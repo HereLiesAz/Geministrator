@@ -1,0 +1,14 @@
+package com.gemini.orchestrator.core.config
+
+interface ConfigStorage {
+    fun saveApiKey(apiKey: String)
+    fun loadApiKey(): String?
+    fun savePreCommitReview(enabled: Boolean)
+    fun loadPreCommitReview(): Boolean
+    fun saveModelName(type: String, name: String)
+    fun loadModelName(type: String, default: String): String
+    fun saveConcurrencyLimit(limit: Int)
+    fun loadConcurrencyLimit(): Int
+    fun saveTokenLimit(limit: Int)
+    fun loadTokenLimit(): Int
+}
