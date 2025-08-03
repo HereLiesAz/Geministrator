@@ -2,6 +2,7 @@ package com.hereliesaz.geministrator.core.council
 
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ILogger
 
 class Designer(private val logger: ILogger, private val adapter: ExecutionAdapter) {
     fun createSpecification(feature: String): List<AbstractCommand> {

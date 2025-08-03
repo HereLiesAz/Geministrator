@@ -13,7 +13,7 @@ $BackupPrefix = "project_backup"
 $Timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 $PSScriptRoot = Get-Location
 
-# Directories to exclude from the backup entirely.
+# Directories to exclude from the backup entirely, regardless of nesting level.
 $excludeDirs = @(
     ".git",
     ".gradle",
@@ -44,10 +44,6 @@ $excludeFiles = @(
     "Thumbs.db"                # Windows thumbnail cache
 )
 
-# Get the full paths for the directories for a robust check
-$fullExcludePaths = $excludeDirs.ForEach({ Join-Path -Path $PSScriptRoot -ChildPath $_ })
-
-
 # --- User Prompt ---
 Write-Host "Please choose a backup type:"
 Write-Host "  1) Full Backup (all file contents)"
@@ -64,25 +60,34 @@ switch ($choice) {
         Write-Host "Output file will be: $BackupFile"
 
         Get-ChildItem -Path $PSScriptRoot -Recurse -File | Where-Object {
-            $currentFile = $_
+            $item = $_
             $isExcluded = $false
+
+            # Check against excluded file name patterns.
             foreach ($pattern in $excludeFiles)
             {
-                if ($currentFile.Name -like $pattern)
+                if ($item.Name -like $pattern)
                 {
                     $isExcluded = $true; break
                 }
             }
+
+            # If not excluded by name, check if the item is within an excluded directory path.
             if (!$isExcluded)
             {
-                foreach ($excludedPath in $fullExcludePaths)
+                # Normalize the path by adding separators to ensure we match whole directory names.
+                # e.g., match `\build\` and not a file like `my_build_script.ps1`
+                $normalizedPath = "$( [System.IO.Path]::DirectorySeparatorChar )$( $item.FullName )$( [System.IO.Path]::DirectorySeparatorChar )"
+                foreach ($dir in $excludeDirs)
                 {
-                    if ( $currentFile.FullName.StartsWith($excludedPath))
+                    $patternToFind = "$( [System.IO.Path]::DirectorySeparatorChar )$dir$( [System.IO.Path]::DirectorySeparatorChar )"
+                    if ( $normalizedPath.Contains($patternToFind))
                     {
                         $isExcluded = $true; break
                     }
                 }
             }
+
             !$isExcluded
         } | ForEach-Object {
             $file = $_
@@ -104,25 +109,35 @@ switch ($choice) {
         Write-Host "Output file will be: $BackupFile"
 
         Get-ChildItem -Path $PSScriptRoot -Recurse | Where-Object {
-            $currentItem = $_
+            $item = $_
             $isExcluded = $false
+
+            # Check against excluded file name patterns.
+            # This will correctly skip directories as their names won't match file patterns.
             foreach ($pattern in $excludeFiles)
             {
-                if ($currentItem.Name -like $pattern)
+                if ($item.Name -like $pattern)
                 {
                     $isExcluded = $true; break
                 }
             }
+
+            # If not excluded by name, check if the item is within an excluded directory path.
             if (!$isExcluded)
             {
-                foreach ($excludedPath in $fullExcludePaths)
+                # Normalize the path by adding separators to ensure we match whole directory names.
+                # e.g., match `\build\` and not just a file containing "build".
+                $normalizedPath = "$( [System.IO.Path]::DirectorySeparatorChar )$( $item.FullName )$( [System.IO.Path]::DirectorySeparatorChar )"
+                foreach ($dir in $excludeDirs)
                 {
-                    if ( $currentItem.FullName.StartsWith($excludedPath))
+                    $patternToFind = "$( [System.IO.Path]::DirectorySeparatorChar )$dir$( [System.IO.Path]::DirectorySeparatorChar )"
+                    if ( $normalizedPath.Contains($patternToFind))
                     {
                         $isExcluded = $true; break
                     }
                 }
             }
+
             !$isExcluded
         } | ForEach-Object {
             $relativePath = $_.FullName.Replace($PSScriptRoot, '.')

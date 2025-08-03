@@ -1,11 +1,11 @@
 ﻿package com.hereliesaz.geministrator
 
-import com.hereliesaz.geministrator.adapter.cli.CliConfigStorage
-import com.hereliesaz.geministrator.cli.CliAdapter
-import com.hereliesaz.geministrator.core.GeminiService
+import com.hereliesaz.geministrator.adapter.CliAdapter
+import com.hereliesaz.geministrator.adapter.CliConfigStorage
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.core.Orchestrator
 import com.hereliesaz.geministrator.core.config.ConfigStorage
-import com.hereliesaz.geministrator.core.council.ILogger
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.ExperimentalCli

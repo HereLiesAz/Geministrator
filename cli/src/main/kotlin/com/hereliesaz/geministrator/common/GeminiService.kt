@@ -1,7 +1,6 @@
-﻿package com.hereliesaz.geministrator.core
+﻿package com.hereliesaz.geministrator.common
 
 import com.hereliesaz.geministrator.core.config.ConfigStorage
-import com.hereliesaz.geministrator.core.council.ILogger
 import com.hereliesaz.geministrator.core.tokenizer.Tokenizer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -80,7 +79,7 @@ class GeminiService(
         } else {
             val error = connection.errorStream.bufferedReader().readText()
             logger.log("API call failed: $error")
-            throw RuntimeException("API call failed: $error")
+            "Error: API call failed with status ${connection.responseCode}. Details: $error"
         }
     }
 

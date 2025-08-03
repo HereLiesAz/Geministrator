@@ -2,7 +2,7 @@ package com.hereliesaz.geministrator.core
 
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
-import com.hereliesaz.geministrator.core.council.ILogger
+import com.hereliesaz.geministrator.common.ILogger
 
 sealed class WorkflowStatus {
     data class Success(val commitMessage: String, val successfulSteps: List<String>) : WorkflowStatus()
@@ -28,20 +28,17 @@ class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger
             if (!result.isSuccess) {
                 val reason = "Execution of $commandName failed: ${result.output}"
                 logger.log("  ERROR: $reason")
+
+                // If tests failed, we return a specific status for self-correction.
+                if (command is AbstractCommand.RunTests) {
+                    logger.log("  TESTS FAILED!")
+                    return WorkflowStatus.TestsFailed(result.output, successfulSteps)
+                }
+
                 return WorkflowStatus.Failure(reason)
             }
             logger.log("  SUCCESS: ${result.output}")
             successfulSteps.add(commandName)
-
-            if (command is AbstractCommand.WriteFile) {
-                logger.log("  [Manager] -> Auto-running tests after file modification...")
-                val testResult = adapter.execute(AbstractCommand.RunTests(null, null))
-                if (!testResult.isSuccess) {
-                    logger.log("  TESTS FAILED!")
-                    return WorkflowStatus.TestsFailed(testResult.output, successfulSteps)
-                }
-                logger.log("  All tests passed after modification.")
-            }
         }
 
         logger.log("---")

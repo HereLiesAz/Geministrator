@@ -3,11 +3,12 @@ package com.hereliesaz.geministrator.core
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
 import com.hereliesaz.geministrator.common.ExecutionResult
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.core.config.ConfigStorage
 import com.hereliesaz.geministrator.core.council.Antagonist
 import com.hereliesaz.geministrator.core.council.Architect
 import com.hereliesaz.geministrator.core.council.Designer
-import com.hereliesaz.geministrator.core.council.ILogger
 import com.hereliesaz.geministrator.core.council.Researcher
 import com.hereliesaz.geministrator.core.council.TechSupport
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)
@@ -35,7 +38,7 @@ data class SubTask(val description: String, val responsible_component: String)
 data class WorkflowPlan(val reasoning: String, val steps: List<WorkflowStep>)
 
 @Serializable
-data class WorkflowStep(val command_type: String, val parameters: Map<String, String>)
+data class WorkflowStep(val command_type: String, val parameters: JsonObject)
 
 class Orchestrator(
     private val adapter: ExecutionAdapter,
@@ -84,7 +87,12 @@ class Orchestrator(
         ai.clearSession()
         logger.log("Orchestrator received complex prompt: '$prompt'")
         val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
-        val masterPlan = deconstructPromptIntoSubTasks(prompt)
+        val masterPlanJson = deconstructPromptIntoSubTasks(prompt)
+        if (masterPlanJson.startsWith("Error:")) {
+            logger.log("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
+            return@runBlocking
+        }
+        val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
         saveSessionState(SessionState(masterPlan, emptyList(), mainBranch))
         executeMasterPlan(masterPlan, projectRoot, mainBranch, emptyList())
     }
@@ -169,7 +177,7 @@ class Orchestrator(
 
     private fun handleTask(prompt: String, projectRoot: String, context: MutableList<String>, attempt: Int, branch: String, createBranch: Boolean = true): String? {
         logJournal("START_TASK", mapOf("prompt" to prompt, "branch" to branch, "attempt" to attempt))
-        
+
         if (createBranch) {
             adapter.execute(AbstractCommand.CreateAndSwitchToBranch(branch))
         }
@@ -189,10 +197,21 @@ class Orchestrator(
         val projectContext = architect.getProjectContextFor(prompt, projectRoot)
         val allContext = context + listOf(bestPractices, projectContext)
         val planJson = generatePlanWithAI(prompt, *allContext.toTypedArray())
+
+        if (planJson.startsWith("Error:")) {
+            logger.log("Failed to generate a plan for '$prompt'. AI Failure: $planJson. Halting task.")
+            return null
+        }
+
         val workflowPlan = jsonParser.decodeFromString<WorkflowPlan>(planJson)
         logger.log("AI Reasoning: ${workflowPlan.reasoning}")
 
         val workflow = convertPlanToWorkflow(workflowPlan)
+        if (workflow.isEmpty() && !workflowPlan.reasoning.contains("No changes needed")) {
+            logger.log("Generated an empty or invalid workflow. Halting task.")
+            return null
+        }
+
         if (workflow.size == 1 && workflow.first() is AbstractCommand.RequestClarification) {
             val clarificationCommand = workflow.first() as AbstractCommand.RequestClarification
             val result = adapter.execute(clarificationCommand)
@@ -202,7 +221,12 @@ class Orchestrator(
         }
 
         val objection = antagonist.reviewPlan(planJson)
-        if (objection != null) { return null }
+        if (objection != null) {
+            logger.log("--- INITIATING SELF-CORRECTION (Attempt ${attempt + 1}) ---")
+            context.add("The previous plan was rejected by the Antagonist. Reason: $objection")
+            context.add("Please generate a new, valid plan that addresses this specific objection.")
+            return handleTask(prompt, projectRoot, context, attempt + 1, branch, createBranch)
+        }
 
         val manager = Manager(adapter, logger)
         val status = manager.executeWorkflow(workflow, prompt)
@@ -226,7 +250,7 @@ class Orchestrator(
         }
     }
 
-    private fun deconstructPromptIntoSubTasks(userPrompt: String): MasterPlan {
+    private fun deconstructPromptIntoSubTasks(userPrompt: String): String {
         val prompt = """
             You are an expert project manager. Deconstruct the following high-level user request into a series of smaller, parallelizable sub-tasks.
             You MUST respond with ONLY a single, valid JSON object of the format:
@@ -234,8 +258,7 @@ class Orchestrator(
 
             User Request: "$userPrompt"
         """.trimIndent()
-        val responseJson = ai.executeStrategicPrompt(prompt)
-        return jsonParser.decodeFromString<MasterPlan>(responseJson)
+        return ai.executeStrategicPrompt(prompt)
     }
 
     private fun cleanup(integrationBranch: String?, featureBranches: List<String>, mainBranch: String) {
@@ -264,7 +287,7 @@ class Orchestrator(
                     dataJsonObject
                 )
             }}\n"
-        adapter.execute(AbstractCommand.AppendToFile(JOURNAL_FILE, entry))
+        adapter.execute(AbstractCommand.LogJournalEntry(entry))
     }
 
     private fun saveSessionState(state: SessionState) {
@@ -288,9 +311,14 @@ class Orchestrator(
             Your plan must be in a single, valid JSON object.
 
             IMPORTANT:
-            - When modifying a file, your `WRITE_FILE` command should contain the *entire* new content of the file, not just the changed lines.
+            - Your response MUST be only the JSON object, with no other text, comments, or markdown.
+            - When modifying a file, your `WRITE_FILE` command must contain the *entire* new content of the file.
+            - For `RUN_SHELL`, the `command` parameter MUST be a JSON array of strings (e.g., ["./gradlew", "build"]). Do not use shell operators like && or |; create separate steps.
+            - For `STAGE_FILES`, the `paths` parameter MUST be a JSON array of file path strings.
+            - If you modify code, you MUST include a `RUN_TESTS` step before the `STAGE_FILES` step.
             - If the provided context is insufficient, your ONLY step should be a `REQUEST_CLARIFICATION` command.
-            - Otherwise, the final step should ALWAYS be a `STAGE_FILES` command.
+            - If no changes are needed, provide an empty `steps` array and explain why in the `reasoning`.
+
             CONTEXT PROVIDED:
             ${context.joinToString("\n---\n")}
 
@@ -303,12 +331,46 @@ class Orchestrator(
     private fun convertPlanToWorkflow(plan: WorkflowPlan): List<AbstractCommand> {
         return plan.steps.mapNotNull { step ->
             when (step.command_type) {
-                "WRITE_FILE" -> AbstractCommand.WriteFile(step.parameters["path"]!!, step.parameters["content"]!!)
-                "RUN_SHELL" -> AbstractCommand.RunShellCommand(step.parameters["command"]!!, step.parameters["workingDir"] ?: ".")
-                "RUN_TESTS" -> AbstractCommand.RunTests(step.parameters["module"], step.parameters["testName"])
-                "DISPLAY_MESSAGE" -> AbstractCommand.DisplayMessage(step.parameters["message"]!!)
-                "STAGE_FILES" -> AbstractCommand.StageFiles(step.parameters["paths"]?.split(",")?.map { it.trim() } ?: emptyList())
-                "REQUEST_CLARIFICATION" -> AbstractCommand.RequestClarification(step.parameters["question"]!!)
+                "WRITE_FILE" -> {
+                    val path =
+                        step.parameters["path"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    val content =
+                        step.parameters["content"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    AbstractCommand.WriteFile(path, content)
+                }
+
+                "RUN_SHELL" -> {
+                    val command =
+                        step.parameters["command"]?.jsonArray?.mapNotNull { it.jsonPrimitive.content }
+                            ?: return@mapNotNull null
+                    val workDir = step.parameters["workingDir"]?.jsonPrimitive?.content ?: "."
+                    AbstractCommand.RunShellCommand(command, workDir)
+                }
+
+                "RUN_TESTS" -> {
+                    val module = step.parameters["module"]?.jsonPrimitive?.content
+                    val testName = step.parameters["testName"]?.jsonPrimitive?.content
+                    AbstractCommand.RunTests(module, testName)
+                }
+
+                "DISPLAY_MESSAGE" -> {
+                    val message =
+                        step.parameters["message"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    AbstractCommand.DisplayMessage(message)
+                }
+
+                "STAGE_FILES" -> {
+                    val paths =
+                        step.parameters["paths"]?.jsonArray?.mapNotNull { it.jsonPrimitive.content }
+                            ?: return@mapNotNull null
+                    AbstractCommand.StageFiles(paths)
+                }
+
+                "REQUEST_CLARIFICATION" -> {
+                    val question = step.parameters["question"]?.jsonPrimitive?.content
+                        ?: return@mapNotNull null
+                    AbstractCommand.RequestClarification(question)
+                }
                 else -> null
             }
         }

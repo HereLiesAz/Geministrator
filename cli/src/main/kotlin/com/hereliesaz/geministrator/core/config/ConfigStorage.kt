@@ -11,4 +11,10 @@ interface ConfigStorage {
     fun loadConcurrencyLimit(): Int
     fun saveTokenLimit(limit: Int)
     fun loadTokenLimit(): Int
+
+    // New methods for search configuration
+    fun saveSearchApiKey(apiKey: String)
+    fun loadSearchApiKey(): String?
+    fun saveSearchEngineId(id: String)
+    fun loadSearchEngineId(): String?
 }
