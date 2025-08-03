@@ -1,50 +1,8 @@
-// products/android-studio-plugin/src/main/kotlin/com/gemini/orchestrator/plugin/RunOrchestratorAction.kt
-package com.gemini.orchestrator.plugin
+package com.hereliesaz.GeminiOrchestrator.plugin
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.wm.ToolWindowManager
-
-/**
- * This action is triggered from the IDE's menu (e.g., Tools -> Run Gemini Orchestrator).
- * Its purpose is to find and show our tool window.
- */
-class RunOrchestratorAction : AnAction() {
-    override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project ?: return
-        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Gemini Orchestrator")
-        toolWindow?.show()
-    }
-}
-
-// products/android-studio-plugin/src/main/kotlin/com/gemini/orchestrator/plugin/ProgressLogger.kt
-package com.gemini.orchestrator.plugin
-
-import com.gemini.orchestrator.core.council.ILogger
-import com.intellij.openapi.application.ApplicationManager
-import javax.swing.JTextArea
-
-/**
- * A thread-safe logger that streams progress updates from the background
- * agents to the UI's text area.
- */
-class ProgressLogger(private val outputArea: JTextArea) : ILogger {
-    override fun log(message: String) {
-        // All UI updates must be dispatched to the Event Dispatch Thread (EDT).
-        ApplicationManager.getApplication().invokeLater {
-            outputArea.append("$message\n")
-            // Auto-scroll to the bottom
-            outputArea.caretPosition = outputArea.document.length
-        }
-    }
-}
-
-// products/android-studio-plugin/src/main/kotlin/com/gemini/orchestrator/plugin/OrchestratorToolWindowFactory.kt
-package com.gemini.orchestrator.plugin
-
-import com.gemini.orchestrator.adapter.as.AndroidStudioAdapter
-import com.gemini.orchestrator.adapter.as.PluginConfigStorage
-import com.gemini.orchestrator.core.Orchestrator
+import com.hereliesaz.GeminiOrchestrator.adapter.as.AndroidStudioAdapter
+import com.hereliesaz.GeminiOrchestrator.adapter.as.PluginConfigStorage
+import com.hereliesaz.GeminiOrchestrator.core.Orchestrator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindow
@@ -151,7 +109,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
                 monitorArea.text = ""
                 runButton.isEnabled = false
             }
-            val combinedLogger = object : com.gemini.orchestrator.core.council.ILogger {
+            val combinedLogger = object : com.hereliesaz.GeminiOrchestrator.core.council.ILogger {
                 override fun log(message: String) {
                     logger.log(message)
                     if (message.contains("[STARTING]") || message.contains("[FINISHED]")) {
@@ -183,7 +141,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             var apiKey = configStorage.loadApiKey()
             while (true) {
                 if (!apiKey.isNullOrBlank()) {
-                    val service = com.gemini.orchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
+                    val service = com.hereliesaz.GeminiOrchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
                     if (service.validateApiKey()) {
                         return apiKey
                     }
@@ -193,7 +151,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
                     Messages.showInputDialog(project, "Please enter your Gemini API Key:", "API Key Required", Messages.getQuestionIcon())
                 }
                 if (apiKey.isNullOrBlank()) return null
-                val service = com.gemini.orchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
+                val service = com.hereliesaz.GeminiOrchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
                 if (service.validateApiKey()) {
                     configStorage.saveApiKey(apiKey)
                     logger.log("✅ API Key is valid and has been saved.")
