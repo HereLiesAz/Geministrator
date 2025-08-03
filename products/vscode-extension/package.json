@@ -3,7 +3,7 @@
   "displayName": "Gemini Orchestrator",
   "description": "An AI-powered development assistant built on a team of collaborative agents.",
   "version": "1.0.0",
-  "publisher": "gemini-labs",
+  "publisher": "hereliesaz",
   "engines": {
     "vscode": "^1.80.0"
   },

@@ -1,4 +1,4 @@
-package com.gemini.orchestrator.core.config
+﻿package com.hereliesaz.GeminiOrchestrator.core.config
 
 interface ConfigStorage {
     fun saveApiKey(apiKey: String)
@@ -12,3 +12,4 @@ interface ConfigStorage {
     fun saveTokenLimit(limit: Int)
     fun loadTokenLimit(): Int
 }
+

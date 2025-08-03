@@ -57,9 +57,7 @@ function runCliProcess(prompt: string) {
     if (orchestratorProcess) {
         orchestratorProcess.kill();
     }
-    
-    // Path to the CLI executable relative to the extension's location
-    // This assumes the CLI has been built and is located correctly.
+
     const cliPath = path.resolve(__dirname, '../../../../cli/build/install/cli/bin/cli');
 
     const args = ['run', prompt];
@@ -101,7 +99,7 @@ function getWebviewContent(): string {
             <textarea id="prompt" rows="4" placeholder="Enter your high-level task..."></textarea>
             <br>
             <button id="run-button">Run Workflow</button>
-            
+
             <h3>Output Log</h3>
             <div id="output">Welcome! Enter a prompt and click "Run Workflow" to begin.</div>
 

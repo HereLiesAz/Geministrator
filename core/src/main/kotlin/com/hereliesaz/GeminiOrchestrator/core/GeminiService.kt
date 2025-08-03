@@ -1,12 +1,10 @@
-package com.gemini.orchestrator.core
+﻿package com.hereliesaz.GeminiOrchestrator.core
 
-import com.gemini.orchestrator.core.config.ConfigStorage
-import com.gemini.orchestrator.core.council.ILogger
-import com.gemini.orchestrator.core.tokenizer.Tokenizer
+import com.hereliesaz.GeminiOrchestrator.core.config.ConfigStorage
+import com.hereliesaz.GeminiOrchestrator.core.council.ILogger
+import com.hereliesaz.GeminiOrchestrator.core.tokenizer.Tokenizer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -28,7 +26,7 @@ class GeminiService(
         val tokenLimit = config.loadTokenLimit()
         val currentTokens = Tokenizer.countTokens(conversationHistory.joinToString("\n"))
         if (currentTokens > tokenLimit) {
-            logger.log("⚠️ Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
+            logger.log("âš ï¸ Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
             val summaryPrompt = "Summarize the key points and context of the following conversation to preserve memory for a new session:\n\n${conversationHistory.joinToString("\n")}"
             val summary = internalExecute(summaryPrompt, model)
             logger.log("  -> Session summary created.")
@@ -43,7 +41,7 @@ class GeminiService(
     }
 
     private fun internalExecute(prompt: String, model: String): String {
-        logger.log("  🧠 Calling AI Model ($model)...")
+        logger.log("  ðŸ§  Calling AI Model ($model)...")
         val url = URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
@@ -68,16 +66,16 @@ class GeminiService(
     fun clearSession() { conversationHistory.clear() }
 
     suspend fun validateApiKey(): Boolean {
-        logger.log("  🔑 Validating API Key...")
+        logger.log("  ðŸ”‘ Validating API Key...")
         val url = URL("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey")
         return try {
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             val isValid = connection.responseCode == HttpURLConnection.HTTP_OK
-            logger.log(if (isValid) "  ✅ API Key is valid." else "  ❌ API Key is invalid.")
+            logger.log(if (isValid) "  âœ… API Key is valid." else "  âŒ API Key is invalid.")
             isValid
         } catch (e: Exception) {
-            logger.log("  ❌ API Key validation failed with an exception: ${e.message}")
+            logger.log("  âŒ API Key validation failed with an exception: ${e.message}")
             false
         }
     }
@@ -87,3 +85,4 @@ class GeminiService(
     @Serializable data class Content(val parts: List<Part>)
     @Serializable data class Part(val text: String)
 }
+

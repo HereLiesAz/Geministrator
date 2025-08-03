@@ -1,15 +1,15 @@
-package com.gemini.orchestrator.core.council
+﻿package com.hereliesaz.GeminiOrchestrator.core.council
 
-import com.gemini.orchestrator.common.AbstractCommand
-import com.gemini.orchestrator.common.ExecutionAdapter
-import com.gemini.orchestrator.core.GeminiService
+import com.hereliesaz.GeminiOrchestrator.common.AbstractCommand
+import com.hereliesaz.GeminiOrchestrator.common.ExecutionAdapter
+import com.hereliesaz.GeminiOrchestrator.core.GeminiService
 import java.io.File
 
 interface ILogger { fun log(message: String) }
 
 class Architect(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
     fun getProjectContextFor(task: String, projectRoot: String): String {
-        logger.log("🏛️ Architect: Performing deep context analysis for '$task'.")
+        logger.log("ðŸ›ï¸ Architect: Performing deep context analysis for '$task'.")
         val fileTree = File(projectRoot).walk().maxDepth(5)
             .filter { it.isFile && !it.path.contains(".git") && !it.path.contains(".idea") }
             .joinToString("\n") { it.relativeTo(File(projectRoot)).path }
@@ -40,7 +40,7 @@ class Architect(private val logger: ILogger, private val ai: GeminiService, priv
     }
 
     fun reviewStagedChanges(changes: Map<String, String>): Boolean {
-        logger.log("🏛️ Architect: Reviewing ${changes.size} staged files for architectural compliance.")
+        logger.log("ðŸ›ï¸ Architect: Reviewing ${changes.size} staged files for architectural compliance.")
         val prompt = """
             You are The Architect, an expert on software architecture.
             The following code changes have been proposed. Review them for any potential violations of clean architecture principles, unintended side effects, or major flaws.
@@ -52,14 +52,14 @@ class Architect(private val logger: ILogger, private val ai: GeminiService, priv
             Your decision:
         """.trimIndent()
         val decision = ai.executeStrategicPrompt(prompt)
-        logger.log("🏛️ Architect's Decision: $decision")
+        logger.log("ðŸ›ï¸ Architect's Decision: $decision")
         return decision.startsWith("APPROVE")
     }
 }
 
 class Researcher(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
     fun findBestPracticesFor(topic: String): String {
-        logger.log("📚 Researcher: Searching for best practices regarding '$topic'.")
+        logger.log("ðŸ“š Researcher: Searching for best practices regarding '$topic'.")
         val searchResult = adapter.execute(AbstractCommand.PerformWebSearch(topic))
         val prompt = """
             You are a Senior Staff Engineer. Based on the following web search results,
@@ -76,25 +76,25 @@ class Researcher(private val logger: ILogger, private val ai: GeminiService, pri
 
 class Designer(private val logger: ILogger, private val adapter: ExecutionAdapter) {
     fun createSpecification(feature: String): List<AbstractCommand> {
-        logger.log("🎨 Designer: Creating feature specification for '$feature'.")
+        logger.log("ðŸŽ¨ Designer: Creating feature specification for '$feature'.")
         return listOf(AbstractCommand.WriteFile(
             path = "docs/specs/${feature.replace(" ", "_")}.md",
             content = "# Feature: $feature\n\nThis feature should allow users to..."
         ))
     }
     fun updateChangelog(commitMessage: String) {
-        logger.log("🎨 Designer: Updating changelog.")
+        logger.log("ðŸŽ¨ Designer: Updating changelog.")
         adapter.execute(AbstractCommand.AppendToFile("CHANGELOG.md", "\n- $commitMessage"))
     }
     fun recordHistoricalLesson(lesson: String) {
-        logger.log("🎨 Designer: Recording important lesson in project history.")
+        logger.log("ðŸŽ¨ Designer: Recording important lesson in project history.")
         adapter.execute(AbstractCommand.AppendToFile("docs/history.md", "\n- $lesson"))
     }
 }
 
 class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
     fun reviewPlan(planJson: String): String? {
-        logger.log("🤔 Antagonist: Reviewing the proposed workflow...")
+        logger.log("ðŸ¤” Antagonist: Reviewing the proposed workflow...")
         val prompt = """
             You are The Antagonist, a cynical but brilliant principal engineer. Your only goal is to find flaws in proposed plans.
             Critique the following workflow plan. Look for missing steps (especially testing), inefficiencies, or potential risks.
@@ -106,17 +106,17 @@ class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
         """.trimIndent()
         val review = ai.executeStrategicPrompt(prompt)
         if (review.startsWith("OBJECTION:")) {
-            logger.log("🔥 Antagonist: $review")
+            logger.log("ðŸ”¥ Antagonist: $review")
             return review
         }
-        logger.log("👍 Antagonist: The plan seems reasonable. No objections.")
+        logger.log("ðŸ‘ Antagonist: The plan seems reasonable. No objections.")
         return null
     }
 }
 
 class TechSupport(private val logger: ILogger, private val ai: GeminiService) {
     fun analyzeMergeConflict(conflictOutput: String): String {
-        logger.log("📞 Tech Support: Analyzing merge conflict...")
+        logger.log("ðŸ“ž Tech Support: Analyzing merge conflict...")
         val prompt = """
             You are a Tech Support specialist for a team of AI agents.
             The following 'git merge' command failed. Analyze the conflict output and explain the root cause.
@@ -130,3 +130,4 @@ class TechSupport(private val logger: ILogger, private val ai: GeminiService) {
         return ai.executeStrategicPrompt(prompt)
     }
 }
+
