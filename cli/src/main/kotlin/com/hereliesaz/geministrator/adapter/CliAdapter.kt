@@ -3,13 +3,28 @@ package com.hereliesaz.geministrator.adapter
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
 import com.hereliesaz.geministrator.common.ExecutionResult
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import kotlinx.serialization.json.Json
 import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URI
+import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
-class CliAdapter : ExecutionAdapter {
+class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+
     override fun execute(command: AbstractCommand): ExecutionResult {
         return when (command) {
-            is AbstractCommand.AppendToFile -> try { File(command.path).appendText(command.content); ExecutionResult(true, "Appended to ${command.path}") } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to append") }
+            is AbstractCommand.AppendToFile -> try {
+                File(command.path).appendText(command.content); ExecutionResult(
+                    true,
+                    "Appended to ${command.path}"
+                )
+            } catch (e: IOException) {
+                ExecutionResult(false, e.message ?: "Failed to append")
+            }
             is AbstractCommand.CreateAndSwitchToBranch -> runCommand(
                 listOf(
                     "git",
@@ -27,7 +42,11 @@ class CliAdapter : ExecutionAdapter {
                     command.branchName
                 )
             )
-            is AbstractCommand.DeleteFile -> try { File(command.path).delete(); ExecutionResult(true, "Deleted ${command.path}") } catch (e: Exception) { ExecutionResult(false, "Failed to delete file") }
+            is AbstractCommand.DeleteFile -> try {
+                File(command.path).delete(); ExecutionResult(true, "Deleted ${command.path}")
+            } catch (e: SecurityException) {
+                ExecutionResult(false, "Failed to delete file: ${e.message}")
+            }
             is AbstractCommand.DiscardAllChanges -> {
                 val resetResult = runCommand(listOf("git", "reset", "--hard", "HEAD"))
                 if (!resetResult.isSuccess) return resetResult
@@ -48,13 +67,17 @@ class CliAdapter : ExecutionAdapter {
                 file.parentFile.mkdirs()
                 file.appendText(command.entry)
                 ExecutionResult(true, "Logged journal entry")
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 ExecutionResult(false, e.message ?: "Failed to log journal entry")
             }
 
             is AbstractCommand.MergeBranch -> runCommand(listOf("git", "merge", command.branchName))
-            is AbstractCommand.PerformWebSearch -> ExecutionResult(true, "Simulated web search for: ${command.query}. Found official documentation.", null)
-            is AbstractCommand.ReadFile -> try { ExecutionResult(true, "Read file successfully.", File(command.path).readText()) } catch (e: Exception) { ExecutionResult(false, "Failed to read file: ${e.message}") }
+            is AbstractCommand.PerformWebSearch -> performWebSearch(command.query)
+            is AbstractCommand.ReadFile -> try {
+                ExecutionResult(true, "Read file successfully.", File(command.path).readText())
+            } catch (e: IOException) {
+                ExecutionResult(false, "Failed to read file: ${e.message}")
+            }
             is AbstractCommand.RequestClarification -> { println("\n--- CLARIFICATION REQUIRED ---\n${command.question}"); print("Your response: "); ExecutionResult(true, "User provided clarification.", readlnOrNull() ?: "") }
             is AbstractCommand.RequestCommitReview -> {
                 println("\n--- PENDING COMMIT: FINAL REVIEW ---\nProposed Commit Message: \"${command.proposedCommitMessage}\"\n--- STAGED CHANGES ---");
@@ -74,10 +97,17 @@ class CliAdapter : ExecutionAdapter {
             }
             is AbstractCommand.RequestUserDecision -> { println("\n--- USER DECISION REQUIRED ---\n${command.prompt}"); command.options.forEachIndexed { index, option -> println("  ${index + 1}. $option") }; print("Enter your choice (number): "); val choice = readlnOrNull()?.toIntOrNull(); val selection = choice?.let { command.options.getOrNull(it - 1) } ?: "Cancel"; ExecutionResult(true, "User chose '$selection'", selection) }
             is AbstractCommand.RunShellCommand -> runCommand(command.command, command.workingDir)
-            is AbstractCommand.RunTests -> runCommand(
-                listOf("./gradlew", "test", "--info"),
-                "."
-            ) // Added --info for better diagnostics
+            is AbstractCommand.RunTests -> {
+                val cmd = mutableListOf("./gradlew")
+                val task = if (command.module != null) ":${command.module}:test" else "test"
+                cmd.add(task)
+                command.testName?.let {
+                    cmd.add("--tests")
+                    cmd.add(it)
+                }
+                cmd.add("--info") // Add --info for better diagnostics
+                runCommand(cmd, ".")
+            }
             is AbstractCommand.StageFiles -> runCommand(listOf("git", "add") + command.filePaths)
             is AbstractCommand.SwitchToBranch -> runCommand(
                 listOf(
@@ -86,7 +116,15 @@ class CliAdapter : ExecutionAdapter {
                     command.branchName
                 )
             )
-            is AbstractCommand.WriteFile -> try { val file = File(command.path); file.parentFile.mkdirs(); file.writeText(command.content); ExecutionResult(true, "Wrote to ${command.path}") } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to write file") }
+            is AbstractCommand.WriteFile -> try {
+                val file =
+                    File(command.path); file.parentFile.mkdirs(); file.writeText(command.content); ExecutionResult(
+                    true,
+                    "Wrote to ${command.path}"
+                )
+            } catch (e: IOException) {
+                ExecutionResult(false, e.message ?: "Failed to write file")
+            }
             is AbstractCommand.Commit -> runCommand(listOf("git", "commit", "-m", command.message))
             is AbstractCommand.DisplayMessage -> { println("[INFO] ${command.message}"); ExecutionResult(true, "Message displayed") }
         }
@@ -101,6 +139,50 @@ class CliAdapter : ExecutionAdapter {
             process.waitFor(120, TimeUnit.SECONDS)
             if (process.exitValue() == 0) ExecutionResult(true, output.ifBlank { "Command executed successfully." }, output)
             else ExecutionResult(false, "Exit code ${process.exitValue()}: $output", output)
-        } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to run shell command") }
+        } catch (e: IOException) {
+            ExecutionResult(false, e.message ?: "Failed to run shell command")
+        } catch (e: InterruptedException) {
+            ExecutionResult(false, "Command timed out: ${e.message}")
+        }
+    }
+
+    private fun performWebSearch(query: String): ExecutionResult {
+        val apiKey = config.loadSearchApiKey()
+        val engineId = config.loadSearchEngineId()
+
+        if (apiKey.isNullOrBlank() || engineId.isNullOrBlank()) {
+            return ExecutionResult(
+                false,
+                "Web search is not configured. Please use 'geministrator config --search-api-key YOUR_KEY --search-engine-id YOUR_ID' to set it up."
+            )
+        }
+
+        println("  [CLI Adapter] Performing web search for: '$query'")
+
+        try {
+            val encodedQuery = URLEncoder.encode(query, "UTF-8")
+            val url =
+                URI("https://www.googleapis.com/customsearch/v1?key=$apiKey&cx=$engineId&q=$encodedQuery").toURL()
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.setRequestProperty("Accept", "application/json")
+
+            return if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val responseText = connection.inputStream.bufferedReader().readText()
+                val searchResponse = jsonParser.decodeFromString<SearchResponse>(responseText)
+                val summary = searchResponse.items.joinToString("\n---\n") {
+                    "Title: ${it.title}\nSnippet: ${it.snippet}\nURL: ${it.link}"
+                }.ifBlank { "No relevant search results found." }
+                ExecutionResult(true, summary)
+            } else {
+                val error = connection.errorStream.bufferedReader().readText()
+                ExecutionResult(
+                    false,
+                    "Web search failed with status ${connection.responseCode}: $error"
+                )
+            }
+        } catch (e: Exception) { // Catch broader exceptions for network/parsing issues
+            return ExecutionResult(false, "An exception occurred during web search: ${e.message}")
+        }
     }
 }

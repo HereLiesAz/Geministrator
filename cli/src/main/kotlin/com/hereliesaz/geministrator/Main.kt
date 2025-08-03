@@ -27,10 +27,11 @@ fun main(args: Array<String>) = runBlocking {
                 val apiKey = getAndValidateApiKey(configStorage, logger)
                 if (apiKey == null) {
                     println("ERROR: Could not obtain a valid API key. Exiting.")
-
+                    return@runBlocking
                 } else {
-                val orchestrator = Orchestrator(CliAdapter(), apiKey, logger, configStorage)
-                orchestrator.run(prompt, System.getProperty("user.dir"))
+                    val orchestrator =
+                        Orchestrator(CliAdapter(configStorage), apiKey, logger, configStorage)
+                    orchestrator.run(prompt, System.getProperty("user.dir"))
                 }
             }
         }
@@ -40,6 +41,16 @@ fun main(args: Array<String>) = runBlocking {
         val toggleReview by option(ArgType.Boolean, shortName = "r", description = "Toggle pre-commit review")
         val setConcurrency by option(ArgType.Int, shortName = "c", description = "Set concurrency limit")
         val setTokenLimit by option(ArgType.Int, shortName = "t", description = "Set token limit")
+        val setSearchApiKey by option(
+            ArgType.String,
+            fullName = "search-api-key",
+            description = "Set Google Custom Search API Key"
+        )
+        val setSearchEngineId by option(
+            ArgType.String,
+            fullName = "search-engine-id",
+            description = "Set Google Programmable Search Engine ID"
+        )
         override fun execute() {
             toggleReview?.let {
                 val current = configStorage.loadPreCommitReview()
@@ -53,6 +64,14 @@ fun main(args: Array<String>) = runBlocking {
             setTokenLimit?.let {
                 configStorage.saveTokenLimit(it)
                 println("SUCCESS: Token limit set to: $it")
+            }
+            setSearchApiKey?.let {
+                configStorage.saveSearchApiKey(it)
+                println("SUCCESS: Search API Key has been saved.")
+            }
+            setSearchEngineId?.let {
+                configStorage.saveSearchEngineId(it)
+                println("SUCCESS: Search Engine ID has been saved.")
             }
         }
     }

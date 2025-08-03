@@ -1,0 +1,1300 @@
+====================================================================
+FILE: .\.gitignore
+====================================================================
+
+
+====================================================================
+FILE: .\README.md
+====================================================================
+# Geministrator
+
+**An AI-powered development assistant built on a team of collaborative agents.**
+
+---
+## Getting Started
+
+### Prerequisites
+
+* Java 17+
+* A valid Gemini API Key
+
+### Installation
+
+1. **Build the Installer:**
+   Run the `jpackage` Gradle task. This will create a native installer in the `cli/build/installer/`
+   directory.
+    ```bash
+    ./gradlew :cli:jpackage
+    ```
+2. **Install the Application:**
+   Navigate to `cli/build/installer/` and run the generated installer (e.g.,
+   `Geministrator-1.0.0.msi` on Windows).
+
+3. **Run the application:**
+   After installation, the application will be available on your system's PATH. You can run it from
+   any terminal.
+
+    ```bash
+    # Run a workflow
+    geministrator run "Your development task here"
+
+    # Configure settings
+    geministrator config -r
+    ```
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
+====================================================================
+FILE: .\build.gradle.kts
+====================================================================
+// Project-level build file: Defines plugins and versions for all modules.
+
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+        maven("https://jitpack.io")
+    }
+
+plugins {
+    kotlin("jvm") version "1.9.23" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
+    application
+    id("org.panteleyev.jpackageplugin") version "1.7.3" apply false
+}
+
+
+
+====================================================================
+FILE: .\settings.gradle.kts
+====================================================================
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+        maven("https://jitpack.io")
+    }
+    plugins {
+        id("org.jetbrains.kotlin.jvm") version "1.9.23"
+        id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
+        id("application")
+        id("org.panteleyev.jpackageplugin") version "1.7.3"
+    }
+}
+
+rootProject.name = "geministrator"
+
+include(":cli")
+
+
+====================================================================
+FILE: .\gradle.properties
+====================================================================
+org.gradle.java.home=C:/Program Files/Java/jdk-21
+
+
+====================================================================
+FILE: .\LICENSE
+====================================================================
+Copyright (c) 2025 HereLiesAz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+====================================================================
+FILE: .\gradle\wrapper\gradle-wrapper.properties
+====================================================================
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-milestone-1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+
+
+====================================================================
+FILE: .\cli\build.gradle.kts
+====================================================================
+import org.panteleyev.jpackage.ImageType
+import org.panteleyev.jpackage.JPackageTask
+// Module-level build file for the 'app' module.
+plugins {
+    kotlin("jvm")
+    application
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.panteleyev.jpackageplugin")
+}
+
+group = "com.hereliesaz.geministrator"
+version = "1.0.0"
+
+
+
+repositories {
+    mavenCentral()
+    google()
+    gradlePluginPortal()
+    mavenLocal()
+    maven("https://jitpack.io")
+}
+
+application {
+    mainClass.set("com.hereliesaz.geministrator.MainKt")
+    applicationName = "geministrator"
+}
+
+dependencies {
+    // All project dependencies are now here
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+}
+
+// This task gathers all dependency JARs into one place for the installer.
+val copyDependencies by tasks.registering(Copy::class) {
+    from(configurations.runtimeClasspath)
+    into(layout.buildDirectory.dir("jpackage-input/libs"))
+}
+
+// This task copies your application's own JAR into the installer's input directory.
+val copyJar by tasks.registering(Copy::class) {
+    from(tasks.jar)
+    into(layout.buildDirectory.dir("jpackage-input"))
+}
+
+// This configures the jpackage task, which creates the native installer.
+tasks.named<JPackageTask>("jpackage") {
+    dependsOn(copyDependencies, copyJar)
+    appName.set("Geministrator")
+    appVersion.set(project.version.toString())
+    vendor.set("HereLiesAz")
+    copyright.set("Copyright (c) 2025 HereLiesAz")
+    mainJar.set(tasks.jar.get().archiveFileName.get())
+
+    // Corrected line: Uses the 'type' property with the correct 'ImageType' enum.
+    type.set(ImageType.APP_IMAGE)
+    // The input directory must contain your app's JAR and a 'libs' folder with all dependencies.
+    input.set(layout.buildDirectory.dir("jpackage-input"))
+    destination.set(layout.buildDirectory.dir("installer"))
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\Main.kt
+====================================================================
+package com.hereliesaz.geministrator
+
+import com.hereliesaz.geministrator.adapter.CliAdapter
+import com.hereliesaz.geministrator.adapter.CliConfigStorage
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+import com.hereliesaz.geministrator.core.Orchestrator
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.ExperimentalCli
+import kotlinx.cli.Subcommand
+import kotlinx.coroutines.runBlocking
+
+class ConsoleLogger : ILogger { override fun log(message: String) { println(message) } }
+
+@OptIn(ExperimentalCli::class)
+fun main(args: Array<String>) = runBlocking {
+    val parser = ArgParser("geministrator")
+    val configStorage = CliConfigStorage()
+    val logger = ConsoleLogger()
+
+    class RunCommand : Subcommand("run", "Run a new workflow") {
+        val prompt by argument(ArgType.String, description = "The high-level task for the AI to perform")
+        override fun execute() {
+            runBlocking {
+                val apiKey = getAndValidateApiKey(configStorage, logger)
+                if (apiKey == null) {
+                    println("ERROR: Could not obtain a valid API key. Exiting.")
+
+                } else {
+                val orchestrator = Orchestrator(CliAdapter(), apiKey, logger, configStorage)
+                orchestrator.run(prompt, System.getProperty("user.dir"))
+                }
+            }
+        }
+    }
+
+    class ConfigureCommand : Subcommand("config", "Configure settings") {
+        val toggleReview by option(ArgType.Boolean, shortName = "r", description = "Toggle pre-commit review")
+        val setConcurrency by option(ArgType.Int, shortName = "c", description = "Set concurrency limit")
+        val setTokenLimit by option(ArgType.Int, shortName = "t", description = "Set token limit")
+        override fun execute() {
+            toggleReview?.let {
+                val current = configStorage.loadPreCommitReview()
+                configStorage.savePreCommitReview(!current)
+                println("SUCCESS: Pre-commit review set to: ${!current}")
+            }
+            setConcurrency?.let {
+                configStorage.saveConcurrencyLimit(it)
+                println("SUCCESS: Concurrency limit set to: $it")
+            }
+            setTokenLimit?.let {
+                configStorage.saveTokenLimit(it)
+                println("SUCCESS: Token limit set to: $it")
+            }
+        }
+    }
+
+    parser.subcommands(RunCommand(), ConfigureCommand())
+    parser.parse(args)
+}
+
+private suspend fun getAndValidateApiKey(storage: ConfigStorage, logger: ILogger): String? {
+    var apiKey = storage.loadApiKey()
+    while (true) {
+        if (!apiKey.isNullOrBlank()) {
+            if (GeminiService(apiKey, logger, storage, "", "").validateApiKey()) {
+                return apiKey
+            }
+            logger.log("WARNING: Your saved API key is no longer valid.")
+        }
+        print("Please enter your Gemini API Key: ")
+        apiKey = readlnOrNull()
+        if (apiKey.isNullOrBlank()) return null
+        if (GeminiService(apiKey, logger, storage, "", "").validateApiKey()) {
+            storage.saveApiKey(apiKey)
+            logger.log("SUCCESS: API Key is valid and has been saved.")
+            return apiKey
+        } else {
+            logger.log("ERROR: The key you entered is invalid. Please try again or press Enter to quit.")
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\Manager.kt
+====================================================================
+package com.hereliesaz.geministrator.core
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ILogger
+
+sealed class WorkflowStatus {
+    data class Success(val commitMessage: String, val successfulSteps: List<String>) : WorkflowStatus()
+    data class Failure(val reason: String) : WorkflowStatus()
+    data class TestsFailed(val testOutput: String, val successfulSteps: List<String>) : WorkflowStatus()
+}
+
+class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger) {
+    fun executeWorkflow(workflow: List<AbstractCommand>, prompt: String): WorkflowStatus {
+        logger.log("Manager starting workflow with ${workflow.size} steps.")
+        if (workflow.isEmpty()) {
+            logger.log("WARNING: Manager received an empty workflow. Nothing to do.")
+            return WorkflowStatus.Success("No changes made.", emptyList())
+        }
+
+        val successfulSteps = mutableListOf<String>()
+        for (command in workflow) {
+            val commandName = command::class.simpleName ?: "UnknownCommand"
+            logger.log("---")
+            logger.log("  [Manager] -> Delegating command: $commandName")
+            val result = adapter.execute(command)
+
+            if (!result.isSuccess) {
+                val reason = "Execution of $commandName failed: ${result.output}"
+                logger.log("  ERROR: $reason")
+
+                // If tests failed, we return a specific status for self-correction.
+                if (command is AbstractCommand.RunTests) {
+                    logger.log("  TESTS FAILED!")
+                    return WorkflowStatus.TestsFailed(result.output, successfulSteps)
+                }
+
+                return WorkflowStatus.Failure(reason)
+            }
+            logger.log("  SUCCESS: ${result.output}")
+            successfulSteps.add(commandName)
+        }
+
+        logger.log("---")
+        logger.log("Manager completed workflow successfully.")
+        return WorkflowStatus.Success(prompt, successfulSteps)
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\Orchestrator.kt
+====================================================================
+package com.hereliesaz.geministrator.core
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ExecutionResult
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import com.hereliesaz.geministrator.core.council.Antagonist
+import com.hereliesaz.geministrator.core.council.Architect
+import com.hereliesaz.geministrator.core.council.Designer
+import com.hereliesaz.geministrator.core.council.Researcher
+import com.hereliesaz.geministrator.core.council.TechSupport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
+
+@Serializable
+data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)
+
+@Serializable
+data class MasterPlan(val sub_tasks: List<SubTask>)
+
+@Serializable
+data class SubTask(val description: String, val responsible_component: String)
+
+@Serializable
+data class WorkflowPlan(val reasoning: String, val steps: List<WorkflowStep>)
+
+@Serializable
+data class WorkflowStep(val command_type: String, val parameters: JsonObject)
+
+class Orchestrator(
+    private val adapter: ExecutionAdapter,
+    private val apiKey: String,
+    private val logger: ILogger,
+    private val config: ConfigStorage,
+) {
+    private val ai: GeminiService
+    private val architect: Architect
+    private val researcher: Researcher
+    private val designer: Designer
+    private val antagonist: Antagonist
+    private val techSupport: TechSupport
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+    private val MAX_RETRY_ATTEMPTS = 2
+    private val JOURNAL_FILE = ".orchestrator/journal.log"
+    private val SESSION_FILE = ".orchestrator/session.json"
+
+    init {
+        val strategicModel = config.loadModelName("strategic", "gemini-pro")
+        val flashModel = config.loadModelName("flash", "gemini-1.5-flash-latest")
+        ai = GeminiService(apiKey, logger, config, strategicModel, flashModel)
+        architect = Architect(logger, ai, adapter)
+        researcher = Researcher(logger, ai, adapter)
+        designer = Designer(logger, adapter)
+        antagonist = Antagonist(logger, ai)
+        techSupport = TechSupport(logger, ai)
+    }
+
+    fun run(prompt: String, projectRoot: String) = runBlocking(Dispatchers.Default) {
+        val sessionState = loadSessionState()
+        if (sessionState != null) {
+            val decision = adapter.execute(
+                AbstractCommand.RequestUserDecision(
+                    "An incomplete workflow was found. Do you want to resume it?",
+                    listOf("Resume", "Start New")
+                )
+            )
+            if (decision.data == "Resume") {
+                logger.log("Resuming previous workflow...")
+                executeMasterPlan(sessionState.masterPlan, projectRoot, sessionState.mainBranch, sessionState.completedBranches)
+                return@runBlocking
+            }
+        }
+
+        ai.clearSession()
+        logger.log("Orchestrator received complex prompt: '$prompt'")
+        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
+        val masterPlanJson = deconstructPromptIntoSubTasks(prompt)
+        if (masterPlanJson.startsWith("Error:")) {
+            logger.log("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
+            return@runBlocking
+        }
+        val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
+        saveSessionState(SessionState(masterPlan, emptyList(), mainBranch))
+        executeMasterPlan(masterPlan, projectRoot, mainBranch, emptyList())
+    }
+
+    private suspend fun executeMasterPlan(masterPlan: MasterPlan, projectRoot: String, mainBranch: String, completedBranches: List<String>) = coroutineScope {
+        val integrationBranch = "integration/orchestrator-${System.currentTimeMillis()}"
+        val concurrencyLimit = config.loadConcurrencyLimit()
+        val semaphore = Semaphore(concurrencyLimit)
+        logger.log("Orchestrator has deconstructed the prompt into ${masterPlan.sub_tasks.size} sub-tasks.")
+        logger.log("Concurrency limit set to $concurrencyLimit simultaneous tasks.")
+
+        val tasksToRun = masterPlan.sub_tasks.withIndex().filter { (index, _) ->
+            !completedBranches.any { it.contains("task-$index") }
+        }
+
+        val managerJobs = tasksToRun.map { (index, subTask) ->
+            async {
+                semaphore.withPermit {
+                    val taskBranch = "feature/orchestrator-task-$index"
+                    logger.log("---")
+                    logger.log("[STARTING] Manager for '${subTask.description}' on branch '$taskBranch'")
+                    val result = handleTask(subTask.description, projectRoot, mutableListOf(), 0, taskBranch)
+                    logger.log("[FINISHED] Manager for '${subTask.description}' with result: ${if (result != null) "SUCCESS" else "FAILURE"}")
+                    result
+                }
+            }
+        }
+
+        val newSuccessfulBranches = managerJobs.awaitAll().filterNotNull()
+        val allSuccessfulBranches = (completedBranches + newSuccessfulBranches).distinct()
+        saveSessionState(SessionState(masterPlan, allSuccessfulBranches, mainBranch))
+
+        if (allSuccessfulBranches.size == masterPlan.sub_tasks.size) {
+            logger.log("All sub-tasks completed. Beginning final integration.")
+            adapter.execute(AbstractCommand.CreateAndSwitchToBranch(integrationBranch))
+            var mergeSuccess = true
+            var mergeResult: ExecutionResult? = null
+            for (branch in allSuccessfulBranches) {
+                mergeResult = adapter.execute(AbstractCommand.MergeBranch(branch))
+                if (!mergeResult.isSuccess) {
+                    logger.log("CRITICAL: Merge conflict detected when merging '$branch'. Halting integration.")
+                    mergeSuccess = false
+                    break
+                }
+            }
+
+            if (mergeSuccess) {
+                val commitMessage = "feat: ${masterPlan.sub_tasks.joinToString(", ") { it.description }}"
+                if (config.loadPreCommitReview()) {
+                    val reviewResult = adapter.execute(AbstractCommand.RequestCommitReview(commitMessage))
+                    if (reviewResult.data != "APPROVE") {
+                        logger.log("User rejected the final commit. Rolling back.")
+                        cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+                        return@coroutineScope
+                    }
+                }
+                adapter.execute(AbstractCommand.SwitchToBranch(mainBranch))
+                adapter.execute(AbstractCommand.MergeBranch(integrationBranch))
+                designer.updateChangelog(commitMessage)
+                cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+            } else {
+                val analysis = techSupport.analyzeMergeConflict(mergeResult?.output ?: "Unknown error")
+                logger.log("--- TECH SUPPORT ANALYSIS ---\n$analysis")
+                val userDecision = adapter.execute(
+                    AbstractCommand.RequestUserDecision(
+                        "A merge conflict occurred. What should we do?",
+                        listOf("Abandon", "Attempt AI Fix")
+                    )
+                )
+                if (userDecision.data == "Attempt AI Fix") {
+                    // Call handleTask without creating a new branch
+                    handleTask("Resolve merge conflict based on Tech Support analysis", projectRoot, mutableListOf(analysis), 0, integrationBranch, createBranch = false)
+                } else {
+                    cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+                }
+            }
+        } else {
+            logger.log("One or more sub-tasks failed. Commit has been aborted.")
+            cleanup(null, allSuccessfulBranches, mainBranch)
+        }
+    }
+
+    private fun handleTask(prompt: String, projectRoot: String, context: MutableList<String>, attempt: Int, branch: String, createBranch: Boolean = true): String? {
+        logJournal("START_TASK", mapOf("prompt" to prompt, "branch" to branch, "attempt" to attempt))
+
+        if (createBranch) {
+            adapter.execute(AbstractCommand.CreateAndSwitchToBranch(branch))
+        }
+
+        if (attempt > MAX_RETRY_ATTEMPTS) {
+            logger.log("Maximum retry attempts reached for task '$prompt'. Halting this sub-task.")
+            designer.recordHistoricalLesson("Sub-task '$prompt' failed after $MAX_RETRY_ATTEMPTS self-correction attempts.")
+            return null
+        }
+
+        if (attempt == 0 && createBranch) { // Only create spec for new feature tasks
+            val specWorkflow = designer.createSpecification(prompt)
+            Manager(adapter, logger).executeWorkflow(specWorkflow, prompt)
+        }
+
+        val bestPractices = researcher.findBestPracticesFor(prompt)
+        val projectContext = architect.getProjectContextFor(prompt, projectRoot)
+        val allContext = context + listOf(bestPractices, projectContext)
+        val planJson = generatePlanWithAI(prompt, *allContext.toTypedArray())
+
+        if (planJson.startsWith("Error:")) {
+            logger.log("Failed to generate a plan for '$prompt'. AI Failure: $planJson. Halting task.")
+            return null
+        }
+
+        val workflowPlan = jsonParser.decodeFromString<WorkflowPlan>(planJson)
+        logger.log("AI Reasoning: ${workflowPlan.reasoning}")
+
+        val workflow = convertPlanToWorkflow(workflowPlan)
+        if (workflow.isEmpty() && !workflowPlan.reasoning.contains("No changes needed")) {
+            logger.log("Generated an empty or invalid workflow. Halting task.")
+            return null
+        }
+
+        if (workflow.size == 1 && workflow.first() is AbstractCommand.RequestClarification) {
+            val clarificationCommand = workflow.first() as AbstractCommand.RequestClarification
+            val result = adapter.execute(clarificationCommand)
+            val userAnswer = result.data as? String ?: "No response."
+            context.add("User Clarification: $userAnswer")
+            return handleTask(prompt, projectRoot, context, attempt, branch, createBranch)
+        }
+
+        val objection = antagonist.reviewPlan(planJson)
+        if (objection != null) {
+            logger.log("--- INITIATING SELF-CORRECTION (Attempt ${attempt + 1}) ---")
+            context.add("The previous plan was rejected by the Antagonist. Reason: $objection")
+            context.add("Please generate a new, valid plan that addresses this specific objection.")
+            return handleTask(prompt, projectRoot, context, attempt + 1, branch, createBranch)
+        }
+
+        val manager = Manager(adapter, logger)
+        val status = manager.executeWorkflow(workflow, prompt)
+
+        return when (status) {
+            is WorkflowStatus.Success -> {
+                adapter.execute(AbstractCommand.Commit("WIP: ${status.commitMessage}"))
+                logJournal("TASK_SUCCESS", mapOf("branch" to branch))
+                branch
+            }
+            is WorkflowStatus.TestsFailed -> {
+                logger.log("--- INITIATING SELF-CORRECTION (Attempt ${attempt + 1}) ---")
+                context.add("The previous attempt failed with this test error:\n${status.testOutput}")
+                context.add("These steps were successful before the failure:\n${status.successfulSteps.joinToString("\n")}")
+                handleTask(prompt, projectRoot, context, attempt + 1, branch, createBranch)
+            }
+            is WorkflowStatus.Failure -> {
+                logJournal("TASK_FAILURE", mapOf("branch" to branch, "reason" to status.reason))
+                null
+            }
+        }
+    }
+
+    private fun deconstructPromptIntoSubTasks(userPrompt: String): String {
+        val prompt = """
+            You are an expert project manager. Deconstruct the following high-level user request into a series of smaller, parallelizable sub-tasks.
+            You MUST respond with ONLY a single, valid JSON object of the format:
+            { "sub_tasks": [ { "description": "...", "responsible_component": "..." } ] }
+
+            User Request: "$userPrompt"
+        """.trimIndent()
+        return ai.executeStrategicPrompt(prompt)
+    }
+
+    private fun cleanup(integrationBranch: String?, featureBranches: List<String>, mainBranch: String) {
+        logger.log("Cleaning up temporary branches...")
+        adapter.execute(AbstractCommand.SwitchToBranch(mainBranch))
+        featureBranches.forEach { adapter.execute(AbstractCommand.DeleteBranch(it)) }
+        integrationBranch?.let { adapter.execute(AbstractCommand.DeleteBranch(it)) }
+        adapter.execute(AbstractCommand.DeleteFile(SESSION_FILE))
+        adapter.execute(AbstractCommand.DeleteFile(JOURNAL_FILE))
+        logger.log("Cleanup complete.")
+    }
+
+    private fun logJournal(action: String, data: Map<String, Any>) {
+        val dataJsonObject = JsonObject(data.mapValues { (_, value) ->
+            when (value) {
+                is String -> JsonPrimitive(value)
+                is Number -> JsonPrimitive(value)
+                is Boolean -> JsonPrimitive(value)
+                else -> JsonPrimitive(value.toString()) // Fallback for other types
+            }
+        })
+        val entry =
+            "{\"timestamp\": ${java.lang.System.currentTimeMillis()}, \"action\": \"$action\", \"data\": ${
+                jsonParser.encodeToString(
+                    JsonObject.serializer(),
+                    dataJsonObject
+                )
+            }}\n"
+        adapter.execute(AbstractCommand.LogJournalEntry(entry))
+    }
+
+    private fun saveSessionState(state: SessionState) {
+        val json = Json.encodeToString(SessionState.serializer(), state)
+        adapter.execute(AbstractCommand.WriteFile(SESSION_FILE, json))
+    }
+
+    private fun loadSessionState(): SessionState? {
+        val result = adapter.execute(AbstractCommand.ReadFile(SESSION_FILE))
+        return if (result.isSuccess && result.data is String && (result.data.isNotBlank())) {
+            try { Json.decodeFromString(SessionState.serializer(), result.data) }
+            catch (e: Exception) { null }
+        } else null
+    }
+
+    private fun generatePlanWithAI(userPrompt: String, vararg context: String): String {
+        logger.log("Orchestrator: Generating workflow plan with AI...")
+        val systemPrompt = """
+            You are an expert software development orchestrator. You will be given a user's request and rich context, including the full content of relevant files.
+            Your task is to create a precise, step-by-step workflow plan to accomplish the request.
+            Your plan must be in a single, valid JSON object.
+
+            IMPORTANT:
+            - Your response MUST be only the JSON object, with no other text, comments, or markdown.
+            - When modifying a file, your `WRITE_FILE` command must contain the *entire* new content of the file.
+            - For `RUN_SHELL`, the `command` parameter MUST be a JSON array of strings (e.g., ["./gradlew", "build"]). Do not use shell operators like && or |; create separate steps.
+            - For `STAGE_FILES`, the `paths` parameter MUST be a JSON array of file path strings.
+            - If you modify code, you MUST include a `RUN_TESTS` step before the `STAGE_FILES` step.
+            - If the provided context is insufficient, your ONLY step should be a `REQUEST_CLARIFICATION` command.
+            - If no changes are needed, provide an empty `steps` array and explain why in the `reasoning`.
+
+            CONTEXT PROVIDED:
+            ${context.joinToString("\n---\n")}
+
+            Based on the user's request and all the provided file content and context, create the JSON workflow plan.
+            User Request: "$userPrompt"
+        """.trimIndent()
+        return ai.executeStrategicPrompt(systemPrompt)
+    }
+
+    private fun convertPlanToWorkflow(plan: WorkflowPlan): List<AbstractCommand> {
+        return plan.steps.mapNotNull { step ->
+            when (step.command_type) {
+                "WRITE_FILE" -> {
+                    val path =
+                        step.parameters["path"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    val content =
+                        step.parameters["content"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    AbstractCommand.WriteFile(path, content)
+                }
+
+                "RUN_SHELL" -> {
+                    val command =
+                        step.parameters["command"]?.jsonArray?.mapNotNull { it.jsonPrimitive.content }
+                            ?: return@mapNotNull null
+                    val workDir = step.parameters["workingDir"]?.jsonPrimitive?.content ?: "."
+                    AbstractCommand.RunShellCommand(command, workDir)
+                }
+
+                "RUN_TESTS" -> {
+                    val module = step.parameters["module"]?.jsonPrimitive?.content
+                    val testName = step.parameters["testName"]?.jsonPrimitive?.content
+                    AbstractCommand.RunTests(module, testName)
+                }
+
+                "DISPLAY_MESSAGE" -> {
+                    val message =
+                        step.parameters["message"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    AbstractCommand.DisplayMessage(message)
+                }
+
+                "STAGE_FILES" -> {
+                    val paths =
+                        step.parameters["paths"]?.jsonArray?.mapNotNull { it.jsonPrimitive.content }
+                            ?: return@mapNotNull null
+                    AbstractCommand.StageFiles(paths)
+                }
+
+                "REQUEST_CLARIFICATION" -> {
+                    val question = step.parameters["question"]?.jsonPrimitive?.content
+                        ?: return@mapNotNull null
+                    AbstractCommand.RequestClarification(question)
+                }
+                else -> null
+            }
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\config\ConfigStorage.kt
+====================================================================
+package com.hereliesaz.geministrator.core.config
+
+interface ConfigStorage {
+    fun saveApiKey(apiKey: String)
+    fun loadApiKey(): String?
+    fun savePreCommitReview(enabled: Boolean)
+    fun loadPreCommitReview(): Boolean
+    fun saveModelName(type: String, name: String)
+    fun loadModelName(type: String, default: String): String
+    fun saveConcurrencyLimit(limit: Int)
+    fun loadConcurrencyLimit(): Int
+    fun saveTokenLimit(limit: Int)
+    fun loadTokenLimit(): Int
+
+    // New methods for search configuration
+    fun saveSearchApiKey(apiKey: String)
+    fun loadSearchApiKey(): String?
+    fun saveSearchEngineId(id: String)
+    fun loadSearchEngineId(): String?
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\council\Antagonist.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+
+class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
+    fun reviewPlan(planJson: String): String? {
+        logger.log("Antagonist: Reviewing the proposed workflow...")
+        val prompt = """
+            You are The Antagonist, a cynical but brilliant principal engineer. Your only goal is to find flaws in proposed plans.
+            Critique the following workflow plan. Look for missing steps (especially testing), inefficiencies, or potential risks.
+            If you find a critical flaw, respond with "OBJECTION: [Your reason]".
+            If the plan is sound, respond with "APPROVE".
+
+            PROPOSED PLAN (in JSON):
+            $planJson
+        """.trimIndent()
+        val review = ai.executeStrategicPrompt(prompt)
+        if (review.startsWith("OBJECTION:")) {
+            logger.log("Antagonist: $review")
+            return review
+        }
+        logger.log("Antagonist: The plan seems reasonable. No objections.")
+        return null
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\council\Architect.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+import java.io.File
+
+class Architect(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
+    fun getProjectContextFor(task: String, projectRoot: String): String {
+        logger.log("Architect: Performing deep context analysis for '$task'.")
+        val fileTree = File(projectRoot).walk().maxDepth(5)
+            .filter { it.isFile && !it.path.contains(".git") && !it.path.contains(".idea") }
+            .joinToString("\n") { it.relativeTo(File(projectRoot)).path }
+        val triagePrompt = """
+            You are an expert software architect.
+            Your job is to identify the most relevant files for a given task.
+            From the following file tree, list the 3-5 most critical files needed to accomplish the task.
+            Respond with ONLY a comma-separated list of file paths.
+
+            FILE TREE:
+            $fileTree
+
+            TASK: "$task"
+        """.trimIndent()
+        val relevantFilePaths = ai.executeFlashPrompt(triagePrompt).split(",").map { it.trim() }
+        logger.log("  -> Architect identified relevant files: $relevantFilePaths")
+        val contextBuilder = StringBuilder("RELEVANT FILE CONTEXT:\n")
+        relevantFilePaths.forEach { path ->
+            if (path.isNotBlank()) {
+                val result = adapter.execute(AbstractCommand.ReadFile(path))
+                if (result.isSuccess) {
+                    contextBuilder.append("--- FILE: $path ---\n")
+                    contextBuilder.append((result.data as? String) ?: "Could not read file.")
+                    contextBuilder.append("\n\n")
+                }
+            }
+        }
+        return contextBuilder.toString()
+    }
+
+    fun reviewStagedChanges(changes: Map<String, String>): Boolean {
+        logger.log("Architect: Reviewing ${changes.size} staged files for architectural compliance.")
+        val prompt = """
+            You are The Architect, an expert on software architecture.
+            The following code changes have been proposed. Review them for any potential violations of clean architecture principles, unintended side effects, or major flaws.
+            Respond with "APPROVE" if the changes are acceptable, or "REJECT: [reason]" if they are not.
+            PROPOSED CHANGES:
+            $changes
+
+            Your decision:
+        """.trimIndent()
+        val decision = ai.executeStrategicPrompt(prompt)
+        logger.log("Architect's Decision: $decision")
+        return decision.startsWith("APPROVE")
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\council\Designer.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ILogger
+
+class Designer(private val logger: ILogger, private val adapter: ExecutionAdapter) {
+    fun createSpecification(feature: String): List<AbstractCommand> {
+        logger.log("Designer: Creating feature specification for '$feature'.")
+        val sanitizedFeature = feature.replace(" ", "_").replace(Regex("[^A-Za-z0-9_]"), "")
+        return listOf(AbstractCommand.WriteFile(
+            path = "docs/specs/$sanitizedFeature.md",
+            content = "# Feature: $feature\n\nThis feature should allow users to..."
+        ))
+    }
+    fun updateChangelog(commitMessage: String) {
+        logger.log("Designer: Updating changelog.")
+        adapter.execute(AbstractCommand.AppendToFile("CHANGELOG.md", "\n- $commitMessage"))
+    }
+    fun recordHistoricalLesson(lesson: String) {
+        logger.log("Designer: Recording important lesson in project history.")
+        adapter.execute(AbstractCommand.AppendToFile("docs/history.md", "\n- $lesson"))
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\council\Researcher.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+
+class Researcher(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
+    fun findBestPracticesFor(topic: String): String {
+        logger.log("Researcher: Searching for best practices regarding '$topic'.")
+        val searchResult = adapter.execute(AbstractCommand.PerformWebSearch(topic))
+        val prompt = """
+            You are a Senior Staff Engineer.
+            Based on the following web search results,
+            summarize the current best practices for the topic.
+            SEARCH RESULTS:
+            ${searchResult.output}
+
+            TOPIC: "$topic"
+        """.trimIndent()
+        return ai.executeFlashPrompt(prompt)
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\council\TechSupport.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.ILogger
+
+class TechSupport(private val logger: ILogger, private val ai: GeminiService) {
+    fun analyzeMergeConflict(conflictOutput: String): String {
+        logger.log("Tech Support: Analyzing merge conflict...")
+        val prompt = """
+            You are a Tech Support specialist for a team of AI agents.
+            The following 'git merge' command failed. Analyze the conflict output and explain the root cause.
+            Propose a clear, step-by-step strategy for how another AI agent could resolve this conflict.
+
+            CONFLICT OUTPUT:
+            $conflictOutput
+
+            Your analysis and resolution plan:
+        """.trimIndent()
+        return ai.executeStrategicPrompt(prompt)
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\core\tokenizer\Tokenizer.kt
+====================================================================
+package com.hereliesaz.geministrator.core.tokenizer
+
+object Tokenizer {
+    /**
+     * A simple heuristic to approximate token count.
+     * The official Gemini tokenizer is more complex, but a common rule of thumb
+     * is that one token is approximately 4 characters for English text.
+     */
+    fun countTokens(text: String): Int {
+        return (text.length / 4.0).toInt()
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\common\GeminiService.kt
+====================================================================
+package com.hereliesaz.geministrator.common
+
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import com.hereliesaz.geministrator.core.tokenizer.Tokenizer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
+import java.net.URI
+
+// Request/Response structures for serialization
+@Serializable private data class GeminiRequest(val model: String, val contents: List<Content>)
+@Serializable private data class GeminiResponse(val candidates: List<Candidate>)
+@Serializable data class Candidate(val content: Content)
+@Serializable data class Content(val parts: List<Part>, val role: String? = null)
+@Serializable data class Part(val text: String)
+
+
+class GeminiService(
+    private val apiKey: String,
+    private val logger: ILogger,
+    private val config: ConfigStorage,
+    private val strategicModelName: String,
+    private val flashModelName: String
+) {
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+    private val conversationHistory = mutableListOf<Content>()
+
+    fun executeStrategicPrompt(prompt: String): String = executePrompt(prompt, strategicModelName)
+    fun executeFlashPrompt(prompt: String): String = executePrompt(prompt, flashModelName)
+
+    private fun executePrompt(prompt: String, model: String): String {
+        conversationHistory.add(Content(parts = listOf(Part(prompt)), role = "user"))
+
+        val tokenLimit = config.loadTokenLimit()
+        // Re-calculate tokens based on the JSON representation of the history
+        val currentTokens = Tokenizer.countTokens(jsonParser.encodeToString(ListSerializer(Content.serializer()), conversationHistory))
+
+        if (currentTokens > tokenLimit) {
+            logger.log("WARNING: Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
+            val historyText = conversationHistory.joinToString("\n") { c -> "${c.role}: ${c.parts.first().text}" }
+            val summaryPrompt = "Summarize the key points and context of the following conversation to preserve memory for a new session:\n\n$historyText"
+            val summary = internalExecute(summaryPrompt, model)
+            logger.log("  -> Session summary created.")
+            conversationHistory.clear()
+            conversationHistory.add(Content(parts = listOf(Part("This is a new session. Here is the summary of the previous one to provide context:\n$summary")), role = "user"))
+            conversationHistory.add(Content(parts = listOf(Part(prompt)), role = "user"))
+        }
+
+        val responseText = internalExecute(prompt, model, conversationHistory)
+        conversationHistory.add(Content(parts = listOf(Part(responseText)), role = "model"))
+        return responseText
+    }
+
+    private fun internalExecute(prompt: String, model: String, history: List<Content>? = null): String {
+        logger.log("  -> Calling AI Model ($model)...")
+        // Use a dynamic endpoint based on the model
+        val url =
+            URI("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent").toURL()
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("x-goog-api-key", apiKey)
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
+
+        val request = GeminiRequest(model, history ?: listOf(Content(parts=listOf(Part(prompt)))))
+        val requestBody = jsonParser.encodeToString(GeminiRequest.serializer(), request)
+
+        connection.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
+
+        return if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+            val responseText = connection.inputStream.bufferedReader().readText()
+            try {
+                jsonParser.decodeFromString<GeminiResponse>(responseText).candidates.first().content.parts.first().text
+            } catch (e: Exception) {
+                logger.log("Error parsing Gemini response: $responseText")
+                "Error: Could not parse AI response."
+            }
+        } else {
+            val error = connection.errorStream.bufferedReader().readText()
+            logger.log("API call failed: $error")
+            "Error: API call failed with status ${connection.responseCode}. Details: $error"
+        }
+    }
+
+    fun clearSession() { conversationHistory.clear() }
+
+    suspend fun validateApiKey(): Boolean {
+        logger.log("  -> Validating API Key...")
+        val url = URI("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey").toURL()
+        return try {
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            val isValid = connection.responseCode == HttpURLConnection.HTTP_OK
+            logger.log(if (isValid) "  -> API Key is valid." else "  -> API Key is invalid.")
+            isValid
+        } catch (e: Exception) {
+            logger.log("  -> API Key validation failed with an exception: ${e.message}")
+            false
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\common\AbstractCommand.kt
+====================================================================
+package com.hereliesaz.geministrator.common
+
+/**
+ * The complete, final set of universal commands for the agent system.
+ */
+sealed interface AbstractCommand {
+    // File System
+    data class WriteFile(val path: String, val content: String) : AbstractCommand
+    data class ReadFile(val path: String) : AbstractCommand
+    data class AppendToFile(val path: String, val content: String) : AbstractCommand
+    data class DeleteFile(val path: String) : AbstractCommand
+    data class LogJournalEntry(val entry: String) : AbstractCommand
+
+    // Execution
+    data class RunShellCommand(val command: List<String>, val workingDir: String = ".") :
+        AbstractCommand
+    data class RunTests(val module: String?, val testName: String?) : AbstractCommand
+
+    // Version Control
+    object GetCurrentBranch : AbstractCommand
+    data class CreateAndSwitchToBranch(val branchName: String) : AbstractCommand
+    data class SwitchToBranch(val branchName: String) : AbstractCommand
+    data class MergeBranch(val branchName: String) : AbstractCommand
+    data class DeleteBranch(val branchName: String) : AbstractCommand
+    data class StageFiles(val filePaths: List<String>) : AbstractCommand
+    data class Commit(val message: String) : AbstractCommand
+    object DiscardAllChanges : AbstractCommand
+
+    // UI & User Interaction
+    data class DisplayMessage(val message: String) : AbstractCommand
+    data class RequestUserDecision(val prompt: String, val options: List<String>) : AbstractCommand
+    data class RequestCommitReview(val proposedCommitMessage: String) : AbstractCommand
+    data class RequestClarification(val question: String) : AbstractCommand
+
+    // External Tools
+    data class PerformWebSearch(val query: String) : AbstractCommand
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\common\ExecutionAdapter.kt
+====================================================================
+package com.hereliesaz.geministrator.common
+
+interface ExecutionAdapter {
+    fun execute(command: AbstractCommand): ExecutionResult
+}
+
+data class ExecutionResult(
+    val isSuccess: Boolean,
+    val output: String,
+    val data: Any? = null
+)
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\common\ILogger.kt
+====================================================================
+package com.hereliesaz.geministrator.common
+
+interface ILogger {
+    fun log(message: String)
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\adapter\CliAdapter.kt
+====================================================================
+package com.hereliesaz.geministrator.adapter
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ExecutionResult
+import java.io.File
+import java.util.concurrent.TimeUnit
+
+class CliAdapter : ExecutionAdapter {
+    override fun execute(command: AbstractCommand): ExecutionResult {
+        return when (command) {
+            is AbstractCommand.AppendToFile -> try { File(command.path).appendText(command.content); ExecutionResult(true, "Appended to ${command.path}") } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to append") }
+            is AbstractCommand.CreateAndSwitchToBranch -> runCommand(
+                listOf(
+                    "git",
+                    "checkout",
+                    "-b",
+                    command.branchName
+                )
+            )
+
+            is AbstractCommand.DeleteBranch -> runCommand(
+                listOf(
+                    "git",
+                    "branch",
+                    "-D",
+                    command.branchName
+                )
+            )
+            is AbstractCommand.DeleteFile -> try { File(command.path).delete(); ExecutionResult(true, "Deleted ${command.path}") } catch (e: Exception) { ExecutionResult(false, "Failed to delete file") }
+            is AbstractCommand.DiscardAllChanges -> {
+                val resetResult = runCommand(listOf("git", "reset", "--hard", "HEAD"))
+                if (!resetResult.isSuccess) return resetResult
+                runCommand(listOf("git", "clean", "-fd"))
+            }
+
+            is AbstractCommand.GetCurrentBranch -> runCommand(
+                listOf(
+                    "git",
+                    "rev-parse",
+                    "--abbrev-ref",
+                    "HEAD"
+                )
+            )
+
+            is AbstractCommand.LogJournalEntry -> try {
+                val file = File(".orchestrator/journal.log")
+                file.parentFile.mkdirs()
+                file.appendText(command.entry)
+                ExecutionResult(true, "Logged journal entry")
+            } catch (e: Exception) {
+                ExecutionResult(false, e.message ?: "Failed to log journal entry")
+            }
+
+            is AbstractCommand.MergeBranch -> runCommand(listOf("git", "merge", command.branchName))
+            is AbstractCommand.PerformWebSearch -> ExecutionResult(true, "Simulated web search for: ${command.query}. Found official documentation.", null)
+            is AbstractCommand.ReadFile -> try { ExecutionResult(true, "Read file successfully.", File(command.path).readText()) } catch (e: Exception) { ExecutionResult(false, "Failed to read file: ${e.message}") }
+            is AbstractCommand.RequestClarification -> { println("\n--- CLARIFICATION REQUIRED ---\n${command.question}"); print("Your response: "); ExecutionResult(true, "User provided clarification.", readlnOrNull() ?: "") }
+            is AbstractCommand.RequestCommitReview -> {
+                println("\n--- PENDING COMMIT: FINAL REVIEW ---\nProposed Commit Message: \"${command.proposedCommitMessage}\"\n--- STAGED CHANGES ---");
+                val diffResult = runCommand(
+                    listOf(
+                        "git",
+                        "diff",
+                        "--staged"
+                    )
+                ); println(diffResult.output); print("Approve and commit these changes? (y/n): ");
+                val choice =
+                    if (readlnOrNull()?.lowercase() == "y") "APPROVE" else "REJECT"; ExecutionResult(
+                    true,
+                    "User chose '$choice'",
+                    choice
+                )
+            }
+            is AbstractCommand.RequestUserDecision -> { println("\n--- USER DECISION REQUIRED ---\n${command.prompt}"); command.options.forEachIndexed { index, option -> println("  ${index + 1}. $option") }; print("Enter your choice (number): "); val choice = readlnOrNull()?.toIntOrNull(); val selection = choice?.let { command.options.getOrNull(it - 1) } ?: "Cancel"; ExecutionResult(true, "User chose '$selection'", selection) }
+            is AbstractCommand.RunShellCommand -> runCommand(command.command, command.workingDir)
+            is AbstractCommand.RunTests -> runCommand(
+                listOf("./gradlew", "test", "--info"),
+                "."
+            ) // Added --info for better diagnostics
+            is AbstractCommand.StageFiles -> runCommand(listOf("git", "add") + command.filePaths)
+            is AbstractCommand.SwitchToBranch -> runCommand(
+                listOf(
+                    "git",
+                    "checkout",
+                    command.branchName
+                )
+            )
+            is AbstractCommand.WriteFile -> try { val file = File(command.path); file.parentFile.mkdirs(); file.writeText(command.content); ExecutionResult(true, "Wrote to ${command.path}") } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to write file") }
+            is AbstractCommand.Commit -> runCommand(listOf("git", "commit", "-m", command.message))
+            is AbstractCommand.DisplayMessage -> { println("[INFO] ${command.message}"); ExecutionResult(true, "Message displayed") }
+        }
+    }
+
+    private fun runCommand(command: List<String>, workDir: String = "."): ExecutionResult {
+        println("  [CLI Adapter] Executing: '${command.joinToString(" ")}'")
+        return try {
+            val process =
+                ProcessBuilder(command).directory(File(workDir)).redirectErrorStream(true).start()
+            val output = process.inputStream.bufferedReader().readText()
+            process.waitFor(120, TimeUnit.SECONDS)
+            if (process.exitValue() == 0) ExecutionResult(true, output.ifBlank { "Command executed successfully." }, output)
+            else ExecutionResult(false, "Exit code ${process.exitValue()}: $output", output)
+        } catch (e: Exception) { ExecutionResult(false, e.message ?: "Failed to run shell command") }
+    }
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\adapter\CliConfigStorage.kt
+====================================================================
+package com.hereliesaz.geministrator.adapter
+
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Properties
+
+class CliConfigStorage : ConfigStorage {
+    private val configFile = File(System.getProperty("user.home"), ".gemini-orchestrator/config.properties")
+    private val properties = Properties()
+    private val KEY_API = "GEMINI_API_KEY"
+    private val KEY_REVIEW = "PRE_COMMIT_REVIEW"
+    private val KEY_CONCURRENCY = "CONCURRENCY_LIMIT"
+    private val KEY_TOKEN_LIMIT = "TOKEN_LIMIT"
+    private val KEY_MODEL_STRATEGIC = "MODEL_STRATEGIC"
+    private val KEY_MODEL_FLASH = "MODEL_FLASH"
+    private val KEY_SEARCH_API = "SEARCH_API_KEY"
+    private val KEY_SEARCH_ENGINE_ID = "SEARCH_ENGINE_ID"
+
+    init {
+        configFile.parentFile.mkdirs()
+        if (configFile.exists()) { FileInputStream(configFile).use { properties.load(it) } }
+    }
+
+    private fun saveProperties() { FileOutputStream(configFile).use { properties.store(it, "Gemini Orchestrator Configuration") } }
+    override fun saveApiKey(apiKey: String) { properties.setProperty(KEY_API, apiKey); saveProperties() }
+    override fun loadApiKey(): String? = properties.getProperty(KEY_API)
+    override fun savePreCommitReview(enabled: Boolean) { properties.setProperty(KEY_REVIEW, enabled.toString()); saveProperties() }
+    override fun loadPreCommitReview(): Boolean = properties.getProperty(KEY_REVIEW, "true").toBoolean()
+    override fun saveConcurrencyLimit(limit: Int) { properties.setProperty(KEY_CONCURRENCY, limit.toString()); saveProperties() }
+    override fun loadConcurrencyLimit(): Int = properties.getProperty(KEY_CONCURRENCY, "2").toIntOrNull() ?: 2
+    override fun saveTokenLimit(limit: Int) { properties.setProperty(KEY_TOKEN_LIMIT, limit.toString()); saveProperties() }
+    override fun loadTokenLimit(): Int = properties.getProperty(KEY_TOKEN_LIMIT, "500000").toIntOrNull() ?: 500000
+    override fun saveModelName(type: String, name: String) { properties.setProperty(if (type == "strategic") KEY_MODEL_STRATEGIC else KEY_MODEL_FLASH, name); saveProperties() }
+    override fun loadModelName(type: String, default: String): String = properties.getProperty(if (type == "strategic") KEY_MODEL_STRATEGIC else KEY_MODEL_FLASH, default)
+
+    // Implementation for new search config methods
+    override fun saveSearchApiKey(apiKey: String) {
+        properties.setProperty(KEY_SEARCH_API, apiKey); saveProperties()
+    }
+
+    override fun loadSearchApiKey(): String? = properties.getProperty(KEY_SEARCH_API)
+    override fun saveSearchEngineId(id: String) {
+        properties.setProperty(KEY_SEARCH_ENGINE_ID, id); saveProperties()
+    }
+
+    override fun loadSearchEngineId(): String? = properties.getProperty(KEY_SEARCH_ENGINE_ID)
+}
+
+
+====================================================================
+FILE: .\cli\src\main\kotlin\com\hereliesaz\geministrator\adapter\test
+====================================================================
+
+

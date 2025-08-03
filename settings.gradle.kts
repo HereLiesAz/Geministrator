@@ -14,6 +14,17 @@
     }
 }
 
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        mavenLocal()
+        maven("https://jitpack.io")
+    }
+}
+
+
 rootProject.name = "geministrator"
 
 include(":cli")
