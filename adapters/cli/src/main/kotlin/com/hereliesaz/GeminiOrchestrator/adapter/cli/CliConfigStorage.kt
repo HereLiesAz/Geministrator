@@ -1,6 +1,6 @@
-package com.hereliesaz.GeminiOrchestrator.adapter.cli
+package com.hereliesaz.geminiorchestrator.adapter.cli
 
-import com.hereliesaz.GeminiOrchestrator.core.config.ConfigStorage
+import com.hereliesaz.geminiorchestrator.core.config.ConfigStorage
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream

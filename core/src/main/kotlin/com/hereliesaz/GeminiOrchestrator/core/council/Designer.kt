@@ -1,7 +1,8 @@
 package com.hereliesaz.GeminiOrchestrator.core.council
 
-import com.hereliesaz.GeminiOrchestrator.common.AbstractCommand
-import com.hereliesaz.GeminiOrchestrator.common.ExecutionAdapter
+import com.hereliesaz.geminiorchestrator.common.AbstractCommand
+import com.hereliesaz.geminiorchestrator.common.ExecutionAdapter
+import com.hereliesaz.geminiorchestrator.core.council.ILogger
 
 class Designer(private val logger: ILogger, private val adapter: ExecutionAdapter) {
     fun createSpecification(feature: String): List<AbstractCommand> {

@@ -1,13 +1,10 @@
-package com.hereliesaz.GeminiOrchestrator.adapter.as
+package com.hereliesaz.geminiorchestrator.adapter.as
 
-import com.hereliesaz.GeminiOrchestrator.common.*
-import com.hereliesaz.GeminiOrchestrator.core.council.ILogger
-import com.intellij.diff.DiffManager
-import com.intellij.diff.requests.SimpleDiffRequest
+import com.hereliesaz.geminiorchestrator.common.*
+import com.hereliesaz.geminiorchestrator.core.council.ILogger
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VfsUtil
 import java.io.File
 

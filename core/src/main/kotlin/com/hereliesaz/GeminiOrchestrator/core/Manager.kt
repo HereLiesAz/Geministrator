@@ -1,8 +1,8 @@
 package com.hereliesaz.GeminiOrchestrator.core
 
-import com.hereliesaz.GeminiOrchestrator.common.AbstractCommand
-import com.hereliesaz.GeminiOrchestrator.common.ExecutionAdapter
 import com.hereliesaz.GeminiOrchestrator.core.council.ILogger
+import com.hereliesaz.geminiorchestrator.common.AbstractCommand
+import com.hereliesaz.geminiorchestrator.common.ExecutionAdapter
 
 sealed class WorkflowStatus {
     data class Success(val commitMessage: String, val successfulSteps: List<String>) : WorkflowStatus()

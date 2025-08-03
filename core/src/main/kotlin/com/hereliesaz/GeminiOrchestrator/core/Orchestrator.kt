@@ -1,8 +1,8 @@
 package com.hereliesaz.GeminiOrchestrator.core
 
-import com.hereliesaz.GeminiOrchestrator.common.*
 import com.hereliesaz.GeminiOrchestrator.core.config.ConfigStorage
 import com.hereliesaz.GeminiOrchestrator.core.council.*
+import com.hereliesaz.geminiorchestrator.common.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -55,7 +55,12 @@ class Orchestrator(
     fun run(prompt: String, projectRoot: String) = runBlocking(Dispatchers.Default) {
         val sessionState = loadSessionState()
         if (sessionState != null) {
-            val decision = adapter.execute(RequestUserDecision("An incomplete workflow was found. Do you want to resume it?", listOf("Resume", "Start New")))
+            val decision = adapter.execute(
+                AbstractCommand.RequestUserDecision(
+                    "An incomplete workflow was found. Do you want to resume it?",
+                    listOf("Resume", "Start New")
+                )
+            )
             if (decision.data == "Resume") {
                 logger.log("🔄 Resuming previous workflow...")
                 executeMasterPlan(sessionState.masterPlan, projectRoot, sessionState.mainBranch, sessionState.completedBranches)
@@ -65,7 +70,7 @@ class Orchestrator(
 
         ai.clearSession()
         logger.log("👑 Orchestrator received complex prompt: '$prompt'")
-        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch()).output.trim()
+        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
         val masterPlan = deconstructPromptIntoSubTasks(prompt)
         saveSessionState(SessionState(masterPlan, emptyList(), mainBranch))
         executeMasterPlan(masterPlan, projectRoot, mainBranch, emptyList())
@@ -130,7 +135,12 @@ class Orchestrator(
             } else {
                 val analysis = techSupport.analyzeMergeConflict(mergeResult?.output ?: "Unknown error")
                 logger.log("--- TECH SUPPORT ANALYSIS ---\n$analysis")
-                val userDecision = adapter.execute(RequestUserDecision("A merge conflict occurred. What should we do?", listOf("Abandon", "Attempt AI Fix")))
+                val userDecision = adapter.execute(
+                    AbstractCommand.RequestUserDecision(
+                        "A merge conflict occurred. What should we do?",
+                        listOf("Abandon", "Attempt AI Fix")
+                    )
+                )
                 if (userDecision.data == "Attempt AI Fix") {
                     handleTask("Resolve merge conflict based on Tech Support analysis", projectRoot, mutableListOf(analysis), 0, integrationBranch)
                 } else {

@@ -1,7 +1,9 @@
-﻿plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.serialization")
+﻿import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id("org.jetbrains.kotlin.jvm") apply false
+    id("org.jetbrains.kotlin.plugin.serialization") apply false
+    id("org.jetbrains.intellij") apply false
 }
 
 allprojects {
@@ -11,19 +13,37 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        maven(url = "https://jitpack.io")
     }
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    kotlin {
-        jvmToolchain(17) // This tells Kotlin and Java tasks to use JDK 17 for compilation
+    tasks.withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "17"
     }
 }
 
+project(":products:android-studio-plugin") {
+    apply(plugin = "org.jetbrains.intellij")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
+    intellij {
+        version.set("2023.3.6")
+        type.set("IC")
+    }
+
+    dependencies {
+        implementation(project(":core"))
+        implementation(project(":adapters:adapter-android-studio"))
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    }
+
+    tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+        changeNotes.set("Initial stable release.")
+    }
+}
 
 project(":core") {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
@@ -35,27 +55,15 @@ project(":core") {
 }
 
 project(":products:cli") {
-    // 1. Apply plugins using the correct syntax for this context
-    apply(plugin = "org.jetbrains.compose")
+    apply(plugin = "application")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    // Fix for Line 38:
-    // Inside configure<org.jetbrains.compose.ComposeExtension>, 'this' is already the extension.
-    configure<org.jetbrains.compose.ComposeExtension> {
-        // 'desktop' is a property of the ComposeExtension, not 'compose.desktop'
-        desktop {
-            // You can add desktop-specific configurations here later,
-            // e.g., mainClass = "com.hereliesaz.geminiorchestrator.cli.MainKt"
-            // For now, an empty block is sufficient to resolve the 'compose' reference.
-        }
+    application {
+        mainClass.set("com.hereliesaz.geminiorchestrator.cli.MainKt")
     }
     dependencies {
         implementation(project(":core"))
         implementation(project(":adapters:adapter-cli"))
-        // Fix for Line 49:
-        // Explicitly get the ComposeExtension using 'the<Type>()'
-        // and then access its properties like 'desktop.currentOs'
-        implementation(compose.desktop.currentOs) // This is the correct notation
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
         implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
@@ -76,6 +84,6 @@ project(":adapters:adapter-android-studio") {
 
 project(":common") {
     dependencies {
-        // This module has no external dependencies, only internal ones.
+        // No external dependencies needed for this module.
     }
 }

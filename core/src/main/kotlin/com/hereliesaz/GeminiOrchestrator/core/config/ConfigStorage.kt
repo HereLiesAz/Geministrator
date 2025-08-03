@@ -1,4 +1,4 @@
-﻿package com.hereliesaz.GeminiOrchestrator.core.config
+﻿package com.hereliesaz.geminiorchestrator.core.config
 
 interface ConfigStorage {
     fun saveApiKey(apiKey: String)

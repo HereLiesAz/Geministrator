@@ -1,8 +1,8 @@
-﻿package com.hereliesaz.GeminiOrchestrator.core
+﻿package com.hereliesaz.geminiorchestrator.core
 
-import com.hereliesaz.GeminiOrchestrator.core.config.ConfigStorage
-import com.hereliesaz.GeminiOrchestrator.core.council.ILogger
-import com.hereliesaz.GeminiOrchestrator.core.tokenizer.Tokenizer
+import com.hereliesaz.geminiorchestrator.core.config.ConfigStorage
+import com.hereliesaz.geminiorchestrator.core.council.ILogger
+import com.hereliesaz.geminiorchestrator.core.tokenizer.Tokenizer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection

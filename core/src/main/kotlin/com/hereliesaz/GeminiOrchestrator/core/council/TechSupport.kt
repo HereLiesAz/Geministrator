@@ -1,6 +1,6 @@
-package com.hereliesaz.GeminiOrchestrator.core.council
+package com.hereliesaz.geminiorchestrator.core.council
 
-import com.hereliesaz.GeminiOrchestrator.core.GeminiService
+import com.hereliesaz.geminiorchestrator.core.GeminiService
 
 class TechSupport(private val logger: ILogger, private val ai: GeminiService) {
     fun analyzeMergeConflict(conflictOutput: String): String {

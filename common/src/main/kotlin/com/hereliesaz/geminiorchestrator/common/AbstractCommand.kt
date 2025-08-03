@@ -16,14 +16,14 @@ sealed interface AbstractCommand {
     data class RunTests(val module: String?, val testName: String?) : AbstractCommand
 
     // Version Control
-    data class GetCurrentBranch() : AbstractCommand
+    object GetCurrentBranch : AbstractCommand
     data class CreateAndSwitchToBranch(val branchName: String) : AbstractCommand
     data class SwitchToBranch(val branchName: String) : AbstractCommand
     data class MergeBranch(val branchName: String, val strategy: String = "") : AbstractCommand
     data class DeleteBranch(val branchName: String) : AbstractCommand
     data class StageFiles(val filePaths: List<String>) : AbstractCommand
     data class Commit(val message: String) : AbstractCommand
-    data class DiscardAllChanges() : AbstractCommand
+    object DiscardAllChanges : AbstractCommand
 
     // UI & User Interaction
     data class DisplayMessage(val message: String) : AbstractCommand
