@@ -2,25 +2,22 @@ package com.hereliesaz.geministrator.core.council
 
 import com.hereliesaz.geministrator.common.GeminiService
 import com.hereliesaz.geministrator.common.ILogger
+import com.hereliesaz.geministrator.common.PromptManager
 
-class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
+class Antagonist(
+    private val logger: ILogger,
+    private val ai: GeminiService,
+    private val promptManager: PromptManager,
+) {
     fun reviewPlan(planJson: String): String? {
-        logger.log("Antagonist: Reviewing the proposed workflow...")
-        val prompt = """
-            You are The Antagonist, a cynical but brilliant principal engineer. Your only goal is to find flaws in proposed plans.
-            Critique the following workflow plan. Look for missing steps (especially testing), inefficiencies, or potential risks.
-            If you find a critical flaw, respond with "OBJECTION: [Your reason]".
-            If the plan is sound, respond with "APPROVE".
-
-            PROPOSED PLAN (in JSON):
-            $planJson
-        """.trimIndent()
+        logger.info("Antagonist: Reviewing the proposed workflow...")
+        val prompt = promptManager.getPrompt("antagonist.reviewPlan", mapOf("planJson" to planJson))
         val review = ai.executeStrategicPrompt(prompt)
         if (review.startsWith("OBJECTION:")) {
-            logger.log("Antagonist: $review")
+            logger.info("Antagonist: $review")
             return review
         }
-        logger.log("Antagonist: The plan seems reasonable. No objections.")
+        logger.info("Antagonist: The plan seems reasonable. No objections.")
         return null
     }
 }

@@ -12,37 +12,37 @@ sealed class WorkflowStatus {
 
 class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger) {
     fun executeWorkflow(workflow: List<AbstractCommand>, prompt: String): WorkflowStatus {
-        logger.log("Manager starting workflow with ${workflow.size} steps.")
+        logger.info("Manager starting workflow with ${workflow.size} steps.")
         if (workflow.isEmpty()) {
-            logger.log("WARNING: Manager received an empty workflow. Nothing to do.")
+            logger.info("WARNING: Manager received an empty workflow. Nothing to do.")
             return WorkflowStatus.Success("No changes made.", emptyList())
         }
 
         val successfulSteps = mutableListOf<String>()
         for (command in workflow) {
             val commandName = command::class.simpleName ?: "UnknownCommand"
-            logger.log("---")
-            logger.log("  [Manager] -> Delegating command: $commandName")
+            logger.info("---")
+            logger.info("  [Manager] -> Delegating command: $commandName")
             val result = adapter.execute(command)
 
             if (!result.isSuccess) {
                 val reason = "Execution of $commandName failed: ${result.output}"
-                logger.log("  ERROR: $reason")
+                logger.error("  ERROR: $reason")
 
                 // If tests failed, we return a specific status for self-correction.
                 if (command is AbstractCommand.RunTests) {
-                    logger.log("  TESTS FAILED!")
+                    logger.error("  TESTS FAILED!")
                     return WorkflowStatus.TestsFailed(result.output, successfulSteps)
                 }
 
                 return WorkflowStatus.Failure(reason)
             }
-            logger.log("  SUCCESS: ${result.output}")
+            logger.info("  SUCCESS: ${result.output}")
             successfulSteps.add(commandName)
         }
 
-        logger.log("---")
-        logger.log("Manager completed workflow successfully.")
+        logger.info("---")
+        logger.info("Manager completed workflow successfully.")
         return WorkflowStatus.Success(prompt, successfulSteps)
     }
 }

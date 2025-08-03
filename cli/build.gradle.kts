@@ -1,6 +1,5 @@
 import org.panteleyev.jpackage.ImageType
 import org.panteleyev.jpackage.JPackageTask
-
 // Module-level build file for the 'app' module.
 plugins {
     kotlin("jvm")
@@ -12,7 +11,14 @@ plugins {
 group = "com.hereliesaz.geministrator"
 version = "1.0.0"
 
-
+// Add sourceSets block to include resources
+sourceSets {
+    main {
+        resources {
+            srcDirs("src/main/resources")
+        }
+    }
+}
 
 repositories {
     mavenCentral()
@@ -58,8 +64,10 @@ tasks.named<JPackageTask>("jpackage") {
     vendor.set("HereLiesAz")
     copyright.set("Copyright (c) 2025 HereLiesAz")
     mainJar.set(tasks.jar.get().archiveFileName.get())
+    // Correctly specify the main class for the launcher
+    mainClass.set(application.mainClass.get())
 
-    // Corrected line: Uses the 'type' property with the correct 'ImageType' enum.
+    // Uses the 'type' property with the correct 'ImageType' enum.
     type.set(ImageType.APP_IMAGE)
     // The input directory must contain your app's JAR and a 'libs' folder with all dependencies.
     input.set(layout.buildDirectory.dir("jpackage-input"))

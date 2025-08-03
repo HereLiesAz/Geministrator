@@ -17,31 +17,71 @@ import java.net.URI
 
 
 class GeminiService(
-    private val apiKey: String,
+    private val authMethod: String,
+    private var apiKey: String,
     private val logger: ILogger,
     private val config: ConfigStorage,
     private val strategicModelName: String,
-    private val flashModelName: String
+    private val flashModelName: String,
+    private val promptManager: PromptManager? = null,
+    private val adapter: ExecutionAdapter? = null, // Adapter for running gcloud
 ) {
     private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
     private val conversationHistory = mutableListOf<Content>()
+    private var authToken: String? = null
+
+    init {
+        if (authMethod == "adc") {
+            tryToGetAdcToken()
+        }
+    }
+
+    private fun tryToGetAdcToken() {
+        val result = adapter?.execute(
+            AbstractCommand.RunShellCommand(
+                listOf(
+                    "gcloud",
+                    "auth",
+                    "application-default",
+                    "print-access-token"
+                )
+            ), silent = true
+        )
+        if (result != null && result.isSuccess && result.output.isNotBlank()) {
+            authToken = result.output.trim()
+        }
+    }
+
+    fun isAdcAuthReady(): Boolean = authToken != null
+
 
     fun executeStrategicPrompt(prompt: String): String = executePrompt(prompt, strategicModelName)
     fun executeFlashPrompt(prompt: String): String = executePrompt(prompt, flashModelName)
 
     private fun executePrompt(prompt: String, model: String): String {
+        if (authMethod == "apikey" && apiKey.isBlank()) {
+            logger.error("Authentication failed. No API key is configured for 'apikey' method.")
+            return "Error: Authentication failed."
+        }
+        if (authMethod == "adc" && authToken == null) {
+            logger.error("Authentication failed. Could not obtain ADC token.")
+            return "Error: Authentication failed."
+        }
+
         conversationHistory.add(Content(parts = listOf(Part(prompt)), role = "user"))
 
         val tokenLimit = config.loadTokenLimit()
-        // Re-calculate tokens based on the JSON representation of the history
         val currentTokens = Tokenizer.countTokens(jsonParser.encodeToString(ListSerializer(Content.serializer()), conversationHistory))
 
         if (currentTokens > tokenLimit) {
-            logger.log("WARNING: Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
+            logger.info("WARNING: Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
             val historyText = conversationHistory.joinToString("\n") { c -> "${c.role}: ${c.parts.first().text}" }
-            val summaryPrompt = "Summarize the key points and context of the following conversation to preserve memory for a new session:\n\n$historyText"
+            val summaryPrompt = promptManager!!.getPrompt(
+                "geminiService.summarizeSession",
+                mapOf("historyText" to historyText)
+            )
             val summary = internalExecute(summaryPrompt, model)
-            logger.log("  -> Session summary created.")
+            logger.info("  -> Session summary created.")
             conversationHistory.clear()
             conversationHistory.add(Content(parts = listOf(Part("This is a new session. Here is the summary of the previous one to provide context:\n$summary")), role = "user"))
             conversationHistory.add(Content(parts = listOf(Part(prompt)), role = "user"))
@@ -53,15 +93,25 @@ class GeminiService(
     }
 
     private fun internalExecute(prompt: String, model: String, history: List<Content>? = null): String {
-        logger.log("  -> Calling AI Model ($model)...")
-        // Use a dynamic endpoint based on the model
-        val url =
-            URI("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent").toURL()
+        logger.info("  -> Calling AI Model ($model) using auth method: $authMethod...")
+
+        val baseUrl =
+            "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent"
+
+        val url = if (authMethod == "apikey") {
+            URI("$baseUrl?key=$apiKey").toURL()
+        } else {
+            URI(baseUrl).toURL()
+        }
+
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
-        connection.setRequestProperty("x-goog-api-key", apiKey)
         connection.setRequestProperty("Content-Type", "application/json")
         connection.doOutput = true
+
+        if (authMethod == "adc" && authToken != null) {
+            connection.setRequestProperty("Authorization", "Bearer $authToken")
+        }
 
         val request = GeminiRequest(model, history ?: listOf(Content(parts=listOf(Part(prompt)))))
         val requestBody = jsonParser.encodeToString(GeminiRequest.serializer(), request)
@@ -73,29 +123,30 @@ class GeminiService(
             try {
                 jsonParser.decodeFromString<GeminiResponse>(responseText).candidates.first().content.parts.first().text
             } catch (e: Exception) {
-                logger.log("Error parsing Gemini response: $responseText")
+                logger.error("Error parsing Gemini response: $responseText", e)
                 "Error: Could not parse AI response."
             }
         } else {
             val error = connection.errorStream.bufferedReader().readText()
-            logger.log("API call failed: $error")
+            logger.error("API call failed: $error")
             "Error: API call failed with status ${connection.responseCode}. Details: $error"
         }
     }
 
     fun clearSession() { conversationHistory.clear() }
 
-    suspend fun validateApiKey(): Boolean {
-        logger.log("  -> Validating API Key...")
-        val url = URI("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey").toURL()
+    suspend fun validateApiKey(keyToValidate: String): Boolean {
+        logger.info("  -> Validating API Key...")
+        val url =
+            URI("https://generativelanguage.googleapis.com/v1beta/models?key=$keyToValidate").toURL()
         return try {
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             val isValid = connection.responseCode == HttpURLConnection.HTTP_OK
-            logger.log(if (isValid) "  -> API Key is valid." else "  -> API Key is invalid.")
+            logger.info(if (isValid) "  -> API Key is valid." else "  -> API Key is invalid.")
             isValid
         } catch (e: Exception) {
-            logger.log("  -> API Key validation failed with an exception: ${e.message}")
+            logger.error("  -> API Key validation failed with an exception", e)
             false
         }
     }

@@ -1,7 +1,7 @@
 package com.hereliesaz.geministrator.common
 
 interface ExecutionAdapter {
-    fun execute(command: AbstractCommand): ExecutionResult
+    fun execute(command: AbstractCommand, silent: Boolean = false): ExecutionResult
 }
 
 data class ExecutionResult(

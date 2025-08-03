@@ -34,4 +34,7 @@ sealed interface AbstractCommand {
 
     // External Tools
     data class PerformWebSearch(val query: String) : AbstractCommand
+
+    // Orchestration Control
+    data class PauseAndExit(val checkInMessage: String) : AbstractCommand
 }

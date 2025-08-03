@@ -3,6 +3,7 @@ package com.hereliesaz.geministrator.adapter
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
 import com.hereliesaz.geministrator.common.ExecutionResult
+import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.core.config.ConfigStorage
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -12,10 +13,13 @@ import java.net.URI
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
 
-class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
+class CliAdapter(
+    private val config: ConfigStorage,
+    private val logger: ILogger,
+) : ExecutionAdapter {
     private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
 
-    override fun execute(command: AbstractCommand): ExecutionResult {
+    override fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
         return when (command) {
             is AbstractCommand.AppendToFile -> try {
                 File(command.path).appendText(command.content); ExecutionResult(
@@ -25,13 +29,14 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
             } catch (e: IOException) {
                 ExecutionResult(false, e.message ?: "Failed to append")
             }
+
             is AbstractCommand.CreateAndSwitchToBranch -> runCommand(
                 listOf(
                     "git",
                     "checkout",
                     "-b",
                     command.branchName
-                )
+                ), silent = silent
             )
 
             is AbstractCommand.DeleteBranch -> runCommand(
@@ -40,17 +45,19 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
                     "branch",
                     "-D",
                     command.branchName
-                )
+                ), silent = silent
             )
+
             is AbstractCommand.DeleteFile -> try {
                 File(command.path).delete(); ExecutionResult(true, "Deleted ${command.path}")
             } catch (e: SecurityException) {
                 ExecutionResult(false, "Failed to delete file: ${e.message}")
             }
             is AbstractCommand.DiscardAllChanges -> {
-                val resetResult = runCommand(listOf("git", "reset", "--hard", "HEAD"))
+                val resetResult =
+                    runCommand(listOf("git", "reset", "--hard", "HEAD"), silent = silent)
                 if (!resetResult.isSuccess) return resetResult
-                runCommand(listOf("git", "clean", "-fd"))
+                runCommand(listOf("git", "clean", "-fd"), silent = silent)
             }
 
             is AbstractCommand.GetCurrentBranch -> runCommand(
@@ -59,9 +66,8 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
                     "rev-parse",
                     "--abbrev-ref",
                     "HEAD"
-                )
+                ), silent = silent
             )
-
             is AbstractCommand.LogJournalEntry -> try {
                 val file = File(".orchestrator/journal.log")
                 file.parentFile.mkdirs()
@@ -71,32 +77,45 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
                 ExecutionResult(false, e.message ?: "Failed to log journal entry")
             }
 
-            is AbstractCommand.MergeBranch -> runCommand(listOf("git", "merge", command.branchName))
+            is AbstractCommand.MergeBranch -> runCommand(
+                listOf("git", "merge", command.branchName),
+                silent = silent
+            )
             is AbstractCommand.PerformWebSearch -> performWebSearch(command.query)
             is AbstractCommand.ReadFile -> try {
                 ExecutionResult(true, "Read file successfully.", File(command.path).readText())
             } catch (e: IOException) {
                 ExecutionResult(false, "Failed to read file: ${e.message}")
             }
-            is AbstractCommand.RequestClarification -> { println("\n--- CLARIFICATION REQUIRED ---\n${command.question}"); print("Your response: "); ExecutionResult(true, "User provided clarification.", readlnOrNull() ?: "") }
-            is AbstractCommand.RequestCommitReview -> {
-                println("\n--- PENDING COMMIT: FINAL REVIEW ---\nProposed Commit Message: \"${command.proposedCommitMessage}\"\n--- STAGED CHANGES ---");
-                val diffResult = runCommand(
-                    listOf(
-                        "git",
-                        "diff",
-                        "--staged"
-                    )
-                ); println(diffResult.output); print("Approve and commit these changes? (y/n): ");
-                val choice =
-                    if (readlnOrNull()?.lowercase() == "y") "APPROVE" else "REJECT"; ExecutionResult(
-                    true,
-                    "User chose '$choice'",
-                    choice
-                )
+
+            is AbstractCommand.RequestClarification -> {
+                logger.interactive("\n--- CLARIFICATION REQUIRED ---\n${command.question}")
+                val response = logger.prompt("Your response: ") ?: ""
+                ExecutionResult(true, "User provided clarification.", response)
             }
-            is AbstractCommand.RequestUserDecision -> { println("\n--- USER DECISION REQUIRED ---\n${command.prompt}"); command.options.forEachIndexed { index, option -> println("  ${index + 1}. $option") }; print("Enter your choice (number): "); val choice = readlnOrNull()?.toIntOrNull(); val selection = choice?.let { command.options.getOrNull(it - 1) } ?: "Cancel"; ExecutionResult(true, "User chose '$selection'", selection) }
-            is AbstractCommand.RunShellCommand -> runCommand(command.command, command.workingDir)
+            is AbstractCommand.RequestCommitReview -> {
+                logger.interactive("\n--- PENDING COMMIT: FINAL REVIEW ---\nProposed Commit Message: \"${command.proposedCommitMessage}\"\n--- STAGED CHANGES ---")
+                val diffResult = runCommand(listOf("git", "diff", "--staged"))
+                logger.interactive(diffResult.output)
+                val response = logger.prompt("Approve and commit these changes? (y/n): ")
+                val choice = if (response?.lowercase() == "y") "APPROVE" else "REJECT"
+                ExecutionResult(true, "User chose '$choice'", choice)
+            }
+
+            is AbstractCommand.RequestUserDecision -> {
+                logger.interactive("\n--- USER DECISION REQUIRED ---\n${command.prompt}")
+                command.options.forEachIndexed { index, option -> logger.interactive("  ${index + 1}. $option") }
+                val choiceStr = logger.prompt("Enter your choice (number): ")
+                val choice = choiceStr?.toIntOrNull()
+                val selection = choice?.let { command.options.getOrNull(it - 1) } ?: "Cancel"
+                ExecutionResult(true, "User chose '$selection'", selection)
+            }
+
+            is AbstractCommand.RunShellCommand -> runCommand(
+                command.command,
+                command.workingDir,
+                silent
+            )
             is AbstractCommand.RunTests -> {
                 val cmd = mutableListOf("./gradlew")
                 val task = if (command.module != null) ":${command.module}:test" else "test"
@@ -105,17 +124,23 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
                     cmd.add("--tests")
                     cmd.add(it)
                 }
-                cmd.add("--info") // Add --info for better diagnostics
-                runCommand(cmd, ".")
+                cmd.add("--info")
+                runCommand(cmd, ".", silent)
             }
-            is AbstractCommand.StageFiles -> runCommand(listOf("git", "add") + command.filePaths)
+
+            is AbstractCommand.StageFiles -> runCommand(
+                listOf("git", "add") + command.filePaths,
+                silent = silent
+            )
+
             is AbstractCommand.SwitchToBranch -> runCommand(
                 listOf(
                     "git",
                     "checkout",
                     command.branchName
-                )
+                ), silent = silent
             )
+
             is AbstractCommand.WriteFile -> try {
                 val file =
                     File(command.path); file.parentFile.mkdirs(); file.writeText(command.content); ExecutionResult(
@@ -125,13 +150,31 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
             } catch (e: IOException) {
                 ExecutionResult(false, e.message ?: "Failed to write file")
             }
-            is AbstractCommand.Commit -> runCommand(listOf("git", "commit", "-m", command.message))
-            is AbstractCommand.DisplayMessage -> { println("[INFO] ${command.message}"); ExecutionResult(true, "Message displayed") }
+
+            is AbstractCommand.Commit -> runCommand(
+                listOf("git", "commit", "-m", command.message),
+                silent = silent
+            )
+
+            is AbstractCommand.DisplayMessage -> {
+                logger.interactive("[INFO] ${command.message}"); ExecutionResult(
+                    true,
+                    "Message displayed"
+                )
+            }
+
+            is AbstractCommand.PauseAndExit -> TODO()
         }
     }
 
-    private fun runCommand(command: List<String>, workDir: String = "."): ExecutionResult {
-        println("  [CLI Adapter] Executing: '${command.joinToString(" ")}'")
+    private fun runCommand(
+        command: List<String>,
+        workDir: String = ".",
+        silent: Boolean = false,
+    ): ExecutionResult {
+        if (!silent) {
+            logger.info("  [CLI Adapter] Executing: '${command.joinToString(" ")}'")
+        }
         return try {
             val process =
                 ProcessBuilder(command).directory(File(workDir)).redirectErrorStream(true).start()
@@ -157,7 +200,7 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
             )
         }
 
-        println("  [CLI Adapter] Performing web search for: '$query'")
+        logger.info("  [CLI Adapter] Performing web search for: '$query'")
 
         try {
             val encodedQuery = URLEncoder.encode(query, "UTF-8")
@@ -181,7 +224,7 @@ class CliAdapter(private val config: ConfigStorage) : ExecutionAdapter {
                     "Web search failed with status ${connection.responseCode}: $error"
                 )
             }
-        } catch (e: Exception) { // Catch broader exceptions for network/parsing issues
+        } catch (e: Exception) {
             return ExecutionResult(false, "An exception occurred during web search: ${e.message}")
         }
     }

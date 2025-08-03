@@ -17,4 +17,10 @@ interface ConfigStorage {
     fun loadSearchApiKey(): String?
     fun saveSearchEngineId(id: String)
     fun loadSearchEngineId(): String?
+
+    // New methods for auth
+    fun saveAuthMethod(method: String)
+    fun loadAuthMethod(): String
+    fun saveFreeTierOnly(enabled: Boolean)
+    fun loadFreeTierOnly(): Boolean
 }
