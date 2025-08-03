@@ -1,20 +1,24 @@
 ﻿pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://plugins.gradle.org/m2/")
+        maven("https://jitpack.io")
+    }
     plugins {
         id("org.jetbrains.kotlin.jvm") version "1.9.23"
         id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
-        id("org.jetbrains.intellij") version "1.17.3"
-        application
-        id("org.jetbrains.compose") version "1.6.10"
+        id("org.jetbrains.intellij") version "2.2.0"
+        id("application")
     }
 }
 
-rootProject.name = "GeminiOrchestrator"
+rootProject.name = "Geministrator"
 
 include(
     ":common",
     ":core",
-    ":adapters:adapter-cli",
-    ":adapters:adapter-android-studio",
-    ":products:cli",
-    ":products:android-studio-plugin"
+    ":cli",
+    ":plugins:android-studio-plugin"
 )

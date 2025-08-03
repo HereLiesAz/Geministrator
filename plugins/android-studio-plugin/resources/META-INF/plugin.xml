@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>com.hereliesaz.geministrator</id>
+    <name>Geministrator</name>
+    <version>1.0.0</version>
+    <vendor>hereliesaz</vendor>
+    <description><![CDATA[AI-driven development assistant to automate complex workflows.]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>com.intellij.diff</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Geministrator" anchor="right" factoryClass="com.hereliesaz.geministrator.plugin.OrchestratorToolWindowFactory" icon="AllIcons.General.User" />
+    </extensions>
+    <actions>
+        <action id="Geministrator.Run" class="com.hereliesaz.geministrator.plugin.RunOrchestratorAction" text="Run Geministrator" description="Opens the Geministrator tool window." icon="AllIcons.Actions.Execute">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

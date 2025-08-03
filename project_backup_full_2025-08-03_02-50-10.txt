@@ -1,0 +1,3889 @@
+====================================================================
+FILE: .\.idea\caches\deviceStreaming.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeviceStreaming">
+    <option name="deviceSelectionList">
+      <list>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="Sony" />
+          <option name="codename" value="A402SO" />
+          <option name="id" value="A402SO" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Sony" />
+          <option name="name" value="Xperia 10" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2520" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="27" />
+          <option name="brand" value="DOCOMO" />
+          <option name="codename" value="F01L" />
+          <option name="id" value="F01L" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="FUJITSU" />
+          <option name="name" value="F-01L" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1280" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="OnePlus" />
+          <option name="codename" value="OP535DL1" />
+          <option name="id" value="OP535DL1" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="OnePlus" />
+          <option name="name" value="CPH2409" />
+          <option name="screenDensity" value="401" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2412" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="OnePlus" />
+          <option name="codename" value="OP5552L1" />
+          <option name="id" value="OP5552L1" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="OnePlus" />
+          <option name="name" value="CPH2415" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2412" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="OPPO" />
+          <option name="codename" value="OP573DL1" />
+          <option name="id" value="OP573DL1" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="OPPO" />
+          <option name="name" value="CPH2557" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="28" />
+          <option name="brand" value="DOCOMO" />
+          <option name="codename" value="SH-01L" />
+          <option name="id" value="SH-01L" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="SHARP" />
+          <option name="name" value="AQUOS sense2 SH-01L" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2160" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="a14m" />
+          <option name="id" value="a14m" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-A145R" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2408" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="a15" />
+          <option name="id" value="a15" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="A15" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="a15x" />
+          <option name="id" value="a15x" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="A15 5G" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="a16x" />
+          <option name="id" value="a16x" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="A16 5G" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="a35x" />
+          <option name="id" value="a35x" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="A35" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="akita" />
+          <option name="id" value="akita" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 8a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="akita" />
+          <option name="id" value="akita" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 8a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="arcfox" />
+          <option name="id" value="arcfox" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="razr plus 2024" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="1272" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="austin" />
+          <option name="id" value="austin" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="moto g 5G (2022)" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1600" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="b0q" />
+          <option name="id" value="b0q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S22 Ultra" />
+          <option name="screenDensity" value="600" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="3088" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="b6q" />
+          <option name="id" value="b6q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Flip 6" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2640" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="32" />
+          <option name="brand" value="google" />
+          <option name="codename" value="bluejay" />
+          <option name="id" value="bluejay" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 6a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="caiman" />
+          <option name="id" value="caiman" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="960" />
+          <option name="screenY" value="2142" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="caiman" />
+          <option name="id" value="caiman" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="960" />
+          <option name="screenY" value="2142" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="comet" />
+          <option name="default" value="true" />
+          <option name="id" value="comet" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro Fold" />
+          <option name="screenDensity" value="390" />
+          <option name="screenX" value="2076" />
+          <option name="screenY" value="2152" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="comet" />
+          <option name="default" value="true" />
+          <option name="id" value="comet" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro Fold" />
+          <option name="screenDensity" value="390" />
+          <option name="screenX" value="2076" />
+          <option name="screenY" value="2152" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="29" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="crownqlteue" />
+          <option name="id" value="crownqlteue" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Note9" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="2220" />
+          <option name="screenY" value="1080" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="dm2q" />
+          <option name="id" value="dm2q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="S23 Plus" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="dm3q" />
+          <option name="id" value="dm3q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S23 Ultra" />
+          <option name="screenDensity" value="600" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="3088" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="dubai" />
+          <option name="id" value="dubai" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="edge 30" />
+          <option name="screenDensity" value="405" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="e1q" />
+          <option name="default" value="true" />
+          <option name="id" value="e1q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S24" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="e3q" />
+          <option name="id" value="e3q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S24 Ultra" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="3120" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="eos" />
+          <option name="id" value="eos" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Eos" />
+          <option name="screenDensity" value="320" />
+          <option name="screenX" value="384" />
+          <option name="screenY" value="384" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="eqe" />
+          <option name="id" value="eqe" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="edge 50 pro" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1220" />
+          <option name="screenY" value="2712" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="felix" />
+          <option name="id" value="felix" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Fold" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="2208" />
+          <option name="screenY" value="1840" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="felix" />
+          <option name="id" value="felix" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Fold" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="2208" />
+          <option name="screenY" value="1840" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="felix_camera" />
+          <option name="id" value="felix_camera" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Fold (Camera-enabled)" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="2208" />
+          <option name="screenY" value="1840" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="fogona" />
+          <option name="id" value="fogona" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="moto g play - 2024" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1600" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="fogos" />
+          <option name="id" value="fogos" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="moto g34 5G" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1600" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="g0q" />
+          <option name="id" value="g0q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-S906U1" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gta9pwifi" />
+          <option name="id" value="gta9pwifi" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-X210" />
+          <option name="screenDensity" value="240" />
+          <option name="screenX" value="1200" />
+          <option name="screenY" value="1920" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts7lwifi" />
+          <option name="id" value="gts7lwifi" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-T870" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts7xllite" />
+          <option name="id" value="gts7xllite" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-T738U" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts8uwifi" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="gts8uwifi" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S8 Ultra" />
+          <option name="screenDensity" value="320" />
+          <option name="screenX" value="1848" />
+          <option name="screenY" value="2960" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts8wifi" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="gts8wifi" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S8" />
+          <option name="screenDensity" value="274" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts9fe" />
+          <option name="id" value="gts9fe" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S9 FE 5G" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="2304" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="gts9wifi" />
+          <option name="id" value="gts9wifi" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-X710" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="husky" />
+          <option name="id" value="husky" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 8 Pro" />
+          <option name="screenDensity" value="390" />
+          <option name="screenX" value="1008" />
+          <option name="screenY" value="2244" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="30" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="java" />
+          <option name="id" value="java" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="G20" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1600" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="komodo" />
+          <option name="id" value="komodo" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro XL" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="1008" />
+          <option name="screenY" value="2244" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="komodo" />
+          <option name="id" value="komodo" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9 Pro XL" />
+          <option name="screenDensity" value="360" />
+          <option name="screenX" value="1008" />
+          <option name="screenY" value="2244" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="lion" />
+          <option name="id" value="lion" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="moto g04" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1612" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="lynx" />
+          <option name="id" value="lynx" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 7a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="lyriq" />
+          <option name="id" value="lyriq" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="edge 40" />
+          <option name="screenDensity" value="400" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="manaus" />
+          <option name="id" value="manaus" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="edge 40 neo" />
+          <option name="screenDensity" value="400" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="motorola" />
+          <option name="codename" value="maui" />
+          <option name="id" value="maui" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Motorola" />
+          <option name="name" value="moto g play - 2023" />
+          <option name="screenDensity" value="280" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1600" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="o1q" />
+          <option name="id" value="o1q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S21" />
+          <option name="screenDensity" value="421" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="OPPO" />
+          <option name="codename" value="oplus_lab_op574fl1" />
+          <option name="id" value="oplus_lab_op574fl1" />
+          <option name="labId" value="oppo" />
+          <option name="manufacturer" value="OPPO" />
+          <option name="name" value="A58" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="35" />
+          <option name="brand" value="OnePlus" />
+          <option name="codename" value="oplus_lab_op5961l1" />
+          <option name="id" value="oplus_lab_op5961l1" />
+          <option name="labId" value="oneplus" />
+          <option name="manufacturer" value="OnePlus" />
+          <option name="name" value="11R 5G" />
+          <option name="screenDensity" value="560" />
+          <option name="screenX" value="1240" />
+          <option name="screenY" value="2772" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="OPPO" />
+          <option name="codename" value="oplus_lab_op5abfl1" />
+          <option name="id" value="oplus_lab_op5abfl1" />
+          <option name="labId" value="oppo" />
+          <option name="manufacturer" value="OPPO" />
+          <option name="name" value="Reno11 5G" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2412" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="OPPO" />
+          <option name="codename" value="oplus_lab_op5b05l1" />
+          <option name="id" value="oplus_lab_op5b05l1" />
+          <option name="labId" value="oppo" />
+          <option name="manufacturer" value="OPPO" />
+          <option name="name" value="A3 Pro 5G" />
+          <option name="screenDensity" value="320" />
+          <option name="screenX" value="720" />
+          <option name="screenY" value="1604" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="31" />
+          <option name="brand" value="google" />
+          <option name="codename" value="oriole" />
+          <option name="id" value="oriole" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 6" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="pa3q" />
+          <option name="id" value="pa3q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S25 Ultra" />
+          <option name="screenDensity" value="600" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="3120" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="panther" />
+          <option name="id" value="panther" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 7" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="q5q" />
+          <option name="id" value="q5q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Z Fold5" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1812" />
+          <option name="screenY" value="2176" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="q6q" />
+          <option name="id" value="q6q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Z Fold6" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1856" />
+          <option name="screenY" value="2160" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="30" />
+          <option name="brand" value="google" />
+          <option name="codename" value="r11" />
+          <option name="formFactor" value="Wear OS" />
+          <option name="id" value="r11" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Watch" />
+          <option name="screenDensity" value="320" />
+          <option name="screenX" value="384" />
+          <option name="screenY" value="384" />
+          <option name="type" value="WEAR_OS" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="r11q" />
+          <option name="id" value="r11q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-S711U" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="30" />
+          <option name="brand" value="google" />
+          <option name="codename" value="redfin" />
+          <option name="id" value="redfin" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 5" />
+          <option name="screenDensity" value="440" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2340" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="33" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_a13" />
+          <option name="id" value="samsung_lab_a13" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy A13" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2408" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_b6q" />
+          <option name="id" value="samsung_lab_b6q" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Z Flip6" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2640" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_e3q" />
+          <option name="id" value="samsung_lab_e3q" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S24 Ultra" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1440" />
+          <option name="screenY" value="3120" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="33" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_gta9p" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="samsung_lab_gta9p" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab A9+ 5G" />
+          <option name="screenDensity" value="240" />
+          <option name="screenX" value="1200" />
+          <option name="screenY" value="1920" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_gts9" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="samsung_lab_gts9" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S9 5G" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_gts9p" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="samsung_lab_gts9p" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S9+ 5G" />
+          <option name="screenDensity" value="340" />
+          <option name="screenX" value="1752" />
+          <option name="screenY" value="2800" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_gts9u" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="samsung_lab_gts9u" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Tab S9 Ultra 5G" />
+          <option name="screenDensity" value="300" />
+          <option name="screenX" value="1848" />
+          <option name="screenY" value="2960" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="samsung_lab_q6q" />
+          <option name="id" value="samsung_lab_q6q" />
+          <option name="labId" value="samsung" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy Z Fold6" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1856" />
+          <option name="screenY" value="2160" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="shiba" />
+          <option name="id" value="shiba" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 8" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="t2q" />
+          <option name="id" value="t2q" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="Galaxy S21 Plus" />
+          <option name="screenDensity" value="394" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="33" />
+          <option name="brand" value="google" />
+          <option name="codename" value="tangorpro" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="tangorpro" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel Tablet" />
+          <option name="screenDensity" value="320" />
+          <option name="screenX" value="1600" />
+          <option name="screenY" value="2560" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="tegu" />
+          <option name="id" value="tegu" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9a" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2424" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="google" />
+          <option name="codename" value="tokay" />
+          <option name="default" value="true" />
+          <option name="id" value="tokay" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2424" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="35" />
+          <option name="brand" value="google" />
+          <option name="codename" value="tokay" />
+          <option name="default" value="true" />
+          <option name="id" value="tokay" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2424" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="35" />
+          <option name="brand" value="vivo" />
+          <option name="codename" value="vivo_lab_v2342" />
+          <option name="id" value="vivo_lab_v2342" />
+          <option name="labId" value="vivo" />
+          <option name="manufacturer" value="vivo" />
+          <option name="name" value="V40 Lite" />
+          <option name="screenDensity" value="440" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="35" />
+          <option name="brand" value="vivo" />
+          <option name="codename" value="vivo_lab_v2348" />
+          <option name="id" value="vivo_lab_v2348" />
+          <option name="labId" value="vivo" />
+          <option name="manufacturer" value="vivo" />
+          <option name="name" value="V40" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="api" value="34" />
+          <option name="brand" value="samsung" />
+          <option name="codename" value="xcover7" />
+          <option name="id" value="xcover7" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Samsung" />
+          <option name="name" value="SM-G556B" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2408" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="Redmi" />
+          <option name="codename" value="xiaomi_lab_citrine" />
+          <option name="id" value="xiaomi_lab_citrine" />
+          <option name="labId" value="xiaomi" />
+          <option name="manufacturer" value="Xiaomi" />
+          <option name="name" value="Redmi Note 14 5G" />
+          <option name="screenDensity" value="450" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2400" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="Xiaomi" />
+          <option name="codename" value="xiaomi_lab_garnet" />
+          <option name="id" value="xiaomi_lab_garnet" />
+          <option name="labId" value="xiaomi" />
+          <option name="manufacturer" value="Xiaomi" />
+          <option name="name" value="Redmi Note 13 Pro 5G" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1220" />
+          <option name="screenY" value="2712" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="34" />
+          <option name="brand" value="Xiaomi" />
+          <option name="codename" value="xiaomi_lab_pipa" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="xiaomi_lab_pipa" />
+          <option name="labId" value="xiaomi" />
+          <option name="manufacturer" value="Xiaomi" />
+          <option name="name" value="Pad 6" />
+          <option name="screenDensity" value="480" />
+          <option name="screenX" value="1220" />
+          <option name="screenY" value="2712" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="35" />
+          <option name="brand" value="Xiaomi" />
+          <option name="codename" value="xiaomi_lab_ruyi" />
+          <option name="id" value="xiaomi_lab_ruyi" />
+          <option name="labId" value="xiaomi" />
+          <option name="manufacturer" value="Xiaomi" />
+          <option name="name" value="MIX Flip" />
+          <option name="screenDensity" value="520" />
+          <option name="screenX" value="1224" />
+          <option name="screenY" value="2912" />
+        </PersistentDeviceSelectionData>
+        <PersistentDeviceSelectionData>
+          <option name="accessStatus">
+            <list>
+              <option value="EULA_NOT_ACCEPTED" />
+            </list>
+          </option>
+          <option name="api" value="35" />
+          <option name="brand" value="Xiaomi" />
+          <option name="codename" value="xiaomi_lab_sheng" />
+          <option name="formFactor" value="Tablet" />
+          <option name="id" value="xiaomi_lab_sheng" />
+          <option name="labId" value="xiaomi" />
+          <option name="manufacturer" value="Xiaomi" />
+          <option name="name" value="Pad 6S Pro 12.4" />
+          <option name="screenDensity" value="400" />
+          <option name="screenX" value="2032" />
+          <option name="screenY" value="3048" />
+        </PersistentDeviceSelectionData>
+      </list>
+    </option>
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\codeStyles\codeStyleConfig.xml
+====================================================================
+<component name="ProjectCodeStyleConfiguration">
+  <state>
+    <option name="PREFERRED_PROJECT_CODE_STYLE" value="Default" />
+  </state>
+</component>
+
+
+====================================================================
+FILE: .\.idea\codeStyles\Project.xml
+====================================================================
+<component name="ProjectCodeStyleConfiguration">
+  <code_scheme name="Project" version="173">
+    <ScalaCodeStyleSettings>
+      <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
+    </ScalaCodeStyleSettings>
+    <codeStyleSettings language="XML">
+      <option name="FORCE_REARRANGE_MODE" value="1" />
+      <indentOptions>
+        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+      </indentOptions>
+      <arrangement>
+        <rules>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>xmlns:android</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>^$</XML_NAMESPACE>
+                </AND>
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>xmlns:.*</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>^$</XML_NAMESPACE>
+                </AND>
+              </match>
+              <order>BY_NAME</order>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>.*:id</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
+                </AND>
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>.*:name</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
+                </AND>
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>name</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>^$</XML_NAMESPACE>
+                </AND>
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>style</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>^$</XML_NAMESPACE>
+                </AND>
+              </match>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>.*</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>^$</XML_NAMESPACE>
+                </AND>
+              </match>
+              <order>BY_NAME</order>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>.*</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>http://schemas.android.com/apk/res/android</XML_NAMESPACE>
+                </AND>
+              </match>
+              <order>ANDROID_ATTRIBUTE_ORDER</order>
+            </rule>
+          </section>
+          <section>
+            <rule>
+              <match>
+                <AND>
+                  <NAME>.*</NAME>
+                  <XML_ATTRIBUTE />
+                  <XML_NAMESPACE>.*</XML_NAMESPACE>
+                </AND>
+              </match>
+              <order>BY_NAME</order>
+            </rule>
+          </section>
+        </rules>
+      </arrangement>
+    </codeStyleSettings>
+  </code_scheme>
+</component>
+
+
+====================================================================
+FILE: .\.idea\.gitignore
+====================================================================
+# Default ignored files
+/shelf/
+/workspace.xml
+
+
+
+====================================================================
+FILE: .\.idea\AndroidProjectSystem.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidProjectSystem">
+    <option name="providerId" value="com.android.tools.idea.GradleProjectSystem" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\compiler.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="17" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\google-java-format.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoogleJavaFormatSettings">
+    <option name="enabled" value="true" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\gradle.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/adapters" />
+            <option value="$PROJECT_DIR$/adapters/adapter-android-studio" />
+            <option value="$PROJECT_DIR$/adapters/adapter-cli" />
+            <option value="$PROJECT_DIR$/cli" />
+            <option value="$PROJECT_DIR$/common" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/plugins" />
+            <option value="$PROJECT_DIR$/plugins/android-studio-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\kotlinc.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="KotlinJpsPluginSettings">
+    <option name="version" value="1.9.23" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\migrations.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectMigrations">
+    <option name="MigrateToGradleLocalJavaHome">
+      <set>
+        <option value="$PROJECT_DIR$" />
+      </set>
+    </option>
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\misc.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="jbr-21" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\runConfigurations.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RunConfigurationProducerService">
+    <option name="ignoredProducers">
+      <set>
+        <option value="com.intellij.execution.junit.AbstractAllInDirectoryConfigurationProducer" />
+        <option value="com.intellij.execution.junit.AllInPackageConfigurationProducer" />
+        <option value="com.intellij.execution.junit.PatternConfigurationProducer" />
+        <option value="com.intellij.execution.junit.TestInClassConfigurationProducer" />
+        <option value="com.intellij.execution.junit.UniqueIdConfigurationProducer" />
+        <option value="com.intellij.execution.junit.testDiscovery.JUnitTestDiscoveryConfigurationProducer" />
+        <option value="org.jetbrains.kotlin.idea.junit.KotlinJUnitRunConfigurationProducer" />
+        <option value="org.jetbrains.kotlin.idea.junit.KotlinPatternConfigurationProducer" />
+      </set>
+    </option>
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\sbt.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaSbtSettings">
+    <option name="customVMPath" value="$USER_HOME$/.jdks/jbr21" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\vcs.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\.idea\workspace.xml
+====================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3590d891-3c27-4b4b-9204-486ca34d917b" name="Changes" comment="Refactor: Update package names and build configurations&#10;&#10;This commit refactors the project by:&#10;&#10;- Updating package names from `com.hereliesaz.GeminiOrchestrator` to `com.hereliesaz.geminiorchestrator`.&#10;- Deleting the `AllAgents.kt` file and moving its classes (Architect, Researcher, Designer, Antagonist, TechSupport) into their own respective files within the `core.council` package.&#10;- Modifying `build.gradle.kts` and `settings.gradle.kts` to:&#10;    - Update plugin management and repository configurations.&#10;    - Set Kotlin JVM target to 17 for all subprojects.&#10;    - Configure the `:products:android-studio-plugin` project with IntelliJ plugin settings and dependencies.&#10;    - Configure the `:products:cli` project as an application.&#10;- Changing `AbstractCommand.GetCurrentBranch` and `AbstractCommand.DiscardAllChanges` to be objects instead of data classes.&#10;- Updating class references in `Orchestrator.kt` for `RequestUserDecision` and `GetCurrentBranch`.&#10;- Updating the plugin ID and class paths in `plugin.xml`.">
+      <change beforePath="$PROJECT_DIR$/.gradle/9.0-milestone-1/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.0-milestone-1/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/9.0-milestone-1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/9.0-milestone-1/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/kotlin/com/hereliesaz/geminiorchestrator/common/AbstractCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/kotlin/com/hereliesaz/geminiorchestrator/common/AbstractCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/GeminiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/GeminiService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/Manager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/Manager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/Orchestrator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/Orchestrator.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Antagonist.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Antagonist.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Architect.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Architect.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Designer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Designer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Researcher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/Researcher.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/TechSupport.kt" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/kotlin/com/hereliesaz/GeminiOrchestrator/core/council/TechSupport.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/products/android-studio-plugin/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/products/android-studio-plugin/src/main/resources/META-INF/plugin.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="GeminiOrchestrator" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Az &lt;hereliesaz@gmail.com&gt;" />
+      </list>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SIGN_OFF_COMMIT" value="true" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;HereLiesAz&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/HereLiesAz/GeminiOrchestrator.git&quot;,
+    &quot;accountId&quot;: &quot;ec06c625-beeb-4144-b820-11c2bdc7ab20&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="2" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="30kjBVWhtIliaksUATv5Bd8qAlF" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;PowerShell.FiletreeGeneration.ps1 (1).executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.FiletreeGeneration.ps1.executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.Repair-Project.ps1 (1).executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.Repair-Project.ps1 (2).executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.Repair-Project.ps1.executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.backup.ps1 (1).executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.backup.ps1.executor&quot;: &quot;Run&quot;,
+    &quot;PowerShell.standardization.ps1.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;C:\\Users\\azrie\\AppData\\Roaming\\Google\\AndroidStudio2025.1.3\\plugins\\Shell Script\\shellcheck.exe&quot;,
+    &quot;android.gradle.sync.needed&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/azrie/AndroidStudioProjects/GeminiOrchestrator/adapters/adapter-android-studio&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;sbt.project.settings.configurable&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\adapters\adapter-android-studio" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\adapters\adapter-cli" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\core" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\plugins\android-studio-plugin" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\plugin" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\plugin\android-studio-plugin\src\main\kotlin\com" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\plugin\vscode-extension" />
+      <recent name="C:\Users\azrie\AndroidStudioProjects\GeminiOrchestrator\plugin\vscode-extension\src" />
+    </key>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3590d891-3c27-4b4b-9204-486ca34d917b" name="Changes" comment="" />
+      <created>1754178332640</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1754178332640</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Delete Gemini Orchestrator project files&#10;&#10;This commit removes all files related to the Gemini Orchestrator project. &#10;This includes core logic, adapters for CLI and Android Studio, plugin files for both IDEs, and common utility classes.">
+      <option name="closed" value="true" />
+      <created>1754183348150</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1754183348150</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Refactor: Rename project and packages from Gemini to Hereliesaz&#10;&#10;This commit renames the project and all associated Java/Kotlin packages&#10;from 'com.gemini.orchestrator' to 'com.hereliesaz.GeminiOrchestrator'.&#10;&#10;Key changes include:&#10;- Updated `group` in `build.gradle.kts` and `settings.gradle.kts`.&#10;- Renamed package declarations in all Kotlin source files.&#10;- Updated `plugin.xml` for the Android Studio plugin.&#10;- Updated `package.json` for the VSCode extension.&#10;- Adjusted import statements across the codebase to reflect the new package structure.&#10;- Deleted obsolete PowerShell utility scripts (`cleanup.ps1`, `FiletreeGeneration.ps1`) as part of project cleanup.&#10;- Removed several unused or placeholder Kotlin files from various modules.&#10;- Updated Gradle configuration files (`.idea/gradle.xml`, `build.gradle.kts`, `settings.gradle.kts`).&#10;- Minor adjustments to comments and logging messages in `GeminiService.kt` and `AllAgents.kt`.&#10;- Corrected path to CLI executable in VSCode extension.">
+      <option name="closed" value="true" />
+      <created>1754191776383</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1754191776383</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Refactor: Update package names and build configurations&#10;&#10;This commit refactors the project by:&#10;&#10;- Updating package names from `com.hereliesaz.GeminiOrchestrator` to `com.hereliesaz.geminiorchestrator`.&#10;- Deleting the `AllAgents.kt` file and moving its classes (Architect, Researcher, Designer, Antagonist, TechSupport) into their own respective files within the `core.council` package.&#10;- Modifying `build.gradle.kts` and `settings.gradle.kts` to:&#10;    - Update plugin management and repository configurations.&#10;    - Set Kotlin JVM target to 17 for all subprojects.&#10;    - Configure the `:products:android-studio-plugin` project with IntelliJ plugin settings and dependencies.&#10;    - Configure the `:products:cli` project as an application.&#10;- Changing `AbstractCommand.GetCurrentBranch` and `AbstractCommand.DiscardAllChanges` to be objects instead of data classes.&#10;- Updating class references in `Orchestrator.kt` for `RequestUserDecision` and `GetCurrentBranch`.&#10;- Updating the plugin ID and class paths in `plugin.xml`.">
+      <option name="closed" value="true" />
+      <created>1754195627711</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1754195627711</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.ts" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Delete Gemini Orchestrator project files&#10;&#10;This commit removes all files related to the Gemini Orchestrator project. &#10;This includes core logic, adapters for CLI and Android Studio, plugin files for both IDEs, and common utility classes." />
+    <MESSAGE value="Refactor: Rename project and packages from Gemini to Hereliesaz&#10;&#10;This commit renames the project and all associated Java/Kotlin packages&#10;from 'com.gemini.orchestrator' to 'com.hereliesaz.GeminiOrchestrator'.&#10;&#10;Key changes include:&#10;- Updated `group` in `build.gradle.kts` and `settings.gradle.kts`.&#10;- Renamed package declarations in all Kotlin source files.&#10;- Updated `plugin.xml` for the Android Studio plugin.&#10;- Updated `package.json` for the VSCode extension.&#10;- Adjusted import statements across the codebase to reflect the new package structure.&#10;- Deleted obsolete PowerShell utility scripts (`cleanup.ps1`, `FiletreeGeneration.ps1`) as part of project cleanup.&#10;- Removed several unused or placeholder Kotlin files from various modules.&#10;- Updated Gradle configuration files (`.idea/gradle.xml`, `build.gradle.kts`, `settings.gradle.kts`).&#10;- Minor adjustments to comments and logging messages in `GeminiService.kt` and `AllAgents.kt`.&#10;- Corrected path to CLI executable in VSCode extension." />
+    <MESSAGE value="Refactor: Update package names and build configurations&#10;&#10;This commit refactors the project by:&#10;&#10;- Updating package names from `com.hereliesaz.GeminiOrchestrator` to `com.hereliesaz.geminiorchestrator`.&#10;- Deleting the `AllAgents.kt` file and moving its classes (Architect, Researcher, Designer, Antagonist, TechSupport) into their own respective files within the `core.council` package.&#10;- Modifying `build.gradle.kts` and `settings.gradle.kts` to:&#10;    - Update plugin management and repository configurations.&#10;    - Set Kotlin JVM target to 17 for all subprojects.&#10;    - Configure the `:products:android-studio-plugin` project with IntelliJ plugin settings and dependencies.&#10;    - Configure the `:products:cli` project as an application.&#10;- Changing `AbstractCommand.GetCurrentBranch` and `AbstractCommand.DiscardAllChanges` to be objects instead of data classes.&#10;- Updating class references in `Orchestrator.kt` for `RequestUserDecision` and `GetCurrentBranch`.&#10;- Updating the plugin ID and class paths in `plugin.xml`." />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactor: Update package names and build configurations&#10;&#10;This commit refactors the project by:&#10;&#10;- Updating package names from `com.hereliesaz.GeminiOrchestrator` to `com.hereliesaz.geminiorchestrator`.&#10;- Deleting the `AllAgents.kt` file and moving its classes (Architect, Researcher, Designer, Antagonist, TechSupport) into their own respective files within the `core.council` package.&#10;- Modifying `build.gradle.kts` and `settings.gradle.kts` to:&#10;    - Update plugin management and repository configurations.&#10;    - Set Kotlin JVM target to 17 for all subprojects.&#10;    - Configure the `:products:android-studio-plugin` project with IntelliJ plugin settings and dependencies.&#10;    - Configure the `:products:cli` project as an application.&#10;- Changing `AbstractCommand.GetCurrentBranch` and `AbstractCommand.DiscardAllChanges` to be objects instead of data classes.&#10;- Updating class references in `Orchestrator.kt` for `RequestUserDecision` and `GetCurrentBranch`.&#10;- Updating the plugin ID and class paths in `plugin.xml`." />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+</project>
+
+
+====================================================================
+FILE: .\cli\build.gradle.kts
+====================================================================
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+    id("application")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+application {
+    mainClass.set("MainKt")
+}
+
+sourceSets.main {
+    java.srcDirs("src")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation(project(":common"))
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
+}
+
+
+====================================================================
+FILE: .\cli\CliAdapter.kt
+====================================================================
+
+
+====================================================================
+FILE: .\cli\CliConfigStorage.kt
+====================================================================
+package com.hereliesaz.geminiorchestrator.adapter.cli
+
+import com.hereliesaz.geminiorchestrator.core.config.ConfigStorage
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.*
+
+class CliConfigStorage : ConfigStorage {
+    private val configFile = File(System.getProperty("user.home"), ".gemini-orchestrator/config.properties")
+    private val properties = Properties()
+    private val KEY_API = "GEMINI_API_KEY"
+    private val KEY_REVIEW = "PRE_COMMIT_REVIEW"
+    private val KEY_CONCURRENCY = "CONCURRENCY_LIMIT"
+    private val KEY_TOKEN_LIMIT = "TOKEN_LIMIT"
+    private val KEY_MODEL_STRATEGIC = "MODEL_STRATEGIC"
+    private val KEY_MODEL_FLASH = "MODEL_FLASH"
+
+    init {
+        configFile.parentFile.mkdirs()
+        if (configFile.exists()) { FileInputStream(configFile).use { properties.load(it) } }
+    }
+
+    private fun saveProperties() { FileOutputStream(configFile).use { properties.store(it, "Gemini Orchestrator Configuration") } }
+    override fun saveApiKey(apiKey: String) { properties.setProperty(KEY_API, apiKey); saveProperties() }
+    override fun loadApiKey(): String? = properties.getProperty(KEY_API)
+    override fun savePreCommitReview(enabled: Boolean) { properties.setProperty(KEY_REVIEW, enabled.toString()); saveProperties() }
+    override fun loadPreCommitReview(): Boolean = properties.getProperty(KEY_REVIEW, "true").toBoolean()
+    override fun saveConcurrencyLimit(limit: Int) { properties.setProperty(KEY_CONCURRENCY, limit.toString()); saveProperties() }
+    override fun loadConcurrencyLimit(): Int = properties.getProperty(KEY_CONCURRENCY, "2").toIntOrNull() ?: 2
+    override fun saveTokenLimit(limit: Int) { properties.setProperty(KEY_TOKEN_LIMIT, limit.toString()); saveProperties() }
+    override fun loadTokenLimit(): Int = properties.getProperty(KEY_TOKEN_LIMIT, "500000").toIntOrNull() ?: 500000
+    override fun saveModelName(type: String, name: String) { properties.setProperty(if (type == "strategic") KEY_MODEL_STRATEGIC else KEY_MODEL_FLASH, name); saveProperties() }
+    override fun loadModelName(type: String, default: String): String = properties.getProperty(if (type == "strategic") KEY_MODEL_STRATEGIC else KEY_MODEL_FLASH, default)
+}
+
+
+
+====================================================================
+FILE: .\cli\Main.kt
+====================================================================
+import kotlinx.cli.*
+import kotlinx.coroutines.runBlocking
+
+class ConsoleLogger : ILogger { override fun log(message: String) { println(message) } }
+
+@OptIn(ExperimentalCli::class)
+fun main(args: Array<String>) = runBlocking {
+    val parser = ArgParser("geministrator")
+    val configStorage = CliConfigStorage()
+    val logger = ConsoleLogger()
+
+    class RunCommand : Subcommand("run", "Run a new workflow") {
+        val prompt by argument(ArgType.String, description = "The high-level task for the AI to perform")
+        override fun execute() {
+            runBlocking {
+                val apiKey = getAndValidateApiKey(configStorage, logger)
+                if (apiKey == null) {
+                    println("ERROR: Could not obtain a valid API key. Exiting.")
+                    return@runBlocking
+                }
+                val orchestrator = Orchestrator(CliAdapter(), apiKey, logger, configStorage)
+                orchestrator.run(prompt, System.getProperty("user.dir"))
+            }
+        }
+    }
+
+    class ConfigureCommand : Subcommand("config", "Configure settings") {
+        val toggleReview by option(ArgType.Boolean, shortName = "r", description = "Toggle pre-commit review")
+        val setConcurrency by option(ArgType.Int, shortName = "c", description = "Set concurrency limit")
+        val setTokenLimit by option(ArgType.Int, shortName = "t", description = "Set token limit")
+        override fun execute() {
+            toggleReview?.let {
+                val current = configStorage.loadPreCommitReview()
+                configStorage.savePreCommitReview(!current)
+                println("SUCCESS: Pre-commit review set to: ${!current}")
+            }
+            setConcurrency?.let {
+                configStorage.saveConcurrencyLimit(it)
+                println("SUCCESS: Concurrency limit set to: $it")
+            }
+            setTokenLimit?.let {
+                configStorage.saveTokenLimit(it)
+                println("SUCCESS: Token limit set to: $it")
+            }
+        }
+    }
+
+    parser.subcommands(RunCommand(), ConfigureCommand())
+    parser.parse(args)
+}
+
+private suspend fun getAndValidateApiKey(storage: ConfigStorage, logger: ILogger): String? {
+    var apiKey = storage.loadApiKey()
+    while (true) {
+        if (!apiKey.isNullOrBlank()) {
+            if (GeminiService(apiKey, logger, storage, "", "").validateApiKey()) {
+                return apiKey
+            }
+            logger.log("WARNING: Your saved API key is no longer valid.")
+        }
+        print("Please enter your Gemini API Key: ")
+        apiKey = readlnOrNull()
+        if (apiKey.isNullOrBlank()) return null
+        if (GeminiService(apiKey, logger, storage, "", "").validateApiKey()) {
+            storage.saveApiKey(apiKey)
+            logger.log("SUCCESS: API Key is valid and has been saved.")
+            return apiKey
+        } else {
+            logger.log("ERROR: The key you entered is invalid. Please try again or press Enter to quit.")
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\common\AbstractCommand.kt
+====================================================================
+/**
+ * The complete, final set of universal commands for the agent system.
+ */
+sealed interface AbstractCommand {
+    // File System
+    data class WriteFile(val path: String, val content: String) : AbstractCommand
+    data class ReadFile(val path: String) : AbstractCommand
+    data class AppendToFile(val path: String, val content: String) : AbstractCommand
+    data class DeleteFile(val path: String) : AbstractCommand
+    data class LogJournalEntry(val entry: String) : AbstractCommand
+
+    // Execution
+    data class RunShellCommand(val command: String, val workingDir: String = ".") : AbstractCommand
+    data class RunTests(val module: String?, val testName: String?) : AbstractCommand
+
+    // Version Control
+    object GetCurrentBranch : AbstractCommand
+    data class CreateAndSwitchToBranch(val branchName: String) : AbstractCommand
+    data class SwitchToBranch(val branchName: String) : AbstractCommand
+    data class MergeBranch(val branchName: String, val strategy: String = "") : AbstractCommand
+    data class DeleteBranch(val branchName: String) : AbstractCommand
+    data class StageFiles(val filePaths: List<String>) : AbstractCommand
+    data class Commit(val message: String) : AbstractCommand
+    object DiscardAllChanges : AbstractCommand
+
+    // UI & User Interaction
+    data class DisplayMessage(val message: String) : AbstractCommand
+    data class RequestUserDecision(val prompt: String, val options: List<String>) : AbstractCommand
+    data class RequestCommitReview(val proposedCommitMessage: String) : AbstractCommand
+    data class RequestClarification(val question: String) : AbstractCommand
+
+    // External Tools
+    data class PerformWebSearch(val query: String) : AbstractCommand
+}
+
+
+====================================================================
+FILE: .\common\build.gradle.kts
+====================================================================
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+}
+
+sourceSets.main {
+    java.srcDirs("src")
+}
+
+
+====================================================================
+FILE: .\common\ExecutionAdapter.kt
+====================================================================
+interface ExecutionAdapter {
+    fun execute(command: AbstractCommand): ExecutionResult
+}
+
+data class ExecutionResult(
+    val isSuccess: Boolean,
+    val output: String,
+    val data: Any? = null
+)
+
+
+====================================================================
+FILE: .\core\config\ConfigStorage.kt
+====================================================================
+interface ConfigStorage {
+    fun saveApiKey(apiKey: String)
+    fun loadApiKey(): String?
+    fun savePreCommitReview(enabled: Boolean)
+    fun loadPreCommitReview(): Boolean
+    fun saveModelName(type: String, name: String)
+    fun loadModelName(type: String, default: String): String
+    fun saveConcurrencyLimit(limit: Int)
+    fun loadConcurrencyLimit(): Int
+    fun saveTokenLimit(limit: Int)
+    fun loadTokenLimit(): Int
+}
+
+
+====================================================================
+FILE: .\core\council\Antagonist.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.core.GeminiService
+
+class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
+    fun reviewPlan(planJson: String): String? {
+        logger.log("Antagonist: Reviewing the proposed workflow...")
+        val prompt = """
+            You are The Antagonist, a cynical but brilliant principal engineer. Your only goal is to find flaws in proposed plans.
+            Critique the following workflow plan. Look for missing steps (especially testing), inefficiencies, or potential risks.
+            If you find a critical flaw, respond with "OBJECTION: [Your reason]".
+            If the plan is sound, respond with "APPROVE".
+
+            PROPOSED PLAN (in JSON):
+            $planJson
+        """.trimIndent()
+        val review = ai.executeStrategicPrompt(prompt)
+        if (review.startsWith("OBJECTION:")) {
+            logger.log("Antagonist: $review")
+            return review
+        }
+        logger.log("Antagonist: The plan seems reasonable. No objections.")
+        return null
+    }
+}
+
+
+====================================================================
+FILE: .\core\council\Architect.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.core.GeminiService
+import java.io.File
+
+class Architect(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
+    fun getProjectContextFor(task: String, projectRoot: String): String {
+        logger.log("Architect: Performing deep context analysis for '$task'.")
+        val fileTree = File(projectRoot).walk().maxDepth(5)
+            .filter { it.isFile && !it.path.contains(".git") && !it.path.contains(".idea") }
+            .joinToString("\n") { it.relativeTo(File(projectRoot)).path }
+        val triagePrompt = """
+            You are an expert software architect. Your job is to identify the most relevant files for a given task.
+            From the following file tree, list the 3-5 most critical files needed to accomplish the task.
+            Respond with ONLY a comma-separated list of file paths.
+
+            FILE TREE:
+            $fileTree
+
+            TASK: "$task"
+        """.trimIndent()
+        val relevantFilePaths = ai.executeFlashPrompt(triagePrompt).split(",").map { it.trim() }
+        logger.log("  -> Architect identified relevant files: $relevantFilePaths")
+        val contextBuilder = StringBuilder("RELEVANT FILE CONTEXT:\n")
+        relevantFilePaths.forEach { path ->
+            if (path.isNotBlank()) {
+                val result = adapter.execute(AbstractCommand.ReadFile(path))
+                if (result.isSuccess) {
+                    contextBuilder.append("--- FILE: $path ---\n")
+                    contextBuilder.append((result.data as? String) ?: "Could not read file.")
+                    contextBuilder.append("\n\n")
+                }
+            }
+        }
+        return contextBuilder.toString()
+    }
+
+    fun reviewStagedChanges(changes: Map<String, String>): Boolean {
+        logger.log("Architect: Reviewing ${changes.size} staged files for architectural compliance.")
+        val prompt = """
+            You are The Architect, an expert on software architecture.
+            The following code changes have been proposed. Review them for any potential violations of clean architecture principles, unintended side effects, or major flaws.
+            Respond with "APPROVE" if the changes are acceptable, or "REJECT: [reason]" if they are not.
+
+            PROPOSED CHANGES:
+            $changes
+
+            Your decision:
+        """.trimIndent()
+        val decision = ai.executeStrategicPrompt(prompt)
+        logger.log("Architect's Decision: $decision")
+        return decision.startsWith("APPROVE")
+    }
+}
+
+
+====================================================================
+FILE: .\core\council\Designer.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+
+class Designer(private val logger: ILogger, private val adapter: ExecutionAdapter) {
+    fun createSpecification(feature: String): List<AbstractCommand> {
+        logger.log("Designer: Creating feature specification for '$feature'.")
+        val sanitizedFeature = feature.replace(" ", "_").replace(Regex("[^A-Za-z0-9_]"), "")
+        return listOf(AbstractCommand.WriteFile(
+            path = "docs/specs/$sanitizedFeature.md",
+            content = "# Feature: $feature\n\nThis feature should allow users to..."
+        ))
+    }
+    fun updateChangelog(commitMessage: String) {
+        logger.log("Designer: Updating changelog.")
+        adapter.execute(AbstractCommand.AppendToFile("CHANGELOG.md", "\n- $commitMessage"))
+    }
+    fun recordHistoricalLesson(lesson: String) {
+        logger.log("Designer: Recording important lesson in project history.")
+        adapter.execute(AbstractCommand.AppendToFile("docs/history.md", "\n- $lesson"))
+    }
+}
+
+
+====================================================================
+FILE: .\core\council\ILogger.kt
+====================================================================
+interface ILogger {
+    fun log(message: String)
+}
+
+
+====================================================================
+FILE: .\core\council\Researcher.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.core.GeminiService
+
+class Researcher(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
+    fun findBestPracticesFor(topic: String): String {
+        logger.log("Researcher: Searching for best practices regarding '$topic'.")
+        val searchResult = adapter.execute(AbstractCommand.PerformWebSearch(topic))
+        val prompt = """
+            You are a Senior Staff Engineer. Based on the following web search results,
+            summarize the current best practices for the topic.
+
+            SEARCH RESULTS:
+            ${searchResult.output}
+
+            TOPIC: "$topic"
+        """.trimIndent()
+        return ai.executeFlashPrompt(prompt)
+    }
+}
+
+
+====================================================================
+FILE: .\core\council\TechSupport.kt
+====================================================================
+package com.hereliesaz.geministrator.core.council
+
+import com.hereliesaz.geministrator.core.GeminiService
+
+class TechSupport(private val logger: ILogger, private val ai: GeminiService) {
+    fun analyzeMergeConflict(conflictOutput: String): String {
+        logger.log("Tech Support: Analyzing merge conflict...")
+        val prompt = """
+            You are a Tech Support specialist for a team of AI agents.
+            The following 'git merge' command failed. Analyze the conflict output and explain the root cause.
+            Propose a clear, step-by-step strategy for how another AI agent could resolve this conflict.
+
+            CONFLICT OUTPUT:
+            $conflictOutput
+
+            Your analysis and resolution plan:
+        """.trimIndent()
+        return ai.executeStrategicPrompt(prompt)
+    }
+}
+
+
+====================================================================
+FILE: .\core\tokenizer\Tokenizer.kt
+====================================================================
+package com.hereliesaz.geminiorchestrator.core.tokenizer
+
+object Tokenizer {
+    fun countTokens(text: String): Int {
+        return text.split(Regex("\\s+")).size
+    }
+}
+
+
+
+
+====================================================================
+FILE: .\core\build.gradle.kts
+====================================================================
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+sourceSets.main {
+    java.srcDirs(
+        "config",
+        "council",
+        "tokenizer",
+        "src"
+    )
+}
+
+dependencies {
+    implementation(project(":common"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+}
+
+
+====================================================================
+FILE: .\core\GeminiService.kt
+====================================================================
+package com.hereliesaz.geministrator.core
+
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import com.hereliesaz.geministrator.core.council.ILogger
+import com.hereliesaz.geministrator.core.tokenizer.Tokenizer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import java.net.HttpURLConnection
+import java.net.URL
+
+class GeminiService(
+    private val apiKey: String,
+    private val logger: ILogger,
+    private val config: ConfigStorage,
+    private val strategicModelName: String,
+    private val flashModelName: String
+) {
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+    private val conversationHistory = mutableListOf<String>()
+
+    fun executeStrategicPrompt(prompt: String): String = executePrompt(prompt, strategicModelName)
+    fun executeFlashPrompt(prompt: String): String = executePrompt(prompt, flashModelName)
+
+    private fun executePrompt(prompt: String, model: String): String {
+        conversationHistory.add("USER: $prompt")
+        val tokenLimit = config.loadTokenLimit()
+        val currentTokens = Tokenizer.countTokens(conversationHistory.joinToString("\n"))
+        if (currentTokens > tokenLimit) {
+            logger.log("WARNING: Token limit reached ($currentTokens / $tokenLimit). Performing graceful session restart.")
+            val summaryPrompt = "Summarize the key points and context of the following conversation to preserve memory for a new session:\n\n${conversationHistory.joinToString("\n")}"
+            val summary = internalExecute(summaryPrompt, model)
+            logger.log("  -> Session summary created.")
+            conversationHistory.clear()
+            conversationHistory.add("SYSTEM: This is a new session. Here is the summary of the previous one to provide context:\n$summary")
+            conversationHistory.add("USER: $prompt")
+        }
+        val fullPrompt = conversationHistory.joinToString("\n")
+        val response = internalExecute(fullPrompt, model)
+        conversationHistory.add("AI: $response")
+        return response
+    }
+
+    private fun internalExecute(prompt: String, model: String): String {
+        logger.log("  -> Calling AI Model ($model)...")
+        val url = URL("https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("x-goog-api-key", apiKey)
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.doOutput = true
+        val requestBody = """{"model": "$model", "contents": [{"parts":[{"text": "$prompt"}]}]}""".replace("\n", "")
+        connection.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
+        if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+            val responseText = connection.inputStream.bufferedReader().readText()
+            return try {
+                jsonParser.decodeFromString<GeminiResponse>(responseText).candidates.first().content.parts.first().text
+            } catch (e: Exception) {
+                logger.log("Error parsing Gemini response: $responseText")
+                "Error: Could not parse AI response."
+            }
+        } else {
+            throw RuntimeException("API call failed: ${connection.errorStream.bufferedReader().readText()}")
+        }
+    }
+
+    fun clearSession() { conversationHistory.clear() }
+
+    suspend fun validateApiKey(): Boolean {
+        logger.log("  -> Validating API Key...")
+        val url = URL("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey")
+        return try {
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            val isValid = connection.responseCode == HttpURLConnection.HTTP_OK
+            logger.log(if (isValid) "  -> API Key is valid." else "  -> API Key is invalid.")
+            isValid
+        } catch (e: Exception) {
+            logger.log("  -> API Key validation failed with an exception: ${e.message}")
+            false
+        }
+    }
+
+    @Serializable data class GeminiResponse(val candidates: List<Candidate>)
+    @Serializable data class Candidate(val content: Content)
+    @Serializable data class Content(val parts: List<Part>)
+    @Serializable data class Part(val text: String)
+}
+
+
+====================================================================
+FILE: .\core\Manager.kt
+====================================================================
+package com.hereliesaz.geministrator.core
+
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.core.council.ILogger
+
+sealed class WorkflowStatus {
+    data class Success(val commitMessage: String, val successfulSteps: List<String>) : WorkflowStatus()
+    data class Failure(val reason: String) : WorkflowStatus()
+    data class TestsFailed(val testOutput: String, val successfulSteps: List<String>) : WorkflowStatus()
+}
+
+class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger) {
+    fun executeWorkflow(workflow: List<AbstractCommand>, prompt: String): WorkflowStatus {
+        logger.log("Manager starting workflow with ${workflow.size} steps.")
+        if (workflow.isEmpty()) {
+            logger.log("WARNING: Manager received an empty workflow. Nothing to do.")
+            return WorkflowStatus.Success("No changes made.", emptyList())
+        }
+
+        val successfulSteps = mutableListOf<String>()
+        for (command in workflow) {
+            val commandName = command::class.simpleName ?: "UnknownCommand"
+            logger.log("---")
+            logger.log("  [Manager] -> Delegating command: $commandName")
+            val result = adapter.execute(command)
+
+            if (!result.isSuccess) {
+                val reason = "Execution of $commandName failed: ${result.output}"
+                logger.log("  ERROR: $reason")
+                return WorkflowStatus.Failure(reason)
+            }
+            logger.log("  SUCCESS: ${result.output}")
+            successfulSteps.add(commandName)
+
+            if (command is AbstractCommand.WriteFile) {
+                logger.log("  [Manager] -> Auto-running tests after file modification...")
+                val testResult = adapter.execute(AbstractCommand.RunTests(null, null))
+                if (!testResult.isSuccess) {
+                    logger.log("  TESTS FAILED!")
+                    return WorkflowStatus.TestsFailed(testResult.output, successfulSteps)
+                }
+                logger.log("  All tests passed after modification.")
+            }
+        }
+
+        logger.log("---")
+        logger.log("Manager completed workflow successfully.")
+        return WorkflowStatus.Success(prompt, successfulSteps)
+    }
+}
+
+
+====================================================================
+FILE: .\core\Orchestrator.kt
+====================================================================
+package com.hereliesaz.geministrator.core
+
+import com.hereliesaz.geministrator.common.*
+import com.hereliesaz.geministrator.core.config.ConfigStorage
+import com.hereliesaz.geministrator.core.council.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+
+@Serializable
+data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)
+
+@Serializable
+data class MasterPlan(val sub_tasks: List<SubTask>)
+
+@Serializable
+data class SubTask(val description: String, val responsible_component: String)
+
+@Serializable
+data class WorkflowPlan(val reasoning: String, val steps: List<WorkflowStep>)
+
+@Serializable
+data class WorkflowStep(val command_type: String, val parameters: Map<String, String>)
+
+class Orchestrator(
+    private val adapter: ExecutionAdapter,
+    private val apiKey: String,
+    private val logger: ILogger,
+    private val config: ConfigStorage
+) {
+    private val ai: GeminiService
+    private val architect: Architect
+    private val researcher: Researcher
+    private val designer: Designer
+    private val antagonist: Antagonist
+    private val techSupport: TechSupport
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+    private val MAX_RETRY_ATTEMPTS = 2
+    private val JOURNAL_FILE = ".orchestrator/journal.log"
+    private val SESSION_FILE = ".orchestrator/session.json"
+
+    init {
+        val strategicModel = config.loadModelName("strategic", "gemini-pro")
+        val flashModel = config.loadModelName("flash", "gemini-1.5-flash-latest")
+        ai = GeminiService(apiKey, logger, config, strategicModel, flashModel)
+        architect = Architect(logger, ai, adapter)
+        researcher = Researcher(logger, ai, adapter)
+        designer = Designer(logger, adapter)
+        antagonist = Antagonist(logger, ai)
+        techSupport = TechSupport(logger, ai)
+    }
+
+    fun run(prompt: String, projectRoot: String) = runBlocking(Dispatchers.Default) {
+        val sessionState = loadSessionState()
+        if (sessionState != null) {
+            val decision = adapter.execute(
+                AbstractCommand.RequestUserDecision(
+                    "An incomplete workflow was found. Do you want to resume it?",
+                    listOf("Resume", "Start New")
+                )
+            )
+            if (decision.data == "Resume") {
+                logger.log("Resuming previous workflow...")
+                executeMasterPlan(sessionState.masterPlan, projectRoot, sessionState.mainBranch, sessionState.completedBranches)
+                return@runBlocking
+            }
+        }
+
+        ai.clearSession()
+        logger.log("Orchestrator received complex prompt: '$prompt'")
+        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
+        val masterPlan = deconstructPromptIntoSubTasks(prompt)
+        saveSessionState(SessionState(masterPlan, emptyList(), mainBranch))
+        executeMasterPlan(masterPlan, projectRoot, mainBranch, emptyList())
+    }
+
+    private suspend fun executeMasterPlan(masterPlan: MasterPlan, projectRoot: String, mainBranch: String, completedBranches: List<String>) = coroutineScope {
+        val integrationBranch = "integration/orchestrator-${System.currentTimeMillis()}"
+        val concurrencyLimit = config.loadConcurrencyLimit()
+        val semaphore = Semaphore(concurrencyLimit)
+        logger.log("Orchestrator has deconstructed the prompt into ${masterPlan.sub_tasks.size} sub-tasks.")
+        logger.log("Concurrency limit set to $concurrencyLimit simultaneous tasks.")
+
+        val tasksToRun = masterPlan.sub_tasks.withIndex().filter { (index, _) ->
+            !completedBranches.any { it.contains("task-$index") }
+        }
+
+        val managerJobs = tasksToRun.map { (index, subTask) ->
+            async {
+                semaphore.withPermit {
+                    val taskBranch = "feature/orchestrator-task-$index"
+                    logger.log("---")
+                    logger.log("[STARTING] Manager for '${subTask.description}' on branch '$taskBranch'")
+                    val result = handleTask(subTask.description, projectRoot, mutableListOf(), 0, taskBranch)
+                    logger.log("[FINISHED] Manager for '${subTask.description}' with result: ${if (result != null) "SUCCESS" else "FAILURE"}")
+                    result
+                }
+            }
+        }
+
+        val newSuccessfulBranches = managerJobs.awaitAll().filterNotNull()
+        val allSuccessfulBranches = (completedBranches + newSuccessfulBranches).distinct()
+        saveSessionState(SessionState(masterPlan, allSuccessfulBranches, mainBranch))
+
+        if (allSuccessfulBranches.size == masterPlan.sub_tasks.size) {
+            logger.log("All sub-tasks completed. Beginning final integration.")
+            adapter.execute(AbstractCommand.CreateAndSwitchToBranch(integrationBranch))
+            var mergeSuccess = true
+            var mergeResult: ExecutionResult? = null
+            for (branch in allSuccessfulBranches) {
+                mergeResult = adapter.execute(AbstractCommand.MergeBranch(branch))
+                if (!mergeResult.isSuccess) {
+                    logger.log("CRITICAL: Merge conflict detected when merging '$branch'. Halting integration.")
+                    mergeSuccess = false
+                    break
+                }
+            }
+
+            if (mergeSuccess) {
+                val commitMessage = "feat: ${masterPlan.sub_tasks.joinToString(", ") { it.description }}"
+                if (config.loadPreCommitReview()) {
+                    val reviewResult = adapter.execute(AbstractCommand.RequestCommitReview(commitMessage))
+                    if (reviewResult.data != "APPROVE") {
+                        logger.log("User rejected the final commit. Rolling back.")
+                        cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+                        return@coroutineScope
+                    }
+                }
+                adapter.execute(AbstractCommand.SwitchToBranch(mainBranch))
+                adapter.execute(AbstractCommand.MergeBranch(integrationBranch))
+                designer.updateChangelog(commitMessage)
+                cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+            } else {
+                val analysis = techSupport.analyzeMergeConflict(mergeResult?.output ?: "Unknown error")
+                logger.log("--- TECH SUPPORT ANALYSIS ---\n$analysis")
+                val userDecision = adapter.execute(
+                    AbstractCommand.RequestUserDecision(
+                        "A merge conflict occurred. What should we do?",
+                        listOf("Abandon", "Attempt AI Fix")
+                    )
+                )
+                if (userDecision.data == "Attempt AI Fix") {
+                    handleTask("Resolve merge conflict based on Tech Support analysis", projectRoot, mutableListOf(analysis), 0, integrationBranch)
+                } else {
+                    cleanup(integrationBranch, allSuccessfulBranches, mainBranch)
+                }
+            }
+        } else {
+            logger.log("One or more sub-tasks failed. Commit has been aborted.")
+            cleanup(null, allSuccessfulBranches, mainBranch)
+        }
+    }
+
+    private fun handleTask(prompt: String, projectRoot: String, context: MutableList<String>, attempt: Int, branch: String): String? {
+        logJournal("START_TASK", mapOf("prompt" to prompt, "branch" to branch, "attempt" to attempt))
+        adapter.execute(AbstractCommand.CreateAndSwitchToBranch(branch))
+
+        if (attempt > MAX_RETRY_ATTEMPTS) {
+            logger.log("Maximum retry attempts reached for task '$prompt'. Halting this sub-task.")
+            designer.recordHistoricalLesson("Sub-task '$prompt' failed after $MAX_RETRY_ATTEMPTS self-correction attempts.")
+            return null
+        }
+
+        if (attempt == 0) {
+            val specWorkflow = designer.createSpecification(prompt)
+            Manager(adapter, logger).executeWorkflow(specWorkflow, prompt)
+        }
+
+        val bestPractices = researcher.findBestPracticesFor(prompt)
+        val projectContext = architect.getProjectContextFor(prompt, projectRoot)
+        val allContext = context + listOf(bestPractices, projectContext)
+        val planJson = generatePlanWithAI(prompt, *allContext.toTypedArray())
+        val workflowPlan = jsonParser.decodeFromString<WorkflowPlan>(planJson)
+        logger.log("AI Reasoning: ${workflowPlan.reasoning}")
+
+        val workflow = convertPlanToWorkflow(workflowPlan)
+        if (workflow.size == 1 && workflow.first() is AbstractCommand.RequestClarification) {
+            val clarificationCommand = workflow.first() as AbstractCommand.RequestClarification
+            val result = adapter.execute(clarificationCommand)
+            val userAnswer = result.data as? String ?: "No response."
+            context.add("User Clarification: $userAnswer")
+            return handleTask(prompt, projectRoot, context, attempt, branch)
+        }
+
+        val objection = antagonist.reviewPlan(planJson)
+        if (objection != null) { return null }
+
+        val manager = Manager(adapter, logger)
+        val status = manager.executeWorkflow(workflow, prompt)
+
+        return when (status) {
+            is WorkflowStatus.Success -> {
+                adapter.execute(AbstractCommand.Commit("WIP: ${status.commitMessage}"))
+                logJournal("TASK_SUCCESS", mapOf("branch" to branch))
+                branch
+            }
+            is WorkflowStatus.TestsFailed -> {
+                logger.log("--- INITIATING SELF-CORRECTION (Attempt ${attempt + 1}) ---")
+                context.add("The previous attempt failed with this test error:\n${status.testOutput}")
+                context.add("These steps were successful before the failure:\n${status.successfulSteps.joinToString("\n")}")
+                handleTask(prompt, projectRoot, context, attempt + 1, branch)
+            }
+            is WorkflowStatus.Failure -> {
+                logJournal("TASK_FAILURE", mapOf("branch" to branch, "reason" to status.reason))
+                null
+            }
+        }
+    }
+
+    private fun deconstructPromptIntoSubTasks(userPrompt: String): MasterPlan {
+        val prompt = """
+            You are an expert project manager. Deconstruct the following high-level user request into a series of smaller, parallelizable sub-tasks.
+            You MUST respond with ONLY a single, valid JSON object of the format:
+            { "sub_tasks": [ { "description": "...", "responsible_component": "..." } ] }
+
+            User Request: "$userPrompt"
+        """.trimIndent()
+        val responseJson = ai.executeStrategicPrompt(prompt)
+        return jsonParser.decodeFromString<MasterPlan>(responseJson)
+    }
+
+    private fun cleanup(integrationBranch: String?, featureBranches: List<String>, mainBranch: String) {
+        logger.log("Cleaning up temporary branches...")
+        adapter.execute(AbstractCommand.SwitchToBranch(mainBranch))
+        featureBranches.forEach { adapter.execute(AbstractCommand.DeleteBranch(it)) }
+        integrationBranch?.let { adapter.execute(AbstractCommand.DeleteBranch(it)) }
+        adapter.execute(AbstractCommand.DeleteFile(SESSION_FILE))
+        adapter.execute(AbstractCommand.DeleteFile(JOURNAL_FILE))
+        logger.log("Cleanup complete.")
+    }
+
+    private fun logJournal(action: String, data: Map<String, Any>) {
+        val entry = "{\"timestamp\": ${System.currentTimeMillis()}, \"action\": \"$action\", \"data\": $data}\n"
+        adapter.execute(AbstractCommand.AppendToFile(JOURNAL_FILE, entry))
+    }
+
+    private fun saveSessionState(state: SessionState) {
+        val json = Json.encodeToString(SessionState.serializer(), state)
+        adapter.execute(AbstractCommand.WriteFile(SESSION_FILE, json))
+    }
+
+    private fun loadSessionState(): SessionState? {
+        val result = adapter.execute(AbstractCommand.ReadFile(SESSION_FILE))
+        return if (result.isSuccess && result.data is String && (result.data as String).isNotBlank()) {
+            try { Json.decodeFromString(SessionState.serializer(), result.data) }
+            catch (e: Exception) { null }
+        } else null
+    }
+
+    private fun generatePlanWithAI(userPrompt: String, vararg context: String): String {
+        logger.log("Orchestrator: Generating workflow plan with AI...")
+        val systemPrompt = """
+            You are an expert software development orchestrator. You will be given a user's request and rich context, including the full content of relevant files.
+            Your task is to create a precise, step-by-step workflow plan to accomplish the request.
+            Your plan must be in a single, valid JSON object.
+
+            IMPORTANT:
+            - When modifying a file, your `WRITE_FILE` command should contain the *entire* new content of the file, not just the changed lines.
+            - If the provided context is insufficient, your ONLY step should be a `REQUEST_CLARIFICATION` command.
+            - Otherwise, the final step should ALWAYS be a `STAGE_FILES` command.
+
+            CONTEXT PROVIDED:
+            ${context.joinToString("\n---\n")}
+
+            Based on the user's request and all the provided file content and context, create the JSON workflow plan.
+            User Request: "$userPrompt"
+        """.trimIndent()
+        return ai.executeStrategicPrompt(systemPrompt)
+    }
+
+    private fun convertPlanToWorkflow(plan: WorkflowPlan): List<AbstractCommand> {
+        return plan.steps.mapNotNull { step ->
+            when (step.command_type) {
+                "WRITE_FILE" -> AbstractCommand.WriteFile(step.parameters["path"]!!, step.parameters["content"]!!)
+                "RUN_SHELL" -> AbstractCommand.RunShellCommand(step.parameters["command"]!!, step.parameters["workingDir"] ?: ".")
+                "RUN_TESTS" -> AbstractCommand.RunTests(step.parameters["module"], step.parameters["testName"])
+                "DISPLAY_MESSAGE" -> AbstractCommand.DisplayMessage(step.parameters["message"]!!)
+                "STAGE_FILES" -> AbstractCommand.StageFiles(step.parameters["paths"]?.split(",")?.map { it.trim() } ?: emptyList())
+                "REQUEST_CLARIFICATION" -> AbstractCommand.RequestClarification(step.parameters["question"]!!)
+                else -> null
+            }
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\gradle\wrapper\gradle-wrapper.jar
+====================================================================
+PK    !              	 META-INF/LICENSEUT     İZ[sÛ6~Ï¯ÀhfgìFI»íî¶}Rc§U7•3’½™>B$(aC,@ZÖşú=Ü(ÉNöu=™Ö¢‰ƒƒsùÎwôJ|égÑËr¯Ä]ªÎ©W/¼ù/e6øvş¶¿Én”ö(¾}ûö»gí‡¡ÿñÍ›Ãá0—´ÍÜØİ›†·ro^áÂûÛõï±Xİˆww«›åıònµïïÖâas[ˆõíÇõİÍÃ;|\Ğ[7ËÍızùó>!ßÌÅªu§PÎÍ_ymfşD3áö²iD«d'8é lë„ì*Qš®âU¢6VŒNÂªŞšj,ñqáEá»•vƒÕÛŸéD…[ªJlb£JòÈ·fÜíÅÂÔğAÃ{¦[Õ§z{¦Xiú£Õ»ı Ì¡SV€J°PG!Çao¬şíçå\Z1ìå `Ó•°°ÛÑKŞ™j'qK¢Ï”;< i¯„,IJĞÌ ïz1^ğ
+jåxk0è`MSiUøĞÒŸ]ËJÓ¶¦ó’ü‹â ‡=Ëáçâ½±¤G?ÚŞ@Ä$«F‡Í¼”Å‰+}ÍKÍAÙÜgÁK¨„îø÷BF”œïy)ü'²€­ìäN¡óp_7–{¯X!{EÇïÓ¾’dç–9hŒ&r¥ArÛë%ÕºköÊ–(úêû·¹¦í˜‡ƒÀêèp“U.H‘[ÕJ®œHÏôL.ÿÃŒ3qkñ7;»Î½ÿĞ&ºQ–y|xê	´Õ½[í<Å'¹å,Ô6°[	)éÕFZoU­¬…åô×š,ş·hM¥áh’²*8Xwe3’) 	EgÑèVãîàGgêá€áåhCpJÖ¹G‚¼~¡ù_ëİhéïà–Feğq·ı7„Â¹ê²;ò3pÇØP~ÔÖ´ğÇr/;Ğ:$DEçğMŠ4şc-¤`ó¸bz@/ãä˜6½Æ„2¤œ?æ"Î 'ÎÑNúÈèíPçn«*-Åpìóc2öó(à!iL8„‘–R@wá1ØtşX­¬ H¥nä¶	ùŸáRhŠXJJ2âB@70¼á-/k2«¬-d¡ ­qPO²íagXĞaÎñÍEß+Øù	’©1‡ëd…eõ#XñQ	4ˆ›F îqÙşô^Û (¾•×Q*V¸F?DcnEîÂ\8ìu¹ÏÀ œ5@€Ì´êQ“+1ŠÁ4>O„>ïæ<›¼0¬rÊA¤õ%lfJ
+X¦wºƒ]Î}~Ç§êIúâÔ|ŞzÍŞw$ŞW«Z©c~ª^ZŠ´£UV5GÈƒî3nÑ‚qÒÉV]§k "[Ë’ŠD‘ÕÈhÔ3¥Ğ:ÊÔÉëïÊ}¿èñÓˆ)›íè.ÔÒ¨
+›ø„b¸òL$H2lZNù"KŠQßÀÖM€m7n;<xŞAÑEš“z>h#Âñ3Z¼LåîÅj‘DeÚã}«À˜5˜âyòòuÕ^Ìâ™f^×ûË°H5€Ö è…­l(×uD>ÆÎ[_`äFWÉPh§Á¥d!û»âÅR±+ßş% uƒ‹ ” -+Y‘
+¹£Tër‡š;*,!%ÕHÿ»+³•Èµr£ŒL¢ ³6Ú8n9:ªò´cKxéiä'B¼TšÔS0Âô¬!á(®×åhFÉÛJû¡Ï&v(—rz×öC(¢È°#Áj¶{K‘çê|vÂ'ü:;dà)On@ÄÇödS±e¶
+â	(£"$¥ó}R:õçñÓà¶¥{s¹FÂ›¥Ñ·sñÒ*Üö]<~`Vb3rqõ±z±™ÉÒ,GeURd! 3±8â@á”Àğz5€eBøô5ÕA#×èL÷š<ïàÄøñ5°»ÃÆÉe3_×VÁ'ÄîÑ”ägÕÜ÷¸aè¶`äXq|†t	ÎûqkÁŠ¨}#!ĞãĞ™K­£'Xä}[Nó#Y>ÛñB9'laı5sĞG‰ ûà+X¦úZ!P$PĞqCt-z>kæ= ë l/±¼ õÑ¦®‘çAPÀ/ÿÅØqÀeÏ
+	fÂÉĞì£°«ìûÛMÓÓÉÊˆ]^µ²‘ìÍïf‡+’Üº7;È^ç¤Õ”µô	Ò¡öå‰å®¡6òàIdõ´ìtA8w¸¾Ú‚úLò¦Êù-èŠPëæbY£ÿc/ä ©0¦£S½cäNâŸ	ä|ã~•
+VäÖÖ8÷š†Ç(Íˆü‰?ƒç¥häÁzÀ£6jÇE ,”Oœà_8ª	¬¸ó­v’S&çÃ±‚?Zbª †©Ø4e
+Í¨Ï”Ğh¤ó%/°*®˜¢è½+ÒÂVÁÃ|Ñº ûÄŠ¡à»¹X«|24§­[yLÈvŠB€ƒ:p›	½ÀòÈ%Ha³@âüßÄŠ<m›¹„?ƒdEj…È )´Z¥ØËµi 'âú°ëÇPg¯ä5Ÿt„HÛ¡¾¨÷àVGDĞÊ©oìñçì ’êÃi'ñ•Ñ°ç6Û“7‰Jc…ı;u,†´ºÃ8áîÑeÛ#ÄÅF™ØºïÈŠåLw.³­ ÁŠÀ›³ºĞèôpÙÆqÃfXª…îa±RÈ›ŠŒLPˆ)İüÙxqAŸSHÅŸÄÜ=ƒR®2Dh¡Êà1ÑœœqvH…‹Or^ª§F«®´¢ÿ}ã‡®­îî—ïng|OÙÓÎï”;Û'Ï®.dÊ™eÉ_™¨ĞzJğ¡¬¨ÇLA§.šAIâœ7ãABG(¾Æ®™˜Ë¾hW
+6Ñ(é°Ê§ô~IÊV F°éAMtL¶NšD•{Q‡Ÿr0ŸY×Ó”ĞuÂ,™»TÏå[œ[Y®—M¹|opÁJõI¦€mõyŒ¾ép>3%¡	½ßs†øunæÌßD¸•C>è!RóŠeªÏ-B¬ãd6Ë†¬*üİb¿“Gd&%¨î-ô5™P°õ8"?õS8Ş¨*ÕUchë$b°pÿÜyŠidà0Ä 3\L&šVAÏÄ<À§ñÇ†yîŞâ¢‰RWA´•†õL N_™+Pˆ?G®2ä4²Ö	Ë½ÀàÓhïÂ•‹ÉîŠL}A›"¥MMÍâñ™V$ŸÎÅT"y¸u6ÍK
+œİVMªpdİ8K&*q4ËÄNå¤˜8ä{jvüM ÷ª‰º¹xè Š:ršz‚Jí/IÌ.Hâ|ãxÊ"³aV6Æzvt•˜>îx:Èaª·Í§ÏÿKkæi©™‹`êZ…ÛG^¿2.Š·7T_¶†›2LÛµwXFH57B9pªR|„i¹ÄoÄì‚¤`ÅØí §£À?ú¡L=©2ƒxŞh«vÒò½ÒiïáïşPˆCXÌxte9¦ÜÙŞ_¨1}	×²Å¹Yd48õRögúş#èäc˜_A4‘’ÚT«şµ¿=Â‚îÀ'XÒÉ¥PøM‹×Ó¨XxG	ô®ˆMNjÏæ³!›‚ß|5¸PØRŸ‹í¨uÂKÛZ|ş	v9Æ$ˆªnÜÀRç-V‚ò"5/i
+V$‡ùÜwIÕ+Ô‡§-jş6/'Î½Æ¹@şl±ËÍLü¼Ø,7Á¸Ÿ–÷¿Ş=Ü‹O‹õz±º_ŞnÄİ:¿–¿{/«?Ä?—« ;šo€Ÿp:êÒI4áJ•ISÑœTœ:B“K¦¢†ÈC,ó~yÿá¶ «¯^/Wï×ËÕ/·¿ß®îñûíúİ¯ åâçå‡åıBï—÷«Û}`áe|\¬ÁakññaıñnsËÕ–o¼Y ı{ØTÓ­İÌpW8ğœ5½ÕHÏéÀ5D¾Bñ—7›—ò´Ñ9àDxÜ ×Ú²;SêØ&3¨û{VšÆæ­çÍ,ÇŞ?æğ9˜}Ğr«º<_bå@ºô`ğ¨¡a'èv6j	7Y@C>2èÔ®ÑÀ¾Ju]ÄÛîb2Ê“Ÿ/Æûœé7zK„”Ûá<"Ş[„-ü‚£ÛñËùÁè9)8”	.k4mì'äZÙÊİt†«ÃWÒ—\¯ğn=»}†„bËW	H`x¦‹r^h@hœ¹Ş8®¶|gU<Öj¼5>mtÉšcÄ˜‘ŸèÎ;3ÃÕ|bpõâxĞ
+İØ1ÕA7ùìğ3eÓ÷§„È	FT¼–º-W#ÙÔc—ÈÁßÁ[ ŞÜ¼±r8‡HĞOq^F¦ËêQÓ%ií¿¾à¾ÜàÅsü0‹kZ! /î¼H…:KŠO{¤îÓt=½,|ñº-°ĞroOAiÒ9¹l§™+ğ¶Z Ô‘†²+¢ç1¨G¿#Åj;üjIˆ±Y› »0ÛÆO¡ˆ·¼AØAæËW-pÌß_é€ ±ÁøÕ°âV2Œì™	Nç£o´tMv9·¿¡!®Œ@š`”ô%¦“nQ¢§IQ~&Œ=“®Ÿ1á9ßÉ6u´M¥jhWx0ãêÂè\Ú–(ëhÅ”Î£µé¶ÌO“¡+Çf•‡¨ÅùÜx{ôd#èˆH6dşEcF£.À·«¬«—¾÷ê¿PK°·£é  ¾'  PK    !              	 META-INF/MANIFEST.MFUT     óMÌËLK-.ÑK-*ÎÌÏ³R0Ô3àåòÌ-ÈIÍMÍ+I,
+ê†d–ä¤Z)¸%¦ä¤*„%¤ñr¸Dèúd&§æ§êz¦ •g¦e¦Y)8$&g¤êŒâå PKÿû±âb   d   PK    !             1 	 org/gradle/cli/CommandLineArgumentException.classUT     MOÍJ1ØÚÖZ/‚9©íviÅ²T¤è©§¼§Ùi›d—d·bÄ·ğ$xğ|(qïgş>¿Ş? `^¶ÛYòÄB®Ñ¥|Ìå’÷¸Ìl®(tæ"›¥H¼Gƒ" ‰+"¹B¹¥|¼&`ç*²"t5c1äğ‚¼>ùí_–ÆV"D§´CôÚ)b7èí">éŸ÷“(ÅncĞg¥—x§2èf^ÅÊ‹Ô`,'™µÂ¥SštãUiÑ·óêî&Ô?ˆˆp*•®Ğÿé+ítqÍàèdúgÕY—§÷hÁ^šĞfPŸĞ0€]‚U0JR©vÂ%@ã¬ûû¯?Õ¨}PKÂß"  p  PK    !             & 	 org/gradle/cli/CommandLineOption.classUT     eR[OQş–¶+P ^q½µ¥e-V0¾/$UŒ%Œ/§»‡í½4»[¢1ò?ôøªF$hb|öwø;ÔÙ…Ú^Îœ™óÍ÷Í™™_¾ı 0‹%†÷{{Ï+o´:7v„kj‹š±¥5ÃsšÒæ¡ôÜ’ã™‚â¾°=6xP2ÂØ	ZN -nq;E­i•Ş,Éˆ£¾°P6fç	ëWÚù[-Û¦@Ğà¥2¹Âµ¤+„/]‹¢»ÂH‹â•™¹™JÉ»ÚÛ0†TÍkù†x(mÁ0åù–nùÜ´…nØR_ö‡»f•˜V›Q±
+ÃÛ|—ë6w-}µ¾-ŒPA?ƒâÅˆ€a´Z¡´õÇ<hÔDHP¹oµá†k¯›$•©vX–mI›"0|ó0Œt!jaô‚$-ßk57dØ`è¿']Ş'Á\—bUáR~¡7—_W1„L
+
+FHñTU
+ÆRÈbDÅ ’Iôá,Ã`Gtİ“¦‚I†ÄÚæ³*Î#Ä9\P‘Šn}¸¤bğ(qŠÊí$®„Âçu[(Ğdä…Ï0Ëwºr_Rq×Ó¸Šm–ï
+rÔ]ZŠ§âUë…Š¦ÓÈ£HÅ¹qx¬Íİ5bán˜ÚQ7Ì7M†lîtn¤róQƒhM,®¶œ=ñÎˆË´Š(S?Zÿ2Q_éÆ¢†ÅVÅ²™¨md{(2„a:É«¡½dM6_`ô;²›ßÇÄg\ÜÇåÿş•CÜd¨N¢Äğ“º•~bîÉL¿âÎÆ‡¿¿?±Tw2dÙ¾Á>ÆÏ,VìAï?PKld®Mn  ³  PK    !             3 	 org/gradle/cli/CommandLineParser$AfterOptions.classUT     •SíNA=C¥ÛÒ‚ø-® ıZ0’
+ÆILH0¢øc¦»Óeaw¶™İ¢ÄÈƒøşĞ%ÑÄğ¡ŒwÛš4î&sgæsï™;w~ÿùñÀ
+Ÿ^V>5níiK†U7J†ø×ã‘HÓlAûJx‚‡‚œ»<4­]aí‡M?4–êÜEÉh8¦Ï¦Ç¨-.Î[«*§üzÓóh#Üåæ<-…t\)„r¥C»B…”‹ö+sç*¦-ŒC`úfĞT–xîz‚Á”Sv·=Q¶<·¼ø>—v•"½à*jz¥	µÑˆ…‡úJ=)m³ñHhdHYg£z!@nŸ³Ì0øÄ•nô”a&×ßbèÏ­å·ÒĞ‘Ö¡a8!$“@–aÄç‡5ArTÔ>Ãx®ºÇxÙãÒ)oFqÍ–ó;Ãü·Ó×…yQâå’´+ñqOÖk¹/ƒwòYÃ8ƒè¦­g­zK=/²]ÒI¸F÷Èõ@ÖæY·ş_x†©^‚5ÜbÈˆ÷‘â+ÊiúBF!İ_;u3r½òŠRü°ê†Ñrwp7‰Û˜bëĞ`0$¸m_h€Ú°"j€4¦1£ã>PC­Ò+cÈÆ"Ö›~M¨W¼æ	ÌSSiôÖFã£Y?Íu¤hÌÑj	ô‘M¶'È¿aä+âo”ş+P†lêK|îøÆpµã›¥	²ÙŸ˜Ø.c¤ø¶p‚ë_Z9ó4’MµòßÀÍ©ĞÉš)lã÷Šß1ûæŒ£“w€æI²¬¾‰¿PKk¬™[  ¶  PK    !             < 	 org/gradle/cli/CommandLineParser$BeforeFirstSubCommand.classUT     µUkOÓ`~^@
+µ(ñ~l+Ğ9˜7À[" qJ2L4ïº—­ÒËÒv 1ú3Lô³?@#ñòÍÄe<]gAÊ×¬í{ŞçœóœË{úãç§/ FqƒáÕóçw²OÕ"×—„]R'T}QM©ºcU“û†ck–S$w…)¸'h³Â=M¯}É«Y:±ÈMO¤ÔjY³xU3ÅLfD=KX7û[±fš$ğ*\¡¥°Ë†-„kØe’.×#_$Ïgµ’XVŸµ1Èy§æêâša
+†Œã–Óe——L‘ÖM#=íX·K3dé6w=áöO‰EÇ%´ëùùZ±±/¡…á\¤î­jïä
+w’¼Ï}!¡•¡Õ¯^ÿiu&ÊLĞçÛğ/2\Œ†ÿ¨‹Këp¹¡ymhoÇ.(
+dì–!aC‡cC×y3,Î<âË<mr»œÎûAjs›%C‘”‰X—ŠIÛ¡VèEB7C|g|æƒ˜öÉèA/C,Ê„{º/oêIh„¡'4\ó3}ƒ{•Y^Í)8„Ãí8ˆ#]›¶%ch.Ÿa`=Ñ[ÅGB÷)M›D
+N &ã8ú¶åæAÂIbÅMÓY¹g/ÙÎŠÊ=¶ àfq†ñÈÄnĞßĞ™C»õ?ø-Úss7)H"ÕN¤1ˆ­*i!ºÖ·NXß´Œèü$ÿ­;é–k–°ı«uÑHá(Cçßep†¡¯‘“X#zÍ$±°+bñS^|¸™Ê¿û2KÇ“F„Å©îã[„ûVh L 'cçz·°}QÆ.ídôÜüG'^GÏGo»ò„¸ÿTâiS¸ÂĞ2MŸÎh «YEáŞåES`„æ—DŸÖÙŒ3zkÆİ¯Ñê šé”D!ùÉÔ*ö¾EğëB'ıCÔ´¢…kè)Ì¨ıïĞñGS ~Caö;ÆuÑàKt¯!Q Õpòab#oÖ0VhùŒ³…›ÍZ¾û\â#.¬âò×5LÕQ3Z*I¸«o¸N÷bJ"bÙ„=Ä¯›¼÷Q$qâ1Jñdhw0¬Î½	Í¿ PKHÄ.  ]  PK    !             = 	 org/gradle/cli/CommandLineParser$KnownOptionParserState.classUT     Véweÿ=4eÚtDZÖ²¼A M“F±¶¼h[‘¤å%µ}ƒ¸L3OÓÉLœ™´T÷}ßÅİWwÑ·‹Êqùä¿zôĞãà9ã'ñ>3IH°Ô/™™ûÜ{Ÿßıİ-ßÿùå× 6ãÿ/=º¯íöĞ š>ÄM-ÔJ…"¡´•Íé†êê–ÍZ'¹Í®:œ‡U'šæéCN>ë„Ú‡TÃá‘P.Íª¹¨.|nÛ¶)½ù2ÒµÛŠöCyÃ 3¬F7Ñ'73ºÉ¹­›’pÛ¡»HŞÖº¥µ-ªñ‘Ğ‘0†`ÒÊÛi~np†Ë-;ËØªfğXÚĞcİV6«šZœ<íUm‡Û—ì1­Q³7'€û’¤«º\B€aó¬Æìæ3È–'Nº+C,~~|ƒ†ù¾†Ğß˜ú6¤]—V0ñ®ĞJÉ¤Ú`Zg‡Vœ@6¢yî0,‰TGÔXŞÕX§m«cqİq…ÂvİÔİÇ›æöì¡ÎÙÜÂiîg4ínî—Ñ€ÅAHXÂ°¨B\–1T5ùŠA,Ç
+Q_‹j¬’QƒZñö/AÔ‰7E†Œ‹Ä[HÆ\,Ş.¡Ê´ÌN;“ÏrÓeèjò4T3+PĞ<×t(³q&¡‰êQ-ÜÚ7–£¤×—\Üm¨Ó!#Œ–Z4#Â°`æ°ßÒ5	­DR_jïN—
+¥61,<º„-”{ƒzÔö¨Ú-ã2lb+.§oUÓ¨dJ#î<ÈÓnGó~W ]PÚáDä.jóÒ¦9Ò!ãßØ$ª¯dh9¿e1;§y£Î³"ò¡IèfØŞi*<›sÇ”"…Ê¨ê(9ÛÑ5®)C–­º/joÅo\eãzgckv'¤’U)ßWTÈ÷)×’±×
+&wŸÃa±j¼²ÜDâ[ºÏƒGÑ,î(¦å*®zˆ+ª9!í¡Ä‹NTm·‡v‰#IwvŠØ½|Rşƒ}"OI†m³æ%¡;aó‹¼†ãõ4‘/x.œİª"Æ úñ_‚šáîµª3ÓLñëdHÕİaEãNÚÖ=i»'®ÁËÎ¥¹+¯·%ÜÄMXAc·Ä¡¡RŞn*ºjÊ@Íåh[2D+¶ıy.#¸¸oˆ¡ÆµŠeqSÅ2†.tÒ-s½1ºkfùP)³rûD:]cET‹JVeg8¡æ”§·‚’T_v,a„Š‹’É°¡Òp(É8Œ± Fq™Ì†³8ï ŠÉÙÜ¡âğEN9Ø$ÎâNö.*şBx2î²fÜËpÑŒ	©K¸_äUÓ:ƒ¡±©Äa·e„Vì,Ñ8â¡:<€‡i:úm\Æ£b2.Çcµ8‚UÅ‘ëYúÛæI†‰¼áê4
+§ëÚQF¹Í/xö<M£»ÜV]ËfXZ¬ï–İ9Eü,P§
+.?—ğ"1AÿŞÄLqûêğ^¦8Lœ[‡Ó)z¯	½×j3¶•ÏP›ÉxÓçñ­²Bğ¸|;ˆãEUƒ·”(Egy/nª8ÄÕx—¸·yÖ!:ßä8> &}‘Ö[LŞG~B?ç´`İô×’jWTGO>;Èí>uĞàØD[C¢?¸Õ¨ÛœŞêÅ.÷´É½'íqïI{ßÓ$Æ°ˆ~?õşK$6„STMaéi,Oí™ÂÊğV·L`Mdk£X×˜Àza!<mÀÆ‚ıQ²GÏıáq¬Gô3l~[[&ÑvõáÔ89™ÄöI\uê4ºR¤µfOà+\ŠW…“×´|ë¦ø¦ÂYoñŒ¼3|F¿ĞqA7J¨¢¸„e/v°$HÆè¹¾ËRúX=‰¾cO£?BêTXÀ™v»”B%r»€\¬¢¯µ¡û±¯à:FgÂõ¢R×Rà$UN;
+’RÑQ½Xé¾1û$óé™,5î›Æu]˜¢7HT‹Ø{U7'¤|7¥ÚS¸yéT{õw¨k4VO"3Ğ’ŠDS+“8”,ğNİëâd>+AÖ=-ãÈG&qû·8’J„éëîè8îûÌÃ€wûãÛÇñ=VŞ8Ö¼†§N`şI¬©“gŠ9ñÁ¿où¯0j¯Æ½½Áğ-¶öË¨ÈùÉ3¿øÿ7‰w¦5ãá¢f3a\×!İ÷Í}¤”ˆøJg~ŒFŠîÚ[Äùá±3?üOÄû)rş9_?“E+ËŠC4G;Q¿‹$ıÔÃÔ ¥éVj<µÇ½Ô æcÔ ÏR{¼@i{›ÊìµÇÇXŒ_±¿Q}üeøËÙ
+4²Õ´A{½»ªèÖy¨úPKï€îœÜ  b  PK    !             < 	 org/gradle/cli/CommandLineParser$MissingOptionArgState.classUT     SmOÓP~.
+[‘NÄ7´‚v/İÜÔ¹€Ñ(ÑÄd‚ƒ‘owİ]©´·KÛ-1F~ˆ¿ÁšèLüàğGOKgĞ,Ah“{î=}çœsîÏ_ß ¨Á`ø°¿ÿ¢ñNkqsOÈ¶¶ª™­¤™ÛµÚ4\¯-ÈïGğ@ĞÇ]æ®0÷‚h«î¢¤u-Ãå]Ã4ZõzÕ¬İ!¬ßò;=Ç!G°Ë*…´l)„oK‹¼}á‹üò­rÃh‹¾ö~
+Œ!½åõ|S<±ÁP÷|«bù¼íˆŠéØ•uÏu¹l7Ié9÷á/?³ƒ€$7»Qê}k+ä¡P0ÎP:’{`Æ$Ã¤«0ÜnÉ=xHaø÷li‡÷îê'Èo3ŒëOóÛ*ÒPÓP0£b
+ÓÓ˜À,CÖåo[‚ ~¸™ä™Ó›oxŸW.­ÊVÕv-¿Ã è‚¼Q.Ná4ñş…(ÈÄå!õ4P±€ù4ÎâÃŒ'ÿ’ß!?"àÉŠU;>KÁEšO´ëˆæã¦şÑÇUqKi\Âçq!*²Æñä†'‡¿ıhTU&N“¦±ç
+ª¸•(æjFœıùX¶RzÜøuº5³‘{£ç¶„ÿ’·*5_¡»Ë0Íí&hŸF†Ö"ÂÙLáuêN¿"ûÑ3Gï|Z"HRŠógXüë•h$Ëbm*F^$ÅÙ™Âd¸Z,píS¢¹Œ•–K4§#Xq }É£ği'Rzu‹åÇúPKÄ€Á;M  —  PK    !             = 	 org/gradle/cli/CommandLineParser$OptionAwareParserState.classUT     …TkOÓP~”q7Q¡‚nle\ÆEÈ$hHp,@$ø…œu‡Rh;rÚ!ÄÈñ7øA—D€?Êøvå–¬MN{÷yŸ÷rŞö÷Ÿ¿ ŒaáóÉÉZú£šçú¾p
+êŒªï¨IU/Ú¦Å=³èhv± —ÂÜdÜå®¦ï
+}ß-Ù®:³Ã-W$ÕC³ùfúùÉÉQ}l‚¸2}å¿S²,Ü]®ÒV8†é!MÇ ôPH—bNkq¨~ªc¯KR¯MK0L¥‘2$/X"¥[fj±hÛÜ)¬RKWÈÕ?çÌ./‘u{BA!YÕù†GCƒşŸÂ ®Ü(Ó×dfê¼]Ó¹‡}'œÏ3Ó›gx«N¯>ş.‚0B¨EC0¶ì´„¡ A=B¾©¡ÅæÇyA…J¯Ò0†ØÊ?ä)‹;FjİóÏe6şA‰-¸qm8Qäw›¢ ›(6÷hÜ¢3ŒôRëŠN¶è\‰¿ºO¼jÅ×ÏƒšÕW­~}MâÈ“<#’-Ï¥Â*¡Ki¥2RòãÓõf#Pñ4„~0´İCPğŒ!À…[YÍï	İ£ÎDC<Œçº›ÙJ$)Ìjncy5»Í¼]ÚÎe66–Ö²İ×Ò“ÂGT—ç	éPŠÃH… aäFã+(c¨7„·hq—ªl‹Å¯eYIà&ÂÇ$ƒVµÙ™ŠZ90WAšağÎLŞ?qÌ„1:¡à"}êÍ¾)[²óBnğ¼%‚ı4u
+ıpjõ‡h‰úsJH Œüi}I»^	!óĞÖVâÍ´&ÏĞşşE:/™OH«†J¢µë¾Ğ+Ã<­uôôï(©BÎ‘¨OÚ:Eû)çHl¢ù;F7Ï1µùÓ[CdºÀÜ×J=¤UKï!òm$…vJ®‹¾rŒ@¹œÀ_PK¥#Ø  J  PK    !             8 	 org/gradle/cli/CommandLineParser$OptionParserState.classUT     •PÁN1“Ğ –Nºê!A,[REP!¢R¨©8póz'ƒ×»²½Q%T>¤Á	©‡~ …‡ zCøàçyoæyfîîÿş€¬0øs}ı£{Ä\\¢N‚í@‚õ@äY!w2×a–'H¼A…Ü"‰CnC1DqiËÌÛ®,®Ef¼¥÷ˆ·¶6Eç+åšîSı TŠ;äá&…¨S©Ô)±#4–ş"¾»ñe£&8
+~Ï cĞèç¥x(2èä&RÃ…‘P2:È³Œë¤GN§ÜX4ŸN
+ßócĞwÜaª/øˆGŠë4:‰/P¸:ÔÔ¾I-İ.ƒJ«}63ğ¦uh0¨¶¾·Ï0íßÍ\“qÇøËí™”ÁçV»÷bÿ5°C3äšJËµc°ßê=wÓw~;¯vl¦è¸}v¥ÎÇQe¡ĞÑ²ª´xŞä¸Ìb4?y¬°ú‘«ƒ?5`~jº?Pô–N¯İÂì×½<7‘W	§&ò¼—,O<èMKnÂŒ—MNßÁÒß{²*tOAåPK"83|¢  }  PK    !             3 	 org/gradle/cli/CommandLineParser$OptionString.classUT     uR]OA=Ck[êji« ¢+J[º4ÅH0>HâS^Ètwº]˜ıÈì¶/Fş‡ş_5’hâğGï¶%~´f’Ù;gî9sïÙûãç×ï Öa0|<;Ûo¼Ó[Ü<¥oêf[¯ê¦ïä‘ã{†ë[‚p%¤à¡ Ë³#ÌÓ°ë†úf›ËPTõÀ6\N¬ÑÚØ¨›ëÏ(W5®øí®”„nÔé(<Ûñ„PgÚ*¤·o¬=]k–èéï3`Ù¿«LñÊ‘‚Áğ•]³·¤¨™Ò©mû®Ë=k‡”ö¸
+…ZŞâš¢X7$ÃÌ	ïñšä]Ûm3J#ÅàÊf(ìü¾R¶Rş@‚‚ççD/VJãyãHùdKåC×q#‹4njÈ`z×0£!;Œ
+™È2æJåILF·ş*ıª¡ÛdHq…o¨Ã0?¡´ò‘†,fqwŠÿŞ¿ì:Ò*ûÿ¡:xÅ’	<h.ÈúI©cĞH|KÃ#,Ç5Ìa>VõUfHnÓD0äâßöºë¶„zÃ[R N¥i.§£(û6@Õ¤Ñ¾J§E$h¹J³y‰ÜêòÕÌ~zo”¸‡$E@£r|¡ØÇ½Xø†¥få¸P¼„~Ù>ôQú„â®ü	&.C•ö}‡+1('ñPK\·w  C  PK    !             2 	 org/gradle/cli/CommandLineParser$ParserState.classUT     …QÁN1'!K))zê¡+I•e(ÄD¥J ‚8póz'ƒ×¼›H•á/8!õÀô£*Æ!P"Å’ıfæßØ3ÿıy€øÂàîöö´uãG\\¡ım_tı¦/LÚ—ŠçÒè 51RÜ¢B!‘=¢‡â*¤™¿İå*Ã¦ßO‚”÷é4¢­­u±±I¹¶õr¿;PŠYëä¢N¤F´R'¢Í¨Å[k?ÖZAŒCÿ÷,0•X?¥BMc“0±<V
+%Ã“¦\ÇmR:á6C»úœçèA‰Aí’y¨¸NÂãèEîA™AyWj™ï1(Öçó0*àA…A©ş«q^g×R~!IÙü¸ï:Á`¹Şş¯×ÉİãwªF¿Ë»˜7áf{êwß|j‡ÁœÑGF¿”ÚŸô¤éÂï%kF¿I9Ô1uâ€ÆÆ`Ái„öŒG
+Kß¨9¸Uæ:Gç2yŸáÌ÷˜»w|ÍÑócú+aaLWÍ`e¬A6ê#,Àh`¤äp>²–^+TG>í‘:™E:P|PKú™˜
+­  Î  PK    !             ? 	 org/gradle/cli/CommandLineParser$UnknownOptionParserState.classUT     •SíNQ=—¶Ê
+–oWÔ¶t»€+$10¢ˆ‰¹İ½,ûÑÜİ¢ÆÈƒøşĞ¤`âÀ‡2Î-E$iø³3wfÎ™3s÷şúıã'€yÌ2|>8xQş¨W¹µ'[_Ô­m½¨[¡_s=»a`ø¡-(.…'x$(¹Ã#ÃÚÖ^T÷#}q›{‘(ê5ÇğyÍpGuaaÎš¿Kµ²|‚ß®{¢nÌÑQ!İÀ¡è¾õ¢x¹t§T6l±¯êcÈ¬‡ui‰Ç®'î‡Ò1ÉmO˜–çš+¡ïóÀ®Ós.#!§_{Aø.X«)éÇ±õ˜Ç"$Ã|Gø¸n†T¤\†R¥#At‰!Á¥Ã0XÙåûÜôxà˜ë±š˜R}Ö?,ƒ~š¹Éc·ñ¤û¸ñC‘ûŸ±3ÁùÄç7’¹§ùı¸˜AYôõ"…!.(oDCz•7ÆĞïˆø	–¥S÷EÓø¹ü…Ã€(e¼*ŞÇËj³¹üy™	*©y"&1‘¡W›áİ±•s7šê´Æ4t‰F‘ü¤uÄ0rÜº»¹,%ÿPq£xIÃ4nöân1QFNı#¶Míâ×ª»ÂŠ—ò[
+˜É "]Æ
+½#†%bµîW…|É«À­"M¯9¬ºò²êš–n‰l
+¤ô-ÑiŠÎI²Ã…Í7‰ïœ9Äpñ£Æ!Æ¿MÜ%\nU÷“ed»’_Z¹+˜hå²­\ªp„k_[é)\oKwNOşEß#Å
+=VØÜl`ôYƒ5pûíŒ×Œ+ ƒÙ” qhrbj‚J PK_rJ%t  Ç  PK    !             & 	 org/gradle/cli/CommandLineParser.classUT     U][G~Ç7Ä´HTl,ê6Õ!ühŒX) AmDK‡İ!YØìÆİJ­^øôºÏã¥^öÆÛ¶Z õ©íuozÑŸĞÿQ{fÃWùğé^ìÎœyçÌ9ï9óîÿüò@jÏ=šèŸáÚ¼°ôø@\›wÆ5»R5Lî¶•ªØº »#LÁ]A‹eî¦´²ĞæİZÅÌrÓñj)UáÕ”!}Ìôõuk=§	ëô¯íŸ­™&Ü2OuÓTX%ÃÂ1¬Y„ãÒYdïïêíêOéb!ş0Æ.Ø5GWS0¨¶SJ—®›"­™F:kW*ÜÒGÉÓ8w\á(2ìŸã<mr«”ÎÏÌ	ÍS°—á@~|r8Ÿ›ÎeÆ†¦Ç3““C9†Ø¨®y†™vDIÜOsÏ5H;Np—|JÜË†ËgL¡3°[MvÕ·^Z,x2Ânòs•»å1^•¸iÚ÷®[ó–}ÏÊ×÷0ì=gX†w!h¿Aö‡¡ ™¡y›Â8ˆæ"x§ha£Ôëš62Íš¬‚C‹.\Ãzf-ø‚Ç½šëw+‚÷ÑÆ Œ}Òåq†ÖÄí‹_ß®>È˜V­òpj}”š¾“lá†Ã»Ğ¤àC¥Ş.T Tbt#¤:7ƒí»RÁI|Æ	´EB£¦è©“Ëp&1µ“·İ{ Î0ñ¾O³-–;"mªŞƒ’‰º$¹iªi*„îÿ4Nı4½Ô®ÇÏ½ixå-¾ÖB"_§ÑÆ)œ!2*Ü£Ûá0ônÆfËÜ)ˆ»5aibJÆê›ˆ’³”îÀù*HÁùõcÜ.Ê‚^À'ñã†MS”¸™qJµŠ°¼¡ûšğÉQp‰a*Ë-ËöT®ëjlµí¤Û¦rWåÖšE“CË\TW¹T¹Y-sê
+º³šªQ:\£*ºt'Õ¶T›ÿ™në
+á2•pÖv(>†³;Ğ5µC5¶£"¸‚O%¥Ww!İ¿9Ÿ…‘ÅÃÀÿÌHbürª÷¨œ2n
+xŒáx~Ó&ƒ6™àú¢ª‹Yê+@ù·ªO~•ÜkkMäW-ã8|‘.eáî¨á#'»çïo’0Êş:n„1‰›$"‰­«õÜ‹aL€ÄH±×„e«„ôtw	ùÅ6}¡e_’ TGîÙÔ²-‰Í¡¯ÚÉÉ´08Hÿ¢Û×ÌRô[È‰û^e´îC	CĞ"ÃÁDûöœ#˜‡)qR¦j`ı;ÜÓ·÷Êº+Uy•ïÒ‘Yúİ2Êªäj•áLJáF7‰‹B?½ bRk€ı1)€di–ÚJ_†wıy€F¤ÉôvivÌŸÑdqÑW8XYÆ¡äO8üäÂ{ëØãØãcD–p,øøÔh|‰HÖÁOĞÎUğ_P}—;^Ÿ\8Úú¾Jví¾ÄáXp	?ÃµX0Ú³„şgHÿˆ¤4[Bæ)¿	°çoş|…l1ø+”âH ,D‡’+^Æèo[ì¹]ìãö‰bq¬cŸ/cê%¦— F;~ÆÃSIÒˆ´øwœÊQ`©Î%87Ÿ¿ù»ó{Ÿ1ŞaÊú[?ñ³eÿPK¡#Ğû±  c  PK    !             & 	 org/gradle/cli/ParsedCommandLine.classUT     UÛvUşv“vÒéXh P@$DJÛÛÒz ÛZš´H”¨‡ÉÌN:íd&ÎLº`¹dù ¾€¼ ·¸VmÀ,•+/\¾€—¾ˆõß9@b²Ô\ÌşçŸï?íïÛ;¿ıõãÏ ¦a2<yüønò«pNÕö¸¥‡çÃZ>kv±d˜ªgØV¼hëœü7¹êrú¸£ºqm‡k{n¹è†çóªéòX¸TˆÕRÜ9rssSÚô,ad3>_6Mr¸;j|Š^¹U0,ÎÃ*wŸ;.Õ"rrf2×ù~øë ƒœ±ËÆo&gÙN!QpTİä	Í4wTÇåúª],ª–¢|üÇwÕ}5aªV!±™Ûåš'¡á˜]ã¸+2¨Êp"U–=ÃLÜTİ´ZZ`,9Üå–·Y‡wÂ2Ü0‡í}®¿‚ò‡£.;…r‘¢É1Ü·ì8ê£”áŠÈ¾EÃ2¼k§Æ»d¸ÇàŸ¸§à†dH2uô)á¤ŒaĞß^œî@Q2	gdœ(õ¦¥n½EsuiOBHÆEñîm†€áqGõlGt<ÑÒò­†AÁ(.‹JcÁÎï&$RÍmQmºû
+¢ˆ ‚8ƒßª¹O6s·G™xGà¦:Éo¡½N‚„†Ëÿ%‘&vVÆœØ\¹À_s=Ü6`“I\•qómâªëHÂ"ÍT*ÓÉñÎ	:=]Ç¼†ë‚Ğ÷”/Ë¶Ç—-ı¶mXÓ­"YÎ¹¤1Í[µM“â¨ç¶lõ†Hb§ÿé[)¦Î‰‰÷e¬‰©ƒ¯5šr&pSpØp›”ª–Jt)0ÄÇ;«tn¡iRH‹:l,€;¤!ÏnºvÉÜEF„|¤`«2)ÎÁLãÈÎ‡FİX¨ı|Õ}í‡Pøø„ÏÛNQ%F®viüÁ¿Sòª£ûx c	Û”®ŞÃb×}øŠ#Z|$5Rh•tÕÄP…&rá¶ˆù‚j6÷aí¡Æ‚&Fê¥Bc£îXÈ²½ÎóÔ€>@^ˆ»K÷µ‹fG‡AGq•îjLÑîKôÿàÇ¸^ÈHmU+]5İ«8NÏ=zû–¢ziı&Éf·+8QÅp6UÁ©è©â¬°Ï‘}¾Å¾PÅEa‡É¾tˆñTô&¾ÃÓ/q¥Š¹lº‚w±@€xpôG$Ş@,Íû0rÆ;ÄòÖÓ£?¿‡øõ!5:ËR§>ZÓ‘*Ö²ëÜğ/¾À-†t¬Qnê\¬™-õr$¸~ˆÍ-š#ø¡0¢âQ7}‹O~âãgµ2CB¹24¾ŸÖÅàüsl­à-©\ %İ÷¤ìö†/’ñG3½±L0O›‰>ÃçD³”¨‡Ö‰Fµµ—´ë¿¢7ò¬
+õ‹4ë¾h&XˆP|»¿ÔR°Ú=ğıPKlæA¸<  á  PK    !             , 	 org/gradle/cli/ParsedCommandLineOption.classUT     mPÍJÃ@şÖª©µş´êÕC¢bU”REÁ‹…Š‚àq»™¦k7IÙM
+"öA|"(ø >”8-xó2Ì÷³ßÌì÷ÏÇ€¬¼ŒÇ7Í'¿+Õ€ÒÈoùªçïù*K†ÚÈ\gid1oÉtÄb_º@õI\‘8¿Õ“ÆÑ?ŒƒD=Éè7ÔÁ{móï}¯0†	×—Aƒ!¥±N‰¬NcfGdÏb¾¹¸ß"ùÏeÊmVXE—ÚÀVfã0¶22*£ÃkiEY’È4js^g8YÙÃ¬ÀêƒÉĞÈ4;İR¹‡yù‘49öT/rmÂskåc[»ü„§:Õù™@i{ç®Š
++ğPXûÇïa¹‚T«(cas¨	Ì^ğ½h0ğøjmÚ‰I×5F›(qÔwïß±ô‰•û«w¬î¾¡ş
+Lİ%®3(ıPKShRS  ¬  PK    !             3 	 org/gradle/internal/file/PathTraversalChecker.classUT     uS[sÓFş66‘bÌ¥¢¤nŠZH"b©IJ0I¸šĞB=0Ğò²–×²@wwaÈÿ¨@ûÚáÁ00mßû£Ä0á’jFÒîwÎùÎwöœıïõË , É0ÜÚºUâ´yğH¤gÙ	ºÎœdI?Š¹²´–dA¸±àJ±ÇU-è‰à‘$ÊYîòX‰9§ÖŞ¯E9G{ii>X8E¾²ş.¾;ˆcT×æi+Ò0J…Qº.¤¢\„×½E¯^ëˆuç©	ÆPieˆ+Q,j™ıPòN,ü(ÕB¦<ö»dòopİ»-yÎÃãF.NHe†ıù:÷c†şÏí‡"ĞÆªŠwEs'Ä{b¦¹íÖÒ¹¨•ÙO¡ØŞb*F¤Ö’¾Şd(ÍÌŞ¯¢Š=ìÆ^æ›ØOE(Í¥V¿DºÇpp§deá@õ9E=01É0æy&¾d0ƒ,Õ<JÃ¡÷c=.[â·HQ0|C9ÃaÒñ =J±ÔÔ"oö[ş)²zeø†~îv¼@Hé4¥^61KeÊKéhLœü°èM¥Eb Æ°;ú†ÌúBêÍ*|LTàá»wŞÅ~3x,,P-wZVócÛJßãÔ±DŒ:kfB6hÌ¶{ò¾÷=©¢3y]Ë¤z#J;Ù†2±Êàl»^còø¢‰HõÚã@ôóÑ6pÁ›>®¦íHÙi¦mnçƒasô¢ua“³Ü´3i÷iTìü@è¸.0Œw3™pÍpf‡^şÚüxävÖ}	\÷e¢[ÒHŸûŸÑ¸[ÅüPÁyüÈPnĞmbØ×¤Ës}´…¼ÍÛ±(OaäÃLz®ÑîÂÇè¿å°oˆÀµ>áà÷]ë‹bqÓµ¾áÈãbÚµà±êZßà¢k(×µf
+dÊµˆêÈï˜´æ^`şN°b-l»Ü¿^áü½òß0î5KnËºxòÖãê¿…®Ÿè;IzhÊhTÇH_	·PFX`%²¡ôPK×50ª  œ  PK    !             A 	 org/gradle/internal/file/locking/ExclusiveFileAccessManager.classUT     ePÁNÛ@}[LBRH¡|€{c…ª(„„P{*ªÚJô¼ŞLœ%ëu´kG T>¤?Ğ3'ø¨ªc‹ªö0£yïÍ›Ùyúsÿ `¿®¯¿¯ÂDª)ÙQ¸ªq¸ª<›i#Û(ËGÄ¸#CÒ“é#5!5õeæÃı±4¶ÃYeréÊ#ÙÛ¨İ¬uÃıãÒüDF.É¦Ú9mSFçä<Ïb|¸ó~ghş\‚hÏK§è“6$p»4NŠµ-ÈYiâ1S±ÉÕ”­âÊ”^Ïë†c¥ÈûSieJ.@C`õ\Îel$+¿$ç¤Š ‹‹‡ÚêâH`asë¬ƒ%´ÚĞèeò2¡“{úZj*Ì¥ÀÆæçÚDçqMÈÄĞÁÖ‹_À^4UUv°ŠÖ2VĞXû¿¯K³êÊÖ'|*ĞäéÕ{Q-Ãñ-W=Î‚s³‹å›ZĞBİgúİ3½ÒD·‡7¿ÑøqÃ`ƒE]¬3É_¬}şPKÍƒ‡    PK    !             > 	 org/gradle/util/internal/WrapperDistributionUrlConverter.classUT     …Q]OA=#…Å²*ÅïÖ—‚İ®`$5¾`LL04}œNo·³³›ÙÙ¾ù!ş
+J"‰¯&ş(ã,5hâ$“É=sÎ=÷Ì|ÿñå+€¬0|><Üm}z\î[@¤I&·2Õa’öÉá†ñœÜåç¡’8È‹$¶\åÔ²8LxÊ²Goss]l<s\Ó:×
+¥y¸îJÒ±ÔDFêØ¡#2¹órx«ù´Ù
+û4
+>Í‚1T;ia½’ŠZ©‰£Øğ¾¢¨°RER[2š«èƒáYFæ¥Ì­‘½¢|Ï¨íT»Îâ¡Â0¿ÏG<R\ÇÑÛŞ>	ëa†aYLH¤Oê;§™F¥{{ç·¼cË¹Û«H“öv_·ü?kU†™çRKû‚¡Vÿ‡ş½Wª˜ÃU†Ë1Ù{×Ä]ª¯şM÷1…’|ıÜél4KÎà—¼“‘)Şqc},O47ı?Ğé@·ª¨á6Ã´M]÷nõA}ÜÅ½’tŸ¡²í¾·²‚ix(—ËY·ºª‰
+¦Üœ`®Û}óø×ÆXü†ÅÔºk1nãÎGgê’}	S?PKÆUQæÂ  £  PK    !             / 	 org/gradle/wrapper/BootstrapMainStarter$1.classUT     mQËnA¬!5ÆIàºp°#¯W"²Ä$NAHXâ€¸´Çíõ8³³«™±9 ò!|. qàø(DÛ—iuuUuÍÌ÷_¿8Æ]…——/ïÒévãô4Õ“´›êª¬¥h*—•Õ˜÷l™ËpJ!ÓSÖa^†ôtB6p7­‹¬¤:3KÑÉI_?®üÖOæÖ
+¦”õ¥eWÇì+]°²KğAïAoy‘¾o@)4‡ÕÜk~f,+t*_ä…§±åü­§ºfŸ?©ª¢4ÏÉ¸a$Ùßï'XWØÑ‚rK®È_Œf¬c‚M…ƒjª|éé¨\z‹&ACaó‘q&>VXkw^µĞÄ&´d@ZsîµÏÿÖŸÿÙ1ŒËÛœu^+^…Ì,Í<•ÏzGoz3òlÿëJ’`W!))
+5(ì·ÿgÚÂmì7±‡…õ§ò¦ècCÂ)\—¿¼&UÒÊyGº©JêÆÑÜü¬ [Øú5ŞúšÔ¤»»ó‡Wµ‚dğPKê¸ô>    PK    !             A 	 org/gradle/wrapper/Download$DefaultDownloadProgressListener.classUT     SQoÓVşîÒÔ­qKJ(TÕ£,	MC„¬V†”Ö©AE‘&±ûÆqëØáÚN‘¼ğÆÃxaÛã‘ÖRmÒÆ“¶ÿ4í\£› Í–|Î=÷»ç;ç|¾üõó¯ –ğ9Ãw¬Wï™mnm	ß6—M«cÎ›VĞë»ÜÀ/õ[P\
+OğPĞf—‡%«+¬­0î…ær‡{¡˜7ûN©Çû%WåhW*‹ÖÒyÂÊêëóØó(vyi‘–Âw\_éúEB†ÄEñêÂÙ…jÉóşƒŞbi‰k®'jtÊä¶'ÊÛ’÷ûB–¯Û¾pûäUÑá±½^%GŠ0l¸a$|!51d6ù€—=î;åµö¦°"ÃÃ^à8B2Ì4ŞBĞH6k#6ÀárémÀÿ[	¥:Ò—bàqøFP“~ÄÀêTÏE×w£ONäßSPaƒ!•/lGF‡†	#E“tP^Ö€1åaÈÚ¯Øšâp¥Ks6C:¿ºZØ¾ÜBò0Œ¿Óu5'ª¿« õz¡n ‡uœÀ¬Š»¾^®OşkÄÍHÉ«áƒ6à^,Ö:TD¾^hüS3GAÇÇ(2}gÏæi:*âSÙgòûòP3²)îÄÂ·Dm?Á•ÍÛ ’”u”p†Hò+ïA-)ÔY†coë±¹=ñÅ]KôÕ½Ğpaz	7»2ØNR¼å‚
+ª$éÂ–Å1t¸È0™œqƒr}m_:Ò{h…î
+ÃÁ]/ã^[È›*éœFÊ¤0¡$&oB	œhEò’ı@©†ƒô½L«†(L[_?Ã¡Ó;˜b;8œÚÁôÓDâ	UÍ+ğŸ¦x˜}ü=¾)ş„Ã¿£•Ñ3öì£Ü£`
+3[ß¦nïÁÜÃ\F÷nw[•ôT	7Mÿ€r1›&*›ŞÃé],fæ*éç(eÓ»8w‹ÄØõ_PiŸá“ßr³Ÿ`LÁÕ{K‘µ®¿Àh17»‹KO©ÏœBŸ){×»ŠõÄ6é«,Ã*zœfrœü9êw“|ú“i¤şPK4>t*  ä  PK    !             4 	 org/gradle/wrapper/Download$ProxyAuthenticator.classUT     TÛRÓP]‡[KWÄPÓB[Ár"^€aìğàÒCH“z’‚Œ#âøŒ–QfŸtÆrÜáâ´ÅÉC’³÷Ú{­³ÏJ~ışú@?fŞíí-ÅßhëÜØvJÑŒ­W3œlÎ´¸g:v$ë¤Å¥°w%3Üal¹ù¬«lpË½Z.Éò\Äô{¬õıƒ„•ñÓú¼eQÀÍğH-…6m!¤i§)º-¤K\G¢ñHJlkoƒ`Ê²“—†˜1-Áud:––<e‰Øä¹œ±igÇ¶ê^”ÎëİÉ¼—¶gÜsd Um›|›ÇláÅÊr5Mî®ë‰,UR'Ï.CãÜ>ï™VlçFjÆLÛôÆZô²\h•¡R­ªP * ^Eµµ¨F#CGZx‹Üuw™*¢¦m2té¡¹¿ºş"æ&ê°$^å…K‚ŸïæhzqaÉ†ºK£*. Õ×t‘¡û<´3T/.-¼H2Ü>/I.×â®”ˆ¥3]Yš£P±XŠş®û¢:ÔâL 7êüIÇsÇbh=-¶¸-{¾S¨Aºh¸ÅĞ^Ê›VJĞÉŞQ £NÎwˆbˆèg[í~RO$aôø-zÉ~Ñœo«WÈ ¢AÏ9«¸ë+ÑÑÇP_b‹ È´c1ïÂú¦0¼Ş“ŠAÕáîÓÌÊU0ÌĞp,ãÔ)A;Èj:ÿc£ Òd='‘árRJ¾ËP¥‡Ö*&1¥`	šä?Æ³–8öõ#˜QÑŒÿàPy‚>hô‘Éôa”!ÏÓ[½+¨£û3ZµÑº‚J8y€†Ïhú ÿjö;`öP…JzÊpmqõ=6ÂÉnÈŸĞt=Ùóò ¡"-1ºĞÿñ
+|ÇHrş†Ãå ±2ĞìOÔ´ŒÏb"IÓ½„{¼>ÀÓı#-ìˆ½• PKûéçæ    PK    !             ! 	 org/gradle/wrapper/Download.classUT     ¥W	|Uÿ¿d7;İn!Ù¶¥´!¡¹vÓÛ4B“^!!›¤.-ÖÉîËfšİ™ef6•z ^€ŠG-UQ¼*ŠÚİ4D jiDñDEÅû>Pñ¢~of7İ$kìOóËo¿ù¾÷¾ã}×ûŞcÏ?ø0€u8ËpäàÁÆJt˜k±Š¦Šè`E}ETO¦Ô„b©ºLê1Ntƒ'¸brZRÌ`tˆG‡ÍtÒ¬hT&¯¯HÅƒI%T…ŒM›ÖF×m¤½Fc0HÁR‚k	åZ\Õ87T-NÔn˜¤‹è¡õ¡Æ`ŒTÜ,1xÃzÚˆòj‚3¬ĞxCÜPb	Ş0j(©7¶é£ZBWb¸J÷+#JCBÑâ×ìçQËƒ†’„sƒø;
+è°›‰9eèqƒ›f‡jZ\WbÈi¬ÜÆ•tÂÊáİsØ…Hsœ¾“´BŒ–ÊM†;lÓ–šhèTR´é[£º1Ü«&¹¶XÃEQ]#¯Xáyêªó$œ[h®É#ïRÌ!GxÙ<¢~rÉª¦Z[Š«kú}X†å^,E9Ã²B²=¸˜AâšeŒ‡9XV¯ŒHÍ>\‚^p)Ã’YK¬"^Õâ†béäÒòY¼mY:	ñÂÅx*üó×=¨dğPæuñ1Ë¶úz.ÇêÅ¨B5ƒK³ÉËr²ó2€$×¢Nì«gX:Ë÷•ÛÅ‰<‘?âÜjçã>¬{°–l¶ô°%òs®\‡Jr×cƒl¤½ÄŞ¯$ÒÜ‡9ÉÈ”fcõ|“æS
+Úİ„f•+ÖU/¹âŞVÓ/,+÷AÂ¢Epãj|X"¾Zšÿ¤ö`Ãª…Ìqòi‡Û±Ó/­m>\€ÅW;Ã¥”Ûƒj<mp’>6¾5mQn©Q»ßøĞ)’Ñ.
+¸©ò>Cµ5Ú§¤RièëiËù+‡2øòqzQLÂÔ§’”^©0úH$Qwé¦åÃn‡öb‡Ö­N^‘¥×cXÙ›]Q¬!^âìŞçÄúº47(Y‡8À°˜ˆ;%¤ƒøsèÔ±RÕóç|(mÿ›ãû¸P>ÄpÉ¹õ498É·EyJxÙƒıT;j«1ÙÒå”b˜\&×IH0Ô.luï¡*	Õ§y1Úk~Âãš¥Œå)¼‘:İe¥B)ô>“ÌYİÂnNiŠB\4™ËNÁ2ÅØbŒ`œz«oæ+8ÀZ(Ûç& è47SªÓ¥ƒ¾Ü‹ƒxõ°™ƒÎa}]X&·²5DÉKÛY[m¯Æ­^Ü‚×@%kQL5:»jæä}>ÖÑªk¹€6’82Ú9d({HÇo˜u):±ôàvR9{w·bšt	Å$¼‘.Ÿ¹-i5Åÿf/î×D‰`ÒbÁ©2¿Yfù)XoÅÛ„ˆ·S¨n]xã;ÄÆÃâg£S`âDmÚ îÃ;{ƒÛ¹„»É&~cšf†å…2‡î‹÷â/îÀûnİ½µ§«­k§Üg’RyWoo·lû_ Y§;XV4YÕL¥†%Gg|.Ê&–Í#™˜ä¶CåuJCH‹=!¹Ûš›©ÒÁäôŒÂpHÂÿ±“zğ!ªš]æœ(¯Ö?Œ{½8ŠP	ÃuC½É¶[Â}äçD>.r÷^áÈcT#çµ&(è|’
+“¼kct1øfİxyK™pÜ‹û‘ÉfVHIˆtñM$œ c2zğ õdá,›ÈPõ_2ÇŞFê>…‡¼˜ÆÃTZdåv-Jó$%öI§Ãwr:6åáÕ¤í™'-_¾ÁÉG)ú>+ÎuŠáâ¹çªœQ{šœÅm¤7;HøCÑËr’ïÁ)"ª6¢Óµ°¹@†î9Ïv÷e<îÅ—ğÊı¾ŞÁF	_u.¥–qKÌ‡å…üº§Å‡'ñu‘şß`Å†±ĞX2PµXh›b)ÖxŠ·:3§8ç·hÊK¯å8 EÕc\Âwò›ß¬äÁw©Qóë¡2ä¦•©+¯>¯;P¤ó÷ñ´ßÃnÈuhQ-
+Ë”GUkhÂUMYÓ-ÙL§Rt³Ó%G´qzJÈ×ôwRáı(7Ú&äİR?¦CD•D4M¯.ÎÖ8I¥şc§Äõ<¼ó³ìÀÊ>\$ü"[Y¡‘ä9â¯h‚ĞÍ¦$¹„ßP2³ø;gQ1¢Cş fû˜£şDO€5şL÷G•ÙPeÊÕUf³ı_“÷)á¯”Qƒº‘T¬9U ÿdÔÌû7ü]$Æ?hn¥Äoz›u¥“Üè÷<ÖÒ<æ¡'£eb¢¤¯21ÙÙæJÒ|G°„VK	cøaûPL<@¸vK#í“¸(ƒ•S¸Œ¡£n
+5wa3}N¢!éœÂ:†6uMa3ÃH¬ó(–ÔÛ‘;kƒõ\¹ûèÙSµÇ şh6Ç–¬²5¤\(«¬ìİ;‰«êckıq´Nc{¤½n»jãš•ÇÑ‘Áµ6÷"tãº,÷-„‰#^5pDHÈ ¿ÑŞHg7lÉà¥M®¢Mî›JjëêW\w dê±öiGüÉÚI¤±…,¦·A)³¡ËmXNï#W`•e\fÃ*zŠ(¼HÃoÖ ä;F°®ö´ú­)ÜTD)³±—ÙØi”Mã`DP&ñÊxí„í‘çé×‹"TÒ÷j‚ex^ïeÉG%/°ÅÜf‹9‰;"]6ş¦Şä:ª ıÈÓ¸3Ü7‰·dp¨´)ƒ»ä…Cé:
+©.ƒwwÏÀ5A_ış÷ìËàıGà#Y[ıÌà£şµşÿ'&1á'ÏMF"M.ÿTø?]üîÏàÑ&·ÿŒÀ?ï"<RìÿB˜ˆ7£eOOÕ	orû¿–Á7—»÷Ñòd!©_¿;àò[ğ>•ÏË²,[l•9†£g¯¯­:ÆgğÃ	'hÏ8A[„ä£Sø	nÃ!Æİ6¼÷Ùp‚ü"à£Ôn‹>I½PÀ§ğ´ŸÁ³6tü_NCULùUD-Æsp±b¢•á§Øğaxíd¹]d›pÿÏsîoØ/sX‡À~Ã:öÛÖ%°ßŸ›@ÿ8ƒºK%á¿·©¤ØÿlØåÿKØ—\aOÀ–jÃ¥%uáRO}Øÿ\ äş™«ªbú-Bñ¿PKá¥ãAf	  *  PK    !             - 	 org/gradle/wrapper/GradleUserHomeLookup.classUT     R]OA=C+İ~ XQPTdU(	ÛIƒÄ¥ÀC¦¥$>5ÓİÛíÒıÊìn1òCüÆ&ş ”ñ¶hŒâƒ/3sÎÜsï¹wæÛ÷Ï_¬cIàİéi³öFïJk@­oêVO_Õ­Ğ\O&n~hóŠ<’1ñe_Æ†Õ'k§~¬oö¤Óª9†/#Ãåènl¬Yë9VÕ~é{©ç1÷¥±ÆÇˆ”8ÌIÅ\‹ùZõQµfØ4Ôßj…V˜*‹v]–Cå˜’¶Gæk%£ˆ”¹7†í˜Ô~èS#i”CV`úX¥éÉÀ1ºÇd%9L
+ÌíÔw·ÛÃÎ^s{§Qï´[õfgÿàE] Üø­h%#gO´-Ës7y*©¬	Ìşô,u=›T%É­ql	—Q,`
+Wò)[«öÙ›†«¸jÄ	ù9\(:”¼T!÷“œ,U.:Y¹H•p7
+˜Á,#°ŒÿÒşôÌ)nâÖÈè<wjVÏG«á£$<˜©ü³øî”‹%hÈçq	÷²Ïù±³‹rüÁgç»ñICEŞ2ZÆŸ€ù/˜zõÓåò'Ìávù./gĞ?àÁ{`,Ëğ:ÌPK­Pú”Ù  ²  PK    !             * 	 org/gradle/wrapper/GradleWrapperMain.classUT     ¥Y|eµ?gö1³“í+›”.¥eI[»i²	-¶[RšWÛ´›´4eû Lv'ÉÒİ°;Û6¨x* ×^-r½Š`|  ¶›@„"jAEQÔ«(¾½^Å×õ…
+Jïÿ›ÙM²É¦Ôßí¯íì|ß9ç;ïÇ7_zõÑÇ‰h4Àt÷7îZ÷úš>-vHOÇkÂ5±şšúš˜‘J$53a¤C)#®c=£'u-«csPË†bƒzìP6—ÊÖ„ûµdV¯¯¥´¡PBĞèkjZ[s`3ëŠøı¹dÙA-´¯zz ‘ÖõL"=€ÕÃz&‹³°¾®á’†u¡¸~¸æ
+1“Úcä21}s"©3-72-Ôd´¡!=Ó¸Åzİc¿ui‰´LN¦ù×i‡µÆ¤–hÜÑw3er39SØgZÜ™Üï1j¯bš7¹Ú–Ô²Y™T&ß€nîÌ&ˆ€ÅvÃ¦Q¬µidõX.“0‡§Ãlğ’—æ¨TAs™–V¦ùLspP”eKÌtÁŒ#&wA¼’|*- *¦E³AÉ´©d#FÌ2&S$šÖÍÆŞ]ZD~•Î£ó™¼Swdº€Ée½»:g um)]¨Ò
+”¢uÊTÃäÁ™=ğ‘Ä¨*¢NÕ¶—–Ó
+•–Ñë`•~W¡`‰Õl8™V1¹õësğ1¦ê`dºY7ÔîõR=…Tª£ØÊæ$a4
+š;5sF¼˜É†à?ÁR!Š2M…kkè•VÓ¥L•3÷ejK¦a{ä„^ "V€½ÖWĞZ
+õRØ‘ér&Yøˆxi£-ş uy"07NoÂ+½ÔB­*5S›­ÖZFO›^êši³M´[Ké^Új¯Á^îı×i™å
+m‡4e‡™Ğ³
+u¯Œ>”ÔDPe²ĞÊº2ç–á¤œwĞN¡ù+™VKœÁänÛámq„‚¼t­;{˜S=–LÀ¥S)- e !«gdŠÂ¨A›Ş>•öÒ~X_K&#½éCiãHzÇpxxÃC®¡ƒÀ\‹·…ú`7›x(Z¡A#ÿ‹CkÆ%kËfˆÈì\Ù§A#ı4 ¸<«6´L×ÁZf —‚
+vÁŸD¦¥ LRÊC‡lñõ
+!(¯Ï%tS¡VÚ‚	+²ÃYSO…„¡:Ì4×"“3ÉÆH"‹ìwBõèfÀ<b8`ôÌA=°íª®@Poh„ÚSÃb·95|XKæôÚ…nÀ	q=Ë$
+ú©,ço 7
+>o,Æ±uzK&£#ÿÚÕ²‚¦%Ú-r¤”e¼‰nVéÍtËL]ZNŸ¢Q™ŞåMRØªe!®L·!«ÛVÍ¶Û¬ÂQ"¥]Ú{+½M8É¿Î „m™şX
+K-
+Nå¶ÍH&íd"wÒ;TºƒşÉ,cûì»TºŞ-jQd×÷¨t+½—©éµ‚ay«ŞodìpîÉõöeº›iKğ,Nkco˜1C¹~îQé}ôÅ¤hÙ®ÓÔ3ZŸHnÿÉ¤$Ä›id„TSÔYX‡z>H÷VĞèCE*%û2İl†ö¢[?jZáĞ¡TĞ‡é£¨ik¹´¼ÇK§Ü'˜ê_S_ö£ÇÔLpş ü5¥÷éxÏ˜;
+^6ƒOÑÃ*=DŸf’B!…N2…^ó¸–~XÈG2Š 8W?¢Ò=
+­„Bû®i>P§Ğgğ’ÒL×¬—ÜÔÑ)”†l®/[pïê`gÙlıYzR@™×H—H»÷KÀkŠjœ¢_û:-TöÓš_¦/"›Ø~Ñ’„Ï—R.¾LÏ¨ô%ú
+¨¯ÈÖôÙÜ°J¡g¡ÒD:®İÑ/ƒò:½ôuzNèêÂ—;gSç·È¡I5Ò-…4ÎÔZÎsşYn¿CÏn¿‹aq+˜µx}Ùk9ê‚(çp§öDVÄ_ÜK?°KÜ‘ª¡áÇÅşĞâ§¥ˆÙ‘Éˆ€û©J?¥³"f¤M4¢Ùíú°—~.ª;è˜Î›.Jk.‘Œ‹úûKÀ¯TzQ´&nÑ§QCCeÅŸ…$ı-ıNø_äÓ°7½ôÑÈ¼H„±Ğ# -Õë¥?ÓG„f^²´5%u½Ã_móşœ$1[˜ƒVş€!_¡¿+ı2én£ĞxéŒĞğC‚æ[tŠæèHÇ½,‰â!v”¶¤Vé”ÙUè\&šªéargƒ—eVTv³G(Š¾ü\¼cF6˜l/Ø‹ªÀs˜^wn82ÏCBˆL+È…{'/ğğ|®,6Î¥ 2W©\-r57+|Ş,9QÄ
+c€¨c¤0†ÇPnz[YHÓ³–ı’\ÎK£ÅŒÑ¢ªœVeÆˆáÆ!-É$
+ÉÔ
+**92'/ç*/cLs‡2z3ÑN/ş¢àz9Èµ(ã†R/[ƒÅíù!Û‘2‡½ÜÿãjÆLáÌ&nĞ½¼†…Kfäİ‰Ò´†/˜.œR:ÑhI+à;Æô‚µÖ1-¶Y R¹¤™€‹ìÖ£Aá°ÊëEÀ]X€Šz66L€ÖZzØd3ºòYæ^ä­è{#†q(7$3‘Eí›[z#»nÙÕÒé8ØÛÓ±ëàÖ]^nAkÇ›¸u¢qnsƒÕ8s»=cì3×<§ ¥oæ-"6¶‚ìô3Şƒ¬>ìåˆˆÙeAáü)#ï`Z,Ãf=øJ¼‹)XF1“&HlE%‘èx·}`GÿÔ ¿pÚ™µÓüĞËWñ•{ùj4ƒeÎ‹â€½¢èìµùÛ¯ò>> fŞ£ˆ@¸àA‘îš“KM…k£˜ıEÅ}ğz‘fV–ÕÇôìdŸ©«cT>7¿?êZ’¦ÕfÁä2šx c’Y\©ƒXÒĞâ2'Ë;c9ª2£#™‹ıˆ‘9´;‘Ò‘N¸ÓËC|½‡Fƒyx=)fZ¥.8‹¬åz~69§rŠ11­	–“Ú¶Ñ†2¸¶ò
+tøüùe;ÓY#©Ì¯/`&N3EANõYöÆ™.5ÍÁ¬ß¤òŒqêÀY>‹1Ên–ğR8é&•ßÀ7£‰'DkÙ—³›Å¹Ón‚ø¿E˜åV©QáÛ‘0¹švGåå·Ùås#+a’³Z¿Ş›I0-åBf‚ôü¡`ŒSsL£¥§­³³Ğ"ğ»¬Æåèj¿Lá÷ÀKïÁºôlVĞÛº(fÇí4e%-î×VÏ¦ÊÓ ?ïã{T¾›1¹zwo­SX> Û:l
+ï[Xæ¾V/ïJ@1uç†âÈù Ü×*jÕıüaAs¤XíĞİ6¶&:Ó¦n%Ì>î¸ÅÈ¹óÓ;Øi‘½Tùcüè¿-rÁü©ækÕ²¨Y'E>78[ìÜµc[GÛn…Ç¦AZ÷Tü¨9ÈC6öcöÚãöš÷„½öYD‚~4–Ìe‡­KÛ–X*ìÒÒĞ"â¶yªï% `&­%íËµ¤;u5vÌŠı?ïS~é‚Ùnùj™1mdÎL¥V.$
+ÔÊî•Í†¶¾¨òÓü%Û+¬+Ô’‘µp¯ÃÏğWT’ù«0jC2vHá¯Áš©CqŒñ^~ÎÎû˜?*èò3è$ŒÚoÙë:ÎŸ¤¸+—6‘'§´ßÁŒÔfä’q«5ˆetx\`ÈºkÄ‹ÔıF& Ô(Œqc¸néËÉœ©Û–}ÁºTäï«ü¼è;”´–6DV¶ìm^şÿXÔæŸ¸Hü™×ºÉAüÍ'ŠSÔ½•ÔHÙ–´nBƒ…”9¢ğ/Uş…¨ÆªPÕ –Në(§\ËÆìÕ¬e³T÷kş@ı-Ó’³‚ÊŒ¹B63ÃH)ÒÍl¤Å>èşÿ¨òïùOLş~*3¦“ÖB[ÒÈêWŠëºäğdvÀéÖ†İ¬võ¯ü7•ÿÂ/—Ì»a6”Î¿#Ud“º>$¢› •Ï¨ü	³‹3õJ!<-9Š^QV>YÂä"¾ãx%3ä–Ø1™èS$…¿Œ§·†‰¤ ‰o+Öauµ,yUiÈ.$r†8~^[qi-%”cŠ‚²oÚ5¹4Oš·’gÌÂW+8"¨RP£ä×ÁÂWˆˆWZ(¾T,“Ä(2-œŠ~$Ñ‰fmÊ¸›ƒöxY,] JçKK¼ÔaÿºPÈ²¯ôCÉ,ØVĞK©R•„©dê†2ÛvÓ/«ìU¸\Z!ˆñ¤:+>úÀÁš%ìœı<)(Õ
+t+Ka±†BKœÔréØ Úr»ÃöR¤za!`2ÑŠ×hÍ¹Ij…0åøÊÜ„ËÒ£õ=¢K7Hº©å}3(O=+£÷‹;ÑF›½LjR©BZ[rcQ
+%Kë‘$éÃÆ!$ õeFÌÙ¯–K†2iƒt¹*…%I®˜ˆE¯t…ˆ*iSÇdêLŠ/gºuGn«5PTs`[Ë®@"]\Z:+WdW6(æ%7r,
+ú4^Ëè§¯Å9Ij—:Ğ<H›Q
+ı°¸·W¤­â#a™Ë©)·+Ò6tÒv¦Æ ||ÇG´„	 +ûOÔê€fe°€iXÅ ê˜¶Ü¢à‹ß±*‰l g\Q¤+qô¤–0ªBÉö%$„ïaZuökE„ƒq¤˜D½(1ÒULõ…ê˜òì
+%Ô:9ğZ#Âxµ±¹KqÌ‹™T"­bÂİ†PÀ,1É,°MËú3F*3âzd+Zj¯¸Ã9kûkŠ-f¡kèN›ÚÑÉª+,~èµht–Ï·ëı›\:nß¸IZñ²Å‚™‚C6ŸnQƒÅõMw.Õ§gvè"r‘l•WÄ)øÇ’Näy	¿*ˆ”…•®<ÍËSuçé¢h$O++kóÔx\~¡nŒ.{„60EF¨rÏ85G»êò´i”Úë#«êŠï[ğo[e¤²;O»F©7OWÛ#ã´7º÷(p$ÍõÕE£ÊX³RïÉS¢²î$ÅÕë±š«{Š+9¬+ÑÊa V¾ş$½iŒÓ­Ñ°sœn†NĞÛóôÎQºk”Óû¢aWÈï¥÷?B÷1…İ~÷#ô1¦ã|Úï¿?ÉôH‡å<8Î÷ûåÊ¼“ŒÓpêøÈ™g°şX8N~ ÉPÎçıòÁ<=§¯†]#gÀş×¬ı±?¿9Oßl€Õ ı¶Zír^kıú|¾' éûR@ 9'Aı²{lçÃô£»i€b»G¨bœ~¥ÿ> Ã
+¤ö+yúÅqª´Äï"oóCÚa€òXP7û]ãôbÔï9XùëQúM~Ÿ§?‰½§!tşrœ|EAm6^ı¢//‡]®&¥ZñC]¯ŞûêI¿«Zq^+$­V,QÃŠEV)!k3ór ~%#gNÁNZ)³/‹Sb³òU hyfñ»ÉïSìcµ{œî ç£\Q™ËóÜìËóÂIkSg‰­}¼(Ï‹£MÊ=´@Ğóñ’<_´gäÌs~K¿ì¨V„4²óÚ‚©­íOûÑ8reeLè‰çî9Áub¡á8õøá€ÍaWeëÑ°Ûâaµó&áöË¥ÎÑyÂíğæÈóZ0ƒ¨!}œ×G}¼a”/?eÿÜ(~>Ìm{|Ü1Æ8ë4U‹Ğ‚H.àøİŸB>Ş>Æİ³ìÎ³V\ "B3¯u>Ş9Ê=c…bÁï*Yá}ÑnÈXy=¢©(~4Œò5yÖ;çX4Z?ÎË¢£å|¨kœS ÕŸà,,1ÆGòãü†h"oœoIWİ(¿94Ê· >Ú}‚oôiöñ[óüöh“|pì¹~wµ­sa;ßQÜS!“<BsünGµlY&™1~gï
++>~ï¿?öøñóy¾/ÏçÁœMJ?Y­€§OÍ_çO[î%ãõœKœN¿?h»YXöSNğ(AµVPı®°gn‚•GÄŠôîº°'äWüA)$àÏLĞ‘!ˆA§‚šçŸŠ†Õ"5ßRªEb+ëıº)„,%Tøé y‚OóÓÑˆ’úõPé—óü¬•…£]"N®.„%ß6‹Ä×'°±íÎó7ï¦Õ!aOšƒÇ·­”çç£·ş ¿'BPÄûá)îæ0Âì§Uü³”~L[ëâ°ì—Ÿ¢ŞÂêB×»î¡­ãü‹¨_/Öƒƒ_åùw–#ı9Úı-E¤ƒÆ+ø»€>6&ñ©Ûır÷/DŠê†}Ï<´}„=~ù4}§./9á>Ğ‚ä†uü+O`Ü·E­óIB !Dm½%DMı¸4'Ú5*Í­ÏK•Ñ®Ó4¿şqçH­w¬é!wÕŸ¦İãRUtÕyiQ—ó1ZuÔ÷ŒIKóR`TZ6&­ÄÉ ÊK«±[8|Ò%=>éR¬¯ÃŠŒ•U=Œ·{òRË§„Ş¬åí:€µ­“¶•Í`»Ouãø¤NË8?ÏKŸÔ-¬ì)QùªPQ[h~õ OÚi§EŸ´kvÀ3Àvá“v¯•öœšÂq=89&É¾âº…ÌkNQ:†¹ŠWº–Ór
+J}Î'åg¥¸sÌyÚz>ãü®xº«Ü‹İG‰Ü«Ü«­çZwØznto¶›İîA<#îÖs·ûëÙç´ov“[ñ<æ¾Ó‚§û.ñ”[å.ë¹Sî±½ò€õ¼N¾I<ÑÇôã¿Únõ6ëI¢ä ½ä$=O‚Ü4ŒÎçMèyŞ^ç^R	å”>J^z€æĞƒ4—¥yôÍg•p%UJŸ Ÿô(UI§¨Zz’:–Ğy -r¬ ¿£–Îw4ÑbG]àØIKƒ´Ô‘¦·PÀq]äøÕ8^¢eN-wÊ´Â9^ç¬¤•Î õTë¼”V9×R³…êWSÈy€œ1jt£‹÷Ñjç­q>H—8¿K—:_¢Ëœ¯PFîµ®å´Î¢õ®‹)ìê¤®t¹+EÍ®Ã´Ñ5LW¸ŞK›\R‹»ŠZİk©Í}µ»ï¦÷ó´YŞB[ä·ÓVùkÔ)¿@Ûä?AWÙ¡/‰ÿPKÇU C%  Ê)  PK    !             " 	 org/gradle/wrapper/Install$1.classUT     W|[Uÿß¤Í{}}ûh»vK÷ÕutmÓnƒ–Æ`tL*¥Œu£„Ëkòš¾-É+ÉËº *"""¨Û/‘Š¢vi¡Œñ!†‚S@AtQ@E‘yÎM²¦]6×ß/=ïÜóuÏıŸs÷|üàÃ ‹•Û.»lõ’Kª»àF3ªöW{ªë«ƒv´ÏŠeÇ|Q;dÒxÜŒ˜FÂ¤É^#áöšÁ‰d4Qíï1"	³¾º/ì‹}>‹et77/
+.n¢µñ%Ùı=ÉH„½†o±f,lÅL3nÅÂ4ºÉŒ'H/i8®a‰/dnª¾T…Ğ:ìd<h®´"¦À;nÇPÄlì}}f¼±5–pŒHdŞ"“7›ŒÆˆ7İ½Á:
+<3åhÒ±"A;LÆãfÌil¡mFwÄT ÒÆMFd^Ä‘ó­¾´¶‰mr›e72’@1¯	Y	g…(Ërq«;É‘ZÜ3Æµ«[iS	/#­=V8—XĞ–Ç‘Î4mÉ]Jû=N¯•˜·œÏ·)ã=¯[jÅ,g™@¼f¬İù¸¬yGyÔ6.8WG	J‹PˆrŠùkª=ıåÕ1ùkºI˜Ì_3Ü5¼¯³5(¨( ĞSü¦Ô,h†äë„‚yÂ¦³ÊàƒLŸÖäìÆ¬§:Á±æ£F`ê¨È‡sî´¤	™qµêX½BâÚ¨9Ş‚ôræCk¤Hsb!_Í¡İ›QE"a1k;œo°7ªhP;½JÇ	¬ Kææ=Á1Zdèülç¥• Œ¤@Ùñ-2°çë8Ëxö2×J°ËÓC§	L"g—w'ìHÒ1WN¯iïN¨<|J(ø]H#4”‘)'Ã5GÌ ÿçÅ6ÏËĞŠ]+>©áœ)pìQnRpY›^x†¥ œÍ	ÙUc`¢cKÂ1£
+VSäÌ8İëòƒf¯"+²Õ4¢dÁ¬-BÎ¥;ŞcX‘dÜ<‹â`„)eJó%Ìy°¶ó	)òT°’®"„åùR‰ùSèÒp.¤c ;äEwúƒ”<tŒ-#‘ c’V’	&zøv…ó-ßeV`‘1¹¨ÖÑk,njîHFuld6€n©Öc3(›N°W`vŞtÍB{ƒÍ‡×G^˜›IvBG<í™^>
+Î-v$BiLZ
+’Ef´ÏÙÒF;(ÆYåJ#û±YÃ&PÖEh„Õ“Ä’šëÆcÁ%ø4ë»4{RÊòxÜâ|FÃåŒn#wâ[õ9|×]A90ÖWÒyXIa´)‰*ÆXÛš';®Â—ŠñE\M:¯àJ
+ª¯íæfGÇW°¬×â:Ç˜ø*æòÀÇˆ›¤hz¾;Ô&'IÛ¸©ˆÿuòz§¥UU(U*¾É0ÒÅ°³MÀ{XI
+n¦ÈJ·ğòoáVŠx:!e-,—«Ûqú·	¼sóIÇw¸lÀ]YTÏdŠ‚ïª;öò–ÖÖ,(~qén|Ÿ"J=‚Õ³e…İ‹ØF¨%Ó€4å¹:GƒŸ?ÀÙ¾Q6'c[}m\ü—Í£÷á~ŞøãtÑHãç´)kHÈ£b˜˜¸I(»‰ ¢úğµ"{St<ˆ–òy›ÕzZ²§ÇŒ›¡Õ¦!ëÕÃtNÙ¹ÖX_2'ÙéG²µ.cpÎå9(YH~¢áq<!P¸vÍJßO
+Ô.Ì‘qØRô´†G±‡qèà¶´I™ùŸjØ…ŸÑ!)¡6êüt<Ç!Û…Ÿ“Ú`ÄNĞÈ/¸Ø…_’‹-v2ªŠÙNUƒLİ‰Ş*ÊÙ(éódj61üŠâ0zÌµqÂ²Y5ãàh|Ì_ÂË~ßŒ+çÙKÄrş[¾9¿*^%çÈå„ó“‘¯eqFî\Ó·ûÓ­æ¸&™N¦tèxƒ£°$›íDCŒ:¢’Î™·É1‡Àí˜£j4È¤·ğ¶F5êl…Kã'6©ş«€kmÇÁj•3G;ßÅß‹ğ7¼7¶6J¹
+şI9v›İOÕ‚Ş £åÊÈkĞø—†÷ñor¯ßŠ…ìş„ŠÿP¤¨!v+F`==×·–^#Şa^”4cÁ4ˆüóşµn+–9sUĞÃ`Úè.
+·$ÙN¸9¥zéİ¡ŠBÂ­ššT¡c\.˜³È^ymE‘l{„Æ€½î0¹-tMˆ	$“z‹¸ÃÅ!×ÕŒò“t1ILæ•%tË™VD‡À°œ•\¨GkÕE¹¨ĞÄ1•ª	™–sÍèçt³¹÷O^QÉ›¦)d$4j8;?S³d?=?1?¦
+úòôÈY¥yÒhİas~¬`Ò\-æ’l1,“'”ßt­q,xæu•ßM§GIÖQ«‰QGe„: ê»’}.| 4Ú@ğ3
+ 	Ó©27›Á¤Ã7¨Š®DÔJğk1Á€@—M,dµ$Ø1ÛÍ~ÙëŠÅ²½ÔjWj_Œ9VÔ<}sĞì“ÍhÒD3—¾™Yô0CU¹Åªª‡¤‘r·¢ÊJ=Uôœ³BUT/ä\ƒ*üY2`4ÑH/ÈKÇ@AÎÄ²œÎ°õìœ‰S	¶Fw´fãc†rÖP_ĞB/kjæNÛ“Ñn3¾†#D¸THME…“Kø=Õ3”Şb’ÒKLRz¹pÑú2L¡÷
+âji¿‡è¬ÚÀúõŞ‚¨¨Ûiõ;PéÛŞÂ˜5„9÷ÿJP¹é}…ÛI'Iw_W;‚ù¶ÚALKaÁêµ]C¨—ìÂ/m¦)œ8„¥ƒ¨LáÔ­hªK¡e+hOı*)¬F[à¬AœhßÏ€{bİıè$!ëR0RuÖëi5­˜Ö>ˆşÚæ/Ä¬€ßSŸBoç ¢~Åİ¬zš‹|RºZ®n…Vïó¤p‘·0gŠ‡q±_@+ó—üê“¤ëÀ;^u—üÚ>ûps±»Y/×Ë‹ïÀl¯Z®/ø'H£‹½š—¾¾Ğy….¼êÕüªW} _H\/°Çñ××¡ø5²ÿ¯ÖUºuÛÉÍt,R¸mwvxšìób …{|^e÷²aƒäÆ ^ï,/òÜç¼Ê“ØS/WüŠ§p€Sâè>•¸Ó¯H­^Õ«ù2GáK¯\˜³’Î2‚]õ¼ãÑÀ'‡°»ô©!<3„gSØëWSxŞ«ú•´sÀŠ¼<°«>õHé*}‘<Æ+)ì+ııA·²ójWéëÒã7N	¿RĞ¬–¹.4İ"üåê¶;³)@¿RØ=9‰ 4øø€Kÿ<Œ¿Ü¤ğaéG)¶g /H—}eÂE~‰öQğìÄû€·°+à.‚2¡v6{R¢¸ÜÓÕ1$&¦D)eMJLÛŠÇ¡£àW¼44£ô©.
+Ù3^…â0"8»†ÄlŠæ^Z°5^O™˜ãWvB	ø‹Ü^¥ƒ¢]”óé,_iÀdúU² cè£Â7,êS¢‘‚@œêcêÛ9Ş‚l”
+»ÊÄ¢q‰Q_[—ÇwÊû"rN»ïŞÑàË0$NØÅßé£-'Ê½ûÊÄI™³¥y,¦§ÃMâ<q2µîwKz5¾Lñ€¤QÓÇt•ôeì“ô5ì—ôMj˜~Hµ—(ÕXMÒ	T¾˜VŠ9’V‹%=Y¬–4*úÄ«âq‘¸JÒ«Åµ’^/¶Kz³–ô!±WÒ½ây±/Š—$¿_¼ÅÔuëF÷±\Ò"ÑâÚîºUòL™¿Íu§ä™2?à”<Sæ‡\J)ó;]H)ó¹<SæŸr½"y¦Ìïs½!y¦Ì¿ízWòL™Ïõä™2ÿ¡»PòL‰w—¸+˜—”xÌÓ	<7 ’€WàLàN¸±ôä/¤w¦Wß w¨~M,G1¬.Â˜ ¢˜èZ†I®5˜ìº %® J]a”¹.Å÷j”»/@…;ˆ©î^Lso„×mK=n	ôîÿPKN!Ãå  ÿ  PK    !             - 	 org/gradle/wrapper/Install$InstallCheck.classUT     e‘ÛJ1†ÿXµµ®Özºñn<u]ª(EÅAAAğ2İN·Ñìd[/Ä>ˆoá…^ø >”8[ÈÌüùæOHŞ?^ß lb^à±ß¿hÜ»MÜRÜrwİ íÖÜ ‰R¥e¦’Ø‹’±nH“´Ä›i½ CÁ­íFÖİmKm©æ¦¡ÉÔS¹Gsg§ln3k?óí®Ö,ØôêÜRª˜È¨8dµGÆòY¬76¶6^‹zîC	B |™tM@GJ“ÀrbB?4²¥É¿32MÉø'±Í¤ÖKßù0¿XÃS7²'}-ãĞ?oŞP1Ê~_ãÇIÄ~“§F%~î¿ÇB[*İ5tFÖÊ‰éÓ_—Ë,¿-S£û*VÙÀâÊ_ƒÿğê•@aeõÊƒÉ2Š¨8(al#¨:(c<¯f†ù•Pç¦È?3„jNqUÍÎ‚ÃÁ¯sÜ- ÀTÖ®¯_0µşŒéÚ3fŸ€ZX>PKD;k  ç  PK    !               	 org/gradle/wrapper/Install.classUT     ¥X	xÇu~C ¸‚’¢dè°×”h8H)C¶²M¢RG`É–—À‚\	Øev’h×JÚÈi¶i§‰”ÆrİÖt['Z	¤£Dê»uÓ¤iÓ¤gÚÆnÚ¦WšŞ‡£üo  	Êi£OfgæÍÌ›÷ş÷¿7|å;Ÿ¾NDÛENĞÅsç†w=Ş:ª¥Oéf¦5ÑšÎ¶ÆZÓV~ÂÈi®a™ñ¼•Ñ1në9]stLkN<=®§O9…¼ÓšÈj9GµNŒÅóÚDÜà=F»º¶¥·ï„¬½«²>[Èå0àŒkñmèêæ˜aêºm˜c=­ÛÎÂø®»âıtë‚”«`§õûœ.heuÙZ&§w±µ‰	İî0WËåüä´ê¤vZëÌiæXçÑ“zÚõS½ úœ56¦Û‚Ö'k¬OÊÉİ‚ëŒ™³´Œ µûËÓ]§ŸMç
+qZêÕ“Në³_35yÊ½Õ‹ÓÕmSËuf!Ø™³Ò§páÎ½K.Çæõ÷¦áîôpøúŞRÃZ“5w¼ÇqôühËÛò„Ûi­RÈO‚vzû©Y¡ÕÔ¤ -o ­	R€øë¶ )´Œ¿ÖÁš\µyëÖ­‚Æj^°ìĞİIéLÃêäÃÊ=éÚ—Q³»ı‹7—Û>†)ûvLwûršãj·Wí%wévºƒ­ 
+
+Vë§V8D?k8®#öP6S›B›è.A-R´à¹Î>+—Ş€aÇOaAz~ÂLb ¦Ê‰R’Çp`„¢
+µS¢9Œğa8¡1Ü~lş½ƒÔA|ìÕ<·Kmkr{?mWh»o™áô6”°ìÉ í,iÙ­µ İN.İ|›]t7¯OZ1_G?İ#Èo8{ù"AÚCmËè^ºOĞ£H“«ÙÆh/­nis¶¨KwTÓrÕ´eºšaªš9	±’N†ît¨{ÏN £gT×R³†™Qõ³ZÚÍMªÛfå&;Ô3/”KşöS\‘µì¼›Ş^ˆc5n¸X*H{é~…úéA[¾Gùi@Ğ¦ğ"R†Ó Bû()Èëé4A¢l¾ƒˆê%ÍW¶šãXjşÿk»a	´³ÇÚ[$H‡è0«Â3FôVÆ	ôm¯aŒ^Ër¡¦6±Š¸šVØ¼ÍOÇ:Î˜kŸoSË35¸L05püŸtBĞ¾7F¯Ù|ÕY,©5Vá¾š 5HFv²B}åÜ$hg”¼±û‘{âÛwv\/E=]°w²s?èŒ×oŒé$c<˜[¢ÅLC|[3Ë~¨½LcĞI…Æé” µÕÚ˜[èZŞOyf‡ùÊ—ğf)dÒD…07o’_` _øX/CÑ¥‚BF4&2šı˜àíÎÒ$kòÄÓ9ËÑƒôœzâ©/6Kõéíô–ıÁŠÖU7î-¹g…w*tÒ8'1€Ô"3Æ»`:×zP?[Z³±³ûnzB?LïåTºÁÒĞáÅCÅÄı6„û¯.+‚MŞO?Îº|@P|i-±òC¼ò)¤×ªèº:\SÕŸ °ìG9k¼­€Ê(H™aûécl@ÔP.lúñ9?-h%°Ó3êX¹‚«s†Ò3¼Ã&ú)QW„am¤e¦ZÙZ f5 !sg›Ùf¦P)Õ”Ék“ê¸vZWGuİT]-Ğœ1Üñ6³Ï2³†WİqÍÅ®n©^<2®!F
+ù-ê„ma¡;©"'ù¬YÄËdÑQY©\5¨†ƒàµ™™2¼DÕl¨VSLW^®fm+(wí‚Ã,çÈº¯ƒ/Ö_}™Ãv.¡¶9-ï£&­’‰JÃ³4Y)Q’ZÚÌ´‡T«å‰#†c¸ê¸ëN8‰Î2v0–KŞ¹b·“	©D6RõÙ	ö•…¯œPm>ğö@¶d­Q”Zp`MMã’¸nµhLut]:E5\‡­}Ú  Aq?ŠskÃÓ5ò:j1}‚×ùég¤÷yéhJ¡çèy”%ğ¡D¨A$!¨s²Xi™­@æûúÃò“AúyúÅÜ§@ó1ÌsGÍÌ8ÇRó*%¬è|È˜(UWWºÊÜå×M—³œ Ğ¼bi¯YÈë¶ô.t˜¦–qŞ~U"~º†ˆÂód¿eë{sz»" ?Ë¥Ëgè:èÆÔÏºå‰…!<›…~•Åye‘Ö{¡æ¤Ÿ~#p‡î‚ôìçèeË’4‡ö![ãgV*)˜ Õ¦£eeàó^‚îú¨	Jş6}^¡WèwødÔxõùS¨p×ß-1Ë—@‡'ô²Y÷·*/ü¾ Ûªİ4öú
+û%4çÙj2´şP¡/Ó¡r”	pvVPg8YÛt•ËÌÏR¸ÏŸĞŸ²kÿ^©u Ÿşp;ƒä	ƒÿ%ç¨¿ ¯óÏ¼
+¹I‘Pd&Èé—è—¡*²Ï* è¸¢j€ş–ùñàåXĞß±Ä]—|lùé[\,YcAú6ÇÓ?Ó¿ ƒ˜tôo•ä+}thÜ¶Îh£ïÿ€b°M9İé¿*ÿIÿ]¬TòÿB.»º›_*°Lİí<<< k9¶?V5İÒyU¸}Aİ…û	@BÔ1. R_ÇÊ¸€ğ|ıUT~Ô:·xUúE`Ïx=l‚n/Ğf~7(–‰ "±|AÂ]²2¯J¸b%œ$VUcå=ı¢	ê»ÖáádÕEK“I¸Z´(¢Y¬™¿,é·¢HMœéÌÒ#„º`ıÜvZ'Ö+"$6€ğxêÕ#İS áƒxK©f®ò­Üw©Í)âvq[Ë&à3]È¡è:ìèvÏvŠV Ó›à|Ëá€h«Ğ¢Mıb¶rtw5*²ƒåÄŒÍ’ï‚Ä ÚEDa…i°ÿË>uIÅ*€Å@PÄEGtêD®À9å£g%¼a.Å6±÷Ø=¤2Z¦,;KS ¦µá%c^ìb™»áÌ1y†‹{'KØ“÷Ì{	"´tâ ¥4Ã¾4´ÌK£ğä›E"î½X`8\yÚvaÕAPôƒ)1³×GüoNBÎ³¬üşÕÍEÌY›ûõ¬VÈ¹•şÁËqş€ØÇvœÿ×•ÿëF~±9¯R8áæœ¾q\T—uı¾}ìâ "†Ä[Àd³¥ÑÍQ¹[wÄˆB¯ÓóĞ‰GÁd¶|¸²‚"Å¹}“@9ĞXÍ²4ˆã@]¹àL¨nÉÕj8 áâ»Fé^ÑrDã­æÉ;í‘¹5TgY´”k„½E”8#²h“s$*À›Ş>+2\™4L}¨ÕíC¼mCVğÃÛjä¿Ná«‘ÿ6%Û -GëVĞJpæIô¶@Ş‹v}$u|šš®ÑêÔà4µD®ÒÚèU
+Å®ÒúË>´6–‰°¤í²h¤Hw-Ò–‹¤ÌP|pŠî‹i[jğeªŸºù­È5Ú‘JNÓ›®ïñty[¼Ÿ¥‘ïöTÂW¤î¤DCøØ}ô¼WLİ|5:y‘Ş,è©ŞÏ’?5è‰4õFfèÁÁk´/•‘iÚ?Eà½T-6²Hl"ây‘Ö¡ÖÙ„ñM©T2Ò”š¦‡ ì
+GåùwF¯ÑqVğaôM%_¢•ÑëŞg¨!êÙ>E^ñrõ£‹X.;NôS0‘§ğ½ëaãƒT‡§£‡NÃXï‡•ŸÆè¬ÿ*üòm˜ó&ä(M™²Që1ÏûBìeò^nÊÎPnè™©„7:Mok\EŸ	$|!/[ìLª«şijŠ‡|–ú"=>kÓ‡Zêë.±Ù¿y‹t®H?„õç±~šôtùZ|ñëÏRG¼Å·£‘n›¡÷¥Xüc¸ï²wÕÖ"}ğ(¶ÇĞ‡÷Á!_Šñ>RCEúÉP)š*Ò%8ûÙ¤Ÿ’:ğz"#Şèˆ/6Riú™·d¡çR°ÏÏİZÜ€ZhíÄÍ6 =sÛß³öZ	ìõØë|7pù]Fg/f<h»"Ò_q4¿ÈnÚì¹wC·ÙÀD7l‡cgèòEòy^8_İ_ƒä¥ÊÀE±T¶qW9:½FWS©ıP³X¤O3în0îÎãã× ó¹ÔïÓÇ‹ô›3ô	œ/^ •|©ß;:uó‹St,¿F_fÉ¯¤Ø3ÓôÕošş¸H_Kx½üõ1ZYñ×«S7¿O•ôşOİ|Ç`'½v#V¤¿ºÌ?7¡
+âµWZhµl×’*ÛVj“m˜ºd{7í‘í^Ú'Û$í0—íq:ëi”•í8Y²-ĞûdË¿,÷Aú¨lK~Qà`³uàoTlˆ1¿dŒƒÑØıÍåÔP$u…BŒ´è‰¦oNÓß!ÀPÓ?à'Vşş'ü JEú×²hüDÓ¿KÑÿ™¹³ş©{3[}"O¬@™¹Ä•X$%Cy0ZÒ‰ÀvQÀ’nõ¥­¤«.-;Ñ,8iF¬(ŠÆŠë‡ØÜ`.áawŠ„W$|Rd-‚‚½šğ³[¯²GÅFF;âŠÿ§8.ÄE±¹YÜu¢(bWÄÖ¢x“üí.ŠDÂ×†ó÷Å½]Ş†î@C·òÅ$
+‚ˆPwFôÅıéÑ5Êš@KğÉãİ­Ÿ>V‹òO}œ‚k”ï“O]¤µñ5<¨w®ˆ$†Ö(E1òÇ<-A ‰wèVºS7ŸùŞ)rÊmâ½j‡¦ÅáÑ?ä‹_GšÅ[qı
+ìÀƒ(›*s;zì½s—±İ`×fñ0,
+BÍâ>ãòŠ£Í"S²tdZŒİ¨Şù%
+0ÜÏ…¼ü¯¼¹A!£“bT²}¾ÍÓYÙç–ûgéq±}n7 ÿvzNö¹åşóô	Ùç–ûŸ¤Ë²Ï-÷9z¹Ï-÷_¢ÏË>·Üÿ:}Cö¹åşë( ¹Ï-úÂ#¹/[îÇD·ìsËı´xJêYŠ‹& ÿ-Àê#T'’äiô…d©:ò|PK1"‚Kù  x  PK    !              	 org/gradle/wrapper/Logger.classUT     …“íNA†ß±ÀB)–R@° ¸~µ…e-FÒPcbHLH5Ö`äßt{Ø.ìGÙŒ1r!\…ÅÄ^€e<C‹Ğ†ììÎ™÷9ïLÎÌŸ¿¿~Xƒ)p|tô¦úIoJkŸü–¾¡[»úŠn^Çqeì¾á-âxH.Éˆx²-#Ãj“µ%^¤oìJ7¢½cìÊÑ\_¯XkOXVÏøİÄu9µ¥Qá!ù¶ã…osôÂˆ½8^]}¼Z5Zt¨…H7‚$´è…ã’À|Ú¦Ê–Kæ‡Pv:šõÀ¶)Ô0$0¹'¥éJß6_5÷ÈŠ5ŒLŸGŸ3á·dÓ%£Ã‰C±€ØyêøNüL`¨¸SÚHKÛdp=ÙÒÃ0r<ã¶ÀL±~·«}ÔwaQL†f‚„}fºˆ˜¯Y3EÒ«epsc˜Å¼@¾@CA@ë¨€ëg°ˆé4p‹—,O·#ğèâZ6Û2lĞAB¾EµR½ßækæUÈ¥E.AW¾wÖ²[[+WC},(Ë‡\øâæÀÌsÿçú$(«Ë\ÕM>…Ù:º—‰×¤ğ­ÂQášjã7§ŠÌ÷b˜ÿ3˜àŞàÑ,®qÒå÷?1Yø©¯POyL÷4…&[ş©c¤¿áæò	nŸ	—p§',õ„¹®p¼+¼÷®ü…ƒ«Üğ,RØı¶Œ!n@¾‹M(lañÅË`ê,ö+œ`å2Æ—€Qå›úPKì	ü<    PK    !             & 	 org/gradle/wrapper/PathAssembler.classUT     UÏJÃ@ÆgMÿÄZEŸ@ÙS+MC+–PEÁ“ (ô¾ÙL“m7›°›ÖƒØñ-<	| Jœˆœ…ùø~ûÍ,ûùõş cØcğ²ÙÜGO<r‰&áS.ç|Àe‘—J‹J&È‹‰[Ô(Òe&\ 3”K·ÊŸÎ…v8àeä¢T½#LFr|JYıÍÏWZp™FdÑ¤Ê ZeR¢k´Ş"O†Qàš?ûÀtŠ••x­428*l¦V$ÃG+Êmx'ªìÒ9Ìc¶û±¡&oãÊª-­seTuÁà°wóPEXo=ûïú3^¯?ë‚´a‡AãŠ¾ #h’­‹Ñña›ú.¹R´yüİ×ß@¶ÀûPKë0[ü$  j  PK    !             . 	 org/gradle/wrapper/PropertiesFileHandler.classUT     T[WUşNI3qZJ¡”*6Š!$D¨ÅmÕR*Ø °˜zÁ“ÉI20™ÏL ,µ«}ğG´úØ×>…¶¬e|óİßĞ!î.	—f­ÉÌÙ—o_Î·÷Ÿ¿üÀ(<†',d~Œå¹±&ìBl<fcÉ˜áT\Óâ¾éØ©ŠS$—ÂÜ¤,s/e”…±æU+^l¼È-O$cn)UánÊTù±±cô
+ÙÊÌ¾±jY$ğÊ<5BGa—L[iÚ%’®éQ,’g†/gR±û9Æ /:Uiˆ[¦%â,¥K’,‘ŞÜu…Lß‘½|SxÊfšÛ¤”«|§-n—ÒóùUaø‚gKÂ_Üô|Qix2\ŒgëÖ¦“V0ƒ»ÇªoZéYîN0Dšõt† éí¦Õ¼Aí:Â8ÅĞİğt,‹"Sm††¨¸ş&!2œ‰·‰ guœACWCÕÈSÃ9
+{Õ´Mÿz=ìİÎ£WG.0ô4g8c»UÑ—‚W4¼¥¢µXw}[G.2,‡Î7Œšüë¶—SaúN–ã‰ŞUû0@Ø\§¹W¦R4Äuª¤‚kbsQø­å’ˆÊBR¦Ú©4¤©U¦/$÷ÉpîïÌœ F0Æû¸ÌĞyT¯á
+ƒFl÷ı>D{cÈPµ6	¨Åû¨M!ÌqL(»«”ïPˆ¡­¶»R²½uhø„!ìpj8„‡Ø·k®á&ÑÙó¹ô½eÓ/OâG1“ná3S˜fxÃ«æ½½ºã3Çæğ9n+ë,õÚ¢©RÀÄŒ™æ0¯wè\R70?Zî±XÀ¢º–%r$0dqüŸPw±¬ˆğÃéªM›À,š<o‰ú Dã-ü?:÷ğµš‡o.4Àª¶oVÄÔ}C¸j²4|·Oş¦ÎÜ¨šVAm‚ïú§¤tdt£,ì¨b:©£îÁTE‹4×BÈÿËÔ'¥ ƒƒf=¨¶M³’únÊ‚J)¡¬ LõG|I©I²T–Î†êÔ^xKÇ
+*´½æs¾©~‡8=Ik–ºœ¥­:W­ä…\RîK8IU?bBô0ü@§×’ø-QÃé'Ğ£ûÙ6zr¹ìŞÜF_nv(™Kl!ZÃ;5¼·ÁÜí-ñğ|À0›|cœ>®1äæjø´s²†™Ç;¯Sôİ®a67¨á‹_wşJô†Hú%)jÈ-?İù#ñß>Ë>E(Iè¯¶±’ÛÏ%V:-kX­amhö+J²‹¸ø\ô"ZGÑ‡”z?êç‡ø¥şf$=…6ÚÂÄvœÀ#ú&“ôÚşPK]&úoö  ö  PK    !             - 	 org/gradle/wrapper/WrapperConfiguration.classUT     }“mOAÇg¡ĞRÒ¤*rˆ}€R[ V@”'•Å´‚m»½\ïš»+$ù ~_hbcâ?€Ê8Û»ÓÒ¶ÉÍìÎÿ7»;³ûë÷Ÿ MŸ./ó¹b‘–Î˜Z—ÅREœKZ­.+Ô”55YÓÊçu¦0j0V©‘,UYéÌhÔq¹BƒÍ‰u)Y£õ¤Ìs³Ùt)³„Z=çğ•†¢à„Q¥É4™*É*cº¬J8{Ît×ÂùÜüÂ|.YfçâGş‚ÖĞKì¹¬0QM—R’NË
+K]è´^gzêe75µ"K½µg/xOé9M)T•R{ÅSV2½ĞO@(Ë†©ËÅ×ì¶T*3Sûù¤Úãx`áİ™
+&ßq§î5«FÛ§
+UšYÊ5Ş÷rİÊÄ=KÀ/4ıì­\cZÃ$@vŒSE.S“mµ%Ú×Œè_•UÙ\#Ğ‹0£~ğÂMÜÊ‹üúÖîöÉ~a;òrïÕ¶ÆğÃèƒ	ƒN©øşÜ@°‚wXŞ=†,O !îİ ÃÜ{@`È`æÖ•Ò…bWkÇ7åƒ®O–®ê­ŒÄânÅ6ÜÄ£±nmü ;µUÑÎÖìx‡öo[´Î»€"ã^?äœöùö±–±#Ö „‘×íÅaƒCFwÄÛá‡š@èàºö#`ÂøÄ;âi<›øÚ çòâÇÄ[‚á÷¡eÛÚ6`Û!Ûbó[[6ˆŞ4ünàh³´ÑÄááññwßjB$|§	“Ü›âŞt(lÂŒ§	Ñ¯À!ˆAÜN†üô'f›0ëÄç iÇChù}‰oùb‡ç!å†Gü¡+>éàiw|ÒÁ3®ø¢ƒ/¹ã‹uÅ§ü‘;>åà9W|ÚÁ»ãÓ¾+.øÌg;¼
+OºğvÇÁ×à©uğg°î†ÛÅ{‰ßèıPKRÊ¸Hï  P  PK    !             ( 	 org/gradle/wrapper/WrapperExecutor.classUT     VûwEş†>Bx4-oĞ…¶iÒğZ
+¨´€Vú¢)`Š€Ûd’.İìÆİM[@ğ­ ø~‚øDA¶D~ğ~ğòxg7i’6õpNNîÎÌıîã»3wæŸoş`n3œ;y²¿õx`HŠp5hÄ“P ®¥3²"™²¦†ÓZ‚Ó¼Î.œ‡%#æñ#›6mII1x(I…ÓR&,C--ëã6‘®ŞšÇ'³ŠBÆ°^OC®¦d•s]VS4;Êuƒ|Ñ|kóÆæÖp‚N¸Á<Q-«Çù.YáMOERº”PxdL—2®Gö;rç8gMMw¡’aÑiTŠ(’šŠôáqÓ…j2•Ñ5Ò4en0,é²u²¦¬Dú¦æ·0,(h9N8š²cÒ¨kjRN14vÍO‡­“Õmh«¬Êæ£õ¥öÊÇÑ¸¡¢¡qŸ°ÈjyŞ\¨õ 5^x1.ª°Ä7æŠ¯e^x0O|­`ğÇáÂ*
+’Ë†iØ®½¸÷{°~â@Ñ¤D!</Xè!+2Ì×¹”ØA0]Û«+u]ú£¦¨ğ/Ö`­ Ô ÅÍ>Içªéğ»(È3âE#‚ÂqCkQÎ6G²jr]•”|æ¶gy(+'ÿDí%Rq!LE;ÃiJëÊ¡8â\L*7#{û;)¦ÖyĞŒõ^b‘¡¦¡T[Ôm#UØD	&Š”Ûé¹ñCmªÔŠXğb³ ©móMãG‰‡†™!Ît)ó[±M0O[¯Ö˜é’aqÓ"Ç±]„Ò>->ÉvcÇÌÄ‚»œ˜éÍYït¬>E~‹­F‡¥›Z¢Ù´]Ë¦™Zõ¢Ç±ßË°ù(œ…“=‚“~reÌêjÀ	u/”cr&JÍ…;ÕÛO½„"”3NÑbNLƒ4mM?ãàáòOáN$?4…w¦JTCÚ=ÜÓô‘9Íµ¬iÑN/R:2CeC§˜ØŠ‘íñc&H(QiUh•aXA–÷IŠœL>í”x¡‹ó_CàECØŠ¬0>J8cVœ£M^ÆqTÀ‘v¡ıYÕ¤hvÇyÆiVÏ3„:´¬’ğ«šéÆŸënşB+ö'u-í¯_cÔ7»q²¤Ã;EuáEê_IMOKfù½q kú­Pş¼¼ŒW<x	¯2ÿ‡ëÚ˜4DíÃéÓ¯{poĞÆ/¨¥yšaiqÏéT3Y“Œr)íÂ[…’oIÍ·=8ƒw¨«–»%\xÈŒÑ>.À‹,ÛV>À‡¼ò‘•ª¸ğ	CU\ÑÄ–ıL\6Ÿâ,5¹DiUİøœam¹VQş|}!\~É°½GóJJ–ûÇdsØ?ÂÚUô—“2Oøeµl½‰ƒ|½¿Llì~KW‘Z²§İøÁe{èMŠfÖY6 ‹¸$Šúñ\Xí¤»$%®ŠÜI7¨(æ,‘ÖüìÁOø…
+9Z~ë»qUÀË÷œ‹øM„ğ{IíšFÏ*Ú7¨KØ!äff	ƒá&=°ğ•¾ƒVTª.zIõdÓC\ÛëéŒºèWqñÓW¸ömIO’.‘XHÿ· æÂ
+TÒìßMÁ¦`(›€ïêb±	,¾¥7°üVZxà,.„ƒáØÌáB“xÈBC·…}n°Ğâk¥Á–ĞaYèğí¤Ñ“¹Ñn_7úB‡+,D-ìó=MÃ¹ÅC¾giÏ’XH[xÎ‚iaÌÂñKXÕ}'b•·áŠõT4E}/„'ñZh§î\£ÔhÇe¼‰ôÚ²my#¶TpÌ–ÇqÊ–§é_HU<)%$—İÂ™XwS(8wC>¶pîÉswHoi×6±ôÀÉ!ûQ9$[‚×±ÜwŞÂWwáúÎ³JÊöªˆœVî®áÇº*|ç£•Á¨ï›&Êaî’áOú÷•ú^lKºÆsöı¹ÈÜÄºmr
+QMÒ);]9ífÒÑø‚+}ßïÄåàašÄ¯WJ<Í³·„ã)[{°×óØ›Ó±U„­¶±{rØ½4®"¹M°ĞD$ÄÚ*ï¢zyåÕĞ]T…®®>‡*6nª¦MFh:"µÕ³SŸƒŠÿ PK ‡#æU  Å  PK     ! °·£é  ¾'   	               META-INF/LICENSEUT     PK     ! ÿû±âb   d    	           0  META-INF/MANIFEST.MFUT     PK     ! Âß"  p  1 	           İ  org/gradle/cli/CommandLineArgumentException.classUT     PK     ! ld®Mn  ³  & 	           g  org/gradle/cli/CommandLineOption.classUT     PK     ! k¬™[  ¶  3 	           2  org/gradle/cli/CommandLineParser$AfterOptions.classUT     PK     ! HÄ.  ]  < 	           ÷  org/gradle/cli/CommandLineParser$BeforeFirstSubCommand.classUT     PK     ! ï€îœÜ  b  = 	           ˜  org/gradle/cli/CommandLineParser$KnownOptionParserState.classUT     PK     ! Ä€Á;M  —  < 	           è   org/gradle/cli/CommandLineParser$MissingOptionArgState.classUT     PK     ! ¥#Ø  J  = 	           ¨#  org/gradle/cli/CommandLineParser$OptionAwareParserState.classUT     PK     ! "83|¢  }  8 	           ô&  org/gradle/cli/CommandLineParser$OptionParserState.classUT     PK     ! \·w  C  3 	           )  org/gradle/cli/CommandLineParser$OptionString.classUT     PK     ! ú™˜
+­  Î  2 	           }+  org/gradle/cli/CommandLineParser$ParserState.classUT     PK     ! _rJ%t  Ç  ? 	           “-  org/gradle/cli/CommandLineParser$UnknownOptionParserState.classUT     PK     ! ¡#Ğû±  c  & 	           }0  org/gradle/cli/CommandLineParser.classUT     PK     ! læA¸<  á  & 	           ‹5  org/gradle/cli/ParsedCommandLine.classUT     PK     ! ShRS  ¬  , 	           $:  org/gradle/cli/ParsedCommandLineOption.classUT     PK     ! ×50ª  œ  3 	           Ú;  org/gradle/internal/file/PathTraversalChecker.classUT     PK     ! Íƒ‡    A 	           E?  org/gradle/internal/file/locking/ExclusiveFileAccessManager.classUT     PK     ! ÆUQæÂ  £  > 	           DA  org/gradle/util/internal/WrapperDistributionUrlConverter.classUT     PK     ! ê¸ô>    / 	           {C  org/gradle/wrapper/BootstrapMainStarter$1.classUT     PK     ! 4>t*  ä  A 	           oE  org/gradle/wrapper/Download$DefaultDownloadProgressListener.classUT     PK     ! ûéçæ    4 	           I  org/gradle/wrapper/Download$ProxyAuthenticator.classUT     PK     ! á¥ãAf	  *  ! 	           bL  org/gradle/wrapper/Download.classUT     PK     ! ­Pú”Ù  ²  - 	            V  org/gradle/wrapper/GradleUserHomeLookup.classUT     PK     ! ÇU C%  Ê)  * 	           ]X  org/gradle/wrapper/GradleWrapperMain.classUT     PK     ! N!Ãå  ÿ  " 	           ãm  org/gradle/wrapper/Install$1.classUT     PK     ! D;k  ç  - 	           !z  org/gradle/wrapper/Install$InstallCheck.classUT     PK     ! 1"‚Kù  x    	           ğ{  org/gradle/wrapper/Install.classUT     PK     ! ì	ü<     	           @‹  org/gradle/wrapper/Logger.classUT     PK     ! ë0[ü$  j  & 	           Ò  org/gradle/wrapper/PathAssembler.classUT     PK     ! ]&úoö  ö  . 	           S  org/gradle/wrapper/PropertiesFileHandler.classUT     PK     ! RÊ¸Hï  P  - 	           ®“  org/gradle/wrapper/WrapperConfiguration.classUT     PK     !  ‡#æU  Å  ( 	           —  org/gradle/wrapper/WrapperExecutor.classUT     PK    ! !   µ    
+
+
+====================================================================
+FILE: .\gradle\wrapper\gradle-wrapper.properties
+====================================================================
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.0-milestone-1-bin.zip
+networkTimeout=10000
+validateDistributionUrl=true
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\resources\META-INF\plugin.xml
+====================================================================
+<idea-plugin>
+    <id>com.hereliesaz.geministrator</id>
+    <name>Geministrator</name>
+    <version>1.0.0</version>
+    <vendor>hereliesaz</vendor>
+    <description><![CDATA[AI-driven development assistant to automate complex workflows.]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
+    <depends>com.intellij.modules.vcs</depends>
+    <depends>com.intellij.diff</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Geministrator" anchor="right" factoryClass="com.hereliesaz.geministrator.plugin.OrchestratorToolWindowFactory" icon="AllIcons.General.User" />
+    </extensions>
+    <actions>
+        <action id="Geministrator.Run" class="com.hereliesaz.geministrator.plugin.RunOrchestratorAction" text="Run Geministrator" description="Opens the Geministrator tool window." icon="AllIcons.Actions.Execute">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\src\AndroidStudioAdapter.kt
+====================================================================
+package com.hereliesaz.geminiorchestrator.adapter.as
+
+import com.hereliesaz.geminiorchestrator.common.*
+import com.hereliesaz.geminiorchestrator.core.council.ILogger
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.VfsUtil
+import java.io.File
+
+class AndroidStudioAdapter(private val project: Project, private val logger: ILogger) : ExecutionAdapter {
+    override fun execute(command: AbstractCommand): ExecutionResult {
+        var result: ExecutionResult? = null
+        ApplicationManager.getApplication().invokeAndWait {
+            result = when (command) {
+                is AbstractCommand.ReadFile -> {
+                    try {
+                        val file = VfsUtil.findFileByIoFile(File(project.basePath, command.path), false)
+                        val content = file?.let { VfsUtil.loadText(it) } ?: ""
+                        ExecutionResult(true, "Read file.", content)
+                    } catch (e: Exception) { ExecutionResult(false, "Failed to read file: ${e.message}") }
+                }
+                is AbstractCommand.RequestCommitReview -> {
+                    // This is a simplified version. A real implementation would be more complex.
+                    val userChoice = Messages.showYesNoDialog(project, "Approve changes for commit?\nMessage: ${command.proposedCommitMessage}", "Final Review", "Approve", "Reject", null)
+                    val decision = if (userChoice == Messages.YES) "APPROVE" else "REJECT"
+                    ExecutionResult(true, "User chose '$decision'", decision)
+                }
+                // This is a simplified adapter. A full implementation would use the IntelliJ SDK
+                // for every single command (Git, file I/O, etc.) for maximum safety and integration.
+                else -> ExecutionResult(true, "Simulated execution of ${command::class.simpleName} in IDE", null)
+            }
+        }
+        return result ?: ExecutionResult(false, "Adapter command failed to execute on EDT.")
+    }
+}
+
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\src\build.gradle.kts
+====================================================================
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.intellij")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+sourceSets.main {
+    java.srcDirs("src")
+    resources.srcDirs("resources")
+}
+
+
+intellij {
+    version.set("2023.3.6")
+    type.set("IC") // Or "IU" for Ultimate
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation(project(":common"))
+}
+
+tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+    changeNotes.set("Initial stable release.")
+}
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\src\OrchestratorToolWindowFactory.kt
+====================================================================
+
+import com.hereliesaz.GeminiOrchestrator.adapter.as.AndroidStudioAdapter
+import com.hereliesaz.GeminiOrchestrator.adapter.as.PluginConfigStorage
+import com.hereliesaz.GeminiOrchestrator.core.Orchestrator
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.content.ContentFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.awt.BorderLayout
+import java.awt.FlowLayout
+import javax.swing.*
+
+class OrchestratorToolWindowFactory : ToolWindowFactory {
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+    override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val orchestratorPanel = OrchestratorPanel(project)
+        val content = ContentFactory.getInstance().createContent(orchestratorPanel, "", false)
+        toolWindow.contentManager.addContent(content)
+    }
+
+    inner class OrchestratorPanel(private val project: Project) : JPanel(BorderLayout()) {
+        private val promptArea = JBTextArea(5, 50).apply {
+            lineWrap = true
+            wrapStyleWord = true
+        }
+        private val runButton = JButton("Run Workflow")
+        private val outputArea = JTextArea().apply {
+            isEditable = false
+            font = font.deriveFont(12f)
+        }
+        private val configStorage = PluginConfigStorage()
+        private val logger = ProgressLogger(outputArea)
+        private val reviewCheckbox = JBCheckBox("Require final review before commit", configStorage.loadPreCommitReview())
+        private val concurrencyLabel = JLabel("Max Parallel Tasks:")
+        private val concurrencySpinner = JSpinner(SpinnerNumberModel(configStorage.loadConcurrencyLimit(), 1, 16, 1))
+        private val tokenLimitLabel = JLabel("Token Limit:")
+        private val tokenLimitSpinner = JSpinner(SpinnerNumberModel(configStorage.loadTokenLimit(), 10000, 2000000, 10000))
+        private val monitorLabel = JLabel("Active Task Monitor")
+        private val monitorArea = JTextArea(10, 50).apply {
+            isEditable = false
+            font = font.deriveFont(12f)
+        }
+
+        init {
+            val settingsPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+            settingsPanel.add(reviewCheckbox)
+            settingsPanel.add(Box.createHorizontalStrut(10))
+            settingsPanel.add(concurrencyLabel)
+            settingsPanel.add(concurrencySpinner)
+            settingsPanel.add(Box.createHorizontalStrut(10))
+            settingsPanel.add(tokenLimitLabel)
+            settingsPanel.add(tokenLimitSpinner)
+
+            val buttonPanel = JPanel(BorderLayout())
+            buttonPanel.add(runButton, BorderLayout.CENTER)
+            buttonPanel.add(settingsPanel, BorderLayout.SOUTH)
+
+            val topPanel = JPanel(BorderLayout())
+            topPanel.add(JBScrollPane(promptArea), BorderLayout.CENTER)
+            topPanel.add(buttonPanel, BorderLayout.SOUTH)
+
+            val mainPanel = JPanel(BorderLayout())
+            mainPanel.add(topPanel, BorderLayout.NORTH)
+            mainPanel.add(JBScrollPane(outputArea), BorderLayout.CENTER)
+
+            val monitorPanel = JPanel(BorderLayout())
+            monitorPanel.border = BorderFactory.createEmptyBorder(5, 0, 0, 0)
+            monitorPanel.add(monitorLabel, BorderLayout.NORTH)
+            monitorPanel.add(JBScrollPane(monitorArea), BorderLayout.CENTER)
+
+            val splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, mainPanel, monitorPanel)
+            splitPane.resizeWeight = 0.7
+
+            add(splitPane, BorderLayout.CENTER)
+
+            runButton.addActionListener {
+                coroutineScope.launch { runWorkflow(promptArea.text) }
+            }
+            reviewCheckbox.addActionListener { configStorage.savePreCommitReview(reviewCheckbox.isSelected) }
+            concurrencySpinner.addChangeListener { configStorage.saveConcurrencyLimit(concurrencySpinner.value as Int) }
+            tokenLimitSpinner.addChangeListener { configStorage.saveTokenLimit(tokenLimitSpinner.value as Int) }
+
+            if (configStorage.loadApiKey().isNullOrBlank()) {
+                showOnboardingWizard()
+            }
+        }
+
+        private fun showOnboardingWizard() {
+            SwingUtilities.invokeLater {
+                Messages.showMessageDialog(project, "Welcome to Gemini Orchestrator!\nThis tool requires a Gemini API Key to function.\nPlease enter your key to continue.", "Welcome", Messages.getInformationIcon())
+                coroutineScope.launch { getAndValidateApiKey() }
+            }
+        }
+
+        private suspend fun runWorkflow(prompt: String) {
+            if (prompt.isBlank()) return
+            withContext(Dispatchers.Main) {
+                outputArea.text = ""
+                monitorArea.text = ""
+                runButton.isEnabled = false
+            }
+            val combinedLogger = object : com.hereliesaz.GeminiOrchestrator.core.council.ILogger {
+                override fun log(message: String) {
+                    logger.log(message)
+                    if (message.contains("[STARTING]") || message.contains("[FINISHED]")) {
+                        SwingUtilities.invokeLater { monitorArea.append("$message\n") }
+                    }
+                }
+            }
+            combinedLogger.log("â–¶ï¸ Initializing workflow...")
+            val apiKey = getAndValidateApiKey()
+            if (apiKey == null) {
+                combinedLogger.log("âŒ Workflow cancelled. API key is required.")
+                withContext(Dispatchers.Main) { runButton.isEnabled = true }
+                return
+            }
+            val adapter = AndroidStudioAdapter(project, combinedLogger)
+            val orchestrator = Orchestrator(adapter, apiKey, combinedLogger, configStorage)
+            try {
+                orchestrator.run(prompt, project.basePath ?: ".")
+            } catch (e: Exception) {
+                combinedLogger.log("---")
+                combinedLogger.log("âŒ A critical error occurred: ${e.message}")
+            } finally {
+                combinedLogger.log("--- Workflow Finished ---")
+                withContext(Dispatchers.Main) { runButton.isEnabled = true }
+            }
+        }
+
+        private suspend fun getAndValidateApiKey(): String? {
+            var apiKey = configStorage.loadApiKey()
+            while (true) {
+                if (!apiKey.isNullOrBlank()) {
+                    val service = com.hereliesaz.GeminiOrchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
+                    if (service.validateApiKey()) {
+                        return apiKey
+                    }
+                    logger.log("âš ï¸ Your saved API key is no longer valid. Please enter a new one.")
+                }
+                apiKey = withContext(Dispatchers.Main) {
+                    Messages.showInputDialog(project, "Please enter your Gemini API Key:", "API Key Required", Messages.getQuestionIcon())
+                }
+                if (apiKey.isNullOrBlank()) return null
+                val service = com.hereliesaz.GeminiOrchestrator.core.GeminiService(apiKey, logger, configStorage, "", "")
+                if (service.validateApiKey()) {
+                    configStorage.saveApiKey(apiKey)
+                    logger.log("âœ… API Key is valid and has been saved.")
+                    return apiKey
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Messages.showErrorDialog(project, "The key you entered is invalid. Please try again.", "Invalid API Key")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\src\PluginConfigStorage.kt
+====================================================================
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\src\RunOrchestratorAction.kt
+====================================================================
+
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.wm.ToolWindowManager
+
+class RunOrchestratorAction : AnAction() {
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Gemini Orchestrator")
+        toolWindow?.show()
+    }
+}
+
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\build.gradle.kts
+====================================================================
+plugins {
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.intellij")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+sourceSets {
+    main {
+        kotlin.srcDirs = listOf("src")
+        resources.srcDirs = listOf("resources")
+    }
+}
+
+intellij {
+    version.set("2023.3.6")
+    type.set("IC")
+}
+
+dependencies {
+    implementation(project(":core"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+}
+
+tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+    changeNotes.set("Initial stable release.")
+}
+
+
+====================================================================
+FILE: .\plugins\android-studio-plugin\ProgressLogger.kt
+====================================================================
+package com.hereliesaz.geminiorchestrator.plugin
+import com.intellij.openapi.application.ApplicationManager
+import javax.swing.JTextArea
+
+class ProgressLogger(private val outputArea: JTextArea) : com.hereliesaz.geminiorchestrator.core.council.ILogger {
+    override fun log(message: String) {
+        ApplicationManager.getApplication().invokeLater {
+            outputArea.append("$message\n")
+            outputArea.caretPosition = outputArea.document.length
+        }
+    }
+}
+
+
+====================================================================
+FILE: .\plugins\vscode-extension\src\extension.ts
+====================================================================
+import * as vscode from 'vscode';
+import { spawn, ChildProcess } from 'child_process';
+import * as path from 'path';
+
+let orchestratorPanel: vscode.WebviewPanel | undefined;
+let orchestratorProcess: ChildProcess | undefined;
+
+export function activate(context: vscode.ExtensionContext) {
+    context.subscriptions.push(
+        vscode.commands.registerCommand('gemini-orchestrator.start', () => {
+            if (orchestratorPanel) {
+                orchestratorPanel.reveal(vscode.ViewColumn.Two);
+                return;
+            }
+
+            orchestratorPanel = vscode.window.createWebviewPanel(
+                'geminiOrchestrator',
+                'Geministrator',
+                vscode.ViewColumn.Two,
+                {
+                    enableScripts: true,
+                    localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+                }
+            );
+
+            orchestratorPanel.webview.html = getWebviewContent();
+
+            orchestratorPanel.onDidDispose(() => {
+                orchestratorPanel = undefined;
+                if (orchestratorProcess) {
+                    orchestratorProcess.kill();
+                    orchestratorProcess = undefined;
+                }
+            }, null, context.subscriptions);
+
+            orchestratorPanel.webview.onDidReceiveMessage(
+                message => {
+                    switch (message.command) {
+                        case 'runWorkflow':
+                            runCliProcess(message.text);
+                            return;
+                        case 'sendToCli':
+                            if (orchestratorProcess && orchestratorProcess.stdin) {
+                                orchestratorProcess.stdin.write(`${message.text}\n`);
+                            }
+                            return;
+                    }
+                },
+                undefined,
+                context.subscriptions
+            );
+        })
+    );
+}
+
+function runCliProcess(prompt: string) {
+    if (orchestratorProcess) {
+        orchestratorProcess.kill();
+    }
+
+    const cliPath = path.resolve(__dirname, '../../../cli/build/install/cli/bin/cli');
+
+    const args = ['run', prompt];
+    orchestratorProcess = spawn(cliPath, args);
+
+    orchestratorProcess.stdout?.on('data', (data: Buffer) => {
+        const message = data.toString();
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: message });
+    });
+
+    orchestratorProcess.stderr?.on('data', (data: Buffer) => {
+        const message = data.toString();
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: `ERROR: ${message}` });
+    });
+
+    orchestratorProcess.on('close', (code) => {
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: `\n--- Process finished with exit code ${code} ---` });
+        orchestratorProcess = undefined;
+    });
+}
+
+function getWebviewContent(): string {
+    return `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Geministrator</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+                #output { white-space: pre-wrap; background-color: #222; color: #eee; padding: 10px; font-family: monospace; height: 70vh; overflow-y: scroll; border-radius: 5px; }
+                textarea { width: 95%; margin-bottom: 10px; }
+                button { padding: 5px 10px; }
+            </style>
+        </head>
+        <body>
+            <h1>Geministrator</h1>
+            <textarea id="prompt" rows="4" placeholder="Enter your high-level task..."></textarea>
+            <br>
+            <button id="run-button">Run Workflow</button>
+
+            <h3>Output Log</h3>
+            <div id="output">Welcome! Enter a prompt and click "Run Workflow" to begin.</div>
+
+            <script>
+                const vscode = acquireVsCodeApi();
+                const runButton = document.getElementById('run-button');
+                const promptArea = document.getElementById('prompt');
+                const outputArea = document.getElementById('output');
+
+                runButton.addEventListener('click', () => {
+                    const text = promptArea.value;
+                    if (text) {
+                        outputArea.textContent = ''; // Clear previous output
+                        vscode.postMessage({ command: 'runWorkflow', text: text });
+                    }
+                });
+
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    switch (message.command) {
+                        case 'log':
+                            outputArea.textContent += message.text;
+                            outputArea.scrollTop = outputArea.scrollHeight; // Auto-scroll
+                            break;
+                    }
+                });
+            </script>
+        </body>
+        </html>
+    `;
+}
+
+export function deactivate() {
+    if (orchestratorProcess) {
+        orchestratorProcess.kill();
+    }
+}
+
+
+====================================================================
+FILE: .\plugins\vscode-extension\.vscodeignore
+====================================================================
+
+
+====================================================================
+FILE: .\plugins\vscode-extension\package.json
+====================================================================
+{
+  "name": "gemini-orchestrator",
+  "displayName": "Gemini Orchestrator",
+  "description": "An AI-powered development assistant built on a team of collaborative agents.",
+  "version": "1.0.0",
+  "publisher": "hereliesaz",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:gemini-orchestrator.start"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gemini-orchestrator.start",
+        "title": "Start Gemini Orchestrator",
+        "category": "Gemini Orchestrator"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "typescript": "^5.0.0"
+  }
+}
+
+
+
+====================================================================
+FILE: .\plugins\vscode-extension\tsconfig.json
+====================================================================
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2020",
+    "outDir": "out",
+    "lib": [
+      "ES2020"
+    ],
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true
+  },
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ]
+}
+
+
+
+====================================================================
+FILE: .\.gitignore
+====================================================================
+
+
+====================================================================
+FILE: .\build.gradle.kts
+====================================================================
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.plugins.JavaPluginExtension
+
+plugins {
+    id("org.jetbrains.kotlin.jvm") apply false
+    id("org.jetbrains.kotlin.plugin.serialization") apply false
+    id("org.jetbrains.intellij")apply false
+}
+
+allprojects {
+    group = "com.hereliesaz.geministrator"
+    version = "1.0.0"
+
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "java")
+
+    configure<JavaPluginExtension> {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "17"
+    }
+}
+
+
+====================================================================
+FILE: .\FILETREE
+====================================================================
+gemini-orchestrator/
+â”œâ”€â”€ .gitignore
+â”œâ”€â”€ README.md
+â”œâ”€â”€ build.gradle.kts
+â”œâ”€â”€ settings.gradle.kts
+â”‚
+â”œâ”€â”€ ğŸ“ common/
+â”‚   â””â”€â”€ src/main/kotlin/com/gemini/orchestrator/common/
+â”‚       â”œâ”€â”€ AbstractCommand.kt
+â”‚       â””â”€â”€ ExecutionResult.kt
+â”‚
+â”œâ”€â”€ ğŸ“ core/
+â”‚   â””â”€â”€ src/main/kotlin/com/gemini/orchestrator/core/
+â”‚       â”œâ”€â”€ config/
+â”‚       â”‚   â””â”€â”€ ConfigStorage.kt
+â”‚       â”œâ”€â”€ council/
+â”‚       â”‚   â”œâ”€â”€ AllAgents.kt
+â”‚       â”‚   â”œâ”€â”€ ILogger.kt
+â”‚       â”‚   â””â”€â”€ TechSupport.kt
+â”‚       â”œâ”€â”€ tokenizer/
+â”‚       â”‚   â””â”€â”€ Tokenizer.kt
+â”‚       â”œâ”€â”€ GeminiService.kt
+â”‚       â”œâ”€â”€ Manager.kt
+â”‚       â””â”€â”€ Orchestrator.kt
+â”‚
+â”œâ”€â”€ ğŸ“ adapters/
+â”‚   â”œâ”€â”€ ğŸ“ adapter-cli/
+â”‚   â”‚   â””â”€â”€ src/main/kotlin/com/gemini/orchestrator/adapter/cli/
+â”‚   â”‚       â”œâ”€â”€ CliAdapter.kt
+â”‚   â”‚       â””â”€â”€ CliConfigStorage.kt
+â”‚   â”‚
+â”‚   â””â”€â”€ ğŸ“ adapter-android-studio/
+â”‚       â””â”€â”€ src/main/kotlin/com/gemini/orchestrator/adapter/as/
+â”‚           â”œâ”€â”€ AndroidStudioAdapter.kt
+â”‚           â””â”€â”€ PluginConfigStorage.kt
+â”‚
+â””â”€â”€ ğŸ“ products/
+    â”œâ”€â”€ ğŸ“ cli/
+    â”‚   â””â”€â”€ src/main/kotlin/com/gemini/orchestrator/cli/
+    â”‚       â””â”€â”€ Main.kt
+    â”‚
+    â”œâ”€â”€ ğŸ“ android-studio-plugin/
+    â”‚   â”œâ”€â”€ src/main/kotlin/com/gemini/orchestrator/plugin/
+    â”‚   â”‚   â”œâ”€â”€ OrchestratorToolWindowFactory.kt
+    â”‚   â”‚   â”œâ”€â”€ ProgressLogger.kt
+    â”‚   â”‚   â””â”€â”€ RunOrchestratorAction.kt
+    â”‚   â””â”€â”€ src/main/resources/META-INF/
+    â”‚       â””â”€â”€ plugin.xml
+    â”‚
+    â””â”€â”€ ğŸ“ vscode-extension/
+        â”œâ”€â”€ .vscodeignore
+        â”œâ”€â”€ package.json
+        â”œâ”€â”€ tsconfig.json
+        â””â”€â”€ ğŸ“ src/
+            â””â”€â”€ extension.ts
+
+
+
+====================================================================
+FILE: .\gradle.properties
+====================================================================
+org.gradle.java.home=C:/Users/azrie/.jdks/jbr-17.0.14
+
+
+====================================================================
+FILE: .\gradlew
+====================================================================
+#!/bin/sh
+
+#
+# Copyright Â© 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions Â«$varÂ», Â«${var}Â», Â«${var:-default}Â», Â«${var+SET}Â»,
+#           Â«${var#prefix}Â», Â«${var%suffix}Â», and Â«$( cmd )Â»;
+#         * compound commands having a testable exit status, especially Â«caseÂ»;
+#         * various built-in commands including Â«commandÂ», Â«setÂ», and Â«ulimitÂ».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/HEAD/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+# This is normally unused
+# shellcheck disable=SC2034
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        # In POSIX sh, ulimit -H is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        # In POSIX sh, ulimit -n is undefined. That's why the result is checked to see if it worked.
+        # shellcheck disable=SC2039,SC3045
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+
+
+
+====================================================================
+FILE: .\gradlew.bat
+====================================================================
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+@rem SPDX-License-Identifier: Apache-2.0
+@rem
+
+@if "%DEBUG%"=="" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+@rem This is normally unused
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo. 1>&2
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
+echo. 1>&2
+echo Please set the JAVA_HOME variable in your environment to match the 1>&2
+echo location of your Java installation. 1>&2
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if %ERRORLEVEL% equ 0 goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+
+
+
+====================================================================
+FILE: .\local.properties
+====================================================================
+## This file must *NOT* be checked into Version Control Systems,
+# as it contains information specific to your local configuration.
+#
+# Location of the SDK. This is only used by Gradle.
+# For customization when using a Version Control System, please read the
+# header note.
+#Sat Aug 02 18:45:30 CDT 2025
+sdk.dir=C\:\\Users\\azrie\\AppData\\Local\\Android\\Sdk
+
+
+
+====================================================================
+FILE: .\README.md
+====================================================================
+# Geministrator
+
+**An AI-powered development assistant built on a team of collaborative agents.**
+
+Geministrator is a production-ready prototype that automates complex development workflows from within your IDE or command line. It uses a hierarchical council of six specialized AI agents to plan, research, execute, document, quality-check, and debug software development tasks.
+
+Inspired by the script-based automation of projects like [**tmux-orchestrator**](https://github.com/Jedward23/Tmux-Orchestrator), this project reimagines workflow automation in the age of large language models, replacing static configuration files with a dynamic, resilient, and collaborative AI team.
+
+---
+
+## How It Works: The Agent Council
+
+The Geministrator is built around a team of six specialized agents that collaborate to ensure high-quality, well-documented, and robust results.
+
+1.  **The Orchestrator:** The team lead. It interprets the user's goals, directs the council, integrates the work of parallel managers, and makes the final decision to commit code.
+
+2.  **The Architect:** The internal expert. It maintains a deep understanding of the project's codebase, structure, and history. It provides curated context to other agents and reviews all code for architectural compliance.
+
+3.  **The Researcher:** The external expert. It connects to the outside world via tool access (e.g., web search) to find best practices, research libraries, and proactively scan for dependency vulnerabilities.
+
+4.  **The Designer:** The project's scribe and historian. It is responsible for creating and maintaining the **Project Guidebook**â€”a set of living documents containing feature specifications, a changelog, and a "Document of Reasoning" to preserve institutional memory.
+
+5.  **The Antagonist:** The designated "red teamer." Its sole purpose is to challenge the Orchestrator's plans *before* they are executed, searching for flaws, risks, or inefficiencies.
+
+6.  **The Tech Support:** The error specialist. When a technical problem occurs that the agents cannot solve (like a Git merge conflict), Tech Support is called to analyze the error and propose a resolution strategy.
+
+---
+
+## Core Features & Principles
+
+* **Concurrent & Isolated Work:** Complex tasks are broken down, and each sub-task is handled by a `Manager` agent on its own isolated Git branch, controlled by a user-configurable concurrency limit.
+* **Mandatory Checkpoints:** All plans are reviewed by the Antagonist before execution, and all integrated code is reviewed by the Architect before being committed.
+* **Self-Correction Loop:** The system automatically runs tests after code changes. If a test fails, it reads the error, and the Orchestrator attempts to generate a new workflow to fix the bug.
+* **User-Controlled Commits:** A pre-commit review step (which can be disabled) ensures the user has the final say before code is written to history.
+* **Session Persistence & Recovery:** Workflows are saved to a journal file, allowing the application to resume an incomplete task after a restart.
+* **Graceful AI Restarts:** To prevent context overload, AI sessions are automatically summarized and restarted when they approach a user-defined token limit.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+* Java 17+
+* Node.js and npm (for building the VS Code extension)
+* A valid Gemini API Key
+
+### 1. For the Command-Line (CLI) Version
+
+1.  **Build the CLI:**
+    ```bash
+    ./gradlew :cli:installDist
+    ```
+2.  **Run the application:**
+    * The first time you run it, it will prompt you for your Gemini API Key.
+    * Use the `config` subcommand to manage settings.
+    ```bash
+    # Run a workflow
+    ./cli/build/install/cli/bin/cli run "Your development task here"
+
+    # Configure settings
+    ./cli/build/install/cli/bin/cli config --toggle-review
+    ./cli/build/install/cli/bin/cli config --set-concurrency=4
+    ```
+
+### 2. For the Android Studio Plugin
+
+1.  **Build the Plugin:**
+    ```bash
+    ./gradlew :plugins:android-studio-plugin:buildPlugin
+    ```
+    This will generate a `.zip` file in `plugins/android-studio-plugin/build/distributions/`.
+
+2.  **Install the Plugin:**
+    * Open Android Studio > `Settings/Preferences` > `Plugins`.
+    * Click the gear icon > `Install Plugin from Disk...` and select the `.zip` file.
+    * Restart the IDE.
+
+3.  **Run the Orchestrator:**
+    * A "Welcome" wizard will appear on first run to guide you through setup.
+    * Go to `Tools` > `Run Geministrator` to open the tool window.
+    * Use the UI controls to configure settings like pre-commit review, concurrency, and token limits.
+
+### 3. For the VS Code Extension
+
+1.  **Build the CLI Prerequisite:** The VS Code extension depends on the CLI executable. You must build it first:
+    ```bash
+    ./gradlew :cli:installDist
+    ```
+2.  **Build the Extension:**
+    ```bash
+    cd plugins/vscode-extension
+    npm install
+    npm run compile
+    ```
+3.  **Run the Extension:**
+    * Open the `Geministrator` project folder in VS Code.
+    * Press `F5` to open a new "Extension Development Host" window with the extension running.
+    * In the new window, open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and type `Start Geministrator`.
+    * This will open the Geministrator panel, where you can enter your prompt and run your workflows.
+
+
+====================================================================
+FILE: .\settings.gradle.kts
+====================================================================
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://plugins.gradle.org/m2/")
+        maven("https://jitpack.io")
+    }
+    plugins {
+        id("org.jetbrains.kotlin.jvm") version "1.9.23"
+        id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23"
+        id("org.jetbrains.intellij") version "2.2.0"
+        id("application")
+    }
+}
+
+rootProject.name = "Geministrator"
+
+include(
+    ":common",
+    ":core",
+    ":cli",
+    ":plugins:android-studio-plugin"
+)
+
+

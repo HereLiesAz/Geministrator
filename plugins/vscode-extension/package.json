@@ -1,0 +1,36 @@
+{
+  "name": "geministrator",
+  "displayName": "Geministrator",
+  "description": "An AI-powered development assistant built on a team of collaborative agents.",
+  "version": "1.0.0",
+  "publisher": "hereliesaz",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:geministrator.start"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "geministrator.start",
+        "title": "Start Geministrator",
+        "category": "Geministrator"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "18.x",
+    "typescript": "^5.0.0"
+  }
+}
