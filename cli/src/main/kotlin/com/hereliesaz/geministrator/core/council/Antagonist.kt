@@ -1,6 +1,6 @@
-package com.hereliesaz.geministrator_plugin.core.council
+package com.hereliesaz.geministrator.core.council
 
-import com.hereliesaz.geministrator_plugin.core.GeminiService
+import com.hereliesaz.geministrator.core.GeminiService
 
 class Antagonist(private val logger: ILogger, private val ai: GeminiService) {
     fun reviewPlan(planJson: String): String? {

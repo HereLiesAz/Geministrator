@@ -1,13 +1,26 @@
 package com.hereliesaz.geministrator.core
 
-import com.hereliesaz.geministrator.common.*
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.common.ExecutionResult
 import com.hereliesaz.geministrator.core.config.ConfigStorage
-import com.hereliesaz.geministrator.core.council.*
-import kotlinx.coroutines.*
+import com.hereliesaz.geministrator.core.council.Antagonist
+import com.hereliesaz.geministrator.core.council.Architect
+import com.hereliesaz.geministrator.core.council.Designer
+import com.hereliesaz.geministrator.core.council.ILogger
+import com.hereliesaz.geministrator.core.council.Researcher
+import com.hereliesaz.geministrator.core.council.TechSupport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable
 data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)
@@ -55,7 +68,12 @@ class Orchestrator(
     fun run(prompt: String, projectRoot: String) = runBlocking(Dispatchers.Default) {
         val sessionState = loadSessionState()
         if (sessionState != null) {
-            val decision = adapter.execute(RequestUserDecision("An incomplete workflow was found. Do you want to resume it?", listOf("Resume", "Start New")))
+            val decision = adapter.execute(
+                AbstractCommand.RequestUserDecision(
+                    "An incomplete workflow was found. Do you want to resume it?",
+                    listOf("Resume", "Start New")
+                )
+            )
             if (decision.data == "Resume") {
                 logger.log("Resuming previous workflow...")
                 executeMasterPlan(sessionState.masterPlan, projectRoot, sessionState.mainBranch, sessionState.completedBranches)
@@ -130,7 +148,12 @@ class Orchestrator(
             } else {
                 val analysis = techSupport.analyzeMergeConflict(mergeResult?.output ?: "Unknown error")
                 logger.log("--- TECH SUPPORT ANALYSIS ---\n$analysis")
-                val userDecision = adapter.execute(RequestUserDecision("A merge conflict occurred. What should we do?", listOf("Abandon", "Attempt AI Fix")))
+                val userDecision = adapter.execute(
+                    AbstractCommand.RequestUserDecision(
+                        "A merge conflict occurred. What should we do?",
+                        listOf("Abandon", "Attempt AI Fix")
+                    )
+                )
                 if (userDecision.data == "Attempt AI Fix") {
                     // Call handleTask without creating a new branch
                     handleTask("Resolve merge conflict based on Tech Support analysis", projectRoot, mutableListOf(analysis), 0, integrationBranch, createBranch = false)
@@ -251,7 +274,7 @@ class Orchestrator(
 
     private fun loadSessionState(): SessionState? {
         val result = adapter.execute(AbstractCommand.ReadFile(SESSION_FILE))
-        return if (result.isSuccess && result.data is String && (result.data as String).isNotBlank()) {
+        return if (result.isSuccess && result.data is String && (result.data.isNotBlank())) {
             try { Json.decodeFromString(SessionState.serializer(), result.data) }
             catch (e: Exception) { null }
         } else null

@@ -1,8 +1,8 @@
-package com.hereliesaz.geministrator_plugin.core.council
+package com.hereliesaz.geministrator.core.council
 
-import com.hereliesaz.geministrator_plugin.common.AbstractCommand
-import com.hereliesaz.geministrator_plugin.common.ExecutionAdapter
-import com.hereliesaz.geministrator_plugin.core.GeminiService
+import com.hereliesaz.geministrator.common.AbstractCommand
+import com.hereliesaz.geministrator.common.ExecutionAdapter
+import com.hereliesaz.geministrator.core.GeminiService
 
 class Researcher(private val logger: ILogger, private val ai: GeminiService, private val adapter: ExecutionAdapter) {
     fun findBestPracticesFor(topic: String): String {

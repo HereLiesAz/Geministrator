@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 // Request/Response structures for serialization
 @Serializable private data class GeminiRequest(val model: String, val contents: List<Content>)
@@ -56,7 +56,8 @@ class GeminiService(
     private fun internalExecute(prompt: String, model: String, history: List<Content>? = null): String {
         logger.log("  -> Calling AI Model ($model)...")
         // Use a dynamic endpoint based on the model
-        val url = URL("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent")
+        val url =
+            URI("https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent").toURL()
         val connection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
         connection.setRequestProperty("x-goog-api-key", apiKey)
@@ -87,7 +88,7 @@ class GeminiService(
 
     suspend fun validateApiKey(): Boolean {
         logger.log("  -> Validating API Key...")
-        val url = URL("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey")
+        val url = URI("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey").toURL()
         return try {
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"

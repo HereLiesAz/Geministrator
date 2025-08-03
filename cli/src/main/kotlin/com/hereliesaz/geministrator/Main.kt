@@ -1,11 +1,15 @@
-﻿package com.hereliesaz.geministrator.cli
+﻿package com.hereliesaz.geministrator
 
 import com.hereliesaz.geministrator.adapter.cli.CliConfigStorage
+import com.hereliesaz.geministrator.cli.CliAdapter
 import com.hereliesaz.geministrator.core.GeminiService
 import com.hereliesaz.geministrator.core.Orchestrator
 import com.hereliesaz.geministrator.core.config.ConfigStorage
 import com.hereliesaz.geministrator.core.council.ILogger
-import kotlinx.cli.*
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
+import kotlinx.cli.ExperimentalCli
+import kotlinx.cli.Subcommand
 import kotlinx.coroutines.runBlocking
 
 class ConsoleLogger : ILogger { override fun log(message: String) { println(message) } }
@@ -23,11 +27,11 @@ fun main(args: Array<String>) = runBlocking {
                 val apiKey = getAndValidateApiKey(configStorage, logger)
                 if (apiKey == null) {
                     println("ERROR: Could not obtain a valid API key. Exiting.")
-                    return@runBlocking
-                }
-                // NOTE: This assumes CliAdapter() will be implemented in the currently empty file.
+
+                } else {
                 val orchestrator = Orchestrator(CliAdapter(), apiKey, logger, configStorage)
                 orchestrator.run(prompt, System.getProperty("user.dir"))
+                }
             }
         }
     }

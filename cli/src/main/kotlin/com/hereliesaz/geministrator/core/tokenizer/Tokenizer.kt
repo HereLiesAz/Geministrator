@@ -1,4 +1,4 @@
-﻿package com.hereliesaz.geministrator_plugin.core.tokenizer
+﻿package com.hereliesaz.geministrator.core.tokenizer
 
 object Tokenizer {
     /**
