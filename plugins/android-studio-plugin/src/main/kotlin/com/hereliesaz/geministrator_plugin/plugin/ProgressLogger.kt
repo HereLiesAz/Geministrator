@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.plugin
+package com.hereliesaz.geministrator_plugin.plugin
 import com.intellij.openapi.application.ApplicationManager
 import javax.swing.JTextArea
 

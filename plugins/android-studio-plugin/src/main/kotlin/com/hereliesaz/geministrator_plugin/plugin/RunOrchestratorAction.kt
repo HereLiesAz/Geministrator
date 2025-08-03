@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.plugin
+package com.hereliesaz.geministrator_plugin.plugin
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent

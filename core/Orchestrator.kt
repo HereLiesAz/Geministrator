@@ -8,6 +8,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.collections.mapValues
 
 @Serializable
 data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)
@@ -28,7 +29,7 @@ class Orchestrator(
     private val adapter: ExecutionAdapter,
     private val apiKey: String,
     private val logger: ILogger,
-    private val config: ConfigStorage
+    private val config: ConfigStorage,
 ) {
     private val ai: GeminiService
     private val architect: Architect
@@ -226,7 +227,21 @@ class Orchestrator(
     }
 
     private fun logJournal(action: String, data: Map<String, Any>) {
-        val entry = "{\"timestamp\": ${System.currentTimeMillis()}, \"action\": \"$action\", \"data\": $data}\n"
+        val dataJsonObject = JsonObject(data.mapValues { (_, value) ->
+            when (value) {
+                is String -> JsonPrimitive(value)
+                is Number -> JsonPrimitive(value)
+                is Boolean -> JsonPrimitive(value)
+                else -> JsonPrimitive(value.toString()) // Fallback for other types
+            }
+        })
+        val entry =
+            "{\"timestamp\": ${java.lang.System.currentTimeMillis()}, \"action\": \"$action\", \"data\": ${
+                jsonParser.encodeToString(
+                    JsonObject.serializer(),
+                    dataJsonObject
+                )
+            }}\n"
         adapter.execute(AbstractCommand.AppendToFile(JOURNAL_FILE, entry))
     }
 

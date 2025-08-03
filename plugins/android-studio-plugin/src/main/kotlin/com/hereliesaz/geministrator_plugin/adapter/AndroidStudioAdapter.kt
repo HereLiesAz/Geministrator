@@ -1,13 +1,14 @@
-package com.hereliesaz.geministrator.adapter.as
+package com.hereliesaz.geministrator_plugin.adapter
 
 import com.hereliesaz.geministrator.common.*
 import com.hereliesaz.geministrator.core.council.ILogger
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VfsUtil
+import org.gradle.api.Project
 import java.io.File
+
+private val intellij: Any
 
 class AndroidStudioAdapter(private val project: Project, private val logger: ILogger) : ExecutionAdapter {
     override fun execute(command: AbstractCommand): ExecutionResult {

@@ -1,10 +1,9 @@
-package com.hereliesaz.geministrator.plugin
+package com.hereliesaz.geministrator_plugin.plugin
 
-import com.hereliesaz.geministrator.adapter.as.AndroidStudioAdapter
-import com.hereliesaz.geministrator.adapter.as.PluginConfigStorage
-import com.hereliesaz.geministrator.core.GeminiService
-import com.hereliesaz.geministrator.core.Orchestrator
-import com.hereliesaz.geministrator.core.council.ILogger
+import com.hereliesaz.geministrator_plugin.adapter.AndroidStudioAdapter
+import com.hereliesaz.geministrator_plugin.core.GeminiService
+import com.hereliesaz.geministrator_plugin.core.Orchestrator
+import com.hereliesaz.geministrator_plugin.core.council.ILogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindow

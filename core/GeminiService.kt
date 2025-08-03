@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.serialization.builtins.ListSerializer
 
 // Request/Response structures for serialization
 @Serializable private data class GeminiRequest(val model: String, val contents: List<Content>)
