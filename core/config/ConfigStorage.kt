@@ -1,4 +1,4 @@
-﻿package com.hereliesaz.geministrator.core.config
+package com.hereliesaz.geministrator.core.config
 
 interface ConfigStorage {
     fun saveApiKey(apiKey: String)

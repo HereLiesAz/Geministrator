@@ -1,4 +1,4 @@
-﻿import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.gradle.api.plugins.JavaPluginExtension
 
 plugins {
