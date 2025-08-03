@@ -11,10 +11,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/cli" />
-            <option value="$PROJECT_DIR$/common" />
-            <option value="$PROJECT_DIR$/core" />
-            <option value="$PROJECT_DIR$/plugins" />
-            <option value="$PROJECT_DIR$/plugins/android-studio-plugin" />
           </set>
         </option>
       </GradleProjectSettings>

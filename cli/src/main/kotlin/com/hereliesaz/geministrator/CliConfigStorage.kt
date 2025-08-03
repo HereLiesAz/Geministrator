@@ -4,7 +4,7 @@ import com.hereliesaz.geministrator.core.config.ConfigStorage
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Properties
 
 class CliConfigStorage : ConfigStorage {
     private val configFile = File(System.getProperty("user.home"), ".gemini-orchestrator/config.properties")

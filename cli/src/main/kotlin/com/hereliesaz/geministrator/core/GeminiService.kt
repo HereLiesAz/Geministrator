@@ -4,10 +4,10 @@ import com.hereliesaz.geministrator.core.config.ConfigStorage
 import com.hereliesaz.geministrator.core.council.ILogger
 import com.hereliesaz.geministrator.core.tokenizer.Tokenizer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlinx.serialization.builtins.ListSerializer
 
 // Request/Response structures for serialization
 @Serializable private data class GeminiRequest(val model: String, val contents: List<Content>)

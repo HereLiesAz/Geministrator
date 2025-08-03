@@ -8,7 +8,6 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlin.collections.mapValues
 
 @Serializable
 data class SessionState(val masterPlan: MasterPlan, val completedBranches: List<String>, val mainBranch: String)

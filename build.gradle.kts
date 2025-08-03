@@ -1,36 +1,14 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.gradle.api.plugins.JavaPluginExtension
+﻿// Project-level build file: Defines plugins and versions for all modules.
 
-plugins {
-    id("org.jetbrains.kotlin.jvm") apply false
-    id("org.jetbrains.kotlin.plugin.serialization") apply false
-    id("org.jetbrains.intellij")apply false
-}
-
-allprojects {
-    group = "com.hereliesaz.geministrator"
-    version = "1.0.0"
 
     repositories {
-        mavenCentral()
         google()
-        maven(url = "https://jitpack.io")
-    }
-}
-
-subprojects {
-    apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "java")
-
-    configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
-        }
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        mavenCentral()
+        gradlePluginPortal()
     }
 
-    tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+plugins {
+    kotlin("jvm") version "1.9.23" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.23" apply false
+    application
     }
-}
