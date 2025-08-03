@@ -5,6 +5,7 @@ import com.hereliesaz.geministrator.core.council.ILogger
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VfsUtil
 import java.io.File
 

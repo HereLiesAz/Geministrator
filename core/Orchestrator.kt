@@ -55,12 +55,7 @@ class Orchestrator(
     fun run(prompt: String, projectRoot: String) = runBlocking(Dispatchers.Default) {
         val sessionState = loadSessionState()
         if (sessionState != null) {
-            val decision = adapter.execute(
-                AbstractCommand.RequestUserDecision(
-                    "An incomplete workflow was found. Do you want to resume it?",
-                    listOf("Resume", "Start New")
-                )
-            )
+            val decision = adapter.execute(RequestUserDecision("An incomplete workflow was found. Do you want to resume it?", listOf("Resume", "Start New")))
             if (decision.data == "Resume") {
                 logger.log("Resuming previous workflow...")
                 executeMasterPlan(sessionState.masterPlan, projectRoot, sessionState.mainBranch, sessionState.completedBranches)
@@ -135,12 +130,7 @@ class Orchestrator(
             } else {
                 val analysis = techSupport.analyzeMergeConflict(mergeResult?.output ?: "Unknown error")
                 logger.log("--- TECH SUPPORT ANALYSIS ---\n$analysis")
-                val userDecision = adapter.execute(
-                    AbstractCommand.RequestUserDecision(
-                        "A merge conflict occurred. What should we do?",
-                        listOf("Abandon", "Attempt AI Fix")
-                    )
-                )
+                val userDecision = adapter.execute(RequestUserDecision("A merge conflict occurred. What should we do?", listOf("Abandon", "Attempt AI Fix")))
                 if (userDecision.data == "Attempt AI Fix") {
                     // Call handleTask without creating a new branch
                     handleTask("Resolve merge conflict based on Tech Support analysis", projectRoot, mutableListOf(analysis), 0, integrationBranch, createBranch = false)
