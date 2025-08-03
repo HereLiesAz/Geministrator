@@ -10,9 +10,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/adapters" />
-            <option value="$PROJECT_DIR$/adapters/adapter-android-studio" />
-            <option value="$PROJECT_DIR$/adapters/adapter-cli" />
             <option value="$PROJECT_DIR$/cli" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/core" />

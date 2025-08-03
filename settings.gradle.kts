@@ -1,4 +1,4 @@
-pluginManagement {
+﻿pluginManagement {
     repositories {
         google()
         mavenCentral()
@@ -12,7 +12,6 @@ pluginManagement {
         id("org.jetbrains.intellij") version "1.17.3"
         application
         id("org.jetbrains.compose") version "1.6.10"
-        id("org.jetbrains.intellij") version "2.2.0"
         id("application")
     }
 }
