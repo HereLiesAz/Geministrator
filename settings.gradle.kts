@@ -13,7 +13,8 @@
         id("application")
         id("org.panteleyev.jpackageplugin") version "1.7.3"
         id("com.android.application") version "8.4.1" apply false
-        id("org.jetbrains.intellij") version "2.2.0" apply false
+        id("org.jetbrains.intellij") version "2024.1.4"
+
     }
 }
 
@@ -31,7 +32,6 @@ dependencyResolutionManagement {
 rootProject.name = "geministrator"
 
 include(":cli")
-// include(":app_android") // Temporarily disabled to resolve build error and focus on plugins.
-
+include(":app_android")
 include(":plugin_android_studio")
 include(":plugin_vscode")
