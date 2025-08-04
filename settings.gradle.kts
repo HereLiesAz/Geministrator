@@ -13,7 +13,7 @@
         id("application")
         id("org.panteleyev.jpackageplugin") version "1.7.3"
         id("com.android.application") version "8.4.1" apply false
-        id("org.jetbrains.intellij") version "2024.1.4"
+        id("org.jetbrains.intellij.platform") version "2.7.0"
 
     }
 }

@@ -1,31 +1,30 @@
 package com.hereliesaz.geministrator.android.data
 
 import android.content.Context
-import android.net.Uri
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import java.io.File
+import java.util.UUID
 
-class GitManager(private val context: Context, private val projectFolderUri: Uri) {
+class GitManager(private val projectCacheDir: File) {
 
     private val repository: Repository by lazy {
-        // JGit needs a File path, but SAF gives us a Uri.
-        // A common approach is to copy to a cache or use a proxy.
-        // For simplicity, we'll assume a direct path is available for now,
-        // but this part will require a more complex SAF-to-File implementation.
-        val projectDir = File(projectFolderUri.path!!) // Simplified for now
-        val gitDir = File(projectDir, ".git")
-        FileRepositoryBuilder().setGitDir(gitDir).build()
+        val gitDir = File(projectCacheDir, ".git")
+        FileRepositoryBuilder()
+            .setGitDir(gitDir)
+            .readEnvironment() // scan environment GIT_* variables
+            .findGitDir() // scan up the file system tree
+            .build()
     }
 
     private val git: Git by lazy {
         Git(repository)
     }
 
-    fun init() {
-        if (!File(repository.directory.parent, ".git").exists()) {
-            Git.init().setDirectory(File(repository.directory.parent)).call()
+    fun init(): Result<Unit> = runCatching {
+        if (!repository.directory.exists()) {
+            Git.init().setDirectory(projectCacheDir).call()
         }
     }
 
@@ -46,5 +45,20 @@ class GitManager(private val context: Context, private val projectFolderUri: Uri
         status.removed.forEach { statusStringBuilder.append("REMOVED: $it\n") }
         status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") }
         statusStringBuilder.toString().ifEmpty { "No changes." }
+    }
+
+    companion object {
+        fun cloneRepository(url: String, context: Context): Result<File> = runCatching {
+            val repoName = url.substringAfterLast('/').substringBeforeLast('.')
+            val destination = File(context.cacheDir, "cloned_repos/${repoName}_${UUID.randomUUID()}")
+            destination.mkdirs()
+
+            Git.cloneRepository()
+                .setURI(url)
+                .setDirectory(destination)
+                .call()
+
+            destination
+        }
     }
 }

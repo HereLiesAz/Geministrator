@@ -1,6 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij")
+    id("org.jetbrains.intellij.platform")
 }
 
 repositories {
@@ -10,7 +10,7 @@ repositories {
 // For a detailed guide, see:
 // https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version.set("2024.1.4") // Target IDE version [cite: 863]
+    version.set("2.7.0") // Target IDE version [cite: 863]
     type.set("IC") // Community Edition. Use "IU" for Ultimate. [cite: 863]
     plugins.set(listOf("org.jetbrains.kotlin")) // [cite: 863]
 }

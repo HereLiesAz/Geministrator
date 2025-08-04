@@ -1,54 +1,47 @@
-package com.hereliesaz.geministrator.android.ui.project
+package com.hereliesaz.geministrator.android.data
 
-import android.app.Activity
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Repository
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import java.io.File
 
-@Composable
-fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            projectViewModel.onProjectSelected(result.data?.data)
+class GitManager(private val projectCacheDir: File) {
+
+    private val repository: Repository by lazy {
+        val gitDir = File(projectCacheDir, ".git")
+        FileRepositoryBuilder()
+            .setGitDir(gitDir)
+            .readEnvironment() // scan environment GIT_* variables
+            .findGitDir() // scan up the file system tree
+            .build()
+    }
+
+    private val git: Git by lazy {
+        Git(repository)
+    }
+
+    fun init(): Result<Unit> = runCatching {
+        if (!repository.directory.exists()) {
+            Git.init().setDirectory(projectCacheDir).call()
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Select a Project Folder",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Geministrator needs access to a folder to read, write, and manage files with Git. Your data remains on your device.",
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = { projectViewModel.selectProject(launcher) }) {
-            Text("Choose Folder")
-        }
+    fun stageFile(filePath: String): Result<Unit> = runCatching {
+        git.add().addFilepattern(filePath).call()
+    }
+
+    fun commit(message: String): Result<String> = runCatching {
+        val revCommit = git.commit().setMessage(message).call()
+        revCommit.fullMessage
+    }
+
+    fun getStatus(): Result<String> = runCatching {
+        val status = git.status().call()
+        val statusStringBuilder = StringBuilder()
+        [cite_start]status.added.forEach { statusStringBuilder.append("ADDED: $it\n") } [cite: 398]
+        [cite_start]status.modified.forEach { statusStringBuilder.append("MODIFIED: $it\n") } [cite: 398]
+        [cite_start]status.removed.forEach { statusStringBuilder.append("REMOVED: $it\n") } [cite: 398]
+        [cite_start]status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") } [cite: 398]
+        statusStringBuilder.toString().ifEmpty { "No changes." [cite_start]} [cite: 399]
     }
 }
