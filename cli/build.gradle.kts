@@ -3,6 +3,7 @@ import org.panteleyev.jpackage.JPackageTask
 // Module-level build file for the 'app' module.
 plugins {
     kotlin("jvm")
+    `java-library`
     application
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.panteleyev.jpackageplugin")
