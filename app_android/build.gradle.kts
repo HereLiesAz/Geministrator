@@ -32,7 +32,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmToolchain(17)
     }
     buildFeatures {
         compose = true
@@ -65,9 +65,7 @@ dependencies {
 
     // Material 3 and Adaptive Layouts
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.material3.window)
             implementation(libs.androidx.material3.adaptive)
-            implementation(libs.androidx.material3.adaptive.navigation.suite)
 
             // Navigation
             implementation(libs.androidx.navigation.compose)

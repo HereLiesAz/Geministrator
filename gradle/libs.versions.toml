@@ -36,10 +36,9 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 
 # Material 3 & Adaptive
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material3-window = { group = "androidx.compose.material3", name = "material3-window-size-class" }
-androidx-material3-adaptive = { group = "androidx.compose.material3", name = "material3-adaptive", version = "1.0.0-alpha06" }
-androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
+androidx-material3-adaptive = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3-window = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3" }
 
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }

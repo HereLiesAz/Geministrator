@@ -14,8 +14,6 @@ class MainViewModel(private val application: Application) : AndroidViewModel(app
     val uiState = _uiState.asStateFlow()
 
     fun startSession(prompt: String, projectViewModel: ProjectViewModel) {
-        val projectCachePath = projectViewModel.uiState.value.localCachePath ?: return
-
         val sessionViewModel = SessionViewModel(application, prompt, projectViewModel)
 
         val nextId = (_uiState.value.sessions.maxOfOrNull { it.id } ?: 0) + 1

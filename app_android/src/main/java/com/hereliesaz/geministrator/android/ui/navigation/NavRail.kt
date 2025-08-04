@@ -2,7 +2,6 @@ package com.hereliesaz.geministrator.android.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
@@ -16,11 +15,6 @@ fun NavigationSuiteScope.geministratorNavSuite(
         selected = currentDestination == "sessions",
         onClick = { onNavigate("sessions") },
         icon = { Icon(Icons.Default.SmartToy, contentDescription = "Sessions") }
-    )
-    item(
-        selected = currentDestination == "save_file",
-        onClick = { onNavigate("save_file") },
-        icon = { Icon(Icons.Default.Save, contentDescription = "Save File") }
     )
     item(
         selected = currentDestination == "settings",

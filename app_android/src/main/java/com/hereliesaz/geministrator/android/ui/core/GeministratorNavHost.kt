@@ -6,7 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.hereliesaz.geministrator.android.data.FileSaveScreen
+import com.hereliesaz.geministrator.android.ui.file.FileSaveScreen
 import com.hereliesaz.geministrator.android.ui.main.MainSessionView
 import com.hereliesaz.geministrator.android.ui.main.MainViewModel
 import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
