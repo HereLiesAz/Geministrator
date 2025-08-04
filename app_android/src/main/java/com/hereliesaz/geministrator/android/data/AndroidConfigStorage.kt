@@ -9,8 +9,10 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.hereliesaz.geministrator.core.config.ConfigStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "geministrator_settings")
 
@@ -22,32 +24,30 @@ class AndroidConfigStorage(private val context: Context) : ConfigStorage {
         val CONCURRENCY_LIMIT = intPreferencesKey("CONCURRENCY_LIMIT")
         val TOKEN_LIMIT = intPreferencesKey("TOKEN_LIMIT")
         val THEME_PREFERENCE = stringPreferencesKey("THEME_PREFERENCE")
-        // Other keys can be added here
     }
 
-    override suspend fun saveApiKey(apiKey: String) {
+    override fun saveApiKey(apiKey: String): Unit = runBlocking(Dispatchers.IO) {
         context.dataStore.edit { it[API_KEY] = apiKey }
     }
 
-    override suspend fun loadApiKey(): String? {
-        return context.dataStore.data.map { it[API_KEY] }.first()
+    override fun loadApiKey(): String? = runBlocking(Dispatchers.IO) {
+        context.dataStore.data.map { it[API_KEY] }.first()
     }
 
-    override suspend fun savePreCommitReview(enabled: Boolean) {
+    override fun savePreCommitReview(enabled: Boolean): Unit = runBlocking(Dispatchers.IO) {
         context.dataStore.edit { it[PRE_COMMIT_REVIEW] = enabled }
     }
 
-    override suspend fun loadPreCommitReview(): Boolean {
-        return context.dataStore.data.map { it[PRE_COMMIT_REVIEW] ?: true }.first()
+    override fun loadPreCommitReview(): Boolean = runBlocking(Dispatchers.IO) {
+        context.dataStore.data.map { it[PRE_COMMIT_REVIEW] ?: true }.first()
     }
 
-    // ... other required methods from ConfigStorage interface
-    override fun saveModelName(type: String, name: String) = Unit // Not implemented for Android yet
-    override fun loadModelName(type: String, default: String): String = default // Not implemented
-    override fun saveConcurrencyLimit(limit: Int) = Unit // Not implemented
-    override fun loadConcurrencyLimit(): Int = 2 // Not implemented
-    override fun saveTokenLimit(limit: Int) = Unit // Not implemented
-    override fun loadTokenLimit(): Int = 500000 // Not implemented
+    override fun saveModelName(type: String, name: String) = Unit
+    override fun loadModelName(type: String, default: String): String = default
+    override fun saveConcurrencyLimit(limit: Int) = Unit
+    override fun loadConcurrencyLimit(): Int = 2
+    override fun saveTokenLimit(limit: Int) = Unit
+    override fun loadTokenLimit(): Int = 500000
     override fun saveSearchApiKey(apiKey: String) = Unit
     override fun loadSearchApiKey(): String? = null
     override fun saveSearchEngineId(id: String) = Unit

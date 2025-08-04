@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.hereliesaz.geministrator.android.app_android-mergeDebugResources-50:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\azrie\\.gradle\\caches\\8.14.3\\transforms\\6184ee009ba18073e954337985d6ae5b\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}

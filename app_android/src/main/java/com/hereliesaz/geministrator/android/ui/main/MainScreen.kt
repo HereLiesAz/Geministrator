@@ -1,6 +1,5 @@
 package com.hereliesaz.geministrator.android.ui.main
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.hereliesaz.geministrator.android.ui.core.GeministratorNavHost
+import com.hereliesaz.geministrator.android.ui.navigation.geministratorNavSuite
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.session.SessionScreen
 

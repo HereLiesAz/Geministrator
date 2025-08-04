@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -78,6 +79,8 @@ dependencies {
             implementation(libs.eclipse.jgit)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     implementation(libs.androidx.room.external.antlr)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore.preferences.core)
 
     // Testing
             testImplementation(libs.junit)
@@ -89,4 +92,10 @@ dependencies {
             // Debugging
             debugImplementation(libs.androidx.compose.ui.tooling)
             debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // DataStore for settings
+    implementation(libs.androidx.datastore.preferences)
+
+    // DocumentFile for Storage Access Framework helpers
+    implementation(libs.androidx.documentfile)
 }

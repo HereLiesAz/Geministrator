@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.android.data
+package com.hereliesaz.geministrator.android.ui.project
 
 import android.content.Context
 import android.content.Intent
@@ -17,6 +17,7 @@ import java.io.BufferedReader
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStreamReader
+
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 private val PROJECT_URI_KEY = stringPreferencesKey("project_folder_uri")

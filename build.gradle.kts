@@ -3,7 +3,11 @@
 
 plugins {
     id("org.jetbrains.kotlin.android") version "2.2.0" apply false
-
-    // The intellij platform plugin is applied here because it's not a standard
-    // Android/Kotlin plugin and is best managed at the root level for IDE tooling.
+    id("org.jetbrains.kotlin.jvm") version "2.2.0" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0" apply false
+    id("application")
+    id("org.panteleyev.jpackageplugin") version "1.7.3"
+    id("com.android.application") version "8.12.0" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0" apply false
+    id("org.jetbrains.intellij.platform") version "2.2.0" apply false
 }

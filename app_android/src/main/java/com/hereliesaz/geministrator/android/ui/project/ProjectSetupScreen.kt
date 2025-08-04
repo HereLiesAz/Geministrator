@@ -1,47 +1,112 @@
-package com.hereliesaz.geministrator.android.data
+package com.hereliesaz.geministrator.android.ui.project
 
-import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.lib.Repository
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import java.io.File
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
-class GitManager(private val projectCacheDir: File) {
+@Composable
+fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
+    val uiState by projectViewModel.uiState.collectAsState()
+    var cloneUrl by remember { mutableStateOf("") }
 
-    private val repository: Repository by lazy {
-        val gitDir = File(projectCacheDir, ".git")
-        FileRepositoryBuilder()
-            .setGitDir(gitDir)
-            .readEnvironment() // scan environment GIT_* variables
-            .findGitDir() // scan up the file system tree
-            .build()
-    }
-
-    private val git: Git by lazy {
-        Git(repository)
-    }
-
-    fun init(): Result<Unit> = runCatching {
-        if (!repository.directory.exists()) {
-            Git.init().setDirectory(projectCacheDir).call()
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            projectViewModel.onProjectSelected(result.data?.data)
         }
     }
 
-    fun stageFile(filePath: String): Result<Unit> = runCatching {
-        git.add().addFilepattern(filePath).call()
-    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Welcome to Geministrator", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(32.dp))
 
-    fun commit(message: String): Result<String> = runCatching {
-        val revCommit = git.commit().setMessage(message).call()
-        revCommit.fullMessage
-    }
+        Text(
+            "Select an existing project folder to get started.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-    fun getStatus(): Result<String> = runCatching {
-        val status = git.status().call()
-        val statusStringBuilder = StringBuilder()
-        [cite_start]status.added.forEach { statusStringBuilder.append("ADDED: $it\n") } [cite: 398]
-        [cite_start]status.modified.forEach { statusStringBuilder.append("MODIFIED: $it\n") } [cite: 398]
-        [cite_start]status.removed.forEach { statusStringBuilder.append("REMOVED: $it\n") } [cite: 398]
-        [cite_start]status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") } [cite: 398]
-        statusStringBuilder.toString().ifEmpty { "No changes." [cite_start]} [cite: 399]
+        Button(
+            onClick = { projectViewModel.selectProject(folderPickerLauncher) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Select Folder")
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Divider(modifier = Modifier.weight(1f))
+            Text("OR")
+            Divider(modifier = Modifier.weight(1f))
+        }
+
+        Text(
+            "Clone a new project from a Git repository URL.",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = cloneUrl,
+            onValueChange = { cloneUrl = it },
+            label = { Text("https://github.com/user/repo.git") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            enabled = !uiState.isLoading
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { projectViewModel.cloneProject(cloneUrl) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = cloneUrl.isNotBlank() && !uiState.isLoading
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Cloning...")
+            } else {
+                Text("Clone Repository")
+            }
+        }
     }
 }
