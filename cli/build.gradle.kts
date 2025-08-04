@@ -2,10 +2,10 @@ import org.panteleyev.jpackage.ImageType
 import org.panteleyev.jpackage.JPackageTask
 // Module-level build file for the 'app' module.
 plugins {
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
     `java-library`
     application
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.kotlin.serialization)
     id("org.panteleyev.jpackageplugin")
 }
 
@@ -47,7 +47,7 @@ dependencies {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
 }
 
 tasks.test {

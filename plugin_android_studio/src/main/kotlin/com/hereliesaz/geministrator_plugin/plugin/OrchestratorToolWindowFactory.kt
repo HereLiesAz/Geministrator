@@ -1,9 +1,7 @@
 package com.hereliesaz.geministrator_plugin.plugin
 
 import com.hereliesaz.geministrator.adapter.CliAdapter
-import com.hereliesaz.geministrator.adapter.CliConfigStorage
 import com.hereliesaz.geministrator.common.GeminiService
-import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.common.PromptManager
 import com.hereliesaz.geministrator.core.Orchestrator
 import com.hereliesaz.geministrator_plugin.adapter.AndroidStudioAdapter
@@ -36,9 +34,9 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val orchestratorPanel = OrchestratorPanel(project) // [cite: 873]
-        val content = ContentFactory.getInstance().createContent(orchestratorPanel, "", false) // [cite: 873]
-        toolWindow.contentManager.addContent(content) // [cite: 873]
+        val orchestratorPanel = OrchestratorPanel(project) //
+        val content = ContentFactory.getInstance().createContent(orchestratorPanel, "", false) //
+        toolWindow.contentManager.addContent(content) //
     }
 
     inner class OrchestratorPanel(private val project: Project) : JPanel(BorderLayout()) {
@@ -46,7 +44,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             lineWrap = true
             wrapStyleWord = true
         }
-        private val runButton = JButton("Run Workflow") // [cite: 874]
+        private val runButton = JButton("Run Workflow") //
         private val outputArea = JTextArea().apply {
             isEditable = false
             font = font.deriveFont(12f)
@@ -55,12 +53,12 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
         private val logger = ProgressLogger(outputArea)
         private val reviewCheckbox =
             JBCheckBox("Require final review before commit", configStorage.loadPreCommitReview())
-        private val concurrencyLabel = JLabel("Max Parallel Tasks:") // [cite: 875]
+        private val concurrencyLabel = JLabel("Max Parallel Tasks:") //
         private val concurrencySpinner =
-            JSpinner(SpinnerNumberModel(configStorage.loadConcurrencyLimit(), 1, 16, 1)) // [cite: 875]
-        private val tokenLimitLabel = JLabel("Token Limit:") // [cite: 875]
+            JSpinner(SpinnerNumberModel(configStorage.loadConcurrencyLimit(), 1, 16, 1)) //
+        private val tokenLimitLabel = JLabel("Token Limit:") //
         private val tokenLimitSpinner =
-            JSpinner(SpinnerNumberModel(configStorage.loadTokenLimit(), 10000, 2000000, 10000)) // [cite: 875]
+            JSpinner(SpinnerNumberModel(configStorage.loadTokenLimit(), 10000, 2000000, 10000)) //
 
         init {
             val settingsPanel = JPanel(FlowLayout(FlowLayout.LEFT))
@@ -68,7 +66,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             settingsPanel.add(Box.createHorizontalStrut(10))
             settingsPanel.add(concurrencyLabel)
             settingsPanel.add(concurrencySpinner)
-            settingsPanel.add(Box.createHorizontalStrut(10)) // [cite: 877]
+            settingsPanel.add(Box.createHorizontalStrut(10)) //
             settingsPanel.add(tokenLimitLabel)
             settingsPanel.add(tokenLimitSpinner)
 
@@ -78,7 +76,7 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
 
             val topPanel = JPanel(BorderLayout())
             topPanel.add(JBScrollPane(promptArea), BorderLayout.CENTER)
-            topPanel.add(buttonPanel, BorderLayout.SOUTH) // [cite: 878]
+            topPanel.add(buttonPanel, BorderLayout.SOUTH) //
 
             val mainPanel = JPanel(BorderLayout())
             mainPanel.add(topPanel, BorderLayout.NORTH)
@@ -92,9 +90,13 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             runButton.addActionListener {
                 coroutineScope.launch { runWorkflow(promptArea.text) }
             }
-            reviewCheckbox.addActionListener { configStorage.savePreCommitReview(reviewCheckbox.isSelected) } // [cite: 880]
-            concurrencySpinner.addChangeListener { configStorage.saveConcurrencyLimit(concurrencySpinner.value as Int) } // [cite: 880]
-            tokenLimitSpinner.addChangeListener { configStorage.saveTokenLimit(tokenLimitSpinner.value as Int) } // [cite: 880]
+            reviewCheckbox.addActionListener { configStorage.savePreCommitReview(reviewCheckbox.isSelected) } //
+            concurrencySpinner.addChangeListener {
+                configStorage.saveConcurrencyLimit(
+                    concurrencySpinner.value as Int
+                )
+            } //
+            tokenLimitSpinner.addChangeListener { configStorage.saveTokenLimit(tokenLimitSpinner.value as Int) } //
 
             if (configStorage.loadApiKey().isNullOrBlank()) {
                 showOnboardingWizard()
@@ -120,15 +122,15 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
                 runButton.isEnabled = false
             }
 
-            // The adapter for the plugin UI
             val adapter = AndroidStudioAdapter(project, logger)
+            val promptManager = PromptManager(
+                CliAdapter(
+                    configStorage,
+                    logger
+                ).configDirectory
+            ) // Use a valid directory
 
-            // Since the CLI module contains the core logic, we need its config and prompt manager
-            val cliConfig = CliConfigStorage()
-            val promptManager = PromptManager(cliConfig.getConfigDirectory())
-
-            // Create the GeminiService with all its required arguments
-            val geminiService = createGeminiService(cliConfig, logger, CliAdapter(cliConfig, logger))
+            val geminiService = createGeminiService(configStorage, logger, adapter)
 
             if (geminiService == null) {
                 logger.error("Could not create Gemini Service. Check authentication.")
@@ -136,11 +138,10 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
                 return
             }
 
-            // Create the orchestrator with all its required arguments
-            val orchestrator = Orchestrator(adapter, logger, cliConfig, promptManager, geminiService)
+            val orchestrator =
+                Orchestrator(adapter, logger, configStorage, promptManager, geminiService)
 
             try {
-                // For now, projectType is hardcoded. This could be a dropdown in the UI later.
                 orchestrator.run(prompt, project.basePath ?: ".", "IDE Plugin Task", null)
             } catch (e: Exception) {
                 logger.error("--- A critical error occurred ---", e)

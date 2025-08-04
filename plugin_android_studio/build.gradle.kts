@@ -1,6 +1,6 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij.platform")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.intellij.platform)
 }
 
 repositories {

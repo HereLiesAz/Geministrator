@@ -29,6 +29,7 @@ class SessionViewModel(
 
     private val logger = AndroidLogger()
 
+
     init {
         listenToLogs()
         startOrchestration()

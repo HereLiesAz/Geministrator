@@ -1,26 +1,27 @@
 [versions]
-android-gradle-plugin = "8.12.0"
-kotlin = "2.2.20-beta2"
-core-ktx = "1.16.0"
+android-gradle-plugin = "8.3.2"
+kotlin = "1.9.22"
+core-ktx = "1.12.0"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines-core = "1.10.2"
-kotlinx-serialization-json = "1.9.0"
-lifecycle = "2.9.2"
-activity-compose = "1.10.1"
-compose-bom = "2025.07.00"
-mockk = "1.14.5"
-navigation-compose = "2.9.3"
+kotlinx-coroutines-core = "1.8.0"
+kotlinx-serialization-json = "1.6.3"
+lifecycle = "2.7.0"
+activity-compose = "1.8.2"
+compose-bom = "2024.06.00"
+mockk = "1.13.10"
+navigation-compose = "2.7.7"
 jgit = "6.9.0.202403050737-r"
-datastore = "1.1.7"
-documentfile = "1.1.0"
+datastore = "1.0.0"
+documentfile = "1.0.1"
 junit = "4.13.2"
-androidx-test-ext = "1.3.0"
-espresso-core = "3.7.0"
-material3-adaptive-navigation-suite = "1.3.2"
-room-external-antlr = "2.7.2"
-datastore-core = "1.1.7"
-datastore-preferences-core = "1.1.7"
-ui = "2.2.20-beta2"
+androidx-test-ext = "1.1.5"
+espresso-core = "3.5.1"
+datastore-core = "1.0.0"
+datastore-preferences-core = "1.0.0"
+ui = "1.6.5"
+intellij-platform = "2.0.0-beta2"
+material3-adaptive-navigation-suite = "1.0.0-alpha03"
+material-icons = "1.6.7"
 
 [libraries]
 # Core & Lifecycle
@@ -32,14 +33,16 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 # Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version = "1.9.0-rc01" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
+
 
 # Material 3 & Adaptive
-androidx-material3-adaptive = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material3-window = { group = "androidx.compose.material3", name = "material3" }
-androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3-adaptive-navigation-suite" }
 
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
@@ -51,17 +54,15 @@ eclipse-jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
-androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version = "1.9.0-rc01" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 
 # Debugging
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.9.0-rc01" }
-androidx-compose-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3-adaptive-navigation-suite" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kotlinx-cli" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-androidx-room-external-antlr = { group = "androidx.room", name = "room-external-antlr", version.ref = "room-external-antlr" }
 androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore-core" }
 androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore-preferences-core" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
@@ -72,5 +73,6 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }

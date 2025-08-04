@@ -1,16 +1,16 @@
 {
     "logs": [
         {
-            "outputFile": "com.hereliesaz.geministrator.android.app_android-mergeDebugResources-50:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.hereliesaz.geministrator.android.app_android-mergeDebugResources-56:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
                     "source": "G:\\My Drive\\Geministrator\\app_android\\src\\main\\res\\values-night\\themes.xml",
                     "from": {
-                        "startLines": "1",
+                        "startLines": "2",
                         "startColumns": "4",
-                        "startOffsets": "17",
+                        "startOffsets": "19",
                         "endColumns": "84",
-                        "endOffsets": "97"
+                        "endOffsets": "99"
                     },
                     "to": {
                         "startLines": "2",

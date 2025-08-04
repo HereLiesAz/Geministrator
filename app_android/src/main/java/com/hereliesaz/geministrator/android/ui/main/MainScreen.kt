@@ -12,7 +12,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigation.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigation.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import com.hereliesaz.geministrator.android.ui.navigation.geministratorNavSuite
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.session.SessionScreen
 
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
 fun MainScreen(projectViewModel: ProjectViewModel) {
     val navController = rememberNavController()

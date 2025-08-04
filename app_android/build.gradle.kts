@@ -1,11 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 android {
     namespace = "com.hereliesaz.geministrator.android"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.hereliesaz.geministrator.android"
@@ -41,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.20-beta2"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packaging {
         resources {
@@ -65,9 +64,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.extended)
+
 
     // Material 3 and Adaptive Layouts
-    implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -77,8 +80,6 @@ dependencies {
 
     // On-device Git
     implementation(libs.eclipse.jgit)
-    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
-    implementation(libs.androidx.room.external.antlr)
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences.core)
 

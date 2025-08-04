@@ -193,6 +193,8 @@ private suspend fun createGeminiService(
                 GeminiService("apikey", apiKey, logger, configStorage, "", "", null, null)
             if (serviceForValidation.validateApiKey(apiKey)) {
                 logger.info("API Key authentication successful.")
+                // Save the valid key before returning the service
+                configStorage.saveApiKey(apiKey)
                 return GeminiService(
                     "apikey",
                     apiKey,
@@ -208,7 +210,7 @@ private suspend fun createGeminiService(
         }
         apiKey = logger.prompt("Please enter your Gemini API Key: ")
         if (apiKey.isNullOrBlank()) return null
-        configStorage.saveApiKey(apiKey)
+        // Validate the newly entered key *before* saving it
     }
 }
 

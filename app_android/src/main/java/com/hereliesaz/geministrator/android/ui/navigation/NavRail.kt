@@ -5,8 +5,10 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
+import androidx.compose.material3.adaptive.navigation.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 
+@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 fun NavigationSuiteScope.geministratorNavSuite(
     onNavigate: (String) -> Unit,
     currentDestination: String

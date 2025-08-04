@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.hereliesaz.geministrator.android.app_android-mergeDebugResources-50:/values-v21/values-v21.xml",
+            "outputFile": "com.hereliesaz.geministrator.android.app_android-mergeDebugResources-56:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\azrie\\.gradle\\caches\\8.14.3\\transforms\\df33de585260e9b2705867ee61472c1f\\transformed\\core-1.16.0\\res\\values-v21\\values-v21.xml",
+                    "source": "C:\\Users\\azrie\\.gradle\\caches\\8.14.3\\transforms\\2fb594888ddd6b66ccd1c845ccf5845b\\transformed\\core-1.12.0\\res\\values-v21\\values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",

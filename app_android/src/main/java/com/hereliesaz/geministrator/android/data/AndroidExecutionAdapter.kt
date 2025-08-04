@@ -42,14 +42,31 @@ class AndroidExecutionAdapter(
                 ExecutionResult(true, "Tests skipped on Android.")
             }
             is AbstractCommand.GetCurrentBranch -> {
-                // In a real on-device scenario, you'd implement this with JGit.
-                // For now, it's simplified.
-                ExecutionResult(true, "main")
+                gitManager?.getCurrentBranch()?.fold(
+                    onSuccess = { ExecutionResult(true, "Got current branch.", it) },
+                    onFailure = {
+                        ExecutionResult(
+                            false,
+                            "Failed to get current branch: ${it.message}"
+                        )
+                    }
+                ) ?: ExecutionResult(false, "GitManager not initialized.")
             }
             is AbstractCommand.CreateAndSwitchToBranch -> {
-                val message = "Simulated create and switch to ${command.branchName}"
-                logger.info(message)
-                ExecutionResult(true, message)
+                gitManager?.createAndSwitchToBranch(command.branchName)?.fold(
+                    onSuccess = {
+                        ExecutionResult(
+                            true,
+                            "Created and switched to ${command.branchName}"
+                        )
+                    },
+                    onFailure = {
+                        ExecutionResult(
+                            false,
+                            "Failed to create and switch branch: ${it.message}"
+                        )
+                    }
+                ) ?: ExecutionResult(false, "GitManager not initialized.")
             }
             is AbstractCommand.StageFiles -> {
                 var success = true
