@@ -1,25 +1,22 @@
 package com.hereliesaz.geministrator.android.ui.main
 
-import android.net.Uri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.session.Session
 import com.hereliesaz.geministrator.android.ui.session.SessionViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(private val application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState = _uiState.asStateFlow()
 
     fun startSession(prompt: String, projectViewModel: ProjectViewModel) {
-        val projectUri = projectViewModel.uiState.value.projectUri ?: return
+        val projectCachePath = projectViewModel.uiState.value.localCachePath ?: return
 
-        val sessionViewModel = SessionViewModel(prompt, projectViewModel)
+        val sessionViewModel = SessionViewModel(application, prompt, projectViewModel)
 
         val nextId = (_uiState.value.sessions.maxOfOrNull { it.id } ?: 0) + 1
         val title = prompt.take(20).let { if (it.length == 20) "$it..." else it }
@@ -27,7 +24,6 @@ class MainViewModel : ViewModel() {
             id = nextId,
             title = title,
             initialPrompt = prompt,
-            projectUri = projectUri,
             viewModel = sessionViewModel
         )
         _uiState.update {

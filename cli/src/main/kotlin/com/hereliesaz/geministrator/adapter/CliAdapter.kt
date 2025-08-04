@@ -21,7 +21,7 @@ class CliAdapter(
 
     override fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
         return when (command) {
-            is AbstractCommand.AppendToFile -> try {
+            is AbstracatCommand.AppendToFile -> try {
                 File(command.path).appendText(command.content); ExecutionResult(
                     true,
                     "Appended to ${command.path}"

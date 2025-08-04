@@ -1,19 +1,26 @@
 package com.hereliesaz.geministrator.android.ui.session
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hereliesaz.geministrator.adapter.CliConfigStorage
+import com.hereliesaz.geministrator.android.data.AndroidExecutionAdapter
+import com.hereliesaz.geministrator.android.data.AndroidLogger
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
-import com.hereliesaz.geministrator.android.ui.theme.Agent
-import kotlinx.coroutines.delay
+import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.PromptManager
+import com.hereliesaz.geministrator.core.Orchestrator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
 class SessionViewModel(
+    application: Application,
     private val prompt: String,
     private val projectViewModel: ProjectViewModel
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _logEntries = MutableStateFlow<List<LogEntry>>(emptyList())
     val logEntries = _logEntries.asStateFlow()
@@ -22,36 +29,62 @@ class SessionViewModel(
         startOrchestration()
     }
 
-    private fun addLogEntry(entry: LogEntry) {
-        _logEntries.update { it + entry }
-    }
-
     private fun startOrchestration() {
-        viewModelScope.launch {
-            val git = projectViewModel.gitManager
+        viewModelScope.launch(Dispatchers.IO) {
+            val projectRootPath = projectViewModel.uiState.value.localCachePath?.absolutePath
+            if (projectRootPath == null) {
+                _logEntries.value += LogEntry("Error: Project cache path is not available.", com.hereliesaz.geministrator.android.ui.theme.Agent.ANTAGONIST)
+                return@launch
+            }
 
-            addLogEntry(LogEntry("Starting session for prompt: \"$prompt\"", Agent.ORCHESTRATOR))
-            delay(1000)
+            // 1. Initialize Android-specific implementations
+            val logger = AndroidLogger(_logEntries)
+            // For now, we use the CLI's file-based config storage, assuming it can write to a cache dir.
+            // A true Android implementation would use SharedPreferences or DataStore.
+            val configDir = File(getApplication<Application>().cacheDir, "gemini_config")
+            configDir.mkdirs()
+            val configStorage = CliConfigStorage(configDir)
+            val executionAdapter = AndroidExecutionAdapter(projectViewModel, logger)
+            val promptManager = PromptManager(configDir) // Uses the same config dir for prompts.json
 
-            addLogEntry(LogEntry("Creating new feature file...", Agent.DESIGNER))
-            val newFileName = "new_feature.md"
-            val newFileContent = "# New Feature\n\nImplemented based on prompt: \"$prompt\""
-            projectViewModel.writeFile(newFileName, newFileContent)
-            addLogEntry(LogEntry("Wrote content to `$newFileName`.", Agent.DESIGNER))
-            delay(1000)
+            // 2. Configure Gemini Service
+            // This part is simplified. A real app would need a settings screen to manage the API key.
+            // We'll hardcode a dummy key check for now.
+            val apiKey = "YOUR_API_KEY_HERE" // This needs to be managed via a settings screen
+            if (apiKey == "YOUR_API_KEY_HERE") {
+                logger.error("FATAL: Gemini API Key is not configured. Please add it.")
+                return@launch
+            }
 
-            addLogEntry(LogEntry("Staging changes...", Agent.MANAGER))
-            git?.stageFile(newFileName)
-            delay(500)
+            val geminiService = GeminiService(
+                authMethod = "apikey",
+                apiKey = apiKey,
+                logger = logger,
+                config = configStorage,
+                strategicModelName = "gemini-1.5-pro-latest",
+                flashModelName = "gemini-1.5-flash-latest",
+                promptManager = promptManager,
+                adapter = null // ADC not used in this flow
+            )
 
-            addLogEntry(LogEntry("Checking repository status...", Agent.ARCHITECT))
-            val status = git?.getStatus()?.getOrDefault("Error getting status.") ?: "Git not initialized."
-            addLogEntry(LogEntry("Git status retrieved.", Agent.ARCHITECT, content = "```\n$status```"))
-            delay(1000)
+            // 3. Initialize and run the Orchestrator
+            val orchestrator = Orchestrator(
+                adapter = executionAdapter,
+                logger = logger,
+                config = configStorage,
+                promptManager = promptManager,
+                ai = geminiService
+            )
 
-            addLogEntry(LogEntry("Committing changes...", Agent.MANAGER))
-            val commitResult = git?.commit("feat: Implement '$prompt'")?.getOrDefault("Error committing.")
-            addLogEntry(LogEntry("Committed with message: \"$commitResult\"", Agent.MANAGER))
+            logger.info("Orchestrator initialized. Starting workflow for prompt: \"$prompt\"")
+
+            // For now, projectType is hardcoded. This could be a dropdown in the UI later.
+            orchestrator.run(
+                prompt = prompt,
+                projectRoot = projectRootPath,
+                projectType = "Android Application",
+                specFileContent = null
+            )
         }
     }
 }

@@ -6,5 +6,6 @@ data class LogEntry(
     val message: String,
     val agent: Agent,
     val content: String? = null, // For holding markdown or code
-    val isWorking: Boolean = false // To show a placeholder
+    val isWorking: Boolean = false, // To show a placeholder
+    val isAwaitingInput: Boolean = false // To show a prompt for user
 )

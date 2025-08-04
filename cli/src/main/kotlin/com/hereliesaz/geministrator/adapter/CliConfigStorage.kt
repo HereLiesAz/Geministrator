@@ -6,8 +6,9 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Properties
 
-class CliConfigStorage : ConfigStorage {
-    private val configDir = File(System.getProperty("user.home"), ".gemini-orchestrator")
+class CliConfigStorage(
+    private val configDir: File = File(System.getProperty("user.home"), ".gemini-orchestrator")
+) : ConfigStorage {
     private val configFile = File(configDir, "config.properties")
     private val properties = Properties()
     private val KEY_API = "GEMINI_API_KEY"
@@ -57,7 +58,7 @@ class CliConfigStorage : ConfigStorage {
     }
 
     override fun loadAuthMethod(): String =
-        properties.getProperty(KEY_AUTH_METHOD, "adc") // Default to adc
+        properties.getProperty(KEY_AUTH_TDMETHOD, "adc") // Default to adc
 
     override fun saveFreeTierOnly(enabled: Boolean) {
         properties.setProperty(KEY_FREE_TIER_ONLY, enabled.toString()); saveProperties()
