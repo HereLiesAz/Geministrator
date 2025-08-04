@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
-
 android {
     namespace = "com.hereliesaz.geministrator.android"
     compileSdk = 36
@@ -24,7 +23,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -32,13 +34,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmToolchain(17)
+        jvmTarget = "17"
     }
+
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.0"
+        kotlinCompilerExtensionVersion = "2.2.20-beta2"
     }
     packaging {
         resources {
@@ -64,32 +67,25 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
 
     // Material 3 and Adaptive Layouts
-    implementation(libs.androidx.material3)
-            implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.material3.adaptive)
 
-            // Navigation
-            implementation(libs.androidx.navigation.compose)
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
 
-            // ViewModel
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-            // On-device Git
-            implementation(libs.eclipse.jgit)
+    // On-device Git
+    implementation(libs.eclipse.jgit)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     implementation(libs.androidx.room.external.antlr)
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences.core)
 
-    // Testing
-            testImplementation(libs.junit)
-            androidTestImplementation(libs.androidx.test.ext.junit)
-            androidTestImplementation(libs.androidx.test.espresso.core)
-            androidTestImplementation(platform(libs.androidx.compose.bom))
-            androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-            // Debugging
-            debugImplementation(libs.androidx.compose.ui.tooling)
-            debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // Debugging
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // DataStore for settings
     implementation(libs.androidx.datastore.preferences)
