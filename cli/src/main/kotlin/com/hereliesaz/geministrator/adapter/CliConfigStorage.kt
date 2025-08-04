@@ -58,7 +58,7 @@ class CliConfigStorage(
     }
 
     override fun loadAuthMethod(): String =
-        properties.getProperty(KEY_AUTH_TDMETHOD, "adc") // Default to adc
+        properties.getProperty(KEY_AUTH_METHOD, "adc") // Default to adc
 
     override fun saveFreeTierOnly(enabled: Boolean) {
         properties.setProperty(KEY_FREE_TIER_ONLY, enabled.toString()); saveProperties()

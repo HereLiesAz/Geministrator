@@ -12,15 +12,14 @@ class AndroidExecutionAdapter(
     private val logger: ILogger
 ) : ExecutionAdapter {
 
-    private val gitManager: GitManager?
-        get() = projectViewModel.gitManager
-
-    private val projectCacheDir: File?
-        get() = projectViewModel.uiState.value.localCachePath
+    private val gitManager: GitManager? get() = projectViewModel.gitManager
+    private val projectCacheDir: File? get() = projectViewModel.uiState.value.localCachePath
 
     override fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
         if (projectCacheDir == null && command !is AbstractCommand.LogJournalEntry) {
-            return ExecutionResult(false, "Project cache directory is not initialized.")
+            val message = "Project cache directory is not initialized."
+            logger.error(message)
+            return ExecutionResult(false, message)
         }
 
         return when (command) {
@@ -33,42 +32,58 @@ class AndroidExecutionAdapter(
                 if (content != null) {
                     ExecutionResult(true, "Read file successfully.", content)
                 } else {
-                    ExecutionResult(false, "Failed to read file: ${command.path}")
+                    val message = "Failed to read file: ${command.path}"
+                    logger.error(message)
+                    ExecutionResult(false, message)
                 }
             }
             is AbstractCommand.RunTests -> {
-                // Testing is not implemented in the Android environment.
                 logger.info("Skipping tests in Android environment.")
                 ExecutionResult(true, "Tests skipped on Android.")
             }
             is AbstractCommand.GetCurrentBranch -> {
-                ExecutionResult(true, "main") // Simplified for Android
+                // In a real on-device scenario, you'd implement this with JGit.
+                // For now, it's simplified.
+                ExecutionResult(true, "main")
             }
             is AbstractCommand.CreateAndSwitchToBranch -> {
-                // JGit doesn't have a direct checkout -b equivalent.
-                // It's a combination of branchCreate and checkout.
-                // For now, we simulate this.
-                ExecutionResult(true, "Simulated create and switch to ${command.branchName}")
+                val message = "Simulated create and switch to ${command.branchName}"
+                logger.info(message)
+                ExecutionResult(true, message)
             }
             is AbstractCommand.StageFiles -> {
                 var success = true
+                var errorMsg = ""
                 command.filePaths.forEach { path ->
-                    gitManager?.stageFile(path)?.onFailure { success = false }
+                    gitManager?.stageFile(path)?.onFailure {
+                        success = false
+                        errorMsg = it.message ?: "Failed to stage $path"
+                        logger.error(errorMsg)
+                    }
                 }
                 if (success) ExecutionResult(true, "Staged files.")
-                else ExecutionResult(false, "Failed to stage one or more files.")
+                else ExecutionResult(false, errorMsg)
             }
             is AbstractCommand.Commit -> {
                 val result = gitManager?.commit(command.message)
                 result?.fold(
                     onSuccess = { ExecutionResult(true, "Committed successfully.", it) },
-                    onFailure = { ExecutionResult(false, "Commit failed: ${it.message}") }
-                ) ?: ExecutionResult(false, "GitManager not initialized.")
+                    onFailure = {
+                        val message = "Commit failed: ${it.message}"
+                        logger.error(message)
+                        ExecutionResult(false, message)
+                    }
+                ) ?: run {
+                    val message = "GitManager not initialized."
+                    logger.error(message)
+                    ExecutionResult(false, message)
+                }
             }
-            // --- Other commands can be implemented as needed ---
             else -> {
-                logger.info("Executing command: ${command::class.simpleName} (Not fully implemented on Android)")
-                ExecutionResult(true, "Command ${command::class.simpleName} executed with default success.")
+                val message =
+                    "Command ${command::class.simpleName} executed with default success (Not fully implemented on Android)."
+                logger.info(message)
+                ExecutionResult(true, message)
             }
         }
     }

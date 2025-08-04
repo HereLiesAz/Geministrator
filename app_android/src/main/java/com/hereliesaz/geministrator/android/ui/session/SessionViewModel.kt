@@ -14,6 +14,7 @@ import com.hereliesaz.geministrator.core.config.ConfigStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -23,23 +24,47 @@ class SessionViewModel(
     private val projectViewModel: ProjectViewModel
 ) : AndroidViewModel(application) {
 
-    private val _logEntries = MutableStateFlow<List<LogEntry>>(emptyList())
-    val logEntries = _logEntries.asStateFlow()
+    private val _uiState = MutableStateFlow(SessionUiState())
+    val uiState = _uiState.asStateFlow()
+
+    private val logger = AndroidLogger()
 
     init {
+        listenToLogs()
         startOrchestration()
+    }
+
+    private fun listenToLogs() {
+        viewModelScope.launch {
+            logger.logFlow.collect { newEntry ->
+                _uiState.update { currentState ->
+                    val newStatus = when {
+                        "Workflow Finished" in newEntry.message -> WorkflowStatus.SUCCESS
+                        "Workflow Failed" in newEntry.message -> WorkflowStatus.FAILURE
+                        newEntry.isAwaitingInput -> WorkflowStatus.AWAITING_INPUT
+                        else -> currentState.status
+                    }
+                    currentState.copy(
+                        logEntries = currentState.logEntries + newEntry,
+                        status = newStatus
+                    )
+                }
+            }
+        }
     }
 
     private fun startOrchestration() {
         viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(status = WorkflowStatus.RUNNING) }
+
             val projectRootPath = projectViewModel.uiState.value.localCachePath?.absolutePath
             if (projectRootPath == null) {
-                _logEntries.value += LogEntry("Error: Project cache path is not available.", com.hereliesaz.geministrator.android.ui.theme.Agent.ANTAGONIST)
+                logger.error("Error: Project cache path is not available.")
+                _uiState.update { it.copy(status = WorkflowStatus.FAILURE) }
                 return@launch
             }
 
             // 1. Initialize Android-specific implementations
-            val logger = AndroidLogger(_logEntries)
             val configStorage: ConfigStorage = AndroidConfigStorage(getApplication())
             val executionAdapter = AndroidExecutionAdapter(projectViewModel, logger)
 
@@ -52,6 +77,7 @@ class SessionViewModel(
             val apiKey = configStorage.loadApiKey()
             if (apiKey.isNullOrBlank()) {
                 logger.error("FATAL: Gemini API Key is not configured. Please set it in the Settings screen.")
+                _uiState.update { it.copy(status = WorkflowStatus.FAILURE) }
                 return@launch
             }
 

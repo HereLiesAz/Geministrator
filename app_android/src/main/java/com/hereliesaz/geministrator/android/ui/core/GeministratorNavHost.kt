@@ -12,6 +12,7 @@ import com.hereliesaz.geministrator.android.ui.main.MainViewModel
 import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import com.hereliesaz.geministrator.android.ui.settings.PromptEditorScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
 
 @Composable
@@ -35,10 +36,19 @@ fun GeministratorNavHost(
             FileSaveScreen()
         }
         composable("settings") {
-            SettingsScreen(settingsViewModel)
+            SettingsScreen(
+                settingsViewModel = settingsViewModel,
+                onNavigateToPrompts = { navController.navigate("prompts") }
+            )
         }
         composable("history") {
             HistoryScreen()
+        }
+        composable("prompts") {
+            PromptEditorScreen(
+                settingsViewModel = settingsViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

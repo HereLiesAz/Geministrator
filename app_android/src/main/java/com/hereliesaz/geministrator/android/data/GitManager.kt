@@ -13,8 +13,8 @@ class GitManager(private val projectCacheDir: File) {
         val gitDir = File(projectCacheDir, ".git")
         FileRepositoryBuilder()
             .setGitDir(gitDir)
-            .readEnvironment() // scan environment GIT_* variables
-            .findGitDir() // scan up the file system tree
+            .readEnvironment()
+            .findGitDir()
             .build()
     }
 

@@ -9,5 +9,11 @@ enum class Agent(val color: Color) {
     DESIGNER(DesignerColor),
     ANTAGONIST(AntagonistColor),
     TECH_SUPPORT(TechSupportColor),
-    MANAGER(ManagerColor)
+    MANAGER(ManagerColor),
+    UNKNOWN(OnSurface); // Default color for unknown sources
+
+    companion object {
+        private val agentNameMap = entries.associateBy { it.name }
+        fun fromString(name: String): Agent = agentNameMap[name.uppercase()] ?: UNKNOWN
+    }
 }

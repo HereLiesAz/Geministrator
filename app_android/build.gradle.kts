@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.hereliesaz.geministrator.android"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.hereliesaz.geministrator.android"
@@ -37,8 +37,7 @@ android {
         compose = true
     }
     composeOptions {
-        // This version is aligned with the project's Kotlin version (1.9.23)
-        kotlinCompilerExtensionVersion = "2.0.0"
+        kotlinCompilerExtensionVersion = "2.2.0"
     }
     packaging {
         resources {
@@ -77,8 +76,10 @@ dependencies {
 
             // On-device Git
             implementation(libs.eclipse.jgit)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.room.external.antlr)
 
-            // Testing
+    // Testing
             testImplementation(libs.junit)
             androidTestImplementation(libs.androidx.test.ext.junit)
             androidTestImplementation(libs.androidx.test.espresso.core)

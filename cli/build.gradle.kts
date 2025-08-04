@@ -36,13 +36,22 @@ application {
 
 dependencies {
     // All project dependencies are now here
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation(libs.kotlinx.cli)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Testing Dependencies
+    testImplementation(kotlin("test"))
+    testImplementation(libs.mockk)
+    implementation(kotlin("test"))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 // This task gathers all dependency JARs into one place for the installer.

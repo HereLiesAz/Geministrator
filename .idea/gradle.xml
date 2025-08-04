@@ -12,8 +12,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app_android" />
             <option value="$PROJECT_DIR$/cli" />
-            <option value="$PROJECT_DIR$/plugin-android-studio" />
-            <option value="$PROJECT_DIR$/plugin-vscode" />
+            <option value="$PROJECT_DIR$/plugin_android_studio" />
+            <option value="$PROJECT_DIR$/plugin_vscode" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -1,22 +1,13 @@
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
-    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 repositories {
     mavenCentral()
 }
-intellij { // Add this block
-    pluginXml { // This is the correct sub-block for patchPluginXml properties
-        changeNotes.set("""
-            ### 0.1.0
-            - Initial release of the Geministrator plugin.
-        """.trimIndent())
-    }
-}
+
 // For a detailed guide, see:
 // https://github.com/JetBrains/gradle-intellij-plugin/
 
@@ -28,6 +19,10 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 

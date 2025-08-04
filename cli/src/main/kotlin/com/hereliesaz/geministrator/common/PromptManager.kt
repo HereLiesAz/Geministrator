@@ -7,9 +7,11 @@ import java.io.File
 class PromptManager(private val configDir: File) {
 
     private val prompts: Map<String, String>
+    private val customPromptsFile = File(configDir, "prompts.json")
+    private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true; prettyPrint = true }
+
 
     init {
-        val customPromptsFile = File(configDir, "prompts.json")
         prompts = if (customPromptsFile.exists()) {
             loadPromptsFromFile(customPromptsFile)
         } else {
@@ -30,8 +32,10 @@ class PromptManager(private val configDir: File) {
     private fun loadDefaultPrompts(): Map<String, String> {
         val resourceStream = this::class.java.getResourceAsStream("/prompts.json")
             ?: throw IllegalStateException("Default prompts.json not found in resources.")
-        val json = Json.parseToJsonElement(resourceStream.bufferedReader().readText()).jsonObject
-        return json.mapValues { it.value.toString().trim('"') }
+        return resourceStream.use { stream ->
+            val json = Json.parseToJsonElement(stream.bufferedReader().readText()).jsonObject
+            json.mapValues { it.value.toString().trim('"') }
+        }
     }
 
     fun getPrompt(key: String, replacements: Map<String, String> = emptyMap()): String {
@@ -42,8 +46,29 @@ class PromptManager(private val configDir: File) {
         return prompt
     }
 
+    fun getPromptsAsString(): String {
+        return if (customPromptsFile.exists()) {
+            customPromptsFile.readText()
+        } else {
+            this::class.java.getResourceAsStream("/prompts.json")?.bufferedReader()?.readText()
+                ?: "{}"
+        }
+    }
+
+    fun savePromptsFromString(content: String) {
+        // Validate it's actual JSON before saving
+        try {
+            jsonParser.parseToJsonElement(content)
+            customPromptsFile.parentFile.mkdirs()
+            customPromptsFile.writeText(content)
+        } catch (e: Exception) {
+            // In a real app, this would throw a specific exception to be caught by the ViewModel
+            println("Error saving prompts: Invalid JSON format. ${e.message}")
+            throw e
+        }
+    }
+
     fun resetToDefaults(): Boolean {
-        val customPromptsFile = File(configDir, "prompts.json")
         return if (customPromptsFile.exists()) {
             customPromptsFile.delete()
         } else {

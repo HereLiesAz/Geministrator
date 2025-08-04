@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.android.ui.main
+package com.hereliesaz.geministrator.android.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
@@ -7,7 +7,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
-import androidx.compose.runtime.Composable
 
 fun NavigationSuiteScope.geministratorNavSuite(
     onNavigate: (String) -> Unit,
