@@ -25,6 +25,13 @@ class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger
             logger.info("  [Manager] -> Delegating command: $commandName")
             val result = adapter.execute(command)
 
+            // If the adapter executes PauseAndExit, the application will terminate,
+            // and the code below this line will not be reached.
+            if (command is AbstractCommand.PauseAndExit) {
+                // This return is effectively unreachable but satisfies the compiler.
+                return WorkflowStatus.Success("Workflow paused by user.", successfulSteps)
+            }
+
             if (!result.isSuccess) {
                 val reason = "Execution of $commandName failed: ${result.output}"
                 logger.error("  ERROR: $reason")

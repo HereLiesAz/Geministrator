@@ -1,6 +1,6 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -11,8 +11,8 @@ android {
         applicationId = "com.hereliesaz.geministrator.android"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,55 +37,55 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        // This version is aligned with the project's Kotlin version (1.9.23)
+        kotlinCompilerExtensionVersion = "2.0.0"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    buildToolsVersion = "36.0.0"
 }
 
 dependencies {
+    // Project Modules
     implementation(project(":cli"))
 
     // Core & UI
-    implementation("androidx.core:core-ktx:1.16.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.2")
-    implementation("androidx.activity:activity-compose:1.12.0-alpha05")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime)
+    implementation(libs.androidx.activity.compose)
 
-    // Material 3
-    implementation(platform("androidx.compose:compose-bom:2025.07.00"))
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material3:material3-window-size-class")
-    implementation("androidx.compose.material3:material3-adaptive")
-    implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
+    // Compose Bill of Materials
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.foundation)
 
+    // Material 3 and Adaptive Layouts
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.material3.window)
+            implementation(libs.androidx.material3.adaptive)
+            implementation(libs.androidx.material3.adaptive.navigation.suite)
 
-    // Compose UI
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.foundation:foundation:1.9.0-rc01")
+            // Navigation
+            implementation(libs.androidx.navigation.compose)
 
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.3")
+            // ViewModel
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.2")
+            // On-device Git
+            implementation(libs.eclipse.jgit)
 
-    // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.07.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+            // Testing
+            testImplementation(libs.junit)
+            androidTestImplementation(libs.androidx.test.ext.junit)
+            androidTestImplementation(libs.androidx.test.espresso.core)
+            androidTestImplementation(platform(libs.androidx.compose.bom))
+            androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-    implementation("com.github.JetBrains:intellij-platform-plugin-template:2.7.0")
-    implementation("org.eclipse.jgit:org.eclipse.jgit:6.9.0.202403050737-r")
-
-
+            // Debugging
+            debugImplementation(libs.androidx.compose.ui.tooling)
+            debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

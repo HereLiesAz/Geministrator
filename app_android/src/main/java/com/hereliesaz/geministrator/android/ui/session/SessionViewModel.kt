@@ -3,13 +3,14 @@ package com.hereliesaz.geministrator.android.ui.session
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.adapter.CliConfigStorage
+import com.hereliesaz.geministrator.android.data.AndroidConfigStorage
 import com.hereliesaz.geministrator.android.data.AndroidExecutionAdapter
 import com.hereliesaz.geministrator.android.data.AndroidLogger
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.common.GeminiService
 import com.hereliesaz.geministrator.common.PromptManager
 import com.hereliesaz.geministrator.core.Orchestrator
+import com.hereliesaz.geministrator.core.config.ConfigStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,20 +40,18 @@ class SessionViewModel(
 
             // 1. Initialize Android-specific implementations
             val logger = AndroidLogger(_logEntries)
-            // For now, we use the CLI's file-based config storage, assuming it can write to a cache dir.
-            // A true Android implementation would use SharedPreferences or DataStore.
+            val configStorage: ConfigStorage = AndroidConfigStorage(getApplication())
+            val executionAdapter = AndroidExecutionAdapter(projectViewModel, logger)
+
+            // Re-use CLI prompt logic, but point it to a writable cache directory
             val configDir = File(getApplication<Application>().cacheDir, "gemini_config")
             configDir.mkdirs()
-            val configStorage = CliConfigStorage(configDir)
-            val executionAdapter = AndroidExecutionAdapter(projectViewModel, logger)
-            val promptManager = PromptManager(configDir) // Uses the same config dir for prompts.json
+            val promptManager = PromptManager(configDir)
 
             // 2. Configure Gemini Service
-            // This part is simplified. A real app would need a settings screen to manage the API key.
-            // We'll hardcode a dummy key check for now.
-            val apiKey = "YOUR_API_KEY_HERE" // This needs to be managed via a settings screen
-            if (apiKey == "YOUR_API_KEY_HERE") {
-                logger.error("FATAL: Gemini API Key is not configured. Please add it.")
+            val apiKey = configStorage.loadApiKey()
+            if (apiKey.isNullOrBlank()) {
+                logger.error("FATAL: Gemini API Key is not configured. Please set it in the Settings screen.")
                 return@launch
             }
 
@@ -78,7 +77,6 @@ class SessionViewModel(
 
             logger.info("Orchestrator initialized. Starting workflow for prompt: \"$prompt\"")
 
-            // For now, projectType is hardcoded. This could be a dropdown in the UI later.
             orchestrator.run(
                 prompt = prompt,
                 projectRoot = projectRootPath,

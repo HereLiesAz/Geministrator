@@ -12,6 +12,7 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
+import kotlin.system.exitProcess
 
 class CliAdapter(
     private val config: ConfigStorage,
@@ -21,7 +22,7 @@ class CliAdapter(
 
     override fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
         return when (command) {
-            is AbstracatCommand.AppendToFile -> try {
+            is AbstractCommand.AppendToFile -> try {
                 File(command.path).appendText(command.content); ExecutionResult(
                     true,
                     "Appended to ${command.path}"
@@ -163,7 +164,12 @@ class CliAdapter(
                 )
             }
 
-            is AbstractCommand.PauseAndExit -> TODO()
+            is AbstractCommand.PauseAndExit -> {
+                logger.interactive("\n--- EXECUTION PAUSED BY AI ---")
+                logger.interactive(command.checkInMessage)
+                logger.interactive("To resume, run Geministrator again. State has been saved.")
+                exitProcess(0)
+            }
         }
     }
 

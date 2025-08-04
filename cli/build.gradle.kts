@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.hereliesaz.geministrator"
-version = "1.0.0"
+version = "1.1.0"
 
 // Add sourceSets block to include resources
 sourceSets {
@@ -42,7 +42,7 @@ dependencies {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
 }
 
 // This task gathers all dependency JARs into one place for the installer.

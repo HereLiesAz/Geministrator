@@ -85,39 +85,39 @@ class Orchestrator(
 
     fun run(prompt: String, projectRoot: String, projectType: String, specFileContent: String?) =
         runBlocking(Dispatchers.Default) {
-        val sessionState = loadSessionState()
-        if (sessionState != null) {
-            val decision = adapter.execute(
-                AbstractCommand.RequestUserDecision(
-                    "An incomplete workflow was found. Do you want to resume it?",
-                    listOf("Resume", "Start New")
+            val sessionState = loadSessionState()
+            if (sessionState != null) {
+                val decision = adapter.execute(
+                    AbstractCommand.RequestUserDecision(
+                        "An incomplete workflow was found. Do you want to resume it?",
+                        listOf("Resume", "Start New")
+                    )
                 )
-            )
-            if (decision.data == "Resume") {
-                logger.info("Resuming previous workflow...")
-                executeMasterPlan(
-                    sessionState.masterPlan,
-                    projectRoot,
-                    sessionState.mainBranch,
-                    sessionState.completedBranches.toMutableList(),
-                    sessionState.completedTaskIndices.toMutableSet()
-                )
+                if (decision.data == "Resume") {
+                    logger.info("Resuming previous workflow...")
+                    executeMasterPlan(
+                        sessionState.masterPlan,
+                        projectRoot,
+                        sessionState.mainBranch,
+                        sessionState.completedBranches.toMutableList(),
+                        sessionState.completedTaskIndices.toMutableSet()
+                    )
+                    return@runBlocking
+                }
+            }
+
+            ai.clearSession()
+            logger.info("Orchestrator received complex prompt: '$prompt'")
+            val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
+            val masterPlanJson = deconstructPromptIntoSubTasks(prompt, projectType, specFileContent)
+            if (masterPlanJson.startsWith("Error:")) {
+                logger.error("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
                 return@runBlocking
             }
-        }
-
-        ai.clearSession()
-            logger.info("Orchestrator received complex prompt: '$prompt'")
-        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
-            val masterPlanJson = deconstructPromptIntoSubTasks(prompt, projectType, specFileContent)
-        if (masterPlanJson.startsWith("Error:")) {
-            logger.error("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
-            return@runBlocking
-        }
-        val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
+            val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
             saveSessionState(SessionState(masterPlan, emptyList(), emptySet(), mainBranch))
             executeMasterPlan(masterPlan, projectRoot, mainBranch, mutableListOf(), mutableSetOf())
-    }
+        }
 
     private suspend fun executeMasterPlan(
         masterPlan: MasterPlan,
@@ -308,15 +308,6 @@ class Orchestrator(
             logger.error("Generated an empty or invalid workflow. Halting task.")
             return null
         }
-
-        val pauseCommand = workflow.filterIsInstance<AbstractCommand.PauseAndExit>().firstOrNull()
-        if (pauseCommand != null) {
-            logger.interactive("\n--- EXECUTION PAUSED BY AI ---")
-            logger.interactive(pauseCommand.checkInMessage)
-            logger.interactive("To resume, run Geministrator again. State has been saved.")
-            exitProcess(0)
-        }
-
 
         if (workflow.size == 1 && workflow.first() is AbstractCommand.RequestClarification) {
             val clarificationCommand = workflow.first() as AbstractCommand.RequestClarification

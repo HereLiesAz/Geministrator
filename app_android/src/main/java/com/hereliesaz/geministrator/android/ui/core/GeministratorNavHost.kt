@@ -12,6 +12,7 @@ import com.hereliesaz.geministrator.android.ui.main.MainViewModel
 import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
 
 @Composable
 fun GeministratorNavHost(
@@ -20,6 +21,7 @@ fun GeministratorNavHost(
     modifier: Modifier = Modifier
 ) {
     val mainViewModel: MainViewModel = viewModel()
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -33,7 +35,7 @@ fun GeministratorNavHost(
             FileSaveScreen()
         }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(settingsViewModel)
         }
         composable("history") {
             HistoryScreen()
