@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.compose.material3.Text
 import androidx.navigation.compose.composable
 import com.hereliesaz.geministrator.android.ui.file.FileSaveScreen
 import com.hereliesaz.geministrator.android.ui.main.MainSessionView
@@ -12,6 +13,7 @@ import com.hereliesaz.geministrator.android.ui.main.MainViewModel
 import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import com.hereliesaz.geministrator.android.ui.session.SessionLogScreen
 import com.hereliesaz.geministrator.android.ui.settings.PromptEditorScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
 
@@ -42,7 +44,15 @@ fun GeministratorNavHost(
             )
         }
         composable("history") {
-            HistoryScreen()
+            HistoryScreen(onSessionClick = { sessionId ->
+                navController.navigate("session_log/$sessionId")
+            })
+        }
+        composable("session_log/{sessionId}") { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId")
+            if (sessionId != null) {
+                SessionLogScreen(sessionId = sessionId)
+            }
         }
         composable("prompts") {
             PromptEditorScreen(

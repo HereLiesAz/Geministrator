@@ -1,6 +1,8 @@
 [versions]
 android-gradle-plugin = "8.3.2"
 kotlin = "1.9.22"
+room = "2.6.1"
+ksp = "1.9.22-1.0.17"
 core-ktx = "1.12.0"
 kotlinx-cli = "0.3.6"
 kotlinx-coroutines-core = "1.8.0"
@@ -72,6 +74,11 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 # GitHub
 github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github-api" }
 
+# Room
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+
 
 
 [plugins]
@@ -80,3 +87,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

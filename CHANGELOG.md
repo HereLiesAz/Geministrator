@@ -147,10 +147,10 @@ All notable changes to this project will be documented in this file.
   - [x] [cite_start]Implement UI for changing the color theme. [cite: 76]
   - [x] [cite_start]Add a section to view and edit the JSON prompts used by the AI
     agents. [cite: 77]
-- [ ] **History Screen**
-  - [ ] [cite_start]Design a UI to display a list of completed sessions. [cite: 78]
-  - [ ] [cite_start]Implement persistence for session logs (e.g., using Room database). [cite: 79]
-  - [ ] [cite_start]Allow users to tap on a past session to view its full log. [cite: 80]
+- [x] **History Screen**
+  - [x] [cite_start]Design a UI to display a list of completed sessions. [cite: 78]
+  - [x] [cite_start]Implement persistence for session logs (e.g., using Room database). [cite: 79]
+  - [x] [cite_start]Allow users to tap on a past session to view its full log. [cite: 80]
 - [ ] **Git UI Integration**
   - [ ] [cite_start]Create a "Version Control" tab or panel within the `SessionScreen`. [cite: 81]
   - [ ] [cite_start]Display the output of `git status` in a formatted way. [cite: 82]
