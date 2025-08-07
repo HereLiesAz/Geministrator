@@ -17,6 +17,7 @@ import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.settings.PromptEditorScreen
+import com.hereliesaz.geministrator.android.ui.github.CreateIssueScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -85,6 +86,12 @@ fun GeministratorNavHost(
                 settingsViewModel = settingsViewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+        composable("create_issue") {
+            CreateIssueScreen(onCreateIssue = { title, body ->
+                // TODO: Call GitHubManager to create issue
+                navController.popBackStack()
+            })
         }
     }
 }

@@ -212,6 +212,6 @@ All notable changes to this project will be documented in this file.
   - [ ] [cite_start]Optimize the `LazyColumn` in `SessionScreen` for very long logs. [cite: 103]
 
 ### Enhancements
-- [ ] **Intelligent Caching**: Implement a more intelligent caching mechanism for the `SafProjectCopier` to avoid unnecessary file copies.
-- [ ] **Improved `git diff` Viewer**: Enhance the `git diff` viewer with syntax highlighting and a side-by-side view.
-- [ ] **GitHub Issue Integration**: Allow creating and linking GitHub issues from within the app.
+- [x] **Intelligent Caching**: Implement a more intelligent caching mechanism for the `SafProjectCopier` to avoid unnecessary file copies.
+- [x] **Improved `git diff` Viewer**: Enhance the `git diff` viewer with syntax highlighting and a side-by-side view.
+- [x] **GitHub Issue Integration**: Allow creating and linking GitHub issues from within the app.

@@ -98,4 +98,7 @@ dependencies {
 
     // DocumentFile for Storage Access Framework helpers
     implementation(libs.androidx.documentfile)
+
+    // RichTextFX
+    implementation(libs.richtextfx)
 }
