@@ -55,4 +55,9 @@ class PluginConfigStorage : ConfigStorage {
         props.setValue(ID_FREE_TIER_ONLY, enabled, false)
 
     override suspend fun loadFreeTierOnly(): Boolean = props.getBoolean(ID_FREE_TIER_ONLY, false)
+
+    override suspend fun loadDefaultRepo(): String? = null
+    override suspend fun saveGitHubToken(token: String) {}
+    override suspend fun loadGitHubToken(): String? = null
+    override suspend fun saveDefaultRepo(repoName: String) {}
 }

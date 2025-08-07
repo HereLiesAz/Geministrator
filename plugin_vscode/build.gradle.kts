@@ -20,7 +20,6 @@ val npmInstall by tasks.registering(Exec::class) {
     commandLine("npm", "install")
 
     inputs.file(file("package.json"))
-    inputs.file(file("package-lock.json"))
     outputs.dir(file("node_modules"))
 }
 

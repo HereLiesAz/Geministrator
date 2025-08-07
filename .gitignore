@@ -17,3 +17,6 @@ prompts/build/
 /plugin_android_studio/build/
 /.idea/
 /.gradle/
+.intellijPlatform/
+/plugin_vscode/node_modules/
+/plugin_vscode/package-lock.json

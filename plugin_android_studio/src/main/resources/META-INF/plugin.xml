@@ -7,7 +7,6 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jetbrains.kotlin</depends>
     <depends>com.intellij.modules.vcs</depends>
-    <depends>com.intellij.diff</depends>
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow anchor="right" factoryClass="com.hereliesaz.geministrator_plugin.plugin.OrchestratorToolWindowFactory"
             icon="AllIcons.General.User"
