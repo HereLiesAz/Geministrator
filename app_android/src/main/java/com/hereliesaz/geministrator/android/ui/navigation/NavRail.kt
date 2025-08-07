@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.android.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
@@ -27,5 +28,10 @@ fun NavigationSuiteScope.geministratorNavSuite(
         selected = currentDestination == "history",
         onClick = { onNavigate("history") },
         icon = { Icon(Icons.Default.History, contentDescription = "History") }
+    )
+    item(
+        selected = currentDestination == "explorer",
+        onClick = { onNavigate("explorer") },
+        icon = { Icon(Icons.Default.Folder, contentDescription = "Explorer") }
     )
 }

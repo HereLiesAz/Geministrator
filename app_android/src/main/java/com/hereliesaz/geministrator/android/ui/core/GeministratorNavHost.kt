@@ -14,6 +14,8 @@ import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.session.DiffScreen
+import com.hereliesaz.geministrator.android.ui.navigation.ExplorerScreen
+import com.hereliesaz.geministrator.android.ui.session.FileContentScreen
 import com.hereliesaz.geministrator.android.ui.session.SessionLogScreen
 import com.hereliesaz.geministrator.android.ui.settings.PromptEditorScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
@@ -59,6 +61,23 @@ fun GeministratorNavHost(
             val filePath = backStackEntry.arguments?.getString("filePath")
             if (filePath != null) {
                 DiffScreen(filePath = filePath)
+            }
+        }
+        composable("explorer") {
+            ExplorerScreen(
+                projectViewModel = projectViewModel,
+                onFileClick = { filePath ->
+                    navController.navigate("file_content/$filePath")
+                }
+            )
+        }
+        composable("file_content/{filePath}") { backStackEntry ->
+            val filePath = backStackEntry.arguments?.getString("filePath")
+            if (filePath != null) {
+                FileContentScreen(
+                    projectViewModel = projectViewModel,
+                    filePath = filePath
+                )
             }
         }
         composable("prompts") {

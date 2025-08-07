@@ -157,11 +157,11 @@ All notable changes to this project will be documented in this file.
   - [x] [cite_start]Add a "Staged Files" section with checkboxes, allowing the user to manually
     stage or unstage files. [cite: 83]
   - [x] [cite_start]Implement a `git diff` viewer to show changes in a selected file. [cite: 84]
-- [ ] **File Browser**
-  - [ ] [cite_start]Create a new "Explorer" screen accessible from the `NavRail`. [cite: 85]
-  - [ ] [cite_start]Display a navigable tree of the files and directories within the user-selected
+- [x] **File Browser**
+  - [x] [cite_start]Create a new "Explorer" screen accessible from the `NavRail`. [cite: 85]
+  - [x] [cite_start]Display a navigable tree of the files and directories within the user-selected
     project folder. [cite: 86]
-  - [ ] [cite_start]Allow users to tap on a file to view its content in a read-only
+  - [x] [cite_start]Allow users to tap on a file to view its content in a read-only
     editor. [cite: 87]
 - [ ] **Real-time Sync & UI State**
   - [ ] [cite_start]Convert `SessionViewModel` to emit a `UiState` object containing the log

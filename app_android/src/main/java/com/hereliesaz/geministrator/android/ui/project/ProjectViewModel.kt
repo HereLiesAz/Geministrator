@@ -118,19 +118,53 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun readFile(filePath: String): String? {
-        // For reading, the local cache is the source of truth for the app's logic.
-        return _uiState.value.localCachePath?.let { cachePath ->
-            val fileInCache = File(cachePath, filePath)
-            if (fileInCache.exists()) fileInCache.readText() else null
+    fun readFile(filePath: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val content = _uiState.value.localCachePath?.let { cachePath ->
+                val fileInCache = File(cachePath, filePath)
+                if (fileInCache.exists()) fileInCache.readText() else "File not found."
+            } ?: "Project cache path not found."
+            _uiState.update { it.copy(fileContent = content) }
         }
     }
+
+    fun loadFileTree() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.value.localCachePath?.let { cachePath ->
+                val rootFile = File(cachePath)
+                val fileTree = buildFileTree(rootFile)
+                _uiState.update { it.copy(fileTree = fileTree) }
+            }
+        }
+    }
+
+    private fun buildFileTree(file: File): FileNode {
+        return FileNode(
+            name = file.name,
+            path = file.absolutePath,
+            isDirectory = file.isDirectory,
+            children = if (file.isDirectory) {
+                file.listFiles()?.map { buildFileTree(it) } ?: emptyList()
+            } else {
+                emptyList()
+            }
+        )
+    }
 }
+
+data class FileNode(
+    val name: String,
+    val path: String,
+    val isDirectory: Boolean,
+    val children: List<FileNode> = emptyList()
+)
 
 data class ProjectUiState(
     val projectUri: Uri? = null,
     val localCachePath: File? = null,
     val isLoading: Boolean = false,
     val cloneUrl: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    val fileTree: FileNode? = null,
+    val fileContent: String = ""
 )
