@@ -55,7 +55,11 @@ fun MainScreen(projectViewModel: ProjectViewModel) {
 }
 
 @Composable
-fun MainSessionView(mainViewModel: MainViewModel = viewModel(), projectViewModel: ProjectViewModel) {
+fun MainSessionView(
+    mainViewModel: MainViewModel = viewModel(),
+    projectViewModel: ProjectViewModel,
+    navController: androidx.navigation.NavController
+) {
     val uiState by mainViewModel.uiState.collectAsState()
     val sessions = uiState.sessions
     val selectedIndex = uiState.selectedSessionIndex
@@ -83,7 +87,10 @@ fun MainSessionView(mainViewModel: MainViewModel = viewModel(), projectViewModel
         if (sessions.isNotEmpty()) {
             val selectedSession = sessions[selectedIndex]
             Box(modifier = Modifier.weight(1f)) {
-                SessionScreen(sessionViewModel = selectedSession.viewModel)
+                SessionScreen(
+                    sessionViewModel = selectedSession.viewModel,
+                    navController = navController
+                )
             }
         }
     }

@@ -151,12 +151,12 @@ All notable changes to this project will be documented in this file.
   - [x] [cite_start]Design a UI to display a list of completed sessions. [cite: 78]
   - [x] [cite_start]Implement persistence for session logs (e.g., using Room database). [cite: 79]
   - [x] [cite_start]Allow users to tap on a past session to view its full log. [cite: 80]
-- [ ] **Git UI Integration**
-  - [ ] [cite_start]Create a "Version Control" tab or panel within the `SessionScreen`. [cite: 81]
-  - [ ] [cite_start]Display the output of `git status` in a formatted way. [cite: 82]
-  - [ ] [cite_start]Add a "Staged Files" section with checkboxes, allowing the user to manually
+- [x] **Git UI Integration**
+  - [x] [cite_start]Create a "Version Control" tab or panel within the `SessionScreen`. [cite: 81]
+  - [x] [cite_start]Display the output of `git status` in a formatted way. [cite: 82]
+  - [x] [cite_start]Add a "Staged Files" section with checkboxes, allowing the user to manually
     stage or unstage files. [cite: 83]
-  - [ ] [cite_start]Implement a `git diff` viewer to show changes in a selected file. [cite: 84]
+  - [x] [cite_start]Implement a `git diff` viewer to show changes in a selected file. [cite: 84]
 - [ ] **File Browser**
   - [ ] [cite_start]Create a new "Explorer" screen accessible from the `NavRail`. [cite: 85]
   - [ ] [cite_start]Display a navigable tree of the files and directories within the user-selected

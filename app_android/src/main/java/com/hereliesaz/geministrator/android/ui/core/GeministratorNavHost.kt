@@ -13,6 +13,7 @@ import com.hereliesaz.geministrator.android.ui.main.MainViewModel
 import com.hereliesaz.geministrator.android.ui.navigation.HistoryScreen
 import com.hereliesaz.geministrator.android.ui.navigation.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import com.hereliesaz.geministrator.android.ui.session.DiffScreen
 import com.hereliesaz.geministrator.android.ui.session.SessionLogScreen
 import com.hereliesaz.geministrator.android.ui.settings.PromptEditorScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
@@ -32,7 +33,7 @@ fun GeministratorNavHost(
         modifier = modifier
     ) {
         composable("sessions") {
-            MainSessionView(mainViewModel, projectViewModel)
+            MainSessionView(mainViewModel, projectViewModel, navController)
         }
         composable("save_file") {
             FileSaveScreen()
@@ -52,6 +53,12 @@ fun GeministratorNavHost(
             val sessionId = backStackEntry.arguments?.getString("sessionId")
             if (sessionId != null) {
                 SessionLogScreen(sessionId = sessionId)
+            }
+        }
+        composable("diff/{filePath}") { backStackEntry ->
+            val filePath = backStackEntry.arguments?.getString("filePath")
+            if (filePath != null) {
+                DiffScreen(filePath = filePath)
             }
         }
         composable("prompts") {

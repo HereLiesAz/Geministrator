@@ -16,11 +16,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,28 +35,54 @@ import com.hereliesaz.geministrator.android.ui.components.MarkdownText
 import com.hereliesaz.geministrator.android.ui.components.ShimmerPlaceholder
 
 @Composable
-fun SessionScreen(sessionViewModel: SessionViewModel = viewModel()) {
+fun SessionScreen(
+    sessionViewModel: SessionViewModel = viewModel(),
+    navController: androidx.navigation.NavController
+) {
     val uiState by sessionViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf("Log", "Version Control")
 
     LaunchedEffect(uiState.logEntries.size) {
-        if (uiState.logEntries.isNotEmpty()) {
+        if (uiState.logEntries.isNotEmpty() && selectedTabIndex == 0) {
             listState.animateScrollToItem(uiState.logEntries.size - 1)
         }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(items = uiState.logEntries, key = { it.id }) { entry ->
-                LogEntryItem(entry)
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            tabs.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) }
+                )
+            }
+        }
+
+        when (selectedTabIndex) {
+            0 -> {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(items = uiState.logEntries, key = { it.id }) { entry ->
+                        LogEntryItem(entry)
+                    }
+                }
+            }
+
+            1 -> {
+                VersionControlView(
+                    sessionViewModel = sessionViewModel,
+                    navController = navController
+                )
             }
         }
 

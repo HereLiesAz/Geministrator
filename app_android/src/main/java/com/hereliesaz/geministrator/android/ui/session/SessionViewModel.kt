@@ -54,6 +54,28 @@ class SessionViewModel(
         }
     }
 
+    fun getDiff(filePath: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val diffResult = projectViewModel.gitManager?.getDiff(filePath)
+            diffResult?.onSuccess { diff ->
+                _uiState.update { it.copy(diff = diff) }
+            }?.onFailure {
+                _uiState.update { it.copy(diff = "Error getting diff: ${it.message}") }
+            }
+        }
+    }
+
+    fun getGitStatus() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val statusResult = projectViewModel.gitManager?.getStatus()
+            statusResult?.onSuccess { status ->
+                _uiState.update { it.copy(gitStatus = status) }
+            }?.onFailure {
+                // TODO: Handle error properly
+            }
+        }
+    }
+
     private fun startOrchestration() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(status = WorkflowStatus.RUNNING) }

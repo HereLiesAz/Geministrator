@@ -7,6 +7,13 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import java.io.File
 import java.util.UUID
 
+data class GitStatus(
+    val added: Set<String> = emptySet(),
+    val modified: Set<String> = emptySet(),
+    val removed: Set<String> = emptySet(),
+    val untracked: Set<String> = emptySet()
+)
+
 class GitManager(private val projectCacheDir: File) {
 
     private val repository: Repository by lazy {
@@ -51,15 +58,26 @@ class GitManager(private val projectCacheDir: File) {
         }
     }
 
-    fun getStatus(): Result<String> {
+    fun getDiff(filePath: String): Result<String> {
+        return try {
+            val diffStream = java.io.ByteArrayOutputStream()
+            git.diff().setOutputStream(diffStream).addPath(filePath).call()
+            Result.success(diffStream.toString())
+        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
+            Result.failure(e)
+        }
+    }
+
+    fun getStatus(): Result<GitStatus> {
         return try {
             val status = git.status().call()
-            val statusStringBuilder = StringBuilder()
-            status.added.forEach { statusStringBuilder.append("ADDED: $it\n") }
-            status.modified.forEach { statusStringBuilder.append("MODIFIED: $it\n") }
-            status.removed.forEach { statusStringBuilder.append("REMOVED: $it\n") }
-            status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") }
-            Result.success(statusStringBuilder.toString().ifEmpty { "No changes." })
+            val gitStatus = GitStatus(
+                added = status.added,
+                modified = status.modified,
+                removed = status.removed,
+                untracked = status.untracked
+            )
+            Result.success(gitStatus)
         } catch (e: org.eclipse.jgit.api.errors.NoWorkTreeException) {
             Result.failure(e)
         } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
