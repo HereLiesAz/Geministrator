@@ -52,17 +52,20 @@ fun MainScreen(projectViewModel: ProjectViewModel) {
 }
 
 @Composable
-fun MainSessionView(mainViewModel: MainViewModel = viewModel(), projectViewModel: ProjectViewModel) {
+fun MainSessionView(
+    mainViewModel: MainViewModel = viewModel(),
+    projectViewModel: ProjectViewModel,
+    navController: NavController
+) {
     val uiState by mainViewModel.uiState.collectAsState()
     val sessions = uiState.sessions
     val selectedIndex = uiState.selectedSessionIndex
 
-    if (uiState.showNewSessionDialog) {
-        NewSessionDialog(
-            onDismiss = { mainViewModel.onDismissNewSessionDialog() },
-            onConfirm = { prompt -> mainViewModel.startSession(prompt, projectViewModel) }
-        )
-    }
+    NewSessionDialog(
+        showSheet = uiState.showNewSessionDialog,
+        onDismiss = { mainViewModel.onDismissNewSessionDialog() },
+        onConfirm = { prompt -> mainViewModel.startSession(prompt, projectViewModel) }
+    )
 
     Scaffold(
         floatingActionButton = {
@@ -87,7 +90,10 @@ fun MainSessionView(mainViewModel: MainViewModel = viewModel(), projectViewModel
                     }
                 }
                 val selectedSession = sessions[selectedIndex]
-                SessionScreen(sessionViewModel = selectedSession.viewModel)
+                SessionScreen(
+                    sessionViewModel = selectedSession.viewModel,
+                    navController = navController
+                )
             }
         }
     }
