@@ -1,22 +1,29 @@
-/cli/build/
+/cli/build/*
 /build/
-/app_android/build/
-/build/
+/app_android/build/*
+/build/*
 /.idea/
-/.kotlin/
+/.kotlin/*
 project_backup_full_*
 
-.gradle/
+.gradle/*
 
 *.hprof
 
-prompts/build/
-/app_android/build/
-/.idea/
+prompts/build/*
+/app_android/build/*
+/.idea/*
 /.gradle/
 /plugin_android_studio/build/
 /.idea/
 /.gradle/
-.intellijPlatform/
+/.idea/
+.intellijPlatform/*
 /plugin_vscode/node_modules/
 /plugin_vscode/package-lock.json
+/app_android/build/
+/app_android/build/intermediates/
+/app_android/build/outputs/
+/.idea/
+/.gradle/
+/plugin_vscode/build/*
