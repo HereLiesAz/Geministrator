@@ -1,26 +1,32 @@
 package com.hereliesaz.geministrator.core.config
 
 interface ConfigStorage {
-    fun saveApiKey(apiKey: String)
-    fun loadApiKey(): String?
-    fun savePreCommitReview(enabled: Boolean)
-    fun loadPreCommitReview(): Boolean
-    fun saveModelName(type: String, name: String)
-    fun loadModelName(type: String, default: String): String
-    fun saveConcurrencyLimit(limit: Int)
-    fun loadConcurrencyLimit(): Int
-    fun saveTokenLimit(limit: Int)
-    fun loadTokenLimit(): Int
+    suspend fun saveApiKey(apiKey: String)
+    suspend fun loadApiKey(): String?
+    suspend fun savePreCommitReview(enabled: Boolean)
+    suspend fun loadPreCommitReview(): Boolean
+    suspend fun saveModelName(type: String, name: String)
+    suspend fun loadModelName(type: String, default: String): String
+    suspend fun saveConcurrencyLimit(limit: Int)
+    suspend fun loadConcurrencyLimit(): Int
+    suspend fun saveTokenLimit(limit: Int)
+    suspend fun loadTokenLimit(): Int
 
     // New methods for search configuration
-    fun saveSearchApiKey(apiKey: String)
-    fun loadSearchApiKey(): String?
-    fun saveSearchEngineId(id: String)
-    fun loadSearchEngineId(): String?
+    suspend fun saveSearchApiKey(apiKey: String)
+    suspend fun loadSearchApiKey(): String?
+    suspend fun saveSearchEngineId(id: String)
+    suspend fun loadSearchEngineId(): String?
 
     // New methods for auth
-    fun saveAuthMethod(method: String)
-    fun loadAuthMethod(): String
-    fun saveFreeTierOnly(enabled: Boolean)
-    fun loadFreeTierOnly(): Boolean
+    suspend fun saveAuthMethod(method: String)
+    suspend fun loadAuthMethod(): String
+    suspend fun saveFreeTierOnly(enabled: Boolean)
+    suspend fun loadFreeTierOnly(): Boolean
+
+    // New method for GitHub
+    suspend fun saveGitHubToken(token: String)
+    suspend fun loadGitHubToken(): String?
+    suspend fun saveDefaultRepo(repoName: String)
+    suspend fun loadDefaultRepo(): String?
 }

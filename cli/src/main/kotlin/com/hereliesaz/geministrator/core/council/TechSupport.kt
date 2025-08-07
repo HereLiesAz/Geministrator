@@ -9,7 +9,7 @@ class TechSupport(
     private val ai: GeminiService,
     private val promptManager: PromptManager,
 ) {
-    fun analyzeMergeConflict(conflictOutput: String): String {
+    suspend fun analyzeMergeConflict(conflictOutput: String): String {
         logger.info("Tech Support: Analyzing merge conflict...")
         val prompt = promptManager.getPrompt(
             "techSupport.analyzeMergeConflict",

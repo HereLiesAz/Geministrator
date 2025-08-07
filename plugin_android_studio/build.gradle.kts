@@ -19,13 +19,11 @@ dependencies {
 
     // Add a dependency for the test framework
     testImplementation(kotlin("test"))
-
-    // Markdown
-    implementation(libs.flexmark)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
 }
 
 // The IntelliJ plugin will configure the test task, but we ensure it uses JUnit Platform.

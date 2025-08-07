@@ -53,9 +53,36 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function runCliProcess(prompt: string) {
-    // For now, we assume the server is running. In a real implementation,
-    // we would start the server here if it's not already running.
-    orchestratorPanel?.webview.postMessage({ command: 'connect', prompt: prompt });
+    if (orchestratorProcess) {
+        orchestratorProcess.kill();
+    }
+
+    // Call the CLI command directly, assuming it is on the system's PATH.
+    // This is more robust than a hardcoded relative path.
+    const command = 'geministrator';
+    const args = ['run', prompt];
+
+    orchestratorProcess = spawn(command, args);
+
+    orchestratorProcess.stdout?.on('data', (data: Buffer) => {
+        const message = data.toString();
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: message });
+    });
+
+    orchestratorProcess.stderr?.on('data', (data: Buffer) => {
+        const message = data.toString();
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: `ERROR: ${message}` });
+    });
+
+    orchestratorProcess.on('close', (code) => {
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: `\n--- Process finished with exit code ${code} ---` });
+        orchestratorProcess = undefined;
+    });
+
+    orchestratorProcess.on('error', (err) => {
+        orchestratorPanel?.webview.postMessage({ command: 'log', text: `\n--- FAILED TO START PROCESS ---\nIs 'geministrator' installed and in your system's PATH?\nError: ${err.message}` });
+        orchestratorProcess = undefined;
+    });
 }
 
 function getWebviewContent(): string {
@@ -87,29 +114,6 @@ function getWebviewContent(): string {
                 const runButton = document.getElementById('run-button');
                 const promptArea = document.getElementById('prompt');
                 const outputArea = document.getElementById('output');
-                let socket;
-
-                function connect(prompt) {
-                    socket = new WebSocket('ws://localhost:8080/ws');
-
-                    socket.onopen = function() {
-                        outputArea.textContent = 'Connection established. Starting workflow...\\n';
-                        socket.send(JSON.stringify({ command: 'run', prompt: prompt }));
-                    };
-
-                    socket.onmessage = function(event) {
-                        outputArea.textContent += event.data + '\\n';
-                        outputArea.scrollTop = outputArea.scrollHeight; // Auto-scroll
-                    };
-
-                    socket.onclose = function() {
-                        outputArea.textContent += '\\n--- Connection closed ---';
-                    };
-
-                    socket.onerror = function(error) {
-                        outputArea.textContent += '\\n--- WebSocket Error: ' + error.message + ' ---';
-                    };
-                }
 
                 runButton.addEventListener('click', () => {
                     const text = promptArea.value;
@@ -122,8 +126,9 @@ function getWebviewContent(): string {
                 window.addEventListener('message', event => {
                     const message = event.data;
                     switch (message.command) {
-                        case 'connect':
-                            connect(message.prompt);
+                        case 'log':
+                            outputArea.textContent += message.text;
+                            outputArea.scrollTop = outputArea.scrollHeight; // Auto-scroll
                             break;
                     }
                 });

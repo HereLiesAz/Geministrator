@@ -203,23 +203,6 @@ different coding style.
 
 ---
 
-## 📱 Android App
-
-The Android app provides a mobile interface for running Geministrator workflows.
-
-### Setup
-
-1.  Open the project in Android Studio.
-2.  Create a `local.properties` file in the root of the project.
-3.  Add the following line to `local.properties`, replacing `<path_to_android_sdk>` with the actual path to your Android SDK:
-    ```
-    sdk.dir=<path_to_android_sdk>
-    ```
-4.  Sync the project with Gradle.
-5.  Run the `app_android` configuration on an emulator or a physical device.
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

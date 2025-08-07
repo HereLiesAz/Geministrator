@@ -13,11 +13,12 @@ class Designer(private val logger: ILogger, private val adapter: ExecutionAdapte
             content = "# Feature: $feature\n\nThis feature should allow users to..."
         ))
     }
-    fun updateChangelog(commitMessage: String) {
+    suspend fun updateChangelog(commitMessage: String) {
         logger.info("Designer: Updating changelog.")
         adapter.execute(AbstractCommand.AppendToFile("CHANGELOG.md", "\n- $commitMessage"))
     }
-    fun recordHistoricalLesson(lesson: String) {
+
+    suspend fun recordHistoricalLesson(lesson: String) {
         logger.info("Designer: Recording important lesson in project history.")
         adapter.execute(AbstractCommand.AppendToFile("docs/history.md", "\n- $lesson"))
     }

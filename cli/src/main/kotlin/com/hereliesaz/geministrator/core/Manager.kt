@@ -8,10 +8,11 @@ sealed class WorkflowStatus {
     data class Success(val commitMessage: String, val successfulSteps: List<String>) : WorkflowStatus()
     data class Failure(val reason: String) : WorkflowStatus()
     data class TestsFailed(val testOutput: String, val successfulSteps: List<String>) : WorkflowStatus()
+    data class Paused(val message: String, val successfulSteps: List<String>) : WorkflowStatus()
 }
 
 class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger) {
-    fun executeWorkflow(workflow: List<AbstractCommand>, prompt: String): WorkflowStatus {
+    suspend fun executeWorkflow(workflow: List<AbstractCommand>, prompt: String): WorkflowStatus {
         logger.info("Manager starting workflow with ${workflow.size} steps.")
         if (workflow.isEmpty()) {
             logger.info("WARNING: Manager received an empty workflow. Nothing to do.")
@@ -23,10 +24,14 @@ class Manager(private val adapter: ExecutionAdapter, private val logger: ILogger
             val commandName = command::class.simpleName ?: "UnknownCommand"
             logger.info("---")
             logger.info("  [Manager] -> Delegating command: $commandName")
-            val result = adapter.execute(command)
 
-            // The adapter now handles the termination for PauseAndExit.
-            // If the command was PauseAndExit, the code below this line will not be reached.
+            // Intercept PauseAndExit before it reaches any adapter.
+            if (command is AbstractCommand.PauseAndExit) {
+                logger.info("  [Manager] -> Intercepted PauseAndExit command.")
+                return WorkflowStatus.Paused(command.checkInMessage, successfulSteps)
+            }
+
+            val result = adapter.execute(command)
 
             if (!result.isSuccess) {
                 val reason = "Execution of $commandName failed: ${result.output}"

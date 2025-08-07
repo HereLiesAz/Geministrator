@@ -2,143 +2,128 @@ package com.hereliesaz.geministrator.android.data
 
 import android.content.Context
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.diff.DiffFormatter
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.treewalk.CanonicalTreeParser
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.UUID
 
-data class GitStatus(
-    val added: Set<String> = emptySet(),
-    val modified: Set<String> = emptySet(),
-    val removed: Set<String> = emptySet(),
-    val untracked: Set<String> = emptySet()
-)
-
-/**
- * Manages Git operations for a given project cache directory.
- * @param projectCacheDir The directory where the project is cached.
- */
 class GitManager(private val projectCacheDir: File) {
 
-    private val repository: Repository by lazy {
-        val gitDir = File(projectCacheDir, ".git")
-        FileRepositoryBuilder()
-            .setGitDir(gitDir)
-            .readEnvironment()
-            .findGitDir()
-            .build()
-    }
-
     private val git: Git by lazy {
-        Git(repository)
+        val gitDir = File(projectCacheDir, ".git")
+        // Ensure the repository directory exists before trying to build or wrap it.
+        if (!gitDir.exists()) {
+            Git.init().setDirectory(projectCacheDir).call()
+        }
+        val repo = FileRepositoryBuilder().setGitDir(gitDir).build()
+        Git(repo)
     }
 
-    /**
-     * Initializes a new Git repository in the project cache directory if one doesn't already exist.
-     * @return A [Result] indicating success or failure.
-     */
-    fun init(): Result<Unit> {
-        return try {
-            if (!repository.directory.exists()) {
-                Git.init().setDirectory(projectCacheDir).call()
+    private val repository: Repository by lazy {
+        git.repository
+    }
+
+    fun stageFile(filePath: String): Result<Unit> = runCatching {
+        git.add().addFilepattern(filePath).call()
+    }
+
+    fun stageFiles(filePaths: List<String>): Result<Unit> = runCatching {
+        val addCommand = git.add()
+        filePaths.forEach { addCommand.addFilepattern(it) }
+        addCommand.call()
+    }
+
+
+    fun commit(message: String): Result<String> = runCatching {
+        val revCommit = git.commit().setMessage(message).call()
+        revCommit.fullMessage
+    }
+
+    fun getDiff(filePath: String): Result<String> = runCatching {
+        val head = repository.resolve("HEAD^{tree}")
+            ?: return@runCatching "No HEAD commit found to compare against."
+
+        ByteArrayOutputStream().use { out ->
+            DiffFormatter(out).use { formatter ->
+                formatter.setRepository(repository)
+                val oldTreeParser = CanonicalTreeParser().apply {
+                    reset(repository.newObjectReader(), head)
+                }
+                val newTreeParser = org.eclipse.jgit.treewalk.FileTreeIterator(repository)
+
+                val diffEntries = formatter.scan(oldTreeParser, newTreeParser)
+                val fileEntry =
+                    diffEntries.firstOrNull { it.newPath == filePath || it.oldPath == filePath }
+
+                if (fileEntry != null) {
+                    formatter.format(fileEntry)
+                    out.toString(Charsets.UTF_8)
+                } else {
+                    "No changes found for file: $filePath"
+                }
             }
-            Result.success(Unit)
-        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-            Result.failure(e)
         }
     }
 
-    /**
-     * Stages a file for commit.
-     * @param filePath The path of the file to stage.
-     * @return A [Result] indicating success or failure.
-     */
-    fun stageFile(filePath: String): Result<Unit> {
-        return try {
-            git.add().addFilepattern(filePath).call()
-            Result.success(Unit)
-        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-            Result.failure(e)
+    fun getCurrentBranch(): Result<String> = runCatching {
+        repository.fullBranch
+    }
+
+    fun createAndSwitchToBranch(branchName: String): Result<Unit> = runCatching {
+        git.checkout().setCreateBranch(true).setName(branchName).call()
+    }
+
+    fun switchToBranch(branchName: String): Result<Unit> = runCatching {
+        git.checkout().setName(branchName).call()
+    }
+
+    fun mergeBranch(branchName: String): Result<String> = runCatching {
+        val featureBranch = repository.resolve(branchName)
+
+        val mergeResult = git.merge()
+            .include(featureBranch)
+            .setCommit(true)
+            .setMessage("Merge branch '$branchName'")
+            .call()
+
+        if (mergeResult.mergeStatus.isSuccessful) {
+            "Merged '$branchName' successfully."
+        } else {
+            // Throw a concrete exception instead of an abstract one.
+            throw RuntimeException("Merge conflict for branch '$branchName'. Conflicts: ${mergeResult.conflicts}")
         }
     }
 
-    /**
-     * Commits the staged files.
-     * @param message The commit message.
-     * @return A [Result] containing the full commit message on success, or an exception on failure.
-     */
-    fun commit(message: String): Result<String> {
-        return try {
-            val revCommit = git.commit().setMessage(message).call()
-            Result.success(revCommit.fullMessage)
-        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-            Result.failure(e)
-        }
+    fun deleteBranch(branchName: String): Result<List<String>> = runCatching {
+        git.branchDelete().setBranchNames(branchName).setForce(true).call()
     }
 
-    /**
-     * Gets the diff of a file.
-     * @param filePath The path of the file.
-     * @return A [Result] containing the diff on success, or an exception on failure.
-     */
-    fun getDiff(filePath: String): Result<String> {
-        return try {
-            val diffStream = java.io.ByteArrayOutputStream()
-            git.diff().setOutputStream(diffStream).addPath(filePath).call()
-            Result.success(diffStream.toString())
-        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-            Result.failure(e)
-        }
-    }
 
-    /**
-     * Gets the status of the repository.
-     * @return A [Result] containing the [GitStatus] on success, or an exception on failure.
-     */
-    fun getStatus(): Result<GitStatus> {
-        return try {
-            val status = git.status().call()
-            val gitStatus = GitStatus(
-                added = status.added,
-                modified = status.modified,
-                removed = status.removed,
-                untracked = status.untracked
-            )
-            Result.success(gitStatus)
-        } catch (e: org.eclipse.jgit.api.errors.NoWorkTreeException) {
-            Result.failure(e)
-        } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-            Result.failure(e)
-        }
+    fun getStatus(): Result<String> = runCatching {
+        val status = git.status().call()
+        val statusStringBuilder = StringBuilder()
+        status.added.forEach { statusStringBuilder.append("ADDED: $it\n") }
+        status.modified.forEach { statusStringBuilder.append("MODIFIED: $it\n") }
+        status.removed.forEach { statusStringBuilder.append("REMOVED: $it\n") }
+        status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") }
+        statusStringBuilder.toString().ifEmpty { "No changes." }
     }
 
     companion object {
-        /**
-         * Clones a repository from a URL.
-         * @param url The URL of the repository to clone.
-         * @param context The application context.
-         * @return A [Result] containing the path to the cloned repository on success, or an exception on failure.
-         */
-        fun cloneRepository(url: String, context: Context): Result<File> {
-            return try {
-                val repoName = url.substringAfterLast('/').substringBeforeLast('.')
-                val destination =
-                    File(context.cacheDir, "cloned_repos/${repoName}_${UUID.randomUUID()}")
-                destination.mkdirs()
+        fun cloneRepository(url: String, context: Context): Result<File> = runCatching {
+            val repoName = url.substringAfterLast('/').substringBeforeLast('.')
+            val destination = File(context.cacheDir, "cloned_repos/${repoName}_${UUID.randomUUID()}")
+            destination.mkdirs()
 
-                Git.cloneRepository()
-                    .setURI(url)
-                    .setDirectory(destination)
-                    .call()
+            Git.cloneRepository()
+                .setURI(url)
+                .setDirectory(destination)
+                .call()
 
-                Result.success(destination)
-            } catch (e: org.eclipse.jgit.api.errors.InvalidRemoteException) {
-                Result.failure(e)
-            } catch (e: org.eclipse.jgit.api.errors.TransportException) {
-                Result.failure(e)
-            } catch (e: org.eclipse.jgit.api.errors.GitAPIException) {
-                Result.failure(e)
-            }
+            destination
         }
     }
 }

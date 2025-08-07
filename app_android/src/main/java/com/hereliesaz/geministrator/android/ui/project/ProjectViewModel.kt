@@ -16,10 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-/**
- * ViewModel for managing the project state.
- * @param application The application instance.
- */
 class ProjectViewModel(application: Application) : AndroidViewModel(application) {
     private val projectManager = ProjectManager(application)
     var gitManager: GitManager? = null
@@ -35,40 +31,20 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                 val localCopyPath = withContext(Dispatchers.IO) {
                     SafProjectCopier.copyProjectToCache(getApplication(), uri)
                 }
-                if (localCopyPath != null) {
-                    gitManager = GitManager(localCopyPath)
-                    _uiState.update {
-                        it.copy(
-                            projectUri = uri,
-                            localCachePath = localCopyPath,
-                            isLoading = false
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(isLoading = false, error = "Failed to copy project to cache.")
-                    }
-                }
+                gitManager = GitManager(localCopyPath)
+                _uiState.update { it.copy(projectUri = uri, localCachePath = localCopyPath, isLoading = false) }
             }
         }
     }
 
-    /**
-     * Opens the project folder picker.
-     * @param launcher The activity result launcher.
-     */
     fun selectProject(launcher: ActivityResultLauncher<Intent>) {
         projectManager.openProjectFolderPicker(launcher)
     }
 
-    /**
-     * Clones a repository from a URL.
-     * @param url The URL of the repository to clone.
-     */
     fun cloneProject(url: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val result = withContext(Dispatchers.IO) {
+            val result: Result<File> = withContext(Dispatchers.IO) {
                 GitManager.cloneRepository(url, getApplication())
             }
             result.onSuccess { localRepoPath ->
@@ -81,18 +57,13 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                         projectUri = null // Cloned projects don't have a SAF URI
                     )
                 }
-            }.onFailure { throwable ->
-                _uiState.update {
-                    it.copy(isLoading = false, error = "Failed to clone repository: ${throwable.message}")
-                }
+            }.onFailure {
+                // TODO: Propagate error to the UI
+                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
 
-    /**
-     * Called when a project folder is selected.
-     * @param uri The URI of the selected folder.
-     */
     fun onProjectSelected(uri: Uri?) {
         uri?.let {
             viewModelScope.launch {
@@ -101,98 +72,41 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                 val localCopyPath = withContext(Dispatchers.IO) {
                     SafProjectCopier.copyProjectToCache(getApplication(), it)
                 }
-                if (localCopyPath != null) {
-                    gitManager = GitManager(localCopyPath)
-                    _uiState.update { state ->
-                        state.copy(
-                            projectUri = it,
-                            localCachePath = localCopyPath,
-                            isLoading = false,
-                            cloneUrl = null
-                        )
-                    }
-                } else {
-                    _uiState.update { state ->
-                        state.copy(isLoading = false, error = "Failed to copy project to cache.")
-                    }
-                }
+                gitManager = GitManager(localCopyPath)
+                _uiState.update { state -> state.copy(projectUri = it, localCachePath = localCopyPath, isLoading = false, cloneUrl = null) }
             }
         }
     }
 
-    /**
-     * Writes a file to the project.
-     * @param filePath The path of the file to write.
-     * @param content The content of the file.
-     */
-    fun writeFile(filePath: String, content: String) {
+    fun writeFile(filePath: String, content: String): Result<Unit> = runCatching {
+        var safResult: Result<Unit> = Result.success(Unit)
         // If it's a SAF-based project, write back to the original location.
         _uiState.value.projectUri?.let {
-            projectManager.writeFile(it, filePath, content)
+            safResult = projectManager.writeFile(it, filePath, content)
         }
+        safResult.getOrThrow() // If SAF write failed, throw the exception
 
         // Always update the file in the local cache for consistency.
         _uiState.value.localCachePath?.let { cachePath ->
             val fileInCache = File(cachePath, filePath)
             fileInCache.parentFile?.mkdirs()
             fileInCache.writeText(content)
-        }
+        } ?: throw IllegalStateException("Project cache path is not available.")
     }
 
-    /**
-     * Reads a file from the project.
-     * @param filePath The path of the file to read.
-     */
-    fun readFile(filePath: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val content = _uiState.value.localCachePath?.let { cachePath ->
-                val fileInCache = File(cachePath, filePath)
-                if (fileInCache.exists()) fileInCache.readText() else "File not found."
-            } ?: "Project cache path not found."
-            _uiState.update { it.copy(fileContent = content) }
-        }
-    }
-
-    /**
-     * Loads the file tree for the project.
-     */
-    fun loadFileTree() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _uiState.value.localCachePath?.let { cachePath ->
-                val rootFile = File(cachePath)
-                val fileTree = buildFileTree(rootFile)
-                _uiState.update { it.copy(fileTree = fileTree) }
-            }
-        }
-    }
-
-    private fun buildFileTree(file: File): FileNode {
-        return FileNode(
-            name = file.name,
-            path = file.absolutePath,
-            isDirectory = file.isDirectory,
-            children = if (file.isDirectory) {
-                file.listFiles()?.map { buildFileTree(it) } ?: emptyList()
-            } else {
-                emptyList()
-            }
-        )
+    fun readFile(filePath: String): Result<String> = runCatching {
+        // For reading, the local cache is the source of truth for the app's logic.
+        _uiState.value.localCachePath?.let { cachePath ->
+            val fileInCache = File(cachePath, filePath)
+            if (fileInCache.exists()) fileInCache.readText()
+            else throw java.io.FileNotFoundException("File not found in local cache: $filePath")
+        } ?: throw IllegalStateException("Project cache path is not available.")
     }
 }
-
-data class FileNode(
-    val name: String,
-    val path: String,
-    val isDirectory: Boolean,
-    val children: List<FileNode> = emptyList()
-)
 
 data class ProjectUiState(
     val projectUri: Uri? = null,
     val localCachePath: File? = null,
     val isLoading: Boolean = false,
-    val cloneUrl: String? = null,
-    val error: String? = null,
-    val fileTree: FileNode? = null,
-    val fileContent: String = ""
+    val cloneUrl: String? = null
 )

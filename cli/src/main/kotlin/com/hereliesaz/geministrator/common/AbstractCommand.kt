@@ -23,6 +23,7 @@ sealed interface AbstractCommand {
     data class MergeBranch(val branchName: String) : AbstractCommand
     data class DeleteBranch(val branchName: String) : AbstractCommand
     data class StageFiles(val filePaths: List<String>) : AbstractCommand
+    data class StageFile(val filePath: String) : AbstractCommand // New
     data class Commit(val message: String) : AbstractCommand
     object DiscardAllChanges : AbstractCommand
 
@@ -34,6 +35,14 @@ sealed interface AbstractCommand {
 
     // External Tools
     data class PerformWebSearch(val query: String) : AbstractCommand
+    data class CreatePullRequest(
+        val repoName: String,
+        val title: String,
+        val headBranch: String,
+        val baseBranch: String,
+    ) : AbstractCommand
+
+    data class GetGitHubIssue(val repoName: String, val issueNumber: Int) : AbstractCommand
 
     // Orchestration Control
     data class PauseAndExit(val checkInMessage: String) : AbstractCommand

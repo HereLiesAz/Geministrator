@@ -6,20 +6,11 @@ plugins {
     `java-library`
     application
     alias(libs.plugins.kotlin.serialization)
-    id("org.panteleyev.jpackageplugin")
+    alias(libs.plugins.jpackage)
 }
 
 group = "com.hereliesaz.geministrator"
-version = "1.1.0"
-
-// Add sourceSets block to include resources
-sourceSets {
-    main {
-        resources {
-            srcDirs("src/main/resources")
-        }
-    }
-}
+version = "1.3.0"
 
 repositories {
     mavenCentral()
@@ -35,26 +26,28 @@ application {
 }
 
 dependencies {
-    // All project dependencies are now here
+    // Project Modules
+    implementation(project(":prompts"))
+
+    // Libraries
     implementation(libs.kotlinx.cli)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.github.api)
 
     // Testing Dependencies
     testImplementation(kotlin("test"))
     testImplementation(libs.mockk)
-    implementation(kotlin("test"))
+}
 
-    // Ktor
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.netty)
-    implementation(libs.ktor.server.websockets)
-    implementation(libs.ktor.server.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
 }
 
 tasks.test {
@@ -84,8 +77,8 @@ tasks.named<JPackageTask>("jpackage") {
     // Correctly specify the main class for the launcher
     mainClass.set(application.mainClass.get())
 
-    // Uses the 'type' property with the correct 'ImageType' enum.
-    type.set(ImageType.APP_IMAGE)
+    // Set the type using valueOf to bypass the compiler resolution issue.
+    type.set(ImageType.valueOf("INSTALLER"))
     // The input directory must contain your app's JAR and a 'libs' folder with all dependencies.
     input.set(layout.buildDirectory.dir("jpackage-input"))
     destination.set(layout.buildDirectory.dir("installer"))

@@ -7,35 +7,39 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Primary,
-    secondary = Secondary,
-    background = Background,
-    surface = Surface,
-    onPrimary = OnPrimary,
-    onSecondary = OnSecondary,
-    onBackground = OnBackground,
-    onSurface = OnSurface,
-    error = Error,
-    onError = OnError
+    primary = ExpressivePrimaryDark,
+    onPrimary = ExpressiveOnPrimaryDark,
+    secondary = ExpressiveSecondaryDark,
+    onSecondary = ExpressiveOnSecondaryDark,
+    tertiary = ExpressiveTertiaryDark,
+    onTertiary = ExpressiveOnTertiaryDark,
+    error = ExpressiveErrorDark,
+    background = ExpressiveBackgroundDark,
+    onBackground = ExpressiveOnBackgroundDark,
+    surface = ExpressiveSurfaceDark,
+    onSurface = ExpressiveOnSurfaceDark,
+    surfaceVariant = ExpressiveSurfaceVariantDark,
+    onSurfaceVariant = ExpressiveOnSurfaceDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryVariant,
-    secondary = SecondaryVariant,
-    background = Color(0xFFFFFFFF),
-    surface = Color(0xFFF5F5F5),
-    onPrimary = OnPrimary,
-    onSecondary = OnSecondary,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    error = Error,
-    onError = OnError
+    primary = ExpressivePrimaryLight,
+    onPrimary = ExpressiveOnPrimaryLight,
+    secondary = ExpressiveSecondaryLight,
+    onSecondary = ExpressiveOnSecondaryLight,
+    tertiary = ExpressiveTertiaryLight,
+    onTertiary = ExpressiveOnTertiaryLight,
+    error = ExpressiveErrorLight,
+    background = ExpressiveBackgroundLight,
+    onBackground = ExpressiveOnBackgroundLight,
+    surface = ExpressiveSurfaceLight,
+    onSurface = ExpressiveOnSurfaceLight,
+    surfaceVariant = ExpressiveSurfaceVariantLight,
+    onSurfaceVariant = ExpressiveOnBackgroundLight
 )
 
 @Composable
@@ -55,7 +59,6 @@ fun GeministratorTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
                 !useDarkTheme
         }
@@ -64,6 +67,7 @@ fun GeministratorTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

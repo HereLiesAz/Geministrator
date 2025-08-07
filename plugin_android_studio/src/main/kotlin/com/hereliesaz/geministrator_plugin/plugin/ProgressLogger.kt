@@ -2,20 +2,13 @@ package com.hereliesaz.geministrator_plugin.plugin
 
 import com.hereliesaz.geministrator.common.ILogger
 import com.intellij.openapi.application.ApplicationManager
-import com.vladsch.flexmark.html.HtmlRenderer
-import com.vladsch.flexmark.parser.Parser
-import com.vladsch.flexmark.util.data.MutableDataSet
-import javax.swing.JEditorPane
+import javax.swing.JTextArea
 
-class ProgressLogger(private val outputArea: JEditorPane) : ILogger {
-    private val options = MutableDataSet()
-    private val parser = Parser.builder(options).build()
-    private val renderer = HtmlRenderer.builder(options).build()
-
+class ProgressLogger(private val outputArea: JTextArea) : ILogger {
     private fun log(message: String) {
         ApplicationManager.getApplication().invokeLater {
-            val html = renderer.render(parser.parse(message))
-            outputArea.text = outputArea.text.replace("</body>", "$html</body>")
+            outputArea.append("$message\n")
+            outputArea.caretPosition = outputArea.document.length
         }
     }
 

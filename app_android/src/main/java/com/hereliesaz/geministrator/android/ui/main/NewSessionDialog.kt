@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -24,6 +25,7 @@ fun NewSessionDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        shape = MaterialTheme.shapes.extraLarge,
         title = { Text("Start a New Session") },
         text = {
             Column {
@@ -33,6 +35,7 @@ fun NewSessionDialog(
                     value = prompt,
                     onValueChange = { prompt = it },
                     label = { Text("Task Prompt") },
+                    shape = MaterialTheme.shapes.medium,
                     singleLine = false
                 )
             }

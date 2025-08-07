@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -59,6 +59,7 @@ fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
 
         Button(
             onClick = { projectViewModel.selectProject(folderPickerLauncher) },
+            shape = MaterialTheme.shapes.medium,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Select Folder")
@@ -71,9 +72,9 @@ fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Divider(modifier = Modifier.weight(1f))
+            HorizontalDivider(modifier = Modifier.weight(1f))
             Text("OR")
-            Divider(modifier = Modifier.weight(1f))
+            HorizontalDivider(modifier = Modifier.weight(1f))
         }
 
         Text(
@@ -86,6 +87,7 @@ fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
             value = cloneUrl,
             onValueChange = { cloneUrl = it },
             label = { Text("https://github.com/user/repo.git") },
+            shape = MaterialTheme.shapes.medium,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             enabled = !uiState.isLoading
@@ -94,6 +96,7 @@ fun ProjectSetupScreen(projectViewModel: ProjectViewModel) {
 
         Button(
             onClick = { projectViewModel.cloneProject(cloneUrl) },
+            shape = MaterialTheme.shapes.medium,
             modifier = Modifier.fillMaxWidth(),
             enabled = cloneUrl.isNotBlank() && !uiState.isLoading
         ) {

@@ -74,6 +74,11 @@ fun main(args: Array<String>) {
             fullName = "search-engine-id",
             description = "Set Google Programmable Search Engine ID"
         )
+        val setGitHubToken by option(
+            ArgType.String,
+            fullName = "github-token",
+            description = "Set GitHub Personal Access Token"
+        )
         val resetPrompts by option(
             ArgType.Boolean,
             fullName = "reset-prompts",
@@ -92,48 +97,54 @@ fun main(args: Array<String>) {
 
 
         override fun execute() {
-            toggleReview?.let {
-                val current = configStorage.loadPreCommitReview()
-                configStorage.savePreCommitReview(!current)
-                logger.interactive("SUCCESS: Pre-commit review set to: ${!current}")
-            }
-            setConcurrency?.let {
-                configStorage.saveConcurrencyLimit(it)
-                logger.interactive("SUCCESS: Concurrency limit set to: $it")
-            }
-            setTokenLimit?.let {
-                configStorage.saveTokenLimit(it)
-                logger.interactive("SUCCESS: Token limit set to: $it")
-            }
-            setSearchApiKey?.let {
-                configStorage.saveSearchApiKey(it)
-                logger.interactive("SUCCESS: Search API Key has been saved.")
-            }
-            setSearchEngineId?.let {
-                configStorage.saveSearchEngineId(it)
-                logger.interactive("SUCCESS: Search Engine ID has been saved.")
-            }
-            resetPrompts?.let {
-                if (it) {
-                    if (promptManager.resetToDefaults()) {
-                        logger.interactive("SUCCESS: Custom prompts file deleted. System will use default prompts on next run.")
-                    } else {
-                        logger.error("Failed to delete custom prompts file.")
+            runBlocking {
+                toggleReview?.let {
+                    val current = configStorage.loadPreCommitReview()
+                    configStorage.savePreCommitReview(!current)
+                    logger.interactive("SUCCESS: Pre-commit review set to: ${!current}")
+                }
+                setConcurrency?.let {
+                    configStorage.saveConcurrencyLimit(it)
+                    logger.interactive("SUCCESS: Concurrency limit set to: $it")
+                }
+                setTokenLimit?.let {
+                    configStorage.saveTokenLimit(it)
+                    logger.interactive("SUCCESS: Token limit set to: $it")
+                }
+                setSearchApiKey?.let {
+                    configStorage.saveSearchApiKey(it)
+                    logger.interactive("SUCCESS: Search API Key has been saved.")
+                }
+                setSearchEngineId?.let {
+                    configStorage.saveSearchEngineId(it)
+                    logger.interactive("SUCCESS: Search Engine ID has been saved.")
+                }
+                setGitHubToken?.let {
+                    configStorage.saveGitHubToken(it)
+                    logger.interactive("SUCCESS: GitHub Token has been saved.")
+                }
+                resetPrompts?.let {
+                    if (it) {
+                        if (promptManager.resetToDefaults()) {
+                            logger.interactive("SUCCESS: Custom prompts file deleted. System will use default prompts on next run.")
+                        } else {
+                            logger.error("Failed to delete custom prompts file.")
+                        }
                     }
                 }
-            }
-            setAuthMethod?.let {
-                val method = it.lowercase()
-                if (method == "adc" || method == "apikey") {
-                    configStorage.saveAuthMethod(method)
-                    logger.interactive("SUCCESS: Default authentication method set to '$method'.")
-                } else {
-                    logger.error("Invalid authentication method. Please choose 'adc' or 'apikey'.")
+                setAuthMethod?.let {
+                    val method = it.lowercase()
+                    if (method == "adc" || method == "apikey") {
+                        configStorage.saveAuthMethod(method)
+                        logger.interactive("SUCCESS: Default authentication method set to '$method'.")
+                    } else {
+                        logger.error("Invalid authentication method. Please choose 'adc' or 'apikey'.")
+                    }
                 }
-            }
-            setFreeTierOnly?.let {
-                configStorage.saveFreeTierOnly(it)
-                logger.interactive("SUCCESS: Free tier only mode set to '$it'.")
+                setFreeTierOnly?.let {
+                    configStorage.saveFreeTierOnly(it)
+                    logger.interactive("SUCCESS: Free tier only mode set to '$it'.")
+                }
             }
         }
     }
@@ -175,6 +186,7 @@ private suspend fun createGeminiService(
             promptManager = promptManager,
             adapter = adapter
         )
+        service.initialize()
         if (service.isAdcAuthReady()) {
             return service
         }
@@ -195,7 +207,7 @@ private suspend fun createGeminiService(
                 logger.info("API Key authentication successful.")
                 // Save the valid key before returning the service
                 configStorage.saveApiKey(apiKey)
-                return GeminiService(
+                val service = GeminiService(
                     "apikey",
                     apiKey,
                     logger,
@@ -205,6 +217,8 @@ private suspend fun createGeminiService(
                     promptManager,
                     adapter
                 )
+                service.initialize()
+                return service
             }
             logger.error("Your saved API key is no longer valid.")
         }

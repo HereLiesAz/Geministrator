@@ -30,13 +30,13 @@ class GeminiService(
     private val conversationHistory = mutableListOf<Content>()
     private var authToken: String? = null
 
-    init {
+    suspend fun initialize() {
         if (authMethod == "adc") {
             tryToGetAdcToken()
         }
     }
 
-    private fun tryToGetAdcToken() {
+    private suspend fun tryToGetAdcToken() {
         val result = adapter?.execute(
             AbstractCommand.RunShellCommand(
                 listOf(
@@ -55,10 +55,12 @@ class GeminiService(
     fun isAdcAuthReady(): Boolean = authToken != null
 
 
-    fun executeStrategicPrompt(prompt: String): String = executePrompt(prompt, strategicModelName)
-    fun executeFlashPrompt(prompt: String): String = executePrompt(prompt, flashModelName)
+    suspend fun executeStrategicPrompt(prompt: String): String =
+        executePrompt(prompt, strategicModelName)
 
-    private fun executePrompt(prompt: String, model: String): String {
+    suspend fun executeFlashPrompt(prompt: String): String = executePrompt(prompt, flashModelName)
+
+    private suspend fun executePrompt(prompt: String, model: String): String {
         if (authMethod == "apikey" && apiKey.isBlank()) {
             logger.error("Authentication failed. No API key is configured for 'apikey' method.")
             return "Error: Authentication failed."

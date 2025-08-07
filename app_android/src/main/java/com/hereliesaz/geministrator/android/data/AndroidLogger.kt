@@ -14,7 +14,7 @@ class AndroidLogger : ILogger {
     // A regex to find an agent name at the start of a string, possibly in brackets.
     private val agentRegex = Regex("""^\[?(\w+)]?[:\s]""")
 
-    private fun parseAndEmit(rawMessage: String, defaultAgent: Agent, isError: Boolean = false) {
+    private fun parseAndEmit(rawMessage: String, defaultAgent: Agent) {
         val match = agentRegex.find(rawMessage)
         val agent = match?.groups?.get(1)?.let { Agent.fromString(it.value) } ?: defaultAgent
         val message = rawMessage.removePrefix(match?.value ?: "")
@@ -26,7 +26,7 @@ class AndroidLogger : ILogger {
             else -> null
         }
 
-        val entry = LogEntry(message = message, agent = agent, isError = isError)
+        val entry = LogEntry(message = message, agent = agent)
 
         // In a real implementation, you'd emit status changes separately
         // For now, we piggyback on the log message
@@ -43,7 +43,7 @@ class AndroidLogger : ILogger {
 
     override fun error(message: String, e: Throwable?) {
         val fullMessage = if (e != null) "$message: ${e.message}" else message
-        parseAndEmit(fullMessage, Agent.ANTAGONIST, isError = true) // Default errors to the Antagonist
+        parseAndEmit(fullMessage, Agent.ANTAGONIST) // Default errors to the Antagonist
     }
 
     override fun interactive(message: String) {
@@ -55,9 +55,9 @@ class AndroidLogger : ILogger {
         // This logger is non-blocking. It cannot fulfill the prompt contract.
         // It will log the prompt and the real implementation should show a UI.
         val entry = LogEntry(
-            message = message,
+            message = "Awaiting user input...",
             agent = Agent.ORCHESTRATOR,
-            isAwaitingInput = true
+            clarificationQuestion = message
         )
         _logFlow.tryEmit(entry)
         return null // Immediately return null as we cannot block the orchestrator thread

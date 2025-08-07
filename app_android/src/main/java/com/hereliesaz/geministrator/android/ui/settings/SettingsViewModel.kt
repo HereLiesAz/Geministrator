@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.android.data.AndroidConfigStorage
 import com.hereliesaz.geministrator.common.PromptManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,6 +21,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<UiEvent>()
+    val events = _events.asSharedFlow()
 
     init {
         loadSettings()
@@ -61,6 +66,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             config.saveApiKey(_uiState.value.apiKey)
             config.saveThemePreference(_uiState.value.theme)
+            _events.emit(UiEvent.ShowSaveConfirmation)
         }
     }
 
@@ -71,6 +77,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 promptManager.savePromptsFromString(_uiState.value.promptsJsonString)
                 withContext(Dispatchers.Main) {
                     _uiState.update { it.copy(promptsDirty = false) }
+                    viewModelScope.launch { _events.emit(UiEvent.ShowSaveConfirmation) }
                 }
             } catch (e: Exception) {
                 // TODO: Propagate error to UI
@@ -84,6 +91,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 loadPrompts()
             }
         }
+    }
+
+    sealed class UiEvent {
+        data object ShowSaveConfirmation : UiEvent()
     }
 }
 

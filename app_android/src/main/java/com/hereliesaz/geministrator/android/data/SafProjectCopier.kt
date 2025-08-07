@@ -13,21 +13,15 @@ object SafProjectCopier {
      * Copies a directory from a SAF Uri to a local cache directory.
      * This is necessary for libraries like JGit that require direct File API access.
      */
-    fun copyProjectToCache(context: Context, projectUri: Uri): File? {
-        return try {
-            val cacheDir = File(context.cacheDir, "project_copy_${System.currentTimeMillis()}")
-            cacheDir.mkdirs()
+    fun copyProjectToCache(context: Context, projectUri: Uri): File {
+        val cacheDir = File(context.cacheDir, "project_copy_${System.currentTimeMillis()}")
+        cacheDir.mkdirs()
 
-            val rootDocument = DocumentFile.fromTreeUri(context, projectUri)
-            if (rootDocument == null) {
-                return null
-            }
-            copyDirectory(context, rootDocument, cacheDir)
-            cacheDir
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
+        val rootDocument = DocumentFile.fromTreeUri(context, projectUri)
+        rootDocument?.let { doc ->
+            copyDirectory(context, doc, cacheDir)
         }
+        return cacheDir
     }
 
     private fun copyDirectory(context: Context, sourceDir: DocumentFile, destinationDir: File) {
@@ -52,10 +46,7 @@ object SafProjectCopier {
                     inputStream.copyTo(outputStream)
                 }
             }
-        } catch (e: java.io.FileNotFoundException) {
-            // In a real implementation, propagate this error to the UI
-            e.printStackTrace()
-        } catch (e: java.io.IOException) {
+        } catch (e: Exception) {
             // In a real implementation, propagate this error to the UI
             e.printStackTrace()
         }
@@ -96,11 +87,7 @@ object SafProjectCopier {
                 context.contentResolver.openOutputStream(it.uri)?.use { stream ->
                     stream.bufferedWriter().write(content)
                 }
-            } catch (e: java.io.FileNotFoundException) {
-                // In a real implementation, propagate this error to the UI
-                e.printStackTrace()
-            } catch (e: java.io.IOException) {
-                // In a real implementation, propagate this error to the UI
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }

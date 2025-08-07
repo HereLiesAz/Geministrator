@@ -1,5 +1,13 @@
 package com.hereliesaz.geministrator.android.ui.session
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -29,25 +40,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hereliesaz.geministrator.android.ui.components.DiffView
 import com.hereliesaz.geministrator.android.ui.components.MarkdownText
 import com.hereliesaz.geministrator.android.ui.components.ShimmerPlaceholder
 
 @Composable
-fun SessionScreen(
-    sessionViewModel: SessionViewModel = viewModel(),
-    navController: androidx.navigation.NavController
-) {
+fun SessionScreen(sessionViewModel: SessionViewModel = viewModel()) {
     val uiState by sessionViewModel.uiState.collectAsState()
-    val listState = rememberLazyListState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Log", "Version Control")
 
-    LaunchedEffect(uiState.logEntries.size) {
-        if (uiState.logEntries.isNotEmpty() && selectedTabIndex == 0) {
-            listState.animateScrollToItem(uiState.logEntries.size - 1)
-        }
+    // Show DiffView Dialog when state is not null
+    uiState.diffViewState?.let { diffState ->
+        DiffView(
+            filePath = diffState.filePath,
+            diffContent = diffState.diffContent,
+            onDismiss = { sessionViewModel.dismissDiff() }
+        )
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -61,32 +73,44 @@ fun SessionScreen(
             }
         }
 
-        when (selectedTabIndex) {
-            0 -> {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(items = uiState.logEntries, key = { it.id }) { entry ->
-                        LogEntryItem(entry)
-                    }
-                }
-            }
-
-            1 -> {
-                VersionControlView(
-                    sessionViewModel = sessionViewModel,
-                    navController = navController
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTabIndex) {
+                0 -> LogView(uiState = uiState)
+                1 -> VersionControlView(
+                    sessionViewModel = sessionViewModel
                 )
             }
         }
 
-        StatusFooter(status = uiState.status)
+        StatusFooter(
+            status = uiState.status,
+            clarificationPrompt = uiState.clarificationPrompt,
+            onSubmitClarification = { response ->
+                sessionViewModel.submitClarification(response)
+            }
+        )
+    }
+}
+
+@Composable
+private fun LogView(uiState: SessionUiState) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(uiState.logEntries.size) {
+        if (uiState.logEntries.isNotEmpty()) {
+            listState.animateScrollToItem(uiState.logEntries.size - 1)
+        }
+    }
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(items = uiState.logEntries, key = { it.id }) { entry ->
+            LogEntryItem(entry)
+        }
     }
 }
 
@@ -120,34 +144,99 @@ fun LogEntryItem(entry: LogEntry) {
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun StatusFooter(status: WorkflowStatus) {
-    Box(
+private fun StatusFooter(
+    status: WorkflowStatus,
+    clarificationPrompt: String?,
+    onSubmitClarification: (String) -> Unit,
+) {
+    AnimatedContent(
+        targetState = status,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        when (status) {
-            WorkflowStatus.RUNNING -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(modifier = Modifier.height(24.dp))
-                    Text("  Workflow in progress...", modifier = Modifier.padding(start = 8.dp))
+            .padding(top = 8.dp),
+        transitionSpec = {
+            (fadeIn(animationSpec = tween(300)) + slideInVertically(
+                animationSpec = tween(300),
+                initialOffsetY = { height -> height })).togetherWith(
+                fadeOut(animationSpec = tween(300)) + slideOutVertically(
+                    animationSpec = tween(300),
+                    targetOffsetY = { height -> -height })
+            )
+        },
+        label = "StatusFooterAnimation"
+    ) { targetStatus ->
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            when (targetStatus) {
+                WorkflowStatus.RUNNING -> {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+
+                WorkflowStatus.SUCCESS -> {
+                    Text(
+                        "Workflow Completed Successfully",
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                    )
+                }
+
+                WorkflowStatus.FAILURE -> {
+                    Text(
+                        "Workflow Failed",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                    )
+                }
+
+                WorkflowStatus.AWAITING_INPUT -> {
+                    ClarificationInput(
+                        prompt = clarificationPrompt ?: "Awaiting input...",
+                        onSubmit = onSubmitClarification,
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                    )
+                }
+
+                WorkflowStatus.IDLE -> {
+                    Text(
+                        "Session ready.",
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                    )
                 }
             }
-
-            WorkflowStatus.SUCCESS -> Text("Workflow Completed Successfully")
-            WorkflowStatus.FAILURE -> Text(
-                "Workflow Failed",
-                color = MaterialTheme.colorScheme.error
-            )
-
-            WorkflowStatus.AWAITING_INPUT -> Text(
-                "Awaiting user input...",
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            WorkflowStatus.IDLE -> Text("Session ready.")
         }
+    }
+}
+
+@Composable
+private fun ClarificationInput(
+    prompt: String,
+    onSubmit: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var text by remember { mutableStateOf("") }
+    Column(modifier = modifier) {
+        Text(
+            text = prompt,
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text("Your response...") },
+            shape = MaterialTheme.shapes.medium,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = {
+                if (text.isNotBlank()) {
+                    onSubmit(text)
+                }
+            })
+        )
     }
 }
