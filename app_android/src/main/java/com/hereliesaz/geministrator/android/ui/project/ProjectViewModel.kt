@@ -31,8 +31,20 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                 val localCopyPath = withContext(Dispatchers.IO) {
                     SafProjectCopier.copyProjectToCache(getApplication(), uri)
                 }
-                gitManager = GitManager(localCopyPath)
-                _uiState.update { it.copy(projectUri = uri, localCachePath = localCopyPath, isLoading = false) }
+                if (localCopyPath != null) {
+                    gitManager = GitManager(localCopyPath)
+                    _uiState.update {
+                        it.copy(
+                            projectUri = uri,
+                            localCachePath = localCopyPath,
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(isLoading = false, error = "Failed to copy project to cache.")
+                    }
+                }
             }
         }
     }
@@ -57,9 +69,10 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                         projectUri = null // Cloned projects don't have a SAF URI
                     )
                 }
-            }.onFailure {
-                // TODO: Propagate error to the UI
-                _uiState.update { it.copy(isLoading = false) }
+            }.onFailure { throwable ->
+                _uiState.update {
+                    it.copy(isLoading = false, error = "Failed to clone repository: ${throwable.message}")
+                }
             }
         }
     }
@@ -72,8 +85,21 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
                 val localCopyPath = withContext(Dispatchers.IO) {
                     SafProjectCopier.copyProjectToCache(getApplication(), it)
                 }
-                gitManager = GitManager(localCopyPath)
-                _uiState.update { state -> state.copy(projectUri = it, localCachePath = localCopyPath, isLoading = false, cloneUrl = null) }
+                if (localCopyPath != null) {
+                    gitManager = GitManager(localCopyPath)
+                    _uiState.update { state ->
+                        state.copy(
+                            projectUri = it,
+                            localCachePath = localCopyPath,
+                            isLoading = false,
+                            cloneUrl = null
+                        )
+                    }
+                } else {
+                    _uiState.update { state ->
+                        state.copy(isLoading = false, error = "Failed to copy project to cache.")
+                    }
+                }
             }
         }
     }
@@ -105,5 +131,6 @@ data class ProjectUiState(
     val projectUri: Uri? = null,
     val localCachePath: File? = null,
     val isLoading: Boolean = false,
-    val cloneUrl: String? = null
+    val cloneUrl: String? = null,
+    val error: String? = null
 )

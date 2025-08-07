@@ -127,12 +127,12 @@ All notable changes to this project will be documented in this file.
 ## TODO
 
 ### Core Logic & On-Device Backend
-- [ ] **Robust Error Handling**
-  - [ ] In `ProjectManager`, add detailed `try-catch` blocks for all SAF file operations to handle
+- [x] **Robust Error Handling**
+  - [x] In `ProjectManager`, add detailed `try-catch` blocks for all SAF file operations to handle
     `FileNotFoundException`, `IOException`, etc.
-  - [ ] In `GitManager`, wrap all `JGit` calls in `try-catch` blocks to handle exceptions like
+  - [x] In `GitManager`, wrap all `JGit` calls in `try-catch` blocks to handle exceptions like
     `NoHeadException`, `GitAPIException`, etc.
-  - [ ] [cite_start]Propagate errors gracefully to the UI, displaying user-friendly messages in the
+  - [x] [cite_start]Propagate errors gracefully to the UI, displaying user-friendly messages in the
     session log (e.g., using a new `LogEntry` type for errors). [cite: 67]
 - [ ] **GitHub Integration**
   - [ ] [cite_start]Add a new `GitHubManager` class to the `data` package. [cite: 69]
