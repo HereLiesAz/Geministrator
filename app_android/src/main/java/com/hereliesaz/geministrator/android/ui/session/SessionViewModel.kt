@@ -9,7 +9,7 @@ import com.hereliesaz.geministrator.android.data.AndroidLogger
 import com.hereliesaz.geministrator.android.data.local.HistoryDatabase
 import com.hereliesaz.geministrator.android.data.local.HistoryRepository
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
-import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.JulesService
 import com.hereliesaz.geministrator.common.PromptManager
 import com.hereliesaz.geministrator.core.Orchestrator
 import com.hereliesaz.geministrator.core.config.ConfigStorage
@@ -201,34 +201,19 @@ class SessionViewModel(
             configDir.mkdirs()
             val promptManager = PromptManager(configDir)
 
-            val apiKey = configStorage.loadApiKey()
-            if (apiKey.isNullOrBlank()) {
-                logger.error("FATAL: Gemini API Key is not configured. Please set it in the Settings screen.")
-                _uiState.update { it.copy(status = WorkflowStatus.FAILURE) }
-                return@launch
-            }
-
-            val geminiService = GeminiService(
-                authMethod = "apikey",
-                apiKey = apiKey,
-                logger = logger,
+            val julesService = JulesService(
                 config = configStorage,
-                strategicModelName = configStorage.loadModelName(
-                    "strategic",
-                    "gemini-1.5-pro-latest"
-                ),
-                flashModelName = configStorage.loadModelName("flash", "gemini-1.5-flash-latest"),
-                promptManager = promptManager,
-                adapter = null
+                logger = logger,
+                promptManager = promptManager
             )
-            geminiService.initialize()
+            julesService.initialize()
 
             val orchestrator = Orchestrator(
                 adapter = executionAdapter,
                 logger = logger,
                 config = configStorage,
                 promptManager = promptManager,
-                ai = geminiService
+                ai = julesService
             )
 
             logger.info("Orchestrator initialized. Starting workflow for prompt: \"$prompt\"")

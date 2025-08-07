@@ -2,14 +2,14 @@ package com.hereliesaz.geministrator.core.council
 
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
-import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.JulesService
 import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.common.PromptManager
 import java.io.File
 
 class Architect(
     private val logger: ILogger,
-    private val ai: GeminiService,
+    private val ai: JulesService,
     private val adapter: ExecutionAdapter,
     private val promptManager: PromptManager,
 ) {

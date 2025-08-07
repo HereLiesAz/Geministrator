@@ -5,6 +5,9 @@ plugins {
 
 repositories {
     mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 // For a detailed guide, see:
@@ -19,7 +22,19 @@ dependencies {
 
     // Add a dependency for the test framework
     testImplementation(kotlin("test"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+    // Add the IntelliJ Platform dependency
+    intellijPlatform {
+        intellijIdeaCommunity("2023.3.6")
+        bundledPlugin("Git4Idea")
+        instrumentationTools()
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
