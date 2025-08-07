@@ -1,17 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 android {
     namespace = "com.hereliesaz.geministrator.android"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.hereliesaz.geministrator.android"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 2
-        versionName = "1.1.0"
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -52,11 +53,17 @@ android {
 dependencies {
     // Project Modules
     implementation(project(":cli"))
+    implementation(project(":prompts"))
 
     // Core & UI
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.activity.compose)
+
+    // Room Database
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
     implementation(platform(libs.androidx.compose.bom))
@@ -80,8 +87,6 @@ dependencies {
 
     // On-device Git
     implementation(libs.eclipse.jgit)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.androidx.datastore.preferences.core)
 
 
     // Debugging

@@ -44,7 +44,7 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
     fun cloneProject(url: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            val result = withContext(Dispatchers.IO) {
+            val result: Result<File> = withContext(Dispatchers.IO) {
                 GitManager.cloneRepository(url, getApplication())
             }
             result.onSuccess { localRepoPath ->
@@ -78,26 +78,29 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun writeFile(filePath: String, content: String) {
+    fun writeFile(filePath: String, content: String): Result<Unit> = runCatching {
+        var safResult: Result<Unit> = Result.success(Unit)
         // If it's a SAF-based project, write back to the original location.
         _uiState.value.projectUri?.let {
-            projectManager.writeFile(it, filePath, content)
+            safResult = projectManager.writeFile(it, filePath, content)
         }
+        safResult.getOrThrow() // If SAF write failed, throw the exception
 
         // Always update the file in the local cache for consistency.
         _uiState.value.localCachePath?.let { cachePath ->
             val fileInCache = File(cachePath, filePath)
             fileInCache.parentFile?.mkdirs()
             fileInCache.writeText(content)
-        }
+        } ?: throw IllegalStateException("Project cache path is not available.")
     }
 
-    fun readFile(filePath: String): String? {
+    fun readFile(filePath: String): Result<String> = runCatching {
         // For reading, the local cache is the source of truth for the app's logic.
-        return _uiState.value.localCachePath?.let { cachePath ->
+        _uiState.value.localCachePath?.let { cachePath ->
             val fileInCache = File(cachePath, filePath)
-            if (fileInCache.exists()) fileInCache.readText() else null
-        }
+            if (fileInCache.exists()) fileInCache.readText()
+            else throw java.io.FileNotFoundException("File not found in local cache: $filePath")
+        } ?: throw IllegalStateException("Project cache path is not available.")
     }
 }
 

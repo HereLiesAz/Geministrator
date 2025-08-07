@@ -8,6 +8,6 @@ data class LogEntry(
     val agent: Agent,
     val content: String? = null, // For holding markdown or code
     val isWorking: Boolean = false, // To show a placeholder
-    val isAwaitingInput: Boolean = false, // To show a prompt for user
+    val clarificationQuestion: String? = null, // To signal a prompt for user
     val id: String = UUID.randomUUID().toString(), // For stable LazyColumn keys
 )

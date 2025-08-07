@@ -19,8 +19,9 @@ class CliAdapter(
     private val logger: ILogger,
 ) : ExecutionAdapter {
     private val jsonParser = Json { isLenient = true; ignoreUnknownKeys = true }
+    private val gitHubManager by lazy { GitHubManager(config, logger) }
 
-    override fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
+    override suspend fun execute(command: AbstractCommand, silent: Boolean): ExecutionResult {
         return when (command) {
             is AbstractCommand.AppendToFile -> try {
                 File(command.path).appendText(command.content); ExecutionResult(
@@ -134,6 +135,11 @@ class CliAdapter(
                 silent = silent
             )
 
+            is AbstractCommand.StageFile -> runCommand(
+                listOf("git", "add", command.filePath),
+                silent = silent
+            )
+
             is AbstractCommand.SwitchToBranch -> runCommand(
                 listOf(
                     "git",
@@ -170,6 +176,18 @@ class CliAdapter(
                 logger.interactive("To resume, run Geministrator again. State has been saved.")
                 exitProcess(0)
             }
+            is AbstractCommand.CreatePullRequest -> {
+                gitHubManager.createPullRequest(
+                    command.repoName,
+                    command.title,
+                    command.headBranch,
+                    command.baseBranch
+                )
+            }
+
+            is AbstractCommand.GetGitHubIssue -> {
+                gitHubManager.getIssueDetails(command.repoName, command.issueNumber)
+            }
         }
     }
 
@@ -195,7 +213,7 @@ class CliAdapter(
         }
     }
 
-    private fun performWebSearch(query: String): ExecutionResult {
+    private suspend fun performWebSearch(query: String): ExecutionResult {
         val apiKey = config.loadSearchApiKey()
         val engineId = config.loadSearchEngineId()
 

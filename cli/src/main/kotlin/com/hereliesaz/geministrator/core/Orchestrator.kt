@@ -12,11 +12,9 @@ import com.hereliesaz.geministrator.core.council.Architect
 import com.hereliesaz.geministrator.core.council.Designer
 import com.hereliesaz.geministrator.core.council.Researcher
 import com.hereliesaz.geministrator.core.council.TechSupport
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.Serializable
@@ -25,7 +23,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.system.exitProcess
 
 @Serializable
 data class SessionState(
@@ -57,6 +54,9 @@ private data class TriageResult(
     val needs_project_context: Boolean = false,
 )
 
+private enum class TaskStatus { SUCCESS, FAILURE, PAUSED }
+private data class TaskResult(val status: TaskStatus, val branchName: String?)
+
 
 class Orchestrator(
     private val adapter: ExecutionAdapter,
@@ -83,41 +83,45 @@ class Orchestrator(
         techSupport = TechSupport(logger, ai, promptManager)
     }
 
-    fun run(prompt: String, projectRoot: String, projectType: String, specFileContent: String?) =
-        runBlocking(Dispatchers.Default) {
-            val sessionState = loadSessionState()
-            if (sessionState != null) {
-                val decision = adapter.execute(
-                    AbstractCommand.RequestUserDecision(
-                        "An incomplete workflow was found. Do you want to resume it?",
-                        listOf("Resume", "Start New")
-                    )
+    suspend fun run(
+        prompt: String,
+        projectRoot: String,
+        projectType: String,
+        specFileContent: String?,
+    ) {
+        val sessionState = loadSessionState()
+        if (sessionState != null) {
+            val decision = adapter.execute(
+                AbstractCommand.RequestUserDecision(
+                    "An incomplete workflow was found. Do you want to resume it?",
+                    listOf("Resume", "Start New")
                 )
-                if (decision.data == "Resume") {
-                    logger.info("Resuming previous workflow...")
-                    executeMasterPlan(
-                        sessionState.masterPlan,
-                        projectRoot,
-                        sessionState.mainBranch,
-                        sessionState.completedBranches.toMutableList(),
-                        sessionState.completedTaskIndices.toMutableSet()
-                    )
-                    return@runBlocking
-                }
+            )
+            if (decision.data == "Resume") {
+                logger.info("Resuming previous workflow...")
+                executeMasterPlan(
+                    sessionState.masterPlan,
+                    projectRoot,
+                    sessionState.mainBranch,
+                    sessionState.completedBranches.toMutableList(),
+                    sessionState.completedTaskIndices.toMutableSet()
+                )
+                return
             }
-
-            ai.clearSession()
-            logger.info("Orchestrator received complex prompt: '$prompt'")
-            val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
-            val masterPlanJson = deconstructPromptIntoSubTasks(prompt, projectType, specFileContent)
-            if (masterPlanJson.startsWith("Error:")) {
-                logger.error("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
-                return@runBlocking
-            }
-            val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
-            saveSessionState(SessionState(masterPlan, emptyList(), emptySet(), mainBranch))
-            executeMasterPlan(masterPlan, projectRoot, mainBranch, mutableListOf(), mutableSetOf())
         }
+
+        ai.clearSession()
+        logger.info("Orchestrator received complex prompt: '$prompt'")
+        val mainBranch = adapter.execute(AbstractCommand.GetCurrentBranch).output.trim()
+        val masterPlanJson = deconstructPromptIntoSubTasks(prompt, projectType, specFileContent)
+        if (masterPlanJson.startsWith("Error:")) {
+            logger.error("CRITICAL: Could not deconstruct prompt into sub-tasks. AI Failure: $masterPlanJson")
+            return
+        }
+        val masterPlan = jsonParser.decodeFromString<MasterPlan>(masterPlanJson)
+        saveSessionState(SessionState(masterPlan, emptyList(), emptySet(), mainBranch))
+        executeMasterPlan(masterPlan, projectRoot, mainBranch, mutableListOf(), mutableSetOf())
+    }
 
     private suspend fun executeMasterPlan(
         masterPlan: MasterPlan,
@@ -134,8 +138,9 @@ class Orchestrator(
 
         val tasks = masterPlan.sub_tasks.withIndex().toList()
         val runningTasks = mutableSetOf<Int>()
+        var isPaused = false
 
-        while (completedIndices.size < tasks.size) {
+        while (completedIndices.size < tasks.size && !isPaused) {
             val tasksReadyToRun = tasks.filter { (index, subTask) ->
                 index !in completedIndices &&
                         index !in runningTasks &&
@@ -164,8 +169,13 @@ class Orchestrator(
                         logger.info("[STARTING] Manager for '${subTask.description}' on branch '$taskBranch'")
                         handleTask(subTask.description, projectRoot, mutableListOf(), 0, taskBranch)
                     }
-                    if (taskResult != null) {
-                        completedBranches.add(taskResult)
+
+                    if (taskResult.status == TaskStatus.PAUSED) {
+                        isPaused = true
+                    }
+
+                    if (taskResult.status != TaskStatus.FAILURE) {
+                        taskResult.branchName?.let { completedBranches.add(it) }
                         completedIndices.add(index)
                         saveSessionState(
                             SessionState(
@@ -177,24 +187,24 @@ class Orchestrator(
                         )
                     }
                     runningTasks.remove(index)
-                    taskResult != null
+                    taskResult
                 }
             }
 
             val results = jobs.awaitAll()
-            if (results.any { !it }) {
+            if (results.any { it.status == TaskStatus.FAILURE }) {
                 logger.error("One or more tasks failed in the current wave. Halting further execution.")
-                saveSessionState(
-                    SessionState(
-                        masterPlan,
-                        completedBranches,
-                        completedIndices,
-                        mainBranch
-                    )
-                )
+                // State is already saved inside the loop on failure/success
+                return@coroutineScope
+            }
+            if (isPaused) {
+                logger.info("--- WORKFLOW PAUSED ---")
+                logger.info("Execution has been paused by the AI. To resume, run Geministrator again.")
                 return@coroutineScope
             }
         }
+
+        if (isPaused) return@coroutineScope
 
         logger.info("All sub-tasks completed. Beginning final integration.")
         adapter.execute(AbstractCommand.CreateAndSwitchToBranch(integrationBranch))
@@ -249,7 +259,14 @@ class Orchestrator(
         }
     }
 
-    private fun handleTask(prompt: String, projectRoot: String, context: MutableList<String>, attempt: Int, branch: String, createBranch: Boolean = true): String? {
+    private suspend fun handleTask(
+        prompt: String,
+        projectRoot: String,
+        context: MutableList<String>,
+        attempt: Int,
+        branch: String,
+        createBranch: Boolean = true,
+    ): TaskResult {
         logJournal("START_TASK", mapOf("prompt" to prompt, "branch" to branch, "attempt" to attempt))
 
         if (createBranch) {
@@ -259,7 +276,7 @@ class Orchestrator(
         if (attempt > MAX_RETRY_ATTEMPTS) {
             logger.error("Maximum retry attempts reached for task '$prompt'. Halting this sub-task.")
             designer.recordHistoricalLesson("Sub-task '$prompt' failed after $MAX_RETRY_ATTEMPTS self-correction attempts.")
-            return null
+            return TaskResult(TaskStatus.FAILURE, null)
         }
 
         if (attempt == 0 && createBranch) {
@@ -297,7 +314,7 @@ class Orchestrator(
 
         if (planJson.startsWith("Error:")) {
             logger.error("Failed to generate a plan for '$prompt'. AI Failure: $planJson. Halting task.")
-            return null
+            return TaskResult(TaskStatus.FAILURE, null)
         }
 
         val workflowPlan = jsonParser.decodeFromString<WorkflowPlan>(planJson)
@@ -306,7 +323,7 @@ class Orchestrator(
         val workflow = convertPlanToWorkflow(workflowPlan)
         if (workflow.isEmpty() && !workflowPlan.reasoning.contains("No changes needed")) {
             logger.error("Generated an empty or invalid workflow. Halting task.")
-            return null
+            return TaskResult(TaskStatus.FAILURE, null)
         }
 
         if (workflow.size == 1 && workflow.first() is AbstractCommand.RequestClarification) {
@@ -332,7 +349,7 @@ class Orchestrator(
             is WorkflowStatus.Success -> {
                 adapter.execute(AbstractCommand.Commit("WIP: ${status.commitMessage}"))
                 logJournal("TASK_SUCCESS", mapOf("branch" to branch))
-                branch
+                TaskResult(TaskStatus.SUCCESS, branch)
             }
             is WorkflowStatus.TestsFailed -> {
                 logger.info("--- INITIATING SELF-CORRECTION (Attempt ${attempt + 1}) ---")
@@ -342,12 +359,19 @@ class Orchestrator(
             }
             is WorkflowStatus.Failure -> {
                 logJournal("TASK_FAILURE", mapOf("branch" to branch, "reason" to status.reason))
-                null
+                TaskResult(TaskStatus.FAILURE, null)
+            }
+
+            is WorkflowStatus.Paused -> {
+                logJournal("TASK_PAUSED", mapOf("branch" to branch, "reason" to status.message))
+                // The task itself didn't fail, it just paused. We treat it as a success for branch management,
+                // but the PAUSED status will halt the entire master plan execution.
+                TaskResult(TaskStatus.PAUSED, branch)
             }
         }
     }
 
-    private fun deconstructPromptIntoSubTasks(
+    private suspend fun deconstructPromptIntoSubTasks(
         userPrompt: String,
         projectType: String,
         specFileContent: String?,
@@ -367,7 +391,11 @@ class Orchestrator(
         return ai.executeStrategicPrompt(prompt)
     }
 
-    private fun cleanup(integrationBranch: String?, featureBranches: List<String>, mainBranch: String) {
+    private suspend fun cleanup(
+        integrationBranch: String?,
+        featureBranches: List<String>,
+        mainBranch: String,
+    ) {
         logger.info("Cleaning up temporary branches...")
         adapter.execute(AbstractCommand.SwitchToBranch(mainBranch))
         featureBranches.forEach { adapter.execute(AbstractCommand.DeleteBranch(it)) }
@@ -377,7 +405,7 @@ class Orchestrator(
         logger.info("Cleanup complete.")
     }
 
-    private fun logJournal(action: String, data: Map<String, Any>) {
+    private suspend fun logJournal(action: String, data: Map<String, Any>) {
         val dataJsonObject = JsonObject(data.mapValues { (_, value) ->
             when (value) {
                 is String -> JsonPrimitive(value)
@@ -396,12 +424,12 @@ class Orchestrator(
         adapter.execute(AbstractCommand.LogJournalEntry(entry))
     }
 
-    private fun saveSessionState(state: SessionState) {
+    private suspend fun saveSessionState(state: SessionState) {
         val json = jsonParser.encodeToString(SessionState.serializer(), state)
         adapter.execute(AbstractCommand.WriteFile(SESSION_FILE, json))
     }
 
-    private fun loadSessionState(): SessionState? {
+    private suspend fun loadSessionState(): SessionState? {
         val result = adapter.execute(AbstractCommand.ReadFile(SESSION_FILE))
         return if (result.isSuccess && result.data is String && (result.data.isNotBlank())) {
             try {
@@ -413,7 +441,7 @@ class Orchestrator(
         } else null
     }
 
-    private fun generatePlanWithAI(userPrompt: String, vararg context: String): String {
+    private suspend fun generatePlanWithAI(userPrompt: String, vararg context: String): String {
         logger.info("Orchestrator: Generating workflow plan with AI...")
         val systemPrompt = promptManager.getPrompt(
             "orchestrator.generatePlan",

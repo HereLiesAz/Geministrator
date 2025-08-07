@@ -55,9 +55,9 @@ class AndroidLogger : ILogger {
         // This logger is non-blocking. It cannot fulfill the prompt contract.
         // It will log the prompt and the real implementation should show a UI.
         val entry = LogEntry(
-            message = message,
+            message = "Awaiting user input...",
             agent = Agent.ORCHESTRATOR,
-            isAwaitingInput = true
+            clarificationQuestion = message
         )
         _logFlow.tryEmit(entry)
         return null // Immediately return null as we cannot block the orchestrator thread

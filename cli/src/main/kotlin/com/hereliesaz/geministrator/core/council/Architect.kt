@@ -13,7 +13,7 @@ class Architect(
     private val adapter: ExecutionAdapter,
     private val promptManager: PromptManager,
 ) {
-    fun getProjectContextFor(task: String, projectRoot: String): String {
+    suspend fun getProjectContextFor(task: String, projectRoot: String): String {
         logger.info("Architect: Performing deep context analysis for '$task'.")
         val fileTree = File(projectRoot).walk().maxDepth(5)
             .filter { it.isFile && !it.path.contains(".git") && !it.path.contains(".idea") }
@@ -38,7 +38,7 @@ class Architect(
         return contextBuilder.toString()
     }
 
-    fun reviewStagedChanges(changes: Map<String, String>): Boolean {
+    suspend fun reviewStagedChanges(changes: Map<String, String>): Boolean {
         logger.info("Architect: Reviewing ${changes.size} staged files for architectural compliance.")
         val prompt = promptManager.getPrompt(
             "architect.reviewStagedChanges",

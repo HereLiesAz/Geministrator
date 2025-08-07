@@ -1,24 +1,24 @@
 package com.hereliesaz.geministrator.android.ui.main
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigation.ExperimentalMaterial3AdaptiveNavigationSuiteApi
-import androidx.compose.material3.adaptive.navigation.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
@@ -31,26 +31,23 @@ import com.hereliesaz.geministrator.android.ui.session.SessionScreen
 @Composable
 fun MainScreen(projectViewModel: ProjectViewModel) {
     val navController = rememberNavController()
-    val currentDestination = remember { mutableStateOf("sessions") }
+    var currentDestination by remember { mutableStateOf("sessions") }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             geministratorNavSuite(
-                onNavigate = {
-                    currentDestination.value = it
-                    navController.navigate(it)
+                onNavigate = { destination ->
+                    currentDestination = destination
+                    navController.navigate(destination)
                 },
-                currentDestination = currentDestination.value
+                currentDestination = currentDestination
             )
         }
     ) {
-        Scaffold { innerPadding ->
-            GeministratorNavHost(
-                navController = navController,
-                projectViewModel = projectViewModel,
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
+        GeministratorNavHost(
+            navController = navController,
+            projectViewModel = projectViewModel
+        )
     }
 }
 
@@ -67,22 +64,29 @@ fun MainSessionView(mainViewModel: MainViewModel = viewModel(), projectViewModel
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedIndex) {
-            sessions.forEachIndexed { index, session ->
-                Tab(
-                    selected = selectedIndex == index,
-                    onClick = { mainViewModel.selectSession(index) },
-                    text = { Text(text = session.title) }
-                )
-            }
-            IconButton(onClick = { mainViewModel.onShowNewSessionDialog() }) {
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(onClick = { mainViewModel.onShowNewSessionDialog() }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "New Session")
             }
         }
-        if (sessions.isNotEmpty()) {
-            val selectedSession = sessions[selectedIndex]
-            Box(modifier = Modifier.weight(1f)) {
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            if (sessions.isNotEmpty()) {
+                TabRow(selectedTabIndex = selectedIndex) {
+                    sessions.forEachIndexed { index, session ->
+                        Tab(
+                            selected = selectedIndex == index,
+                            onClick = { mainViewModel.selectSession(index) },
+                            text = { Text(text = session.title) }
+                        )
+                    }
+                }
+                val selectedSession = sessions[selectedIndex]
                 SessionScreen(sessionViewModel = selectedSession.viewModel)
             }
         }

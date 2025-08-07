@@ -10,7 +10,7 @@ enum class Agent(val color: Color) {
     ANTAGONIST(AntagonistColor),
     TECH_SUPPORT(TechSupportColor),
     MANAGER(ManagerColor),
-    UNKNOWN(OnSurface); // Default color for unknown sources
+    UNKNOWN(Color.Gray); // Default color for unknown sources
 
     companion object {
         private val agentNameMap = entries.associateBy { it.name }

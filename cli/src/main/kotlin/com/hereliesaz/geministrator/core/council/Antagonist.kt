@@ -9,7 +9,7 @@ class Antagonist(
     private val ai: GeminiService,
     private val promptManager: PromptManager,
 ) {
-    fun reviewPlan(planJson: String): String? {
+    suspend fun reviewPlan(planJson: String): String? {
         logger.info("Antagonist: Reviewing the proposed workflow...")
         val prompt = promptManager.getPrompt("antagonist.reviewPlan", mapOf("planJson" to planJson))
         val review = ai.executeStrategicPrompt(prompt)

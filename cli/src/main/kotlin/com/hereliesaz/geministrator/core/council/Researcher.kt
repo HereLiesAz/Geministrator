@@ -12,7 +12,7 @@ class Researcher(
     private val adapter: ExecutionAdapter,
     private val promptManager: PromptManager,
 ) {
-    fun findBestPracticesFor(topic: String): String {
+    suspend fun findBestPracticesFor(topic: String): String {
         logger.info("Researcher: Searching for best practices regarding '$topic'.")
         val searchResult = adapter.execute(AbstractCommand.PerformWebSearch(topic))
         val prompt = promptManager.getPrompt(
