@@ -22,7 +22,7 @@ class PromptManager(private val configDir: File) {
     private fun loadPromptsFromFile(file: File): Map<String, String> {
         return try {
             val json = Json.parseToJsonElement(file.readText()).jsonObject
-            json.mapValues { it.value.toString().trim('"') }
+            json.mapValues { it.value.toString() } // Keep the full JSON object
         } catch (e: Exception) {
             println("[WARNING] Could not parse custom prompts.json. Falling back to defaults. Error: ${e.message}")
             loadDefaultPrompts()
@@ -30,11 +30,11 @@ class PromptManager(private val configDir: File) {
     }
 
     private fun loadDefaultPrompts(): Map<String, String> {
-        val resourceStream = this::class.java.getResourceAsStream("/prompts.json")
-            ?: throw IllegalStateException("Default prompts.json not found in resources.")
+        val resourceStream = this::class.java.getResourceAsStream("/prompts-jules.json")
+            ?: throw IllegalStateException("Default prompts-jules.json not found in resources.")
         return resourceStream.use { stream ->
             val json = Json.parseToJsonElement(stream.bufferedReader().readText()).jsonObject
-            json.mapValues { it.value.toString().trim('"') }
+            json.mapValues { it.value.toString() } // Keep the full JSON object for structured prompts
         }
     }
 
@@ -50,7 +50,7 @@ class PromptManager(private val configDir: File) {
         return if (customPromptsFile.exists()) {
             customPromptsFile.readText()
         } else {
-            this::class.java.getResourceAsStream("/prompts.json")?.bufferedReader()?.readText()
+            this::class.java.getResourceAsStream("/prompts-jules.json")?.bufferedReader()?.readText()
                 ?: "{}"
         }
     }

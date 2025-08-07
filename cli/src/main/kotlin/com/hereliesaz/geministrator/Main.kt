@@ -2,7 +2,7 @@
 
 import com.hereliesaz.geministrator.adapter.CliAdapter
 import com.hereliesaz.geministrator.adapter.CliConfigStorage
-import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.JulesService
 import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.common.MultiStreamLogger
 import com.hereliesaz.geministrator.common.PromptManager
@@ -32,11 +32,7 @@ fun main(args: Array<String>) {
 
         override fun execute() {
             runBlocking {
-                val geminiService = createGeminiService(configStorage, logger, adapter)
-                if (geminiService == null) {
-                    logger.error("Could not configure a valid authentication method. Exiting.")
-                    return@runBlocking
-                }
+                val julesService = createJulesService(configStorage, logger, promptManager)
 
                 val specFileContent = specFile?.let {
                     try {
@@ -49,7 +45,7 @@ fun main(args: Array<String>) {
 
                 val projectType = determineProjectType(logger)
                 val orchestrator =
-                    Orchestrator(adapter, logger, configStorage, promptManager, geminiService)
+                    Orchestrator(adapter, logger, configStorage, promptManager, julesService)
                 orchestrator.run(
                     prompt,
                     System.getProperty("user.dir"),
@@ -153,79 +149,19 @@ fun main(args: Array<String>) {
     parser.parse(args)
 }
 
-private suspend fun createGeminiService(
+private suspend fun createJulesService(
     configStorage: CliConfigStorage,
     logger: ILogger,
-    adapter: CliAdapter,
-): GeminiService? {
-    val freeTierOnly = configStorage.loadFreeTierOnly()
-    val authMethod = if (freeTierOnly) "adc" else configStorage.loadAuthMethod()
-
-    val strategicModel: String
-    val flashModel: String
-
-    if (freeTierOnly) {
-        logger.info("Free Tier Only mode is enabled. Using free models and ADC authentication.")
-        strategicModel = "gemini-1.5-pro-latest"
-        flashModel = "gemini-1.5-flash-latest"
-    } else {
-        strategicModel = configStorage.loadModelName("strategic", "gemini-pro")
-        flashModel = configStorage.loadModelName("flash", "gemini-1.5-flash-latest")
-    }
-
-    val promptManager = PromptManager(configStorage.getConfigDirectory())
-
-    if (authMethod == "adc") {
-        val service = GeminiService(
-            authMethod = "adc",
-            apiKey = "", // Not needed for ADC
-            logger = logger,
-            config = configStorage,
-            strategicModelName = strategicModel,
-            flashModelName = flashModel,
-            promptManager = promptManager,
-            adapter = adapter
-        )
-        service.initialize()
-        if (service.isAdcAuthReady()) {
-            return service
-        }
-        if (freeTierOnly) {
-            logger.error("Free Tier Only mode requires ADC authentication, which failed. Please configure gcloud or disable free tier mode.")
-            return null
-        }
-        logger.info("ADC authentication failed. Checking for API key as fallback...")
-    }
-
-    // Fallback to API key or if 'apikey' is the chosen method
-    var apiKey = configStorage.loadApiKey()
-    while (true) {
-        if (!apiKey.isNullOrBlank()) {
-            val serviceForValidation =
-                GeminiService("apikey", apiKey, logger, configStorage, "", "", null, null)
-            if (serviceForValidation.validateApiKey(apiKey)) {
-                logger.info("API Key authentication successful.")
-                // Save the valid key before returning the service
-                configStorage.saveApiKey(apiKey)
-                val service = GeminiService(
-                    "apikey",
-                    apiKey,
-                    logger,
-                    configStorage,
-                    strategicModel,
-                    flashModel,
-                    promptManager,
-                    adapter
-                )
-                service.initialize()
-                return service
-            }
-            logger.error("Your saved API key is no longer valid.")
-        }
-        apiKey = logger.prompt("Please enter your Gemini API Key: ")
-        if (apiKey.isNullOrBlank()) return null
-        // Validate the newly entered key *before* saving it
-    }
+    promptManager: PromptManager
+): JulesService {
+    logger.info("Initializing JulesService...")
+    val service = JulesService(
+        config = configStorage,
+        logger = logger,
+        promptManager = promptManager
+    )
+    service.initialize()
+    return service
 }
 
 
