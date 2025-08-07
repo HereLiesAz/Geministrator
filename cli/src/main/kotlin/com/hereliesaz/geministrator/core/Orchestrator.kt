@@ -3,7 +3,7 @@ package com.hereliesaz.geministrator.core
 import com.hereliesaz.geministrator.common.AbstractCommand
 import com.hereliesaz.geministrator.common.ExecutionAdapter
 import com.hereliesaz.geministrator.common.ExecutionResult
-import com.hereliesaz.geministrator.common.GeminiService
+import com.hereliesaz.geministrator.common.JulesService
 import com.hereliesaz.geministrator.common.ILogger
 import com.hereliesaz.geministrator.common.PromptManager
 import com.hereliesaz.geministrator.core.config.ConfigStorage
@@ -63,7 +63,7 @@ class Orchestrator(
     private val logger: ILogger,
     private val config: ConfigStorage,
     private val promptManager: PromptManager,
-    private val ai: GeminiService,
+    private val ai: JulesService,
 ) {
     private val architect: Architect
     private val researcher: Researcher
