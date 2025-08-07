@@ -210,3 +210,8 @@ All notable changes to this project will be documented in this file.
   - [ ] Profile the app during file I/O and Git operations to identify
     [cite_start]bottlenecks. [cite: 102]
   - [ ] [cite_start]Optimize the `LazyColumn` in `SessionScreen` for very long logs. [cite: 103]
+
+### Enhancements
+- [ ] **Intelligent Caching**: Implement a more intelligent caching mechanism for the `SafProjectCopier` to avoid unnecessary file copies.
+- [ ] **Improved `git diff` Viewer**: Enhance the `git diff` viewer with syntax highlighting and a side-by-side view.
+- [ ] **GitHub Issue Integration**: Allow creating and linking GitHub issues from within the app.
