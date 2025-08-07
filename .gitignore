@@ -11,19 +11,12 @@ project_backup_full_*
 *.hprof
 
 prompts/build/*
-/app_android/build/*
 /.idea/*
 /.gradle/
 /plugin_android_studio/build/
-/.idea/
-/.gradle/
-/.idea/
-.intellijPlatform/*
 /plugin_vscode/node_modules/
 /plugin_vscode/package-lock.json
 /app_android/build/
 /app_android/build/intermediates/
 /app_android/build/outputs/
-/.idea/
-/.gradle/
-/plugin_vscode/build/*
+

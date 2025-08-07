@@ -25,7 +25,7 @@ dependencies {
 
     // Add the IntelliJ Platform dependency
     intellijPlatform {
-        intellijIdeaCommunity("2023.3.6")
+        intellijIdeaCommunity("2025.1.4.1")
         bundledPlugin("Git4Idea")
         instrumentationTools()
     }

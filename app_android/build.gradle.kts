@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.material)
 
 
     // Material 3 and Adaptive Layouts
