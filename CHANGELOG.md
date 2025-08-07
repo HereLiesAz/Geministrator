@@ -143,7 +143,7 @@ All notable changes to this project will be documented in this file.
     generate. [cite: 72]
 
 ### Android App UI/UX
-- [ ] **Settings Screen**
+- [x] **Settings Screen**
   - [x] [cite_start]Implement UI for changing the color theme. [cite: 76]
   - [x] [cite_start]Add a section to view and edit the JSON prompts used by the AI
     agents. [cite: 77]
