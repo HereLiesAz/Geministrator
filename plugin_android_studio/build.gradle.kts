@@ -19,6 +19,9 @@ dependencies {
 
     // Add a dependency for the test framework
     testImplementation(kotlin("test"))
+
+    // Markdown
+    implementation(libs.flexmark)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

@@ -1,4 +1,6 @@
 [versions]
+flexmark = "0.64.8"
+ktor = "2.3.10"
 android-gradle-plugin = "8.3.2"
 kotlin = "1.9.22"
 room = "2.6.1"
@@ -78,6 +80,16 @@ github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+
+# Ktor
+ktor-server-core = { group = "io.ktor", name = "ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-netty = { group = "io.ktor", name = "ktor-server-netty-jvm", version.ref = "ktor" }
+ktor-server-websockets = { group = "io.ktor", name = "ktor-server-websockets-jvm", version.ref = "ktor" }
+ktor-server-content-negotiation = { group = "io.ktor", name = "ktor-server-content-negotiation-jvm", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json-jvm", version.ref = "ktor" }
+
+# Markdown
+flexmark = { group = "com.vladsch.flexmark", name = "flexmark-all", version.ref = "flexmark" }
 
 
 

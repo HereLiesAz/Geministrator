@@ -170,20 +170,20 @@ All notable changes to this project will be documented in this file.
     instead of raw strings to the `Flow`. [cite: 89]
 
 ### Plugins
-- [ ] **VSCode Backend Service**
-  - [ ] [cite_start]Define the specific REST/WebSocket API endpoints needed (e.g., `/run`,
+- [x] **VSCode Backend Service**
+  - [x] [cite_start]Define the specific REST/WebSocket API endpoints needed (e.g., `/run`,
     `/status`, `/ws/logs`). [cite: 90]
-  - [ ] [cite_start]Choose a framework (Ktor, Spring Boot) and implement the server. [cite: 91]
-  - [ ] [cite_start]The server must be able to launch the `Orchestrator` from the `:cli` module as a
+  - [x] [cite_start]Choose a framework (Ktor, Spring Boot) and implement the server. [cite: 91]
+  - [x] [cite_start]The server must be able to launch the `Orchestrator` from the `:cli` module as a
     child process or library call. [cite: 92]
-  - [ ] [cite_start]Update the `extension.ts` in `:plugin-vscode` to communicate with this local
+  - [x] [cite_start]Update the `extension.ts` in `:plugin-vscode` to communicate with this local
     server instead of spawning the CLI directly. [cite: 93]
-- [ ] **Plugin Feature Parity**
-  - [ ] [cite_start]Implement the `NewSessionDialog` equivalent in the Android Studio plugin
+- [x] **Plugin Feature Parity**
+  - [x] [cite_start]Implement the `NewSessionDialog` equivalent in the Android Studio plugin
     UI. [cite: 94]
-  - [ ] [cite_start]Ensure the Android Studio plugin can display markdown, code blocks, and
+  - [x] [cite_start]Ensure the Android Studio plugin can display markdown, code blocks, and
     placeholders. [cite: 95]
-  - [ ] [cite_start]Replicate the `NavRail` functionality (Sessions, Settings, History) in the
+  - [x] [cite_start]Replicate the `NavRail` functionality (Sessions, Settings, History) in the
     Android Studio plugin's tool window. [cite: 96]
 
 ### Code Quality & Refinements

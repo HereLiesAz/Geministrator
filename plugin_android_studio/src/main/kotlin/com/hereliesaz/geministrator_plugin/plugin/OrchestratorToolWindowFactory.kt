@@ -26,6 +26,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.JSplitPane
+import javax.swing.JTabbedPane
 import javax.swing.JTextArea
 import javax.swing.SpinnerNumberModel
 import javax.swing.SwingUtilities
@@ -44,10 +45,10 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             lineWrap = true
             wrapStyleWord = true
         }
-        private val runButton = JButton("Run Workflow") //
-        private val outputArea = JTextArea().apply {
+        private val runButton = JButton("Run Workflow")
+        private val newSessionButton = JButton("New Session")
+        private val outputArea = JEditorPane("text/html", "<html><body></body></html>").apply {
             isEditable = false
-            font = font.deriveFont(12f)
         }
         private val configStorage = PluginConfigStorage()
         private val logger = ProgressLogger(outputArea)
@@ -70,25 +71,45 @@ class OrchestratorToolWindowFactory : ToolWindowFactory {
             settingsPanel.add(tokenLimitLabel)
             settingsPanel.add(tokenLimitSpinner)
 
-            val buttonPanel = JPanel(BorderLayout())
-            buttonPanel.add(runButton, BorderLayout.CENTER)
-            buttonPanel.add(settingsPanel, BorderLayout.SOUTH)
+            val buttonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+            buttonPanel.add(runButton)
+            buttonPanel.add(newSessionButton)
 
             val topPanel = JPanel(BorderLayout())
             topPanel.add(JBScrollPane(promptArea), BorderLayout.CENTER)
-            topPanel.add(buttonPanel, BorderLayout.SOUTH) //
+            topPanel.add(buttonPanel, BorderLayout.SOUTH)
 
-            val mainPanel = JPanel(BorderLayout())
-            mainPanel.add(topPanel, BorderLayout.NORTH)
-            mainPanel.add(JBScrollPane(outputArea), BorderLayout.CENTER)
+            val sessionPanel = JPanel(BorderLayout())
+            sessionPanel.add(topPanel, BorderLayout.NORTH)
+            sessionPanel.add(JBScrollPane(outputArea), BorderLayout.CENTER)
 
-            val splitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT, mainPanel, JScrollPane(JTextArea("")))
-            splitPane.resizeWeight = 0.7
+            val settingsPanel = JPanel() // Placeholder
+            settingsPanel.add(JLabel("Settings placeholder"))
 
-            add(splitPane, BorderLayout.CENTER)
+            val historyPanel = JPanel() // Placeholder
+            historyPanel.add(JLabel("History placeholder"))
+
+            val tabbedPane = JTabbedPane()
+            tabbedPane.addTab("Session", sessionPanel)
+            tabbedPane.addTab("Settings", settingsPanel)
+            tabbedPane.addTab("History", historyPanel)
+
+            add(tabbedPane, BorderLayout.CENTER)
 
             runButton.addActionListener {
                 coroutineScope.launch { runWorkflow(promptArea.text) }
+            }
+            newSessionButton.addActionListener {
+                val prompt = Messages.showInputDialog(
+                    project,
+                    "Enter your high-level task:",
+                    "New Session",
+                    Messages.getQuestionIcon()
+                )
+                if (!prompt.isNullOrBlank()) {
+                    promptArea.text = prompt
+                    coroutineScope.launch { runWorkflow(prompt) }
+                }
             }
             reviewCheckbox.addActionListener { configStorage.savePreCommitReview(reviewCheckbox.isSelected) } //
             concurrencySpinner.addChangeListener {
