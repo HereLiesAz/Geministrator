@@ -163,10 +163,10 @@ All notable changes to this project will be documented in this file.
     project folder. [cite: 86]
   - [x] [cite_start]Allow users to tap on a file to view its content in a read-only
     editor. [cite: 87]
-- [ ] **Real-time Sync & UI State**
-  - [ ] [cite_start]Convert `SessionViewModel` to emit a `UiState` object containing the log
+- [x] **Real-time Sync & UI State**
+  - [x] [cite_start]Convert `SessionViewModel` to emit a `UiState` object containing the log
     entries, current agent status, etc., to better manage loading and result states. [cite: 88]
-  - [ ] [cite_start]Refactor the `Orchestrator`'s `ILogger` to emit structured `LogEntry` objects
+  - [x] [cite_start]Refactor the `Orchestrator`'s `ILogger` to emit structured `LogEntry` objects
     instead of raw strings to the `Flow`. [cite: 89]
 
 ### Plugins
