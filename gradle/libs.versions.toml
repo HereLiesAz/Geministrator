@@ -22,6 +22,7 @@ ui = "1.6.5"
 intellij-platform = "2.0.0-beta2"
 material3-adaptive-navigation-suite = "1.0.0-alpha03"
 material-icons = "1.6.7"
+github-api = "1.321-SNAPSHOT"
 
 [libraries]
 # Core & Lifecycle
@@ -67,6 +68,9 @@ androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core
 androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore-preferences-core" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+
+# GitHub
+github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github-api" }
 
 
 

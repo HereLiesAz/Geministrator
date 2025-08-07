@@ -134,12 +134,12 @@ All notable changes to this project will be documented in this file.
     `NoHeadException`, `GitAPIException`, etc.
   - [x] [cite_start]Propagate errors gracefully to the UI, displaying user-friendly messages in the
     session log (e.g., using a new `LogEntry` type for errors). [cite: 67]
-- [ ] **GitHub Integration**
-  - [ ] [cite_start]Add a new `GitHubManager` class to the `data` package. [cite: 69]
-  - [ ] [cite_start]Integrate a GitHub API client library (e.g., `kotlin-github-api`). [cite: 70]
-    - [ ] Implement OAuth for user authentication with GitHub.
-  - [ ] [cite_start]Add methods for `createPullRequest`, `listIssues`, and `createIssue`. [cite: 71]
-  - [ ] [cite_start]Connect these methods to new `AbstractCommand`s that the `Orchestrator` can
+- [x] **GitHub Integration**
+  - [x] [cite_start]Add a new `GitHubManager` class to the `data` package. [cite: 69]
+  - [x] [cite_start]Integrate a GitHub API client library (e.g., `kotlin-github-api`). [cite: 70]
+    - [x] Implement OAuth for user authentication with GitHub.
+  - [x] [cite_start]Add methods for `createPullRequest`, `listIssues`, and `createIssue`. [cite: 71]
+  - [x] [cite_start]Connect these methods to new `AbstractCommand`s that the `Orchestrator` can
     generate. [cite: 72]
 
 ### Android App UI/UX
