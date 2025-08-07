@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -177,10 +178,15 @@ private fun StatusFooter(
                 }
 
                 WorkflowStatus.SUCCESS -> {
-                    Text(
-                        "Workflow Completed Successfully",
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
-                    )
+                    Row {
+                        Text(
+                            "Workflow Completed Successfully",
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp)
+                        )
+                        Button(onClick = { navController.navigate("create_issue") }) {
+                            Text("Create GitHub Issue")
+                        }
+                    }
                 }
 
                 WorkflowStatus.FAILURE -> {

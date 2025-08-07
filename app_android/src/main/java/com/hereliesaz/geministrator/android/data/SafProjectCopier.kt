@@ -40,6 +40,10 @@ object SafProjectCopier {
     }
 
     private fun copyFile(context: Context, sourceFile: DocumentFile, destinationFile: File) {
+        if (destinationFile.exists() && sourceFile.lastModified() <= destinationFile.lastModified()) {
+            return // Skip copying if the destination file is up-to-date
+        }
+
         try {
             context.contentResolver.openInputStream(sourceFile.uri)?.use { inputStream ->
                 FileOutputStream(destinationFile).use { outputStream ->
