@@ -14,6 +14,10 @@ data class GitStatus(
     val untracked: Set<String> = emptySet()
 )
 
+/**
+ * Manages Git operations for a given project cache directory.
+ * @param projectCacheDir The directory where the project is cached.
+ */
 class GitManager(private val projectCacheDir: File) {
 
     private val repository: Repository by lazy {
@@ -29,6 +33,10 @@ class GitManager(private val projectCacheDir: File) {
         Git(repository)
     }
 
+    /**
+     * Initializes a new Git repository in the project cache directory if one doesn't already exist.
+     * @return A [Result] indicating success or failure.
+     */
     fun init(): Result<Unit> {
         return try {
             if (!repository.directory.exists()) {
@@ -40,6 +48,11 @@ class GitManager(private val projectCacheDir: File) {
         }
     }
 
+    /**
+     * Stages a file for commit.
+     * @param filePath The path of the file to stage.
+     * @return A [Result] indicating success or failure.
+     */
     fun stageFile(filePath: String): Result<Unit> {
         return try {
             git.add().addFilepattern(filePath).call()
@@ -49,6 +62,11 @@ class GitManager(private val projectCacheDir: File) {
         }
     }
 
+    /**
+     * Commits the staged files.
+     * @param message The commit message.
+     * @return A [Result] containing the full commit message on success, or an exception on failure.
+     */
     fun commit(message: String): Result<String> {
         return try {
             val revCommit = git.commit().setMessage(message).call()
@@ -58,6 +76,11 @@ class GitManager(private val projectCacheDir: File) {
         }
     }
 
+    /**
+     * Gets the diff of a file.
+     * @param filePath The path of the file.
+     * @return A [Result] containing the diff on success, or an exception on failure.
+     */
     fun getDiff(filePath: String): Result<String> {
         return try {
             val diffStream = java.io.ByteArrayOutputStream()
@@ -68,6 +91,10 @@ class GitManager(private val projectCacheDir: File) {
         }
     }
 
+    /**
+     * Gets the status of the repository.
+     * @return A [Result] containing the [GitStatus] on success, or an exception on failure.
+     */
     fun getStatus(): Result<GitStatus> {
         return try {
             val status = git.status().call()
@@ -86,6 +113,12 @@ class GitManager(private val projectCacheDir: File) {
     }
 
     companion object {
+        /**
+         * Clones a repository from a URL.
+         * @param url The URL of the repository to clone.
+         * @param context The application context.
+         * @return A [Result] containing the path to the cloned repository on success, or an exception on failure.
+         */
         fun cloneRepository(url: String, context: Context): Result<File> {
             return try {
                 val repoName = url.substringAfterLast('/').substringBeforeLast('.')

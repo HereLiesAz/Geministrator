@@ -187,16 +187,16 @@ All notable changes to this project will be documented in this file.
     Android Studio plugin's tool window. [cite: 96]
 
 ### Code Quality & Refinements
-- [ ] **Unit & Integration Tests**
-  - [ ] [cite_start]Write unit tests for `GitManager` using a temporary folder. [cite: 97]
-  - [ ] [cite_start]Write unit tests for all `ViewModel` state logic. [cite: 98]
-  - [ ] [cite_start]Add integration tests for the `Orchestrator` running with a mock
+- [x] **Unit & Integration Tests**
+  - [x] [cite_start]Write unit tests for `GitManager` using a temporary folder. [cite: 97]
+  - [x] [cite_start]Write unit tests for all `ViewModel` state logic. [cite: 98]
+  - [x] [cite_start]Add integration tests for the `Orchestrator` running with a mock
     `ExecutionAdapter`. [cite: 99]
-- [ ] **Documentation**
-  - [ ] [cite_start]Add KDoc comments to all public classes and methods. [cite: 100]
-  - [ ] [cite_start]Update the main `README.md` to include instructions for setting up and running
+- [x] **Documentation**
+  - [x] [cite_start]Add KDoc comments to all public classes and methods. [cite: 100]
+  - [x] [cite_start]Update the main `README.md` to include instructions for setting up and running
     the Android app. [cite: 101]
-- [ ] **Performance Optimization**
-  - [ ] [cite_start]Profile the app during file I/O and Git operations to identify
+- [x] **Performance Optimization**
+  - [x] [cite_start]Profile the app during file I/O and Git operations to identify
     bottlenecks. [cite: 102]
-  - [ ] [cite_start]Optimize the `LazyColumn` in `SessionScreen` for very long logs. [cite: 103]
+  - [x] [cite_start]Optimize the `LazyColumn` in `SessionScreen` for very long logs. [cite: 103]

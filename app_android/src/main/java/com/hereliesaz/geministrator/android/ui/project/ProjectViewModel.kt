@@ -16,6 +16,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+/**
+ * ViewModel for managing the project state.
+ * @param application The application instance.
+ */
 class ProjectViewModel(application: Application) : AndroidViewModel(application) {
     private val projectManager = ProjectManager(application)
     var gitManager: GitManager? = null
@@ -49,10 +53,18 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Opens the project folder picker.
+     * @param launcher The activity result launcher.
+     */
     fun selectProject(launcher: ActivityResultLauncher<Intent>) {
         projectManager.openProjectFolderPicker(launcher)
     }
 
+    /**
+     * Clones a repository from a URL.
+     * @param url The URL of the repository to clone.
+     */
     fun cloneProject(url: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -77,6 +89,10 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Called when a project folder is selected.
+     * @param uri The URI of the selected folder.
+     */
     fun onProjectSelected(uri: Uri?) {
         uri?.let {
             viewModelScope.launch {
@@ -104,6 +120,11 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Writes a file to the project.
+     * @param filePath The path of the file to write.
+     * @param content The content of the file.
+     */
     fun writeFile(filePath: String, content: String) {
         // If it's a SAF-based project, write back to the original location.
         _uiState.value.projectUri?.let {
@@ -118,6 +139,10 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Reads a file from the project.
+     * @param filePath The path of the file to read.
+     */
     fun readFile(filePath: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val content = _uiState.value.localCachePath?.let { cachePath ->
@@ -128,6 +153,9 @@ class ProjectViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    /**
+     * Loads the file tree for the project.
+     */
     fun loadFileTree() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value.localCachePath?.let { cachePath ->
