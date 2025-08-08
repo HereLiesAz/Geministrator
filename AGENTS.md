@@ -20,15 +20,13 @@ The project is a multi-module Gradle project with the following structure:
 
 Geministrator operates not as a single monolithic AI, but as a team of specialists with distinct roles, managed by a central `Orchestrator`.
 
-For more details on each agent, see their individual `AGENTS.md` files:
-
--   [Orchestrator](./agents/Orchestrator/AGENTS.md)
--   [Manager](./agents/Manager/AGENTS.md)
--   [Architect](./agents/Architect/AGENTS.md)
--   [Researcher](./agents/Researcher/AGENTS.md)
--   [Designer](./agents/Designer/AGENTS.md)
--   [Antagonist](./agents/Antagonist/AGENTS.md)
--   [Tech Support](./agents/TechSupport/AGENTS.md)
+-   **Orchestrator**: Manages the master plan and deploys agents based on a triage assessment.
+-   **Manager**: Executes the step-by-step workflow for a single task.
+-   **Architect**: Analyzes existing code to provide context.
+-   **Researcher**: Scours the web for best practices and documentation.
+-   **Designer**: Creates specifications and updates changelogs.
+-   **Antagonist**: Critiques plans to find flaws before execution.
+-   **Tech Support**: Analyzes merge conflicts and other technical failures.
 
 ### `AbstractCommand` and `ExecutionAdapter`
 
