@@ -37,7 +37,7 @@ fun GeministratorNavHost(
         modifier = modifier
     ) {
         composable("sessions") {
-            MainSessionView(mainViewModel, projectViewModel)
+            MainSessionView(mainViewModel, projectViewModel, navController)
         }
         composable("explorer") {
             FileExplorerScreen(

@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.android.ui.session
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -8,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,7 +51,10 @@ import com.hereliesaz.geministrator.android.ui.components.MarkdownText
 import com.hereliesaz.geministrator.android.ui.components.ShimmerPlaceholder
 
 @Composable
-fun SessionScreen(sessionViewModel: SessionViewModel = viewModel()) {
+fun SessionScreen(
+    sessionViewModel: SessionViewModel = viewModel(),
+    navController: NavController
+) {
     val uiState by sessionViewModel.uiState.collectAsState()
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Log", "Version Control")
@@ -88,11 +93,13 @@ fun SessionScreen(sessionViewModel: SessionViewModel = viewModel()) {
             clarificationPrompt = uiState.clarificationPrompt,
             onSubmitClarification = { response ->
                 sessionViewModel.submitClarification(response)
-            }
+            },
+            navController = navController
         )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
 private fun LogView(uiState: SessionUiState) {
     val listState = rememberLazyListState()
@@ -110,7 +117,18 @@ private fun LogView(uiState: SessionUiState) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(items = uiState.logEntries, key = { it.id }) { entry ->
-            LogEntryItem(entry)
+            AnimatedVisibility(
+                visible = true, // This should be controlled by a real state
+                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                    animationSpec = tween(300),
+                    initialOffsetY = { it / 2 }
+                ),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
+                Column(modifier = Modifier.animateItemPlacement()) {
+                    LogEntryItem(entry)
+                }
+            }
         }
     }
 }
@@ -151,6 +169,7 @@ private fun StatusFooter(
     status: WorkflowStatus,
     clarificationPrompt: String?,
     onSubmitClarification: (String) -> Unit,
+    navController: NavController
 ) {
     AnimatedContent(
         targetState = status,
@@ -158,12 +177,14 @@ private fun StatusFooter(
             .fillMaxWidth()
             .padding(top = 8.dp),
         transitionSpec = {
-            (fadeIn(animationSpec = tween(300)) + slideInVertically(
+            fadeIn(animationSpec = tween(300)) + slideInVertically(
                 animationSpec = tween(300),
-                initialOffsetY = { height -> height })).togetherWith(
+                initialOffsetY = { height -> height }
+            ) using(
                 fadeOut(animationSpec = tween(300)) + slideOutVertically(
                     animationSpec = tween(300),
-                    targetOffsetY = { height -> -height })
+                    targetOffsetY = { height -> -height }
+                )
             )
         },
         label = "StatusFooterAnimation"
