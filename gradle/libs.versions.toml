@@ -26,6 +26,7 @@ material3-adaptive-navigation-suite = "1.0.0"
 material-icons = "1.6.7"
 jpackageplugin = "1.7.3"
 github-api = "1.321"
+material = "1.10.0"
 
 [libraries]
 # Core & Lifecycle
@@ -64,6 +65,9 @@ github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github
 
 # RichTextFX
 richtextfx = { group = "org.fxmisc.richtext", name = "richtextfx", version.ref = "richtextfx" }
+
+# Material
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
