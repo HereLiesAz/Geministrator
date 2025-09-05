@@ -1,0 +1,18 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="org.intellij.plugins.markdown" revision="2025.1.4.1" publication="20250905020100"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="/home/jules/.gradle/caches/8.14.3/transforms/9a3f6aaa6d38ec6d70b9116a668eda06/transformed/ideaIC-2025.1.4.1/plugins/markdown" type="directory" conf="default"/>
+  </publications>
+  <dependencies>
+    <dependency org="bundledPlugin" name="com.intellij.modules.json" rev="2025.1.4.1"/>
+    <dependency org="bundledPlugin" name="com.intellij.platform.images" rev="2025.1.4.1"/>
+    <dependency org="bundledModule" name="intellij.platform.compose" rev="2025.1.4.1"/>
+    <dependency org="bundledModule" name="intellij.platform.compose.markdown" rev="2025.1.4.1"/>
+    <dependency org="bundledModule" name="intellij.yaml.backend" rev="2025.1.4.1"/>
+    <dependency org="bundledPlugin" name="org.intellij.intelliLang" rev="2025.1.4.1"/>
+    <dependency org="bundledPlugin" name="org.toml.lang" rev="2025.1.4.1"/>
+  </dependencies>
+</ivy-module>

@@ -74,7 +74,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.material)
+    implementation(libs.androidx.compose.material)
 
 
     // Material 3 and Adaptive Layouts
@@ -103,4 +103,7 @@ dependencies {
 
     // RichTextFX
     implementation(libs.richtextfx)
+
+    // AzNavRail
+    implementation("com.github.HereLiesAz:AzNavRail:2.3")
 }

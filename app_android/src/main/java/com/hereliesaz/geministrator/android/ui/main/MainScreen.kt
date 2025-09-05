@@ -11,39 +11,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.hereliesaz.geministrator.android.ui.core.GeministratorNavHost
-import com.hereliesaz.geministrator.android.ui.navigation.geministratorNavSuite
+import com.hereliesaz.geministrator.android.ui.navigation.GeministratorNavRail
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
-import com.hereliesaz.geministrator.android.ui.session.SessionScreen
 
-@OptIn(ExperimentalMaterial3AdaptiveNavigationSuiteApi::class)
 @Composable
 fun MainScreen(projectViewModel: ProjectViewModel) {
     val navController = rememberNavController()
     var currentDestination by remember { mutableStateOf("sessions") }
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            geministratorNavSuite(
-                onNavigate = { destination ->
-                    currentDestination = destination
-                    navController.navigate(destination)
-                },
-                currentDestination = currentDestination
-            )
-        }
-    ) {
+    Row(Modifier.fillMaxSize()) {
+        GeministratorNavRail(
+            onNavigate = { destination ->
+                currentDestination = destination
+                navController.navigate(destination)
+            },
+            currentDestination = currentDestination
+        )
         GeministratorNavHost(
             navController = navController,
             projectViewModel = projectViewModel
