@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
 }
 android {
     namespace = "com.hereliesaz.geministrator.android"
@@ -30,18 +31,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "17"
     }
 
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
     }
     packaging {
         resources {
@@ -74,7 +72,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.material)
+    implementation(libs.androidx.compose.material)
 
 
     // Material 3 and Adaptive Layouts
@@ -103,4 +101,7 @@ dependencies {
 
     // RichTextFX
     implementation(libs.richtextfx)
+
+    // AzNavRail
+    implementation("com.github.HereLiesAz:AzNavRail:2.5")
 }
