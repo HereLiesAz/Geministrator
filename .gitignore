@@ -1,22 +1,30 @@
-/cli/build/*
-/build/
-/app_android/build/*
-/build/*
-/.idea/
-/.kotlin/*
-project_backup_full_*
+# IDE files
+.idea/
+.vscode/
 
-.gradle/*
+# Gradle files
+.gradle/
+build/
+local.properties
 
+# Keystore files
+*.jks
+*.keystore
+
+# Android build files
+app/build/
+*/build/
+
+# Other generated files
+*.iml
 *.hprof
+*.log
+captures/
+.externalNativeBuild/
+.cxx/
 
-prompts/build/*
-/.idea/*
-/.gradle/
+# Specific to this project
+project_backup_full_*
 /plugin_android_studio/build/
 /plugin_vscode/node_modules/
 /plugin_vscode/package-lock.json
-/app_android/build/
-/app_android/build/intermediates/
-/app_android/build/outputs/
-
