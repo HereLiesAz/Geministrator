@@ -49,9 +49,7 @@ android {
 }
 
 dependencies {
-    // Project Modules
-    implementation(project(":cli"))
-    implementation(project(":prompts"))
+    implementation(project(":jules-api-client"))
 
     // Core & UI
     implementation(libs.androidx.core.ktx)
@@ -99,8 +97,10 @@ dependencies {
     // DocumentFile for Storage Access Framework helpers
     implementation(libs.androidx.documentfile)
 
-    // RichTextFX
-    implementation(libs.richtextfx)
+    // Sora Editor
+    implementation(platform(libs.sora.editor.bom))
+    implementation(libs.sora.editor)
+    implementation(libs.sora.language.textmate)
 
     // AzNavRail
     implementation("com.github.HereLiesAz:AzNavRail:2.5")
