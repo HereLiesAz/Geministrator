@@ -23,8 +23,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "geministrator"
 
-include(":cli")
 include(":app_android")
-include(":plugin_android_studio")
-include(":plugin_vscode")
-include(":prompts")

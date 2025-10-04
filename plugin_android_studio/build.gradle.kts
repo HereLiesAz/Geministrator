@@ -15,11 +15,6 @@ repositories {
 
 
 dependencies {
-    // Depend on the CLI module to get access to the core logic for MAIN code
-    implementation(project(":cli"))
-    // Add the same dependency for TEST code
-    testImplementation(project(":cli"))
-
     // Add a dependency for the test framework
     testImplementation(kotlin("test"))
 

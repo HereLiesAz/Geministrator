@@ -63,8 +63,10 @@ eclipse-jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.
 # GitHub
 github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github-api" }
 
-# RichTextFX
-richtextfx = { group = "org.fxmisc.richtext", name = "richtextfx", version.ref = "richtextfx" }
+# Sora Editor
+sora-editor-bom = { group = "io.github.rosemoe", name = "editor-bom", version = "0.23.7" }
+sora-editor = { group = "io.github.rosemoe", name = "editor" }
+sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmate" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -86,6 +88,7 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
