@@ -3,8 +3,6 @@ package com.hereliesaz.geministrator.android.ui.explorer
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,12 +13,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.hereliesaz.geministrator.android.ui.components.CodeBlock
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import io.github.rosemoe.sora.widget.CodeEditor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +34,15 @@ fun FileViewerScreen(
     val fileContent = projectState.localCachePath?.let {
         projectViewModel.readFile(filePath).getOrNull()
     } ?: "Error: Could not read file."
+
+    val context = LocalContext.current
+    val editor = remember { CodeEditor(context) }
+
+    DisposableEffect(editor) {
+        onDispose {
+            editor.release()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -50,10 +60,13 @@ fun FileViewerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            CodeBlock(code = fileContent)
+            AndroidView(
+                factory = { editor },
+                modifier = Modifier.fillMaxSize()
+            ) { codeEditor ->
+                codeEditor.setText(fileContent)
+            }
         }
     }
 }
