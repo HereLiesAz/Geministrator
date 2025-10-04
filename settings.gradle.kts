@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 rootProject.name = "geministrator"
 
 include(":app_android")
-include(":python-executor")
+include(":jules-api-client")

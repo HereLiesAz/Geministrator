@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":python-executor"))
+    implementation(project(":jules-api-client"))
 
     // Core & UI
     implementation(libs.androidx.core.ktx)
