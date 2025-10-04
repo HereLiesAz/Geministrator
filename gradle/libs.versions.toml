@@ -1,7 +1,7 @@
 [versions]
 richtextfx = "0.11.2"
 android-gradle-plugin = "8.12.2"
-kotlin = "2.2.10"
+kotlin = "1.9.24"
 ksp = "2.2.10-2.0.2"
 compose-compiler = "1.5.10"
 room = "2.6.1"
@@ -26,6 +26,7 @@ material3-adaptive-navigation-suite = "1.0.0"
 material-icons = "1.6.7"
 jpackageplugin = "1.7.3"
 github-api = "1.321"
+okhttp = "4.12.0"
 
 [libraries]
 # Core & Lifecycle
@@ -62,6 +63,9 @@ eclipse-jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.
 
 # GitHub
 github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github-api" }
+
+# OkHttp
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 # Sora Editor
 sora-editor-bom = { group = "io.github.rosemoe", name = "editor-bom", version = "0.23.7" }

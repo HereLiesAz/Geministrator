@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
-    onNavigateToPrompts: () -> Unit,
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
@@ -63,7 +62,7 @@ fun SettingsScreen(
             OutlinedTextField(
                 value = uiState.apiKey,
                 onValueChange = { settingsViewModel.onApiKeyChange(it) },
-                label = { Text("Gemini API Key") },
+                label = { Text("Jules API Key") },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -96,18 +95,6 @@ fun SettingsScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text("Customization", style = MaterialTheme.typography.titleLarge)
-            Button(
-                onClick = onNavigateToPrompts,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("View & Edit Agent Prompts")
-            }
-
 
             Spacer(modifier = Modifier.weight(1f))
             Button(
