@@ -1,30 +1,41 @@
-# IDE files
-.idea/
-.vscode/
-
-# Gradle files
-.gradle/
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
 build/
-local.properties
-
-# Keystore files
-*.jks
-*.keystore
-
-# Android build files
-app/build/
 */build/
-
-# Other generated files
-*.iml
-*.hprof
-*.log
 captures/
 .externalNativeBuild/
 .cxx/
 
-# Specific to this project
-project_backup_full_*
-/plugin_android_studio/build/
-/plugin_vscode/node_modules/
-/plugin_vscode/package-lock.json
+# Gradle
+.gradle/
+build/
+
+# Local properties
+local.properties
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Mac
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+
+# VSCode
+.vscode/
+
+# Geministrator
+.orchestrator/
+prompts.json
