@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.android.ui.jules
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,12 +23,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun SourceSelectionScreen() {
+fun SourceSelectionScreen(
+    onSessionCreated: (String) -> Unit
+) {
     val viewModel: JulesViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
-        viewModel.loadSources()
+        if (uiState.sources.isEmpty()) {
+            viewModel.loadSources()
+        }
+    }
+
+    if (uiState.showCreateSessionDialog) {
+        CreateSessionDialog(
+            onDismiss = { viewModel.dismissCreateSessionDialog() },
+            onCreateSession = { title, prompt ->
+                viewModel.createSession(title, prompt)
+            }
+        )
+    }
+
+    uiState.createdSession?.let {
+        LaunchedEffect(it) {
+            onSessionCreated(it.id)
+        }
     }
 
     Box(
@@ -47,15 +67,15 @@ fun SourceSelectionScreen() {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding =
-                Modifier.padding(16.dp)
+                contentPadding = Modifier.padding(16.dp)
             ) {
                 items(uiState.sources) { source ->
                     Text(
-                        text = source.name,
+                        text = source.githubRepo?.repo ?: source.name,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .clickable { viewModel.onSourceSelected(source) }
+                            .padding(16.dp)
                     )
                 }
             }
