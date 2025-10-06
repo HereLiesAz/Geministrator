@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jules.apiclient.Activity
 
@@ -43,7 +44,7 @@ fun SessionScreen() {
     Scaffold(
         bottomBar = {
             SendMessageBar(
-                onSendMessage = { /* TODO: Implement send message */ }
+                onSendMessage = { viewModel.sendMessage(it) }
             )
         }
     ) { padding ->

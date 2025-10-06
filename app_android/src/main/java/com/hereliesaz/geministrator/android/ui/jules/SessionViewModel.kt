@@ -54,4 +54,19 @@ class SessionViewModel(
             }
         }
     }
+
+    fun sendMessage(prompt: String) {
+        val client = apiClient ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                client.sendMessage(sessionId, prompt)
+                // After sending, reload the activities to see the agent's response.
+                val activities = client.getActivities(sessionId).activities
+                _uiState.update { it.copy(activities = activities, isLoading = false, error = null) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
 }
