@@ -1,3 +1,3 @@
 plugins {
-    id("com.chaquo.python") version "16.1.0" apply false
+    id("com.chaquo.python") version "17.0.0-alpha01" apply false
 }
