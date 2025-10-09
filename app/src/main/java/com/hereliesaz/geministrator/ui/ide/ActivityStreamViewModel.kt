@@ -3,11 +3,12 @@ package com.hereliesaz.geministrator.ui.ide
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -19,7 +20,7 @@ data class ActivityStreamUiState(
 
 class ActivityStreamViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val config = AndroidConfigStorage(application)
+    private val settingsRepository = SettingsRepository(application)
     private var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(ActivityStreamUiState())
@@ -27,7 +28,7 @@ class ActivityStreamViewModel(application: Application) : AndroidViewModel(appli
 
     init {
         viewModelScope.launch {
-            val apiKey = config.loadApiKey()
+            val apiKey = settingsRepository.apiKey.first()
             if (apiKey.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
             } else {
