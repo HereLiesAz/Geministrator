@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
+    id("com.chaquo.python")
 }
 
 android {
@@ -44,6 +45,10 @@ android {
             excludes += "META-INF/INDEX.LIST"
         }
     }
+}
+
+chaquopy {
+    abiFilters.addAll("x86_64", "arm64-v8a")
 }
 
 kotlin {
