@@ -12,10 +12,12 @@ import androidx.navigation.compose.rememberNavController
 import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
 import com.hereliesaz.geministrator.ui.theme.GeministratorTheme
+import com.hereliesaz.geministrator.util.TextMateLoader
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        TextMateLoader.load(this)
         enableEdgeToEdge()
         setContent {
             GeministratorTheme {

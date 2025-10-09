@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,6 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jules.apiclient.Activity
+import com.jules.apiclient.AgentResponseActivity
+import com.jules.apiclient.PlanActivity
+import com.jules.apiclient.ToolCallActivity
+import com.jules.apiclient.ToolOutputActivity
+import com.jules.apiclient.UserMessageActivity
+import androidx.compose.material3.Card
 
 @Composable
 fun SessionScreen() {
@@ -48,30 +55,41 @@ fun SessionScreen() {
             )
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
+                .padding(padding)
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             } else if (uiState.error != null) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
                     Button(onClick = { viewModel.loadActivities() }) {
                         Text("Retry")
                     }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = Modifier.padding(16.dp),
-                    reverseLayout = true
-                ) {
-                    items(uiState.activities.reversed()) { activity ->
-                        ActivityItem(activity)
+                Column(modifier = Modifier.fillMaxSize()) {
+                    GeminiInteraction(
+                        geminiResponse = uiState.geminiResponse,
+                        onAskGemini = { viewModel.askGemini(it) }
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(16.dp),
+                        reverseLayout = true
+                    ) {
+                        items(uiState.activities.reversed()) { activity ->
+                            ActivityItem(activity)
+                        }
                     }
                 }
             }
@@ -81,13 +99,36 @@ fun SessionScreen() {
 
 @Composable
 fun ActivityItem(activity: Activity) {
-    // TODO: Create a more sophisticated representation of an activity
-    Text(
-        text = activity.name,
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-    )
+            .padding(vertical = 4.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            when (activity) {
+                is UserMessageActivity -> {
+                    Text("You", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.prompt)
+                }
+                is AgentResponseActivity -> {
+                    Text("Agent", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.response)
+                }
+                is ToolCallActivity -> {
+                    Text("Tool Call: ${activity.toolName}", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.args)
+                }
+                is ToolOutputActivity -> {
+                    Text("Tool Output: ${activity.toolName}", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.output)
+                }
+                is PlanActivity -> {
+                    Text("Plan", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.plan)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -105,7 +146,7 @@ fun SendMessageBar(
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
-            label = { Text("Send a message") },
+            label = { Text("Send a message to Jules") },
             modifier = Modifier.weight(1f),
             maxLines = 5
         )
@@ -120,6 +161,51 @@ fun SendMessageBar(
                 Icons.AutoMirrored.Filled.Send,
                 contentDescription = "Send message"
             )
+        }
+    }
+}
+
+@Composable
+fun GeminiInteraction(
+    geminiResponse: String?,
+    onAskGemini: (String) -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Ask Gemini", style = MaterialTheme.typography.titleLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Send a message to Gemini") },
+                modifier = Modifier.weight(1f),
+                maxLines = 5
+            )
+            IconButton(
+                onClick = {
+                    onAskGemini(text)
+                    text = ""
+                },
+                enabled = text.isNotBlank()
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Send message to Gemini"
+                )
+            }
+        }
+        geminiResponse?.let {
+            Text("Gemini Response:", style = MaterialTheme.typography.titleMedium)
+            Text(it)
         }
     }
 }

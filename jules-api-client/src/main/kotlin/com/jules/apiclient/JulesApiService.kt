@@ -1,6 +1,8 @@
 package com.jules.apiclient
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -48,10 +50,49 @@ data class GithubRepoContext(
 )
 
 @Serializable
-data class Activity(
-    val name: String,
-    // ... other activity fields
-)
+@JsonClassDiscriminator("activityType")
+sealed interface Activity {
+    val name: String
+}
+
+@Serializable
+@SerialName("USER_MESSAGE")
+data class UserMessageActivity(
+    override val name: String,
+    val prompt: String
+) : Activity
+
+@Serializable
+@SerialName("AGENT_RESPONSE")
+data class AgentResponseActivity(
+    override val name: String,
+    val response: String
+) : Activity
+
+@Serializable
+@SerialName("TOOL_CALL")
+data class ToolCallActivity(
+    override val name: String,
+    val toolName: String,
+    val args: String
+) : Activity
+
+@Serializable
+@SerialName("TOOL_OUTPUT")
+data class ToolOutputActivity(
+    override val name: String,
+    val toolName: String,
+    val output: String
+) : Activity
+
+@Serializable
+@SerialName("PLAN")
+data class PlanActivity(
+    override val name: String,
+    val plan: String,
+    val approved: Boolean
+) : Activity
+
 
 @Serializable
 data class ActivityList(
