@@ -1,6 +1,6 @@
-# Jules IDE
+# Geministrator
 
-**A mobile IDE powered by the Jules API.**
+**An A2A mobile IDE powered by the Jules and Gemini.**
 
 ---
 
