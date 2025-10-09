@@ -32,6 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jules.apiclient.Activity
+import com.jules.apiclient.AgentResponseActivity
+import com.jules.apiclient.PlanActivity
+import com.jules.apiclient.ToolCallActivity
+import com.jules.apiclient.ToolOutputActivity
+import com.jules.apiclient.UserMessageActivity
+import androidx.compose.material3.Card
 
 @Composable
 fun SessionScreen() {
@@ -93,13 +99,36 @@ fun SessionScreen() {
 
 @Composable
 fun ActivityItem(activity: Activity) {
-    // TODO: Create a more sophisticated representation of an activity
-    Text(
-        text = activity.name,
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-    )
+            .padding(vertical = 4.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            when (activity) {
+                is UserMessageActivity -> {
+                    Text("You", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.prompt)
+                }
+                is AgentResponseActivity -> {
+                    Text("Agent", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.response)
+                }
+                is ToolCallActivity -> {
+                    Text("Tool Call: ${activity.toolName}", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.args)
+                }
+                is ToolOutputActivity -> {
+                    Text("Tool Output: ${activity.toolName}", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.output)
+                }
+                is PlanActivity -> {
+                    Text("Plan", style = MaterialTheme.typography.titleMedium)
+                    Text(activity.plan)
+                }
+            }
+        }
+    }
 }
 
 @Composable
