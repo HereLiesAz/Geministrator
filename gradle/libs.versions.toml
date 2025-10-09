@@ -98,3 +98,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

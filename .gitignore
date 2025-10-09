@@ -3,7 +3,7 @@
 /build
 /captures
 .DS_Store
-/local.properties
+local.properties
 .idea/
 .idea/caches/
 .idea/libraries/

@@ -4,12 +4,13 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
 }
+
 android {
-    namespace = "com.hereliesaz.geministrator.android"
+    namespace = "com.hereliesaz.geministrator"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.hereliesaz.geministrator.android"
+        applicationId = "com.hereliesaz.geministrator"
         minSdk = 26
         targetSdk = 36
         versionCode = 2
@@ -67,8 +68,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.compose.material)
-
 
     // Material 3 and Adaptive Layouts
     implementation(libs.androidx.material3.adaptive.navigation.suite)
@@ -100,5 +99,5 @@ dependencies {
     implementation(libs.sora.language.textmate)
 
     // AzNavRail
-    implementation("com.github.HereLiesAz:AzNavRail:2.5")
+    implementation("com.github.HereLiesAz:AzNavRail:3.14")
 }
