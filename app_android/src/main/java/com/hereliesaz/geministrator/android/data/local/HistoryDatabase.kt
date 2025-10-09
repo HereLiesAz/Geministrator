@@ -73,7 +73,7 @@ interface HistoryDao {
 
 
 // Database
-@Database(entities = [SessionHistoryEntity::class, LogEntryEntity::class], version = 1)
+@Database(entities = [SessionHistoryEntity::class, LogEntryEntity::class], version = 1, exportSchema = false)
 abstract class HistoryDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
 

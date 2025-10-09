@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.android.ui.jules
+package com.hereliesaz.geministrator.android.ui.ide
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,8 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,22 +22,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun SourceSelectionScreen(onNavigateToIde: (String) -> Unit) {
-    val viewModel: JulesViewModel = viewModel()
+fun IDEScreen(sessionId: String) {
+    val viewModel: ActivityStreamViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val session by remember(uiState.session) {
-        mutableStateOf(uiState.session)
-    }
 
-    if (session != null) {
-        LaunchedEffect(session) {
-            onNavigateToIde(session!!.id)
-        }
-    }
-
-
-    LaunchedEffect(Unit) {
-        viewModel.loadSources()
+    LaunchedEffect(sessionId) {
+        viewModel.loadActivities(sessionId)
     }
 
     Box(
@@ -51,7 +39,7 @@ fun SourceSelectionScreen(onNavigateToIde: (String) -> Unit) {
         } else if (uiState.error != null) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = "Error: ${uiState.error}", color = MaterialTheme.colorScheme.error)
-                Button(onClick = { viewModel.loadSources() }) {
+                Button(onClick = { viewModel.loadActivities(sessionId) }) {
                     Text("Retry")
                 }
             }
@@ -59,16 +47,15 @@ fun SourceSelectionScreen(onNavigateToIde: (String) -> Unit) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding =
-                Modifier.padding(16.dp)
+                contentPadding = Modifier.padding(16.dp)
             ) {
-                items(uiState.sources) { source ->
-                    Button(
-                        onClick = { viewModel.createSession("Default prompt", source, "New Session") },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = source.name)
-                    }
+                items(uiState.activities) { activity ->
+                    Text(
+                        text = activity.toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    )
                 }
             }
         }
