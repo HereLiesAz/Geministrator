@@ -48,3 +48,5 @@ package-lock.json
 
 # Log files
 *.log
+/.kotlin/sessions/kotlin-compiler-17060980992664704555.salive
+kotlin-compiler-*
