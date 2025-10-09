@@ -3,6 +3,10 @@
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven { url = uri("https://chaquo.com/maven") }
+    }
+    plugins {
+        id("com.chaquo.python") version "16.1.0"
     }
 }
 
@@ -17,6 +21,7 @@ dependencyResolutionManagement {
         gradlePluginPortal()
         mavenLocal()
         maven("https://jitpack.io")
+        maven { url = uri("https://chaquo.com/maven") }
     }
 }
 
