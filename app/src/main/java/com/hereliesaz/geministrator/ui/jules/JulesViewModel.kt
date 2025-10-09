@@ -3,12 +3,13 @@ package com.hereliesaz.geministrator.ui.jules
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -23,7 +24,7 @@ data class JulesUiState(
 
 class JulesViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val config = AndroidConfigStorage(application)
+    private val settingsRepository = SettingsRepository(application)
     private var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(JulesUiState())
@@ -31,7 +32,7 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            val apiKey = config.loadApiKey()
+            val apiKey = settingsRepository.apiKey.first()
             if (apiKey.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
             } else {

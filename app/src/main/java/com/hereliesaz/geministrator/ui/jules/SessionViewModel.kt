@@ -4,11 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,7 +26,7 @@ class SessionViewModel(
 
     private val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
-    private val config = AndroidConfigStorage(application)
+    private val settingsRepository = SettingsRepository(application)
     private var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(SessionUiState())
@@ -33,7 +34,7 @@ class SessionViewModel(
 
     init {
         viewModelScope.launch {
-            val apiKey = config.loadApiKey()
+            val apiKey = settingsRepository.apiKey.first()
             if (apiKey.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
             } else {
