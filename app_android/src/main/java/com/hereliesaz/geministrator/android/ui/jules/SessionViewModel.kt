@@ -23,7 +23,8 @@ class SessionViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
+    private val sessionId: String = savedStateHandle.get<String>("sessionId")
+        ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
     private val config = AndroidConfigStorage(application)
     private var apiClient: JulesApiClient? = null
 
