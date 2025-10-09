@@ -1,4 +1,5 @@
 [versions]
+a2a = "0.3.0.Beta2"
 aznavrail = "3.13"
 retrofit = "3.0.0"
 retrofit2-kotlinx-serialization-converter = "1.0.0"
@@ -29,6 +30,7 @@ material-icons = "1.6.5"
 jpackageplugin = "1.7.6"
 github-api = "1.330"
 okhttp = "5.2.0"
+vertexai = "1.1.0"
 
 [libraries]
 # Core & Lifecycle
@@ -70,6 +72,12 @@ github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github
 # OkHttp
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
+# Gemini API
+google-cloud-vertexai = { group = "com.google.cloud", name = "google-cloud-vertexai", version.ref = "vertexai" }
+
+# A2A Communication
+a2a-sdk-client = { group = "io.github.a2asdk", name = "a2a-java-sdk-client", version.ref = "a2a" }
+
 # Sora Editor
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
@@ -88,6 +96,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kotlinx-cli" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-core" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

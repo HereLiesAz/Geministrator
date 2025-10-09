@@ -14,6 +14,17 @@ dependencies {
 
     // Coroutines for asynchronous programming
     implementation(libs.kotlinx.coroutines.core)
+
+    // Gemini API
+    implementation(libs.google.cloud.vertexai)
+
+    // A2A Communication
+    implementation(libs.a2a.sdk.client)
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 java {
