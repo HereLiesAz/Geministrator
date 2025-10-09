@@ -1,4 +1,4 @@
-package com.hereliesaz.geministrator.ui.navigation
+package com.hereliesaz.geministrator.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

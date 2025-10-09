@@ -3,13 +3,11 @@ package com.hereliesaz.geministrator.ui.ide
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.hereliesaz.geministrator.android.ui.core.GeministratorNavHost
-import com.hereliesaz.geministrator.android.ui.navigation.GeministratorNavRail
-import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
+import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
+import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
+import com.hereliesaz.geministrator.ui.project.ProjectViewModel
 
 @Composable
 fun MainScreen(projectViewModel: ProjectViewModel) {

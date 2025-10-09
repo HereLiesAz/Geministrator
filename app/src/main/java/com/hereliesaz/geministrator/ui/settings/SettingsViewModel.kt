@@ -3,7 +3,7 @@ package com.hereliesaz.geministrator.ui.settings
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.android.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.AndroidConfigStorage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow

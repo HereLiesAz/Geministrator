@@ -6,8 +6,8 @@ import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.android.data.GitManager
-import com.hereliesaz.geministrator.android.data.SafProjectCopier
+import com.hereliesaz.geministrator.data.GitManager
+import com.hereliesaz.geministrator.data.SafProjectCopier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

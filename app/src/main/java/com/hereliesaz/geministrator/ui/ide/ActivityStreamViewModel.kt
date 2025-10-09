@@ -3,7 +3,7 @@ package com.hereliesaz.geministrator.ui.ide
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.android.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.AndroidConfigStorage
 import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
