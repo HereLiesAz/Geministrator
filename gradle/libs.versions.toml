@@ -1,30 +1,33 @@
 [versions]
+aznavrail = "3.13"
+retrofit = "2.9.0"
+retrofit2-kotlinx-serialization-converter = "1.0.0"
 richtextfx = "0.11.2"
-android-gradle-plugin = "8.12.2"
-kotlin = "2.2.20"
-ksp = "2.2.20-2.0.4"
+android-gradle-plugin = "8.4.1"
+kotlin = "2.0.0"
+ksp = "2.0.0-1.0.21"
 room = "2.6.1"
 core-ktx = "1.12.0"
 kotlinx-cli = "0.3.6"
 kotlinx-coroutines-core = "1.8.0"
 kotlinx-serialization-json = "1.6.3"
-lifecycle = "2.8.2"
+lifecycle = "2.8.0"
 activity-compose = "1.8.2"
 compose-bom = "2024.06.00"
 mockk = "1.13.10"
 navigation-compose = "2.7.7"
 jgit = "6.9.0.202403050737-r"
-datastore = "1.0.0"
+datastore = "1.1.1"
 documentfile = "1.0.1"
 junit = "4.13.2"
 androidx-test-ext = "1.1.5"
 espresso-core = "3.5.1"
 ui = "1.6.5"
-intellij-platform = "2.0.0-beta2"
-material3-adaptive-navigation-suite = "1.0.0"
-material-icons = "1.6.7"
-jpackageplugin = "1.7.3"
-github-api = "1.321"
+intellij-platform = "2.2.0"
+material3-adaptive-navigation-suite = "1.2.0"
+material-icons = "1.6.5"
+jpackageplugin = "0.1.4"
+github-api = "1.319"
 okhttp = "4.12.0"
 
 [libraries]
@@ -40,24 +43,25 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 # Compose
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.07.00" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material" }
-androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended"}
 
 
 # Material 3 & Adaptive
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-material3-window = { group = "androidx.compose.material3", name = "material3" }
-androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3-adaptive-navigation-suite" }
+androidx-material3-window = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation-suite", version.ref = "material3-adaptive-navigation-suite" }
 
 # Navigation
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
 
 # Git
+aznavrail = { module = "com.github.HereLiesAz:AzNavRail", version.ref = "aznavrail" }
 eclipse-jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit"}
 
 # GitHub
@@ -67,6 +71,8 @@ github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 # Sora Editor
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
 sora-editor-bom = { group = "io.github.rosemoe", name = "editor-bom", version = "0.23.7" }
 sora-editor = { group = "io.github.rosemoe", name = "editor" }
 sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmate" }
@@ -75,7 +81,7 @@ sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmat
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
-androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
 
 # Debugging
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
