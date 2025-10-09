@@ -10,6 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.hereliesaz.geministrator.android.ui.explorer.FileExplorerScreen
 import com.hereliesaz.geministrator.android.ui.explorer.FileViewerScreen
+import com.hereliesaz.geministrator.android.ui.ide.IDEScreen
+import com.hereliesaz.geministrator.android.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.android.ui.project.ProjectViewModel
 import com.hereliesaz.geministrator.android.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.android.ui.settings.SettingsViewModel
@@ -26,9 +28,16 @@ fun GeministratorNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = "explorer",
+        startDestination = "jules",
         modifier = modifier
     ) {
+        composable("jules") {
+            SourceSelectionScreen(
+                onNavigateToIde = { sessionId ->
+                    navController.navigate("ide/$sessionId")
+                }
+            )
+        }
         composable("explorer") {
             FileExplorerScreen(
                 projectViewModel = projectViewModel,
@@ -54,6 +63,13 @@ fun GeministratorNavHost(
                 settingsViewModel = settingsViewModel,
                 onNavigateToPrompts = { }
             )
+        }
+        composable(
+            route = "ide/{sessionId}",
+            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId") ?: ""
+            IDEScreen(sessionId = sessionId)
         }
     }
 }

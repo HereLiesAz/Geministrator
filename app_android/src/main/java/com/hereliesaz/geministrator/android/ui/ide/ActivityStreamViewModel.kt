@@ -1,29 +1,28 @@
-package com.hereliesaz.geministrator.android.ui.jules
+package com.hereliesaz.geministrator.android.ui.ide
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.android.data.AndroidConfigStorage
+import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
-import com.jules.apiclient.Source
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class JulesUiState(
-    val sources: List<Source> = emptyList(),
-    val session: com.jules.apiclient.Session? = null,
+data class ActivityStreamUiState(
+    val activities: List<Activity> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
 )
 
-class JulesViewModel(application: Application) : AndroidViewModel(application) {
+class ActivityStreamViewModel(application: Application) : AndroidViewModel(application) {
 
     private val config = AndroidConfigStorage(application)
     private var apiClient: JulesApiClient? = null
 
-    private val _uiState = MutableStateFlow(JulesUiState())
+    private val _uiState = MutableStateFlow(ActivityStreamUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -33,12 +32,11 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
             } else {
                 apiClient = JulesApiClient(apiKey)
-                loadSources()
             }
         }
     }
 
-    fun loadSources() {
+    fun loadActivities(sessionId: String) {
         val client = apiClient
         if (client == null) {
             _uiState.update { it.copy(isLoading = false, error = "API Key not found. Please set it in Settings.") }
@@ -48,21 +46,8 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val sources = client.getSources().sources
-                _uiState.update { it.copy(sources = sources, isLoading = false, error = null) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
-            }
-        }
-    }
-
-    fun createSession(prompt: String, source: Source, title: String) {
-        val client = apiClient ?: return
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val session = client.createSession(prompt, source, title)
-                _uiState.update { it.copy(session = session, isLoading = false, error = null) }
+                val activities = client.getActivities(sessionId).activities
+                _uiState.update { it.copy(activities = activities, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
