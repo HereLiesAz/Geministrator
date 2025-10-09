@@ -66,12 +66,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.material.icons.extended)
 
     // Material 3 and Adaptive Layouts
-    implementation(libs.androidx.material3.adaptive.navigation.suite)
+    implementation(libs.androidx.material3)
 
 
     // Navigation
