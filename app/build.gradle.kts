@@ -21,9 +21,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-        ndk {
-            abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
-        }
     }
 
     buildTypes {
@@ -51,7 +48,7 @@ android {
 }
 
 chaquopy {
-    version = "3.12"
+    abiFilters.addAll("x86_64", "arm64-v8a")
 }
 
 kotlin {
