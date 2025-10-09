@@ -5,9 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
-import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,8 +16,7 @@ import kotlinx.coroutines.launch
 data class SessionUiState(
     val activities: List<Activity> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null,
-    val geminiResponse: String? = null
+    val error: String? = null
 )
 
 class SessionViewModel(
@@ -30,9 +27,7 @@ class SessionViewModel(
     private val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
     private val settingsRepository = SettingsRepository(application)
-    private var julesApiClient: JulesApiClient? = null
-    private var geminiApiClient: GeminiApiClient? = null
-    private var a2aCommunicator: A2ACommunicator? = null
+    private var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState = _uiState.asStateFlow()
@@ -40,32 +35,17 @@ class SessionViewModel(
     init {
         viewModelScope.launch {
             val apiKey = settingsRepository.apiKey.first()
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
-            val gcpLocation = settingsRepository.gcpLocation.first()
-            val geminiModelName = settingsRepository.geminiModelName.first()
-
             if (apiKey.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-                return@launch
+            } else {
+                apiClient = JulesApiClient(apiKey)
+                loadActivities()
             }
-            if (gcpProjectId.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
-                return@launch
-            }
-
-            julesApiClient = JulesApiClient(apiKey)
-            geminiApiClient = GeminiApiClient(
-                projectId = gcpProjectId,
-                location = gcpLocation,
-                modelName = geminiModelName
-            )
-            a2aCommunicator = A2ACommunicator(julesApiClient!!, geminiApiClient!!)
-            loadActivities()
         }
     }
 
     fun loadActivities() {
-        val client = julesApiClient ?: return
+        val client = apiClient ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
@@ -78,7 +58,7 @@ class SessionViewModel(
     }
 
     fun sendMessage(prompt: String) {
-        val client = julesApiClient ?: return
+        val client = apiClient ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
@@ -86,19 +66,6 @@ class SessionViewModel(
                 // After sending, reload the activities to see the agent's response.
                 val activities = client.getActivities(sessionId).activities
                 _uiState.update { it.copy(activities = activities, isLoading = false, error = null) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.message) }
-            }
-        }
-    }
-
-    fun askGemini(prompt: String) {
-        val communicator = a2aCommunicator ?: return
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val response = communicator.julesToGemini(prompt)
-                _uiState.update { it.copy(isLoading = false, geminiResponse = response) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

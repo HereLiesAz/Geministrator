@@ -28,17 +28,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private fun loadSettings() {
         combine(
             settingsRepository.apiKey,
-            settingsRepository.theme,
-            settingsRepository.gcpProjectId,
-            settingsRepository.gcpLocation,
-            settingsRepository.geminiModelName
-        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
+            settingsRepository.theme
+        ) { apiKey, theme ->
             SettingsUiState(
                 apiKey = apiKey ?: "",
-                theme = theme ?: "System",
-                gcpProjectId = gcpProjectId ?: "",
-                gcpLocation = gcpLocation ?: "us-central1",
-                geminiModelName = geminiModelName ?: "gemini-1.0-pro"
+                theme = theme ?: "System"
             )
         }.onEach { newState ->
             _uiState.update { newState }
@@ -53,39 +47,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(theme = newTheme) }
     }
 
-    fun onGcpProjectIdChange(newProjectId: String) {
-        _uiState.update { it.copy(gcpProjectId = newProjectId) }
-    }
-
-    fun onGcpLocationChange(newLocation: String) {
-        _uiState.update { it.copy(gcpLocation = newLocation) }
-    }
-
-    fun onGeminiModelNameChange(newModelName: String) {
-        _uiState.update { it.copy(geminiModelName = newModelName) }
-    }
-
     fun saveSettings() {
         viewModelScope.launch {
             settingsRepository.saveApiKey(_uiState.value.apiKey)
             settingsRepository.saveTheme(_uiState.value.theme)
-            settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
-            settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
-            settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
             _events.emit(UiEvent.ShowSaveConfirmation)
         }
-    }
-
-    fun onPromptsChange(newText: String) {
-        _uiState.update { it.copy(promptsJsonString = newText, promptsDirty = true) }
-    }
-
-    fun resetPrompts() {
-        // TODO: Implement resetting from a default source
-    }
-
-    fun savePrompts() {
-        // TODO: Implement saving to a file
     }
 
     sealed class UiEvent {
@@ -96,9 +63,4 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 data class SettingsUiState(
     val apiKey: String = "",
     val theme: String = "System",
-    val gcpProjectId: String = "",
-    val gcpLocation: String = "us-central1",
-    val geminiModelName: String = "gemini-1.0-pro",
-    val promptsJsonString: String = "",
-    val promptsDirty: Boolean = false,
 )
