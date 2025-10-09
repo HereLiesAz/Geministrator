@@ -16,6 +16,9 @@ class SettingsRepository(private val context: Context) {
     private object PreferenceKeys {
         val API_KEY = stringPreferencesKey("api_key")
         val THEME = stringPreferencesKey("theme")
+        val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
+        val GCP_LOCATION = stringPreferencesKey("gcp_location")
+        val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
     }
 
     val apiKey: Flow<String?>
@@ -28,6 +31,22 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferenceKeys.THEME]
         }
 
+    val gcpProjectId: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GCP_PROJECT_ID]
+        }
+
+    val gcpLocation: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GCP_LOCATION]
+        }
+
+    val geminiModelName: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GEMINI_MODEL_NAME]
+        }
+
+
     suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.API_KEY] = apiKey
@@ -37,6 +56,24 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveTheme(theme: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.THEME] = theme
+        }
+    }
+
+    suspend fun saveGcpProjectId(projectId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GCP_PROJECT_ID] = projectId
+        }
+    }
+
+    suspend fun saveGcpLocation(location: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GCP_LOCATION] = location
+        }
+    }
+
+    suspend fun saveGeminiModelName(modelName: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GEMINI_MODEL_NAME] = modelName
         }
     }
 }
