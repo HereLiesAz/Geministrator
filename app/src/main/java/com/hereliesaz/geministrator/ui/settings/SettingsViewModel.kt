@@ -3,16 +3,21 @@ package com.hereliesaz.geministrator.ui.settings
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.AndroidConfigStorage
-import kotlinx.coroutines.flow.MutableSharedFlow
+import com.hereliesaz.geministrator.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val config = AndroidConfigStorage(application)
+    private val settingsRepository = SettingsRepository(application)
+    private val promptsFile = File(application.filesDir, "prompts.json")
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -22,16 +27,46 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         loadSettings()
+        loadPrompts()
     }
 
     private fun loadSettings() {
-        viewModelScope.launch {
+        combine(
+            settingsRepository.apiKey,
+            settingsRepository.theme,
+            settingsRepository.gcpProjectId,
+            settingsRepository.gcpLocation,
+            settingsRepository.geminiModelName
+        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
+            // Create a temporary state object, don't overwrite prompts state
+            SettingsUiState(
+                apiKey = apiKey ?: "",
+                theme = theme ?: "System",
+                gcpProjectId = gcpProjectId ?: "",
+                gcpLocation = gcpLocation ?: "us-central1",
+                geminiModelName = geminiModelName ?: "gemini-1.0-pro"
+            )
+        }.onEach { newSettingsState ->
             _uiState.update {
                 it.copy(
-                    apiKey = config.loadApiKey() ?: "",
-                    theme = config.loadThemePreference() ?: "System"
+                    apiKey = newSettingsState.apiKey,
+                    theme = newSettingsState.theme,
+                    gcpProjectId = newSettingsState.gcpProjectId,
+                    gcpLocation = newSettingsState.gcpLocation,
+                    geminiModelName = newSettingsState.geminiModelName
                 )
             }
+        }.launchIn(viewModelScope)
+    }
+
+    private fun loadPrompts() {
+        viewModelScope.launch {
+            val promptsJson = if (promptsFile.exists()) {
+                promptsFile.readText()
+            } else {
+                getApplication<Application>().assets.open("prompts.json").bufferedReader().use { it.readText() }
+            }
+            _uiState.update { it.copy(promptsJsonString = promptsJson, promptsDirty = false) }
         }
     }
 
@@ -43,11 +78,46 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(theme = newTheme) }
     }
 
+    fun onGcpProjectIdChange(newProjectId: String) {
+        _uiState.update { it.copy(gcpProjectId = newProjectId) }
+    }
+
+    fun onGcpLocationChange(newLocation: String) {
+        _uiState.update { it.copy(gcpLocation = newLocation) }
+    }
+
+    fun onGeminiModelNameChange(newModelName: String) {
+        _uiState.update { it.copy(geminiModelName = newModelName) }
+    }
+
     fun saveSettings() {
         viewModelScope.launch {
-            config.saveApiKey(_uiState.value.apiKey)
-            config.saveThemePreference(_uiState.value.theme)
+            settingsRepository.saveApiKey(_uiState.value.apiKey)
+            settingsRepository.saveTheme(_uiState.value.theme)
+            settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
+            settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
+            settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
             _events.emit(UiEvent.ShowSaveConfirmation)
+        }
+    }
+
+    fun onPromptsChange(newText: String) {
+        _uiState.update { it.copy(promptsJsonString = newText, promptsDirty = true) }
+    }
+
+    fun resetPrompts() {
+        viewModelScope.launch {
+            if (promptsFile.exists()) {
+                promptsFile.delete()
+            }
+            loadPrompts()
+        }
+    }
+
+    fun savePrompts() {
+        viewModelScope.launch {
+            promptsFile.writeText(_uiState.value.promptsJsonString)
+            _uiState.update { it.copy(promptsDirty = false) }
         }
     }
 
@@ -59,4 +129,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 data class SettingsUiState(
     val apiKey: String = "",
     val theme: String = "System",
+    val gcpProjectId: String = "",
+    val gcpLocation: String = "us-central1",
+    val geminiModelName: String = "gemini-1.0-pro",
+    val promptsJsonString: String = "",
+    val promptsDirty: Boolean = false,
 )

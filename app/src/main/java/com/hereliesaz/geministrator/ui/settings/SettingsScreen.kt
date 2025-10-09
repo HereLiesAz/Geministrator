@@ -70,6 +70,34 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            Text("Gemini Settings", style = MaterialTheme.typography.titleLarge)
+            OutlinedTextField(
+                value = uiState.gcpProjectId,
+                onValueChange = { settingsViewModel.onGcpProjectIdChange(it) },
+                label = { Text("GCP Project ID") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = uiState.gcpLocation,
+                onValueChange = { settingsViewModel.onGcpLocationChange(it) },
+                label = { Text("GCP Location") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = uiState.geminiModelName,
+                onValueChange = { settingsViewModel.onGeminiModelNameChange(it) },
+                label = { Text("Gemini Model Name") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text("Theme", style = MaterialTheme.typography.titleLarge)
             Row(Modifier.fillMaxWidth()) {
                 themeOptions.forEach { text ->
