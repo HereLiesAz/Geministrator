@@ -1,14 +1,14 @@
 [versions]
 richtextfx = "0.11.2"
 android-gradle-plugin = "8.12.2"
-kotlin = "2.2.10"
+kotlin = "1.9.24"
 ksp = "2.2.10-2.0.2"
-compose-compiler = "2.2.10"
+compose-compiler = "1.5.10"
 room = "2.6.1"
 core-ktx = "1.12.0"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines-core = "1.8.1"
-kotlinx-serialization-json = "1.8.1"
+kotlinx-coroutines-core = "1.8.0"
+kotlinx-serialization-json = "1.6.3"
 lifecycle = "2.8.2"
 activity-compose = "1.8.2"
 compose-bom = "2024.06.00"
@@ -26,11 +26,9 @@ material3-adaptive-navigation-suite = "1.0.0"
 material-icons = "1.6.7"
 jpackageplugin = "1.7.3"
 github-api = "1.321"
-okhttp = "5.1.0"
-retrofit = "3.0.0"
+okhttp = "4.12.0"
 
 [libraries]
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 # Core & Lifecycle
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -43,7 +41,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 # Compose
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.07.00" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
@@ -94,11 +92,9 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
-android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }

@@ -1,32 +1,31 @@
-# Android
-*.apk
-*.aab
-*.ap_
-*.dex
-*.class
-build/
-*/build/
-captures/
-.externalNativeBuild/
-.cxx/
-
-# Gradle
-.gradle/
-build/
-
-# Local properties
-local.properties
-
-# IntelliJ
+# Android Studio
+.gradle
+/build
+/captures
+.DS_Store
+/local.properties
 .idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+*.iws
 *.iml
 *.ipr
-*.iws
 
-# Mac
-.DS_Store
+# Gradle
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
 
-# Node
+# Geministrator
+.orchestrator/
+prompts.json
+
+# Node (for VSCode plugin)
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -35,7 +34,17 @@ package-lock.json
 
 # VSCode
 .vscode/
+*.vsix
 
-# Geministrator
-.orchestrator/
-prompts.json
+# Generated files
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.keystore
+*.jks
+
+# Log files
+*.log

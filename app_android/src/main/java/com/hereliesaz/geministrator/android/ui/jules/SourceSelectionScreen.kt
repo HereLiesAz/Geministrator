@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.android.ui.jules
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,22 +23,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun SourceSelectionScreen(onNavigateToIde: (String) -> Unit) {
+fun SourceSelectionScreen(
+    onSessionCreated: (String) -> Unit
+) {
     val viewModel: JulesViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val session by remember(uiState.session) {
-        mutableStateOf(uiState.session)
-    }
 
-    if (session != null) {
-        LaunchedEffect(session) {
-            onNavigateToIde(session!!.id)
+    LaunchedEffect(Unit) {
+        if (uiState.sources.isEmpty()) {
+            viewModel.loadSources()
         }
     }
 
+    if (uiState.showCreateSessionDialog) {
+        CreateSessionDialog(
+            onDismiss = { viewModel.dismissCreateSessionDialog() },
+            onCreateSession = { title, prompt ->
+                viewModel.createSession(title, prompt)
+            }
+        )
+    }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadSources()
+    uiState.createdSession?.let {
+        LaunchedEffect(it) {
+            onSessionCreated(it.id)
+        }
     }
 
     Box(
@@ -59,16 +67,16 @@ fun SourceSelectionScreen(onNavigateToIde: (String) -> Unit) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding =
-                Modifier.padding(16.dp)
+                contentPadding = Modifier.padding(16.dp)
             ) {
                 items(uiState.sources) { source ->
-                    Button(
-                        onClick = { viewModel.createSession("Default prompt", source, "New Session") },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = source.name)
-                    }
+                    Text(
+                        text = source.githubRepo?.repo ?: source.name,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.onSourceSelected(source) }
+                            .padding(16.dp)
+                    )
                 }
             }
         }
