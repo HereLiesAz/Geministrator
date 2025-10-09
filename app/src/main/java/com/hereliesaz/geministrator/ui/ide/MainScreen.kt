@@ -7,10 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
-import com.hereliesaz.geministrator.ui.project.ProjectViewModel
 
 @Composable
-fun MainScreen(projectViewModel: ProjectViewModel) {
+fun MainScreen() {
     val navController = rememberNavController()
 
     Row(modifier = Modifier.fillMaxSize()) {
@@ -24,7 +23,6 @@ fun MainScreen(projectViewModel: ProjectViewModel) {
         )
         GeministratorNavHost(
             navController = navController,
-            projectViewModel = projectViewModel,
             modifier = Modifier.weight(1f)
         )
     }

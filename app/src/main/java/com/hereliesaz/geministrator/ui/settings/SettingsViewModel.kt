@@ -3,16 +3,17 @@ package com.hereliesaz.geministrator.ui.settings
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.AndroidConfigStorage
+import com.hereliesaz.geministrator.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val config = AndroidConfigStorage(application)
+    private val settingsRepository = SettingsRepository(application)
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -25,14 +26,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun loadSettings() {
-        viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    apiKey = config.loadApiKey() ?: "",
-                    theme = config.loadThemePreference() ?: "System"
-                )
-            }
-        }
+        combine(
+            settingsRepository.apiKey,
+            settingsRepository.theme
+        ) { apiKey, theme ->
+            SettingsUiState(
+                apiKey = apiKey ?: "",
+                theme = theme ?: "System"
+            )
+        }.onEach { newState ->
+            _uiState.update { newState }
+        }.launchIn(viewModelScope)
     }
 
     fun onApiKeyChange(newKey: String) {
@@ -45,8 +49,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun saveSettings() {
         viewModelScope.launch {
-            config.saveApiKey(_uiState.value.apiKey)
-            config.saveThemePreference(_uiState.value.theme)
+            settingsRepository.saveApiKey(_uiState.value.apiKey)
+            settingsRepository.saveTheme(_uiState.value.theme)
             _events.emit(UiEvent.ShowSaveConfirmation)
         }
     }
