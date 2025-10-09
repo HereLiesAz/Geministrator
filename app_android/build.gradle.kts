@@ -36,9 +36,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    buildFeatures {
-        compose = true
+    composeCompiler {
+        enableStrongSkippingMode = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -99,5 +100,5 @@ dependencies {
     implementation(libs.sora.language.textmate)
 
     // AzNavRail
-    implementation("com.github.HereLiesAz:AzNavRail:3.14")
+    implementation("com.github.HereLiesAz:AzNavRail:3.13")
 }
