@@ -4,8 +4,14 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.serialization)
+}
+
+import java.util.Properties
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
 }
 
 android {
@@ -26,6 +32,12 @@ android {
         ndk {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator"
+        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId") ?: ""}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -52,7 +64,14 @@ android {
     }
 }
 
-chaquopy {}
+chaquopy {
+    defaultConfig {
+        version = "3.12"
+        pyc {
+            src = true
+        }
+    }
+}
 
 
 kotlin {
@@ -66,6 +85,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.activity.ktx)
 
     // Room Database
     implementation(libs.androidx.room.runtime)
@@ -113,13 +133,8 @@ dependencies {
     // AzNavRail
     implementation(libs.aznavrail)
 
-    // Google Sign-In
-    implementation(libs.google.play.services.auth)
-    implementation(libs.kotlinx.coroutines.play.services)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    // Kotlinx Serialization
-    implementation(libs.kotlinx.serialization.json)
+    // AppAuth for GitHub OAuth
+    implementation(libs.appauth)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.activity.ktx)
 }
