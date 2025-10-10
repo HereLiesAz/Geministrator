@@ -22,10 +22,11 @@ object TextMateLoader {
             // Load the theme
             val themeRegistry = ThemeRegistry.getInstance()
             val themeName = "quietlight-plus"
-            val themePath: (String) -> InputStream? = "textmate/$themeName.json"
+            val themePath = "textmate/$themeName.json"
+            val themeInputStream = context.assets.open(themePath)
             themeRegistry.loadTheme(
                 ThemeModel(
-                    FileResolver(themePath) as IThemeSource?,
+                    IThemeSource.fromInputStream(themeInputStream, themePath, null),
                     themeName
                 )
             )
