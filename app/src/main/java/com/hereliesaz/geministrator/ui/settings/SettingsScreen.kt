@@ -33,7 +33,8 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
-    onNavigateToRoles: () -> Unit,
+    onLogout: () -> Unit,
+    onNavigateToRoles: () -> Unit
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
