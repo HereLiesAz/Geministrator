@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### High Priority
 
--   [ ] **Resolve Build Issues**: The application is currently unbuildable due to a persistent Gradle dependency conflict. This is the most critical and immediate task.
+-   [x] **Resolve Build Issues**: The application is currently unbuildable due to a persistent Gradle dependency conflict. This is the most critical and immediate task.
 -   [ ] **Complete Jules API Integration**:
     -   [ ] **Session Creation**: Implement the UI and logic to allow the user to select a source from the `SourceSelectionScreen` and then create a new session with a prompt.
     -   [ ] **Activity Stream**: Create the main UI for displaying the conversation with the Jules API, including user prompts and agent responses.
