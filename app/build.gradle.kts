@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
-    id("com.chaquo.python")
+    alias(libs.plugins.chaquopy)
 }
 
 android {
@@ -58,6 +58,7 @@ chaquopy {
         }
     }
 }
+
 
 kotlin {
     jvmToolchain(17)
