@@ -54,7 +54,7 @@ chaquopy {
     defaultConfig {
         version = "3.12"
         pyc {
-            src = false
+            src = true
         }
     }
 }
