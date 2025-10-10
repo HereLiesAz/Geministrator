@@ -31,7 +31,7 @@ jpackageplugin = "1.7.6"
 github-api = "1.330"
 okhttp = "5.2.0"
 vertexai = "1.36.0"
-chaquopy = "15.0.1"
+chaquopy = "16.1.0"
 
 [libraries]
 # Core & Lifecycle
