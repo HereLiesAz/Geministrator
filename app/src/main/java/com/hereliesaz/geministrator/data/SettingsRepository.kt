@@ -14,6 +14,17 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 class SettingsRepository(private val context: Context) {
 
+    companion object {
+        @Volatile
+        private var INSTANCE: SettingsRepository? = null
+
+        fun getInstance(context: Context): SettingsRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SettingsRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
+    }
+
     private object PreferenceKeys {
         val API_KEY = stringPreferencesKey("api_key")
         val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")

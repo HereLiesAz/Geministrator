@@ -18,5 +18,10 @@ fun GeministratorNavRail(
             text = "Settings",
             onClick = { onNavigate("settings") }
         )
+        azRailItem(
+            id = "cli",
+            text = "CLI",
+            onClick = { onNavigate("cli") }
+        )
     }
 }

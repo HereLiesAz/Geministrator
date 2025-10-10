@@ -52,7 +52,13 @@ android {
     }
 }
 
-chaquopy {}
+chaquopy {
+    defaultConfig {
+        pip {
+            install("gemini-ai-toolkit")
+        }
+    }
+}
 
 
 kotlin {

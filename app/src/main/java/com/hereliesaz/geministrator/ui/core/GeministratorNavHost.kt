@@ -54,10 +54,12 @@ fun GeministratorNavHost(
                     navController.navigate("login") {
                         popUpTo(0)
                     }
-                }
-            )
+                },
                 onNavigateToRoles = { navController.navigate("roles-settings") }
             )
+        }
+        composable("cli") {
+            com.hereliesaz.geministrator.ui.cli.CliScreen()
         }
         composable("roles-settings") {
             com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
