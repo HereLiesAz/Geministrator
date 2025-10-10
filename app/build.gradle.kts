@@ -50,14 +50,7 @@ android {
     }
 }
 
-chaquopy {
-    defaultConfig {
-        version = "3.12"
-        pyc {
-            src = true
-        }
-    }
-}
+chaquopy {}
 
 
 kotlin {

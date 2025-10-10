@@ -23,7 +23,6 @@ build/
 
 # Geministrator
 .orchestrator/
-prompts.json
 
 # Node (for VSCode plugin)
 node_modules/
