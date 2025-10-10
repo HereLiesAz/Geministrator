@@ -21,8 +21,13 @@ class SettingsRepository(private val context: Context) {
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
-        val ENABLED_AI_AGENT_ROLES = stringSetPreferencesKey("enabled_ai_agent_roles")
+        val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
+
+    val enabledRoles: Flow<Set<String>>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.ENABLED_ROLES] ?: emptySet()
+        }
 
     val apiKey: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
@@ -91,14 +96,9 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    val enabledAiAgentRoles: Flow<Set<String>?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[PreferenceKeys.ENABLED_AI_AGENT_ROLES]
-        }
-
-    suspend fun saveEnabledAiAgentRoles(roles: Set<String>) {
+    suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
         context.dataStore.edit { preferences ->
-            preferences[PreferenceKeys.ENABLED_AI_AGENT_ROLES] = roles
+            preferences[PreferenceKeys.ENABLED_ROLES] = enabledRoles
         }
     }
 }

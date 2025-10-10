@@ -7,7 +7,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hereliesaz.geministrator.ui.geministrator.GeministratorScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
@@ -36,10 +35,12 @@ fun GeministratorNavHost(
             SessionScreen()
         }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToRoles = { navController.navigate("roles-settings") }
+            )
         }
-        composable("geministrator") {
-            GeministratorScreen()
+        composable("roles-settings") {
+            com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
         }
     }
 }

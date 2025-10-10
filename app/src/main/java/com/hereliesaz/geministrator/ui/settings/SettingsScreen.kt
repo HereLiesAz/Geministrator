@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -33,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    onNavigateToRoles: () -> Unit,
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
@@ -134,29 +134,12 @@ fun SettingsScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            Text("AI Agent Roles", style = MaterialTheme.typography.titleLarge)
-            uiState.aiAgentRoles.forEach { role ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = role.isEnabled,
-                            onClick = { settingsViewModel.onAiAgentRoleToggle(role.name) }
-                        )
-                        .padding(vertical = 4.dp)
-                ) {
-                    Checkbox(
-                        checked = role.isEnabled,
-                        onCheckedChange = { settingsViewModel.onAiAgentRoleToggle(role.name) }
-                    )
-                    Text(
-                        text = role.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+            Button(
+                onClick = onNavigateToRoles,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Manage AI Roles")
             }
 
             Spacer(modifier = Modifier.weight(1f))

@@ -4,32 +4,20 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.SettingsRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.io.File
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
-
-    private val promptsJsonFlow = flow {
-        val promptsJson = if (promptsFile.exists()) {
-            promptsFile.readText()
-        } else {
-            getApplication<Application>().assets.open("prompts.json").bufferedReader()
-                .use { it.readText() }
-        }
-        emit(promptsJson)
-    }
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -39,6 +27,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         loadSettings()
+        loadPrompts()
     }
 
     private fun loadSettings() {
@@ -60,33 +49,37 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
             CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
         }.combine(settingsRepository.geminiApiKey) { combined, geminiApiKey ->
-            combined to geminiApiKey
-        }.combine(settingsRepository.enabledAiAgentRoles) { (combined, geminiApiKey), enabledRoles ->
-            Triple(combined, geminiApiKey, enabledRoles)
-        }.combine(promptsJsonFlow) { (combined, geminiApiKey, enabledRoles), promptsJson ->
-            val jsonObject = JSONObject(promptsJson)
-            val allRoleNames = jsonObject.keys().asSequence().toList()
-            // If enabled roles aren't set yet (first run), default to all roles being enabled.
-            val enabledRolesSet = enabledRoles ?: allRoleNames.toSet()
-
-            val roles = allRoleNames.map { roleName ->
-                AiAgentRole(name = roleName, isEnabled = enabledRolesSet.contains(roleName))
-            }
-
             SettingsUiState(
                 apiKey = combined.apiKey ?: "",
                 geminiApiKey = geminiApiKey ?: "",
                 theme = combined.theme ?: "System",
                 gcpProjectId = combined.gcpProjectId ?: "",
                 gcpLocation = combined.gcpLocation ?: "us-central1",
-                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro",
-                promptsJsonString = promptsJson,
-                promptsDirty = false,
-                aiAgentRoles = roles
+                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
             )
         }.onEach { newSettingsState ->
-            _uiState.value = newSettingsState
+            _uiState.update {
+                it.copy(
+                    apiKey = newSettingsState.apiKey,
+                    geminiApiKey = newSettingsState.geminiApiKey,
+                    theme = newSettingsState.theme,
+                    gcpProjectId = newSettingsState.gcpProjectId,
+                    gcpLocation = newSettingsState.gcpLocation,
+                    geminiModelName = newSettingsState.geminiModelName
+                )
+            }
         }.launchIn(viewModelScope)
+    }
+
+    private fun loadPrompts() {
+        viewModelScope.launch {
+            val promptsJson = if (promptsFile.exists()) {
+                promptsFile.readText()
+            } else {
+                getApplication<Application>().assets.open("prompts.json").bufferedReader().use { it.readText() }
+            }
+            _uiState.update { it.copy(promptsJsonString = promptsJson, promptsDirty = false) }
+        }
     }
 
     fun onApiKeyChange(newKey: String) {
@@ -113,19 +106,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(geminiModelName = newModelName) }
     }
 
-    fun onAiAgentRoleToggle(roleName: String) {
-        _uiState.update { currentState ->
-            val updatedRoles = currentState.aiAgentRoles.map { role ->
-                if (role.name == roleName) {
-                    role.copy(isEnabled = !role.isEnabled)
-                } else {
-                    role
-                }
-            }
-            currentState.copy(aiAgentRoles = updatedRoles)
-        }
-    }
-
     fun saveSettings() {
         viewModelScope.launch {
             settingsRepository.saveApiKey(_uiState.value.apiKey)
@@ -134,13 +114,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
             settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
-
-            val enabledRoles = _uiState.value.aiAgentRoles
-                .filter { it.isEnabled }
-                .map { it.name }
-                .toSet()
-            settingsRepository.saveEnabledAiAgentRoles(enabledRoles)
-
             _events.emit(UiEvent.ShowSaveConfirmation)
         }
     }
@@ -154,7 +127,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             if (promptsFile.exists()) {
                 promptsFile.delete()
             }
-            loadSettings()
+            loadPrompts()
         }
     }
 
@@ -170,11 +143,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 }
 
-data class AiAgentRole(
-    val name: String,
-    val isEnabled: Boolean
-)
-
 data class SettingsUiState(
     val apiKey: String = "",
     val geminiApiKey: String = "",
@@ -184,5 +152,4 @@ data class SettingsUiState(
     val geminiModelName: String = "gemini-1.0-pro",
     val promptsJsonString: String = "",
     val promptsDirty: Boolean = false,
-    val aiAgentRoles: List<AiAgentRole> = emptyList()
 )
