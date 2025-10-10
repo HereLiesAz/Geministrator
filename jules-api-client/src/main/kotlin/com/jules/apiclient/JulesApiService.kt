@@ -1,5 +1,6 @@
 package com.jules.apiclient
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
@@ -49,6 +50,7 @@ data class GithubRepoContext(
     val startingBranch: String
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("activityType")
 sealed interface Activity {
