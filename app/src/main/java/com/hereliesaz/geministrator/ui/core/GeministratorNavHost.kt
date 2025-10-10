@@ -18,10 +18,10 @@ fun GeministratorNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "source_selection",
+        startDestination = "explorer",
         modifier = modifier
     ) {
-        composable("source_selection") {
+        composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId ->
                     navController.navigate("session/$sessionId")
@@ -34,8 +34,16 @@ fun GeministratorNavHost(
         ) {
             SessionScreen()
         }
+        composable("ide") {
+            com.hereliesaz.geministrator.ui.ide.IdeScreen()
+        }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToRoles = { navController.navigate("roles-settings") }
+            )
+        }
+        composable("roles-settings") {
+            com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
         }
     }
 }
