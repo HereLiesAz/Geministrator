@@ -21,9 +21,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hereliesaz.geministrator.ui.project.ProjectViewModel
-import io.github.rosemoe.sora.lang.textmate.TextMateColorScheme
-import io.github.rosemoe.sora.lang.textmate.TextMateLanguage
-import io.github.rosemoe.sora.lang.textmate.registry.ThemeRegistry
+import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
+import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
+import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.widget.CodeEditor
 
 @OptIn(ExperimentalMaterial3Api::class)

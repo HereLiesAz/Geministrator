@@ -12,6 +12,7 @@ class GeminiApiClient(
     private val modelName: String
 ) {
 
+    @Suppress("DEPRECATION")
     suspend fun generateContent(prompt: String): GenerateContentResponse {
         return withContext(Dispatchers.IO) {
             try {

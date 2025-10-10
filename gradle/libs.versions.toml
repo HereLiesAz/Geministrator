@@ -30,7 +30,7 @@ material-icons = "1.6.5"
 jpackageplugin = "1.7.6"
 github-api = "1.330"
 okhttp = "5.2.0"
-vertexai = "1.1.0"
+vertexai = "1.36.0"
 
 [libraries]
 # Core & Lifecycle
@@ -67,9 +67,11 @@ aznavrail = { module = "com.github.HereLiesAz:AzNavRail", version.ref = "aznavra
 eclipse-jgit = { group = "org.eclipse.jgit", name = "org.eclipse.jgit", version.ref = "jgit"}
 
 # GitHub
+editor = { module = "io.github.rosemoe:editor" }
 github-api = { group = "org.kohsuke", name = "github-api", version.ref = "github-api" }
 
 # OkHttp
+language-textmate = { module = "io.github.rosemoe:language-textmate" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 
 # Gemini API
