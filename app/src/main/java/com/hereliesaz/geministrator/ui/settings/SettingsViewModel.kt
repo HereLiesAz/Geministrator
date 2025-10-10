@@ -40,17 +40,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun loadSettings() {
-        // Helper data class for type-safe combination of 5 flows
-        data class CombinedSettings(
-            val apiKey: String?,
-            val theme: String?,
-            val gcpProjectId: String?,
-            val gcpLocation: String?,
-            val geminiModelName: String?
-        )
-
         combine(
             settingsRepository.apiKey,
+            settingsRepository.geminiApiKey,
             settingsRepository.theme,
             settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
@@ -59,33 +51,23 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.profilePictureUrl
         ) { values ->
             val apiKey = values[0] as String?
-            val theme = values[1] as String?
-            val gcpProjectId = values[2] as String?
-            val gcpLocation = values[3] as String?
-            val geminiModelName = values[4] as String?
-            val username = values[5] as String?
-            val profilePictureUrl = values[6] as String?
-
+            val geminiApiKey = values[1] as String?
+            val theme = values[2] as String?
+            val gcpProjectId = values[3] as String?
+            val gcpLocation = values[4] as String?
+            val geminiModelName = values[5] as String?
+            val username = values[6] as String?
+            val profilePictureUrl = values[7] as String?
             // Create a temporary state object, don't overwrite prompts state
             SettingsUiState(
                 apiKey = apiKey ?: "",
+                geminiApiKey = geminiApiKey ?: "",
                 theme = theme ?: "System",
                 gcpProjectId = gcpProjectId ?: "",
                 gcpLocation = gcpLocation ?: "us-central1",
                 geminiModelName = geminiModelName ?: "gemini-1.0-pro",
                 username = username,
                 profilePictureUrl = profilePictureUrl
-            settingsRepository.geminiModelName
-        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
-            CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
-        }.combine(settingsRepository.geminiApiKey) { combined, geminiApiKey ->
-            SettingsUiState(
-                apiKey = combined.apiKey ?: "",
-                geminiApiKey = geminiApiKey ?: "",
-                theme = combined.theme ?: "System",
-                gcpProjectId = combined.gcpProjectId ?: "",
-                gcpLocation = combined.gcpLocation ?: "us-central1",
-                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
             )
         }.onEach { newSettingsState ->
             _uiState.update {

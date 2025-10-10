@@ -11,6 +11,7 @@ import com.hereliesaz.geministrator.ui.authentication.LoginScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
+import com.hereliesaz.geministrator.ui.terminal.TerminalScreen
 
 @Composable
 fun GeministratorNavHost(
@@ -25,16 +26,12 @@ fun GeministratorNavHost(
         composable("login") {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate("source_selection") {
+                    navController.navigate("explorer") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
             )
         }
-        composable("source_selection") {
-        startDestination = "explorer",
-        modifier = modifier
-    ) {
         composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId ->
@@ -54,13 +51,15 @@ fun GeministratorNavHost(
                     navController.navigate("login") {
                         popUpTo(0)
                     }
-                }
-            )
+                },
                 onNavigateToRoles = { navController.navigate("roles-settings") }
             )
         }
         composable("roles-settings") {
             com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
+        }
+        composable("terminal") {
+            TerminalScreen()
         }
     }
 }

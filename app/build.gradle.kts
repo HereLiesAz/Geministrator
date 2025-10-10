@@ -122,4 +122,7 @@ dependencies {
     implementation(libs.firebase.auth)
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Gemini API
+    implementation(libs.google.cloud.vertexai)
 }
