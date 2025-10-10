@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    onNavigateToRoles: () -> Unit,
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
@@ -130,6 +131,15 @@ fun SettingsScreen(
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onNavigateToRoles,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Manage AI Roles")
             }
 
             Spacer(modifier = Modifier.weight(1f))

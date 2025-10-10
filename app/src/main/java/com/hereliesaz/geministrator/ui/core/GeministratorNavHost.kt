@@ -35,7 +35,12 @@ fun GeministratorNavHost(
             SessionScreen()
         }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToRoles = { navController.navigate("roles-settings") }
+            )
+        }
+        composable("roles-settings") {
+            com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
         }
     }
 }

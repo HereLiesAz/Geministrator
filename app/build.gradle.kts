@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -110,4 +111,7 @@ dependencies {
 
     // AzNavRail
     implementation(libs.aznavrail)
+
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
 }
