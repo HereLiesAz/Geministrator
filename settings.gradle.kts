@@ -6,7 +6,7 @@
         maven { url = uri("https://chaquo.com/maven") }
     }
     plugins {
-        id("com.chaquo.python") version "16.1.0"
+        id("com.chaquo.python")
     }
 }
 

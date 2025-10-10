@@ -18,10 +18,10 @@ fun GeministratorNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "source_selection",
+        startDestination = "explorer",
         modifier = modifier
     ) {
-        composable("source_selection") {
+        composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId ->
                     navController.navigate("session/$sessionId")

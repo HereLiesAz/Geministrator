@@ -67,6 +67,15 @@ fun SettingsScreen(
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation()
             )
+            OutlinedTextField(
+                value = uiState.geminiApiKey,
+                onValueChange = { settingsViewModel.onGeminiApiKeyChange(it) },
+                label = { Text("Gemini API Key") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation()
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 

@@ -15,6 +15,7 @@ class SettingsRepository(private val context: Context) {
 
     private object PreferenceKeys {
         val API_KEY = stringPreferencesKey("api_key")
+        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         val THEME = stringPreferencesKey("theme")
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
@@ -24,6 +25,11 @@ class SettingsRepository(private val context: Context) {
     val apiKey: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.API_KEY]
+        }
+
+    val geminiApiKey: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GEMINI_API_KEY]
         }
 
     val theme: Flow<String?>
@@ -50,6 +56,12 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.API_KEY] = apiKey
+        }
+    }
+
+    suspend fun saveGeminiApiKey(apiKey: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GEMINI_API_KEY] = apiKey
         }
     }
 
