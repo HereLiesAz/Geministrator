@@ -1,6 +1,23 @@
-# Jules IDE Documentation
+# Geministrator Documentation
 
-Welcome to the official documentation for the Jules IDE project. This documentation is designed to provide a comprehensive overview of the project's architecture, features, and development conventions.
+Welcome to the official documentation for the Geministrator project. This documentation is designed to provide a comprehensive overview of the project's architecture, features, and development conventions.
+
+## Introduction
+
+### Project Purpose
+
+Geministrator is a mobile IDE (Integrated Development Environment) for the Jules API. The primary goal of the project is to provide a fully-featured development environment on mobile devices, leveraging the power of the Jules API for code generation, execution, and repository management.
+
+A secondary goal is to integrate the Gemini API to enable Agent-to-Agent (A2A) communication, allowing for complex, automated development workflows.
+
+### Architecture Overview
+
+The project follows a multi-module architecture, managed by Gradle. The main modules are:
+
+-   **:app**: The main Android application module. The UI is built entirely with Jetpack Compose, following modern Android development best practices.
+-   **:jules-api-client**: A pure Kotlin module responsible for all communication with the Jules API. It uses Retrofit for networking and `kotlinx.serialization` for JSON parsing.
+
+This modular design promotes separation of concerns, making the codebase easier to maintain, test, and scale.
 
 ## Table of Contents
 

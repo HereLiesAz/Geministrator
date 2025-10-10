@@ -19,6 +19,8 @@ class SettingsRepository(private val context: Context) {
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
+        val GITHUB_USERNAME = stringPreferencesKey("github_username")
+        val GITHUB_ACCESS_TOKEN = stringPreferencesKey("github_access_token")
     }
 
     val apiKey: Flow<String?>
@@ -44,6 +46,11 @@ class SettingsRepository(private val context: Context) {
     val geminiModelName: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.GEMINI_MODEL_NAME]
+        }
+
+    val githubUsername: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GITHUB_USERNAME]
         }
 
 
@@ -74,6 +81,35 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveGeminiModelName(modelName: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.GEMINI_MODEL_NAME] = modelName
+        }
+    }
+
+    suspend fun saveGithubUsername(username: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GITHUB_USERNAME] = username
+        }
+    }
+
+    suspend fun clearGithubUsername() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(PreferenceKeys.GITHUB_USERNAME)
+        }
+    }
+
+    val githubAccessToken: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN]
+        }
+
+    suspend fun saveGithubAccessToken(token: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN] = token
+        }
+    }
+
+    suspend fun clearGithubAccessToken() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(PreferenceKeys.GITHUB_ACCESS_TOKEN)
         }
     }
 }

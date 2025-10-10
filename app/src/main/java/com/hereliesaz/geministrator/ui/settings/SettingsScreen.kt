@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,12 +37,16 @@ fun SettingsScreen(
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
         settingsViewModel.events.collectLatest { event ->
             when (event) {
                 is SettingsViewModel.UiEvent.ShowSaveConfirmation -> {
                     snackbarHostState.showSnackbar("Settings Saved")
+                }
+                is SettingsViewModel.UiEvent.LaunchUrl -> {
+                    context.startActivity(event.intent)
                 }
             }
         }
@@ -95,6 +100,30 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text("Integrations", style = MaterialTheme.typography.titleLarge)
+            if (uiState.githubUsername == null) {
+                Button(
+                    onClick = { settingsViewModel.onSignInWithGitHubClick() },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Sign in with GitHub")
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Signed in as: ${uiState.githubUsername}")
+                    Button(onClick = { settingsViewModel.onSignOutFromGitHubClick() }) {
+                        Text("Sign out")
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
