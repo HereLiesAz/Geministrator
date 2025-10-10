@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    onLogout: () -> Unit
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
@@ -42,6 +43,9 @@ fun SettingsScreen(
             when (event) {
                 is SettingsViewModel.UiEvent.ShowSaveConfirmation -> {
                     snackbarHostState.showSnackbar("Settings Saved")
+                }
+                is SettingsViewModel.UiEvent.NavigateToLogin -> {
+                    onLogout()
                 }
             }
         }
@@ -57,6 +61,16 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            uiState.username?.let { username ->
+                Text("User", style = MaterialTheme.typography.titleLarge)
+                Text(text = "Logged in as $username")
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { settingsViewModel.logout() }) {
+                    Text("Logout")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             Text("API Key", style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(
                 value = uiState.apiKey,
