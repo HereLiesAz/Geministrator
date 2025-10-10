@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    onNavigateToRoles: () -> Unit,
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
     val themeOptions = listOf("Light", "Dark", "System")
@@ -67,6 +68,15 @@ fun SettingsScreen(
                 value = uiState.apiKey,
                 onValueChange = { settingsViewModel.onApiKeyChange(it) },
                 label = { Text("Jules API Key") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation()
+            )
+            OutlinedTextField(
+                value = uiState.geminiApiKey,
+                onValueChange = { settingsViewModel.onGeminiApiKeyChange(it) },
+                label = { Text("Gemini API Key") },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -150,6 +160,15 @@ fun SettingsScreen(
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onNavigateToRoles,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Manage AI Roles")
             }
 
             Spacer(modifier = Modifier.weight(1f))

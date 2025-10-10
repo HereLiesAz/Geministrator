@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,17 +16,27 @@ class SettingsRepository(private val context: Context) {
 
     private object PreferenceKeys {
         val API_KEY = stringPreferencesKey("api_key")
+        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         val THEME = stringPreferencesKey("theme")
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
-        val GITHUB_USERNAME = stringPreferencesKey("github_username")
-        val GITHUB_ACCESS_TOKEN = stringPreferencesKey("github_access_token")
+        val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
+
+    val enabledRoles: Flow<Set<String>>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.ENABLED_ROLES] ?: emptySet()
+        }
 
     val apiKey: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.API_KEY]
+        }
+
+    val geminiApiKey: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GEMINI_API_KEY]
         }
 
     val theme: Flow<String?>
@@ -48,15 +59,16 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferenceKeys.GEMINI_MODEL_NAME]
         }
 
-    val githubUsername: Flow<String?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[PreferenceKeys.GITHUB_USERNAME]
-        }
-
 
     suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.API_KEY] = apiKey
+        }
+    }
+
+    suspend fun saveGeminiApiKey(apiKey: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GEMINI_API_KEY] = apiKey
         }
     }
 
@@ -84,32 +96,9 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    suspend fun saveGithubUsername(username: String) {
+    suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
         context.dataStore.edit { preferences ->
-            preferences[PreferenceKeys.GITHUB_USERNAME] = username
-        }
-    }
-
-    suspend fun clearGithubUsername() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(PreferenceKeys.GITHUB_USERNAME)
-        }
-    }
-
-    val githubAccessToken: Flow<String?>
-        get() = context.dataStore.data.map { preferences ->
-            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN]
-        }
-
-    suspend fun saveGithubAccessToken(token: String) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN] = token
-        }
-    }
-
-    suspend fun clearGithubAccessToken() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(PreferenceKeys.GITHUB_ACCESS_TOKEN)
+            preferences[PreferenceKeys.ENABLED_ROLES] = enabledRoles
         }
     }
 }

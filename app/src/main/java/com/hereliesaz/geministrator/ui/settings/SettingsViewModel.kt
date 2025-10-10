@@ -1,31 +1,23 @@
 package com.hereliesaz.geministrator.ui.settings
 
 import android.app.Application
-import android.content.Intent
-import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.BuildConfig
 import com.hereliesaz.geministrator.data.SettingsRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import net.openid.appauth.AuthorizationRequest
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.AuthorizationServiceConfiguration
-import net.openid.appauth.ResponseTypeValues
 import java.io.File
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
-    private val authService = AuthorizationService(application)
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -39,40 +31,41 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun loadSettings() {
-        val flows = listOf(
+        // Helper data class for type-safe combination of 5 flows
+        data class CombinedSettings(
+            val apiKey: String?,
+            val theme: String?,
+            val gcpProjectId: String?,
+            val gcpLocation: String?,
+            val geminiModelName: String?
+        )
+
+        combine(
             settingsRepository.apiKey,
             settingsRepository.theme,
             settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
-            settingsRepository.geminiModelName,
-            settingsRepository.githubUsername
-        )
-        combine(flows) { settings ->
-            val apiKey = settings[0]
-            val theme = settings[1]
-            val gcpProjectId = settings[2]
-            val gcpLocation = settings[3]
-            val geminiModelName = settings[4]
-            val githubUsername = settings[5]
-
-            // Create a temporary state object, don't overwrite prompts state
+            settingsRepository.geminiModelName
+        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
+            CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
+        }.combine(settingsRepository.geminiApiKey) { combined, geminiApiKey ->
             SettingsUiState(
-                apiKey = apiKey ?: "",
-                theme = theme ?: "System",
-                gcpProjectId = gcpProjectId ?: "",
-                gcpLocation = gcpLocation ?: "us-central1",
-                geminiModelName = geminiModelName ?: "gemini-1.0-pro",
-                githubUsername = githubUsername
+                apiKey = combined.apiKey ?: "",
+                geminiApiKey = geminiApiKey ?: "",
+                theme = combined.theme ?: "System",
+                gcpProjectId = combined.gcpProjectId ?: "",
+                gcpLocation = combined.gcpLocation ?: "us-central1",
+                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
             )
         }.onEach { newSettingsState ->
             _uiState.update {
                 it.copy(
                     apiKey = newSettingsState.apiKey,
+                    geminiApiKey = newSettingsState.geminiApiKey,
                     theme = newSettingsState.theme,
                     gcpProjectId = newSettingsState.gcpProjectId,
                     gcpLocation = newSettingsState.gcpLocation,
-                    geminiModelName = newSettingsState.geminiModelName,
-                    githubUsername = newSettingsState.githubUsername
+                    geminiModelName = newSettingsState.geminiModelName
                 )
             }
         }.launchIn(viewModelScope)
@@ -91,6 +84,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun onApiKeyChange(newKey: String) {
         _uiState.update { it.copy(apiKey = newKey) }
+    }
+
+    fun onGeminiApiKeyChange(newKey: String) {
+        _uiState.update { it.copy(geminiApiKey = newKey) }
     }
 
     fun onThemeChange(newTheme: String) {
@@ -112,6 +109,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun saveSettings() {
         viewModelScope.launch {
             settingsRepository.saveApiKey(_uiState.value.apiKey)
+            settingsRepository.saveGeminiApiKey(_uiState.value.geminiApiKey)
             settingsRepository.saveTheme(_uiState.value.theme)
             settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
@@ -140,54 +138,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun onSignInWithGitHubClick() {
-        val serviceConfig = AuthorizationServiceConfiguration(
-            Uri.parse(GITHUB_AUTH_ENDPOINT),
-            Uri.parse(GITHUB_TOKEN_ENDPOINT)
-        )
-        val authRequest = AuthorizationRequest.Builder(
-            serviceConfig,
-            GITHUB_CLIENT_ID,
-            ResponseTypeValues.CODE,
-            Uri.parse(GITHUB_REDIRECT_URI)
-        ).setScope(GITHUB_SCOPE).build()
-
-        val authIntent = authService.getAuthorizationRequestIntent(authRequest)
-
-        viewModelScope.launch {
-            _events.emit(UiEvent.LaunchUrl(authIntent))
-        }
-    }
-
-    fun onSignOutFromGitHubClick() {
-        viewModelScope.launch {
-            settingsRepository.clearGithubUsername()
-            settingsRepository.clearGithubAccessToken()
-            // TODO: Consider revoking the token via API call to GitHub
-        }
-    }
-
     sealed class UiEvent {
         data object ShowSaveConfirmation : UiEvent()
-        data class LaunchUrl(val intent: Intent) : UiEvent()
-    }
-
-    companion object {
-        private const val GITHUB_AUTH_ENDPOINT = "https://github.com/login/oauth/authorize"
-        private const val GITHUB_TOKEN_ENDPOINT = "https://github.com/login/oauth/access_token"
-        private const val GITHUB_CLIENT_ID = BuildConfig.GITHUB_CLIENT_ID
-        private const val GITHUB_REDIRECT_URI = "com.hereliesaz.geministrator://oauth2redirect"
-        private const val GITHUB_SCOPE = "repo"
     }
 }
 
 data class SettingsUiState(
     val apiKey: String = "",
+    val geminiApiKey: String = "",
     val theme: String = "System",
     val gcpProjectId: String = "",
     val gcpLocation: String = "us-central1",
     val geminiModelName: String = "gemini-1.0-pro",
     val promptsJsonString: String = "",
     val promptsDirty: Boolean = false,
-    val githubUsername: String? = null,
 )
