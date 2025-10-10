@@ -32,6 +32,10 @@ github-api = "1.330"
 okhttp = "5.2.0"
 vertexai = "1.36.0"
 chaquopy = "16.1.0"
+play-services-auth = "21.2.0"
+kotlinx-coroutines-play-services = "1.8.1"
+firebase-bom = "33.1.0"
+google-services = "4.4.2"
 
 [libraries]
 # Core & Lifecycle
@@ -81,6 +85,14 @@ google-cloud-vertexai = { group = "com.google.cloud", name = "google-cloud-verte
 # A2A Communication
 a2a-sdk-client = { group = "io.github.a2asdk", name = "a2a-java-sdk-client", version.ref = "a2a" }
 
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+
+# Google Sign-In
+google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines-play-services" }
+
 # Sora Editor
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
@@ -115,3 +127,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }

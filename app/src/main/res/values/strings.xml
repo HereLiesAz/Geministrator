@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Geministrator</string>
+    <!--
+    Replace this with your web client ID from the Google Cloud console.
+    See: https://developers.google.com/identity/sign-in/android/start-integrating
+    -->
+    <string name="web_client_id" translatable="false">YOUR_WEB_CLIENT_ID</string>
 </resources>

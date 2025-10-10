@@ -21,6 +21,9 @@ class SettingsRepository(private val context: Context) {
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
+        val USER_ID = stringPreferencesKey("user_id")
+        val USERNAME = stringPreferencesKey("username")
+        val PROFILE_PICTURE_URL = stringPreferencesKey("profile_picture_url")
         val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
 
@@ -57,6 +60,21 @@ class SettingsRepository(private val context: Context) {
     val geminiModelName: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.GEMINI_MODEL_NAME]
+        }
+
+    val userId: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.USER_ID]
+        }
+
+    val username: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.USERNAME]
+        }
+
+    val profilePictureUrl: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.PROFILE_PICTURE_URL]
         }
 
 
@@ -96,6 +114,21 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
+    suspend fun saveUserId(userId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.USER_ID] = userId
+        }
+    }
+
+    suspend fun saveUsername(username: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.USERNAME] = username
+        }
+    }
+
+    suspend fun saveProfilePictureUrl(url: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.PROFILE_PICTURE_URL] = url
     suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.ENABLED_ROLES] = enabledRoles
