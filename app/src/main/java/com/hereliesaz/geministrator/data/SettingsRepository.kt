@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,7 @@ class SettingsRepository(private val context: Context) {
         val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
+        val ENABLED_AI_AGENT_ROLES = stringSetPreferencesKey("enabled_ai_agent_roles")
     }
 
     val apiKey: Flow<String?>
@@ -86,6 +88,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveGeminiModelName(modelName: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.GEMINI_MODEL_NAME] = modelName
+        }
+    }
+
+    val enabledAiAgentRoles: Flow<Set<String>?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.ENABLED_AI_AGENT_ROLES]
+        }
+
+    suspend fun saveEnabledAiAgentRoles(roles: Set<String>) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.ENABLED_AI_AGENT_ROLES] = roles
         }
     }
 }
