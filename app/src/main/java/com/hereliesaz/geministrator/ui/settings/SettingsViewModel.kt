@@ -40,6 +40,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun loadSettings() {
+        // Helper data class for type-safe combination of 5 flows
+        data class CombinedSettings(
+            val apiKey: String?,
+            val theme: String?,
+            val gcpProjectId: String?,
+            val gcpLocation: String?,
+            val geminiModelName: String?
+        )
+
         combine(
             settingsRepository.apiKey,
             settingsRepository.theme,
@@ -66,11 +75,23 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 geminiModelName = geminiModelName ?: "gemini-1.0-pro",
                 username = username,
                 profilePictureUrl = profilePictureUrl
+            settingsRepository.geminiModelName
+        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
+            CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
+        }.combine(settingsRepository.geminiApiKey) { combined, geminiApiKey ->
+            SettingsUiState(
+                apiKey = combined.apiKey ?: "",
+                geminiApiKey = geminiApiKey ?: "",
+                theme = combined.theme ?: "System",
+                gcpProjectId = combined.gcpProjectId ?: "",
+                gcpLocation = combined.gcpLocation ?: "us-central1",
+                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
             )
         }.onEach { newSettingsState ->
             _uiState.update {
                 it.copy(
                     apiKey = newSettingsState.apiKey,
+                    geminiApiKey = newSettingsState.geminiApiKey,
                     theme = newSettingsState.theme,
                     gcpProjectId = newSettingsState.gcpProjectId,
                     gcpLocation = newSettingsState.gcpLocation,
@@ -97,6 +118,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(apiKey = newKey) }
     }
 
+    fun onGeminiApiKeyChange(newKey: String) {
+        _uiState.update { it.copy(geminiApiKey = newKey) }
+    }
+
     fun onThemeChange(newTheme: String) {
         _uiState.update { it.copy(theme = newTheme) }
     }
@@ -116,6 +141,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun saveSettings() {
         viewModelScope.launch {
             settingsRepository.saveApiKey(_uiState.value.apiKey)
+            settingsRepository.saveGeminiApiKey(_uiState.value.geminiApiKey)
             settingsRepository.saveTheme(_uiState.value.theme)
             settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
@@ -162,6 +188,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
 data class SettingsUiState(
     val apiKey: String = "",
+    val geminiApiKey: String = "",
     val theme: String = "System",
     val gcpProjectId: String = "",
     val gcpLocation: String = "us-central1",

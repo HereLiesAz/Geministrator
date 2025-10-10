@@ -6,7 +6,8 @@ This document provides an overview of the User Interface (UI) and User Experienc
 
 The application is built with Jetpack Compose and Material 3, using the following key components:
 
--   **`GeministratorNavRail`**: A vertical navigation rail for primary navigation between the main sections of the app.
+- **`AzNavRail`**: A vertical navigation rail for primary navigation between the main sections of
+  the app.
 -   **`Sora Editor`**: A native Android code editor that provides a rich and performant code editing experience.
 -   **`LazyColumn`**: Used to display lists of items, such as the list of source repositories and the activity stream in a session.
 -   **`Dialog`**: Used to create the "New Session" dialog.

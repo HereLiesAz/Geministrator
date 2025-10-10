@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -51,14 +52,7 @@ android {
     }
 }
 
-chaquopy {
-    defaultConfig {
-        version = "3.12"
-        pyc {
-            src = true
-        }
-    }
-}
+chaquopy {}
 
 
 kotlin {
@@ -126,4 +120,6 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
 }
