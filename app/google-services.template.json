@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "405858524561",
+    "project_id": "geministrator",
+    "storage_bucket": "geministrator.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405858524561:android:97c40f0818de1f92f88e30",
+        "android_client_info": {
+          "package_name": "com.hereliesaz.geministrator"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405858524561-1njbtk5rir8djq1tpp7d0k9su28bn0pe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hereliesaz.geministrator",
+            "certificate_hash": "c3889e13c8c7136840997c44130572684091063f"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": ""
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
