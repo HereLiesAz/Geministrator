@@ -3,6 +3,8 @@ package com.hereliesaz.geministrator.ui.jules
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hereliesaz.geministrator.data.Prompt
+import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
@@ -19,12 +21,15 @@ data class JulesUiState(
     val showCreateSessionDialog: Boolean = false,
     val createdSession: Session? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val roles: List<Prompt> = emptyList(),
+    val selectedRoles: Set<String> = emptySet()
 )
 
 class JulesViewModel(application: Application) : AndroidViewModel(application) {
 
     private val settingsRepository = SettingsRepository(application)
+    private val promptsRepository = PromptsRepository(application)
     private var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(JulesUiState())
@@ -39,7 +44,30 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
                 apiClient = JulesApiClient(apiKey)
                 loadSources()
             }
+            loadRoles()
         }
+    }
+
+    private fun loadRoles() {
+        viewModelScope.launch {
+            promptsRepository.getPrompts()
+                .onSuccess { roles ->
+                    _uiState.update { it.copy(roles = roles) }
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(error = error.message) }
+                }
+        }
+    }
+
+    fun onRoleSelected(roleName: String, isSelected: Boolean) {
+        val selectedRoles = _uiState.value.selectedRoles.toMutableSet()
+        if (isSelected) {
+            selectedRoles.add(roleName)
+        } else {
+            selectedRoles.remove(roleName)
+        }
+        _uiState.update { it.copy(selectedRoles = selectedRoles) }
     }
 
     fun loadSources() {
@@ -66,11 +94,12 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
     fun createSession(title: String, prompt: String) {
         val client = apiClient ?: return
         val source = _uiState.value.selectedSource ?: return
+        val selectedRoles = _uiState.value.selectedRoles
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, showCreateSessionDialog = false) }
             try {
-                val session = client.createSession(prompt, source, title)
+                val session = client.createSession(prompt, source, title, selectedRoles.joinToString(","))
                 _uiState.update { it.copy(createdSession = session, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
