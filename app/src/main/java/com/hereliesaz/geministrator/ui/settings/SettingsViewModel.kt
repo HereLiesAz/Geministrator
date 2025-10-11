@@ -17,11 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
-sealed class UiEvent {
-    data object ShowSaveConfirmation : UiEvent()
-    data object NavigateToLogin : UiEvent()
-}
-
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
@@ -132,7 +127,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
             settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
-            _events.emit(UiEvent.ShowSaveConfirmation)
+            _events.emit(UiEvent.ShowSaveConfirmation("Settings Saved"))
         }
     }
 
@@ -165,6 +160,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _events.emit(UiEvent.NavigateToLogin)
         }
     }
+
+    fun onSignInWithGitHubClick() {
+        // TODO: Implement GitHub sign-in logic
+    }
+
+    fun onSignOutFromGitHubClick() {
+        // TODO: Implement GitHub sign-out logic
+    }
 }
 
 data class SettingsUiState(
@@ -177,5 +180,6 @@ data class SettingsUiState(
     val promptsJsonString: String = "",
     val promptsDirty: Boolean = false,
     val username: String? = null,
-    val profilePictureUrl: String? = null
+    val profilePictureUrl: String? = null,
+    val githubUsername: String? = null
 )

@@ -10,7 +10,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.hereliesaz.geministrator.R
-import kotlinx.coroutines.android.HandlerDispatcher
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 
 class GoogleAuthUiClient(
@@ -74,8 +74,8 @@ class GoogleAuthUiClient(
 
     suspend fun signOut() {
         try {
-            auth.signOut()
             oneTapClient.signOut().await()
+            auth.signOut()
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e

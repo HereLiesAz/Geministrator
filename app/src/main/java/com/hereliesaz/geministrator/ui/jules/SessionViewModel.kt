@@ -9,9 +9,6 @@ import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
-import com.chaquo.python.Python
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -33,14 +30,7 @@ class SessionViewModel(
 
     private val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
-    private val roles: Set<String> = savedStateHandle.get<String>("roles")?.let { rolesString ->
-        try {
-            Json.decodeFromString<Set<String>>(rolesString)
-        } catch (e: Exception) {
-            // Fallback for old comma-separated format
-            rolesString.split(",").toSet()
-        }
-    } ?: emptySet()
+    private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
     private val settingsRepository = SettingsRepository(application)
     private var julesApiClient: JulesApiClient? = null
     private var geminiApiClient: GeminiApiClient? = null

@@ -45,10 +45,13 @@ fun SettingsScreen(
         settingsViewModel.events.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSaveConfirmation -> {
-                    snackbarHostState.showSnackbar("Settings Saved")
+                    snackbarHostState.showSnackbar(event.message)
                 }
-                is SettingsViewModel.UiEvent.LaunchUrl -> {
+                is UiEvent.LaunchUrl -> {
                     context.startActivity(event.intent)
+                }
+                is UiEvent.NavigateToLogin -> {
+                    onLogout()
                 }
             }
         }

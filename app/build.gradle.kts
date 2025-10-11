@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -53,7 +55,7 @@ android {
 chaquopy {
     defaultConfig {
         version = "3.12"
-        buildPython("python3.12")
+        buildPython("/home/az/Downloads/Python-3.12.8/python")
 
     }
 }
@@ -74,11 +76,10 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.firebase.auth.common)
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+    implementation(libs.play.services.tasks)
     implementation(libs.appauth)
-    implementation(libs.googleid)
-    implementation(libs.kotlinx.coroutines.play.services)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
