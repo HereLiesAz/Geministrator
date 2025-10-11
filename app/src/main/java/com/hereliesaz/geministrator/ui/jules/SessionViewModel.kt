@@ -9,6 +9,7 @@ import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
+import com.chaquo.python.Python
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -42,6 +43,7 @@ class SessionViewModel(
     init {
         viewModelScope.launch {
             val apiKey = settingsRepository.apiKey.first()
+            testPythonIntegration(apiKey)
             val gcpProjectId = settingsRepository.gcpProjectId.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()

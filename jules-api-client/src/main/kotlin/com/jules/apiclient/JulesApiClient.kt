@@ -7,9 +7,11 @@ import retrofit2.Retrofit
 
 class JulesApiClient(private val apiKey: String) {
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://jules.googleapis.com/")
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
     private val service = retrofit.create(JulesApiService::class.java)

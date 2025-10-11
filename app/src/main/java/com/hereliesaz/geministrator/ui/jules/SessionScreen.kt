@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,7 +38,6 @@ import com.jules.apiclient.PlanActivity
 import com.jules.apiclient.ToolCallActivity
 import com.jules.apiclient.ToolOutputActivity
 import com.jules.apiclient.UserMessageActivity
-import androidx.compose.material3.Card
 
 @Composable
 fun SessionScreen() {
@@ -51,7 +51,15 @@ fun SessionScreen() {
     Scaffold(
         bottomBar = {
             SendMessageBar(
-                onSendMessage = { viewModel.sendMessage(it) }
+                onSendMessage = {
+                    if (it.startsWith("/gemini")) {
+                        viewModel.askGemini(it.substringAfter("/gemini "))
+                    } else if (it.startsWith("/decompose")) {
+                        viewModel.decomposeTask(it.substringAfter("/decompose "))
+                    } else {
+                        viewModel.sendMessage(it)
+                    }
+                }
             )
         }
     ) { padding ->
@@ -76,19 +84,38 @@ fun SessionScreen() {
                     }
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    GeminiInteraction(
-                        geminiResponse = uiState.geminiResponse,
-                        onAskGemini = { viewModel.askGemini(it) }
-                    )
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(16.dp),
-                        reverseLayout = true
-                    ) {
-                        items(uiState.activities.reversed()) { activity ->
-                            ActivityItem(activity)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(16.dp),
+                    reverseLayout = true
+                ) {
+                    val reversedActivities = uiState.activities.reversed()
+                    items(reversedActivities) { activity ->
+                        ActivityItem(activity)
+                    }
+
+                    if (uiState.subTasks.isNotEmpty()) {
+                        item {
+                            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text("Sub-tasks", style = MaterialTheme.typography.titleMedium)
+                                    uiState.subTasks.forEach {
+                                        Text(it)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    uiState.geminiResponse?.let {
+                        item {
+                            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Text("Gemini Response", style = MaterialTheme.typography.titleMedium)
+                                    Text(it)
+                                }
+                            }
                         }
                     }
                 }
@@ -146,7 +173,7 @@ fun SendMessageBar(
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
-            label = { Text("Send a message to Jules") },
+            label = { Text("Send a message") },
             modifier = Modifier.weight(1f),
             maxLines = 5
         )
@@ -161,51 +188,6 @@ fun SendMessageBar(
                 Icons.AutoMirrored.Filled.Send,
                 contentDescription = "Send message"
             )
-        }
-    }
-}
-
-@Composable
-fun GeminiInteraction(
-    geminiResponse: String?,
-    onAskGemini: (String) -> Unit
-) {
-    var text by remember { mutableStateOf("") }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("Ask Gemini", style = MaterialTheme.typography.titleLarge)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text("Send a message to Gemini") },
-                modifier = Modifier.weight(1f),
-                maxLines = 5
-            )
-            IconButton(
-                onClick = {
-                    onAskGemini(text)
-                    text = ""
-                },
-                enabled = text.isNotBlank()
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Send message to Gemini"
-                )
-            }
-        }
-        geminiResponse?.let {
-            Text("Gemini Response:", style = MaterialTheme.typography.titleMedium)
-            Text(it)
         }
     }
 }

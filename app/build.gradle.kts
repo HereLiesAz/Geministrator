@@ -25,6 +25,7 @@ android {
         ndk {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
     }
 
     buildTypes {
@@ -54,9 +55,8 @@ android {
 chaquopy {
     defaultConfig {
         version = "3.12"
-        pyc {
-            src = true
-        }
+        buildPython("/home/az/Downloads/Python-3.12.8/python")
+
     }
 }
 
@@ -76,6 +76,8 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.firebase.auth.common)
+    implementation(libs.play.services.auth)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
