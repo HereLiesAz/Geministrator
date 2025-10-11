@@ -30,6 +30,7 @@ class SessionViewModel(
 
     private val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
+    private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
     private val settingsRepository = SettingsRepository(application)
     private var julesApiClient: JulesApiClient? = null
     private var geminiApiClient: GeminiApiClient? = null
@@ -109,9 +110,8 @@ class SessionViewModel(
     fun decomposeTask(task: String) {
         val client = geminiApiClient ?: return
         viewModelScope.launch {
-            val enabledRoles = settingsRepository.enabledRoles.first()
-            if (!enabledRoles.contains("planner")) {
-                _uiState.update { it.copy(error = "The 'planner' role is not enabled.") }
+            if (!roles.contains("planner")) {
+                _uiState.update { it.copy(error = "The 'planner' role is not enabled for this session.") }
                 return@launch
             }
 
@@ -119,8 +119,7 @@ class SessionViewModel(
             try {
                 val prompt = "Decompose the following high-level task into a list of smaller, manageable sub-tasks:\n\n$task"
                 val response = client.generateContent(prompt)
-                val textResponse = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
-                val subTasks = textResponse.split("\n").filter { it.isNotBlank() }
+                val subTasks = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response).split("\n").filter { it.isNotBlank() }
                 _uiState.update { it.copy(subTasks = subTasks, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

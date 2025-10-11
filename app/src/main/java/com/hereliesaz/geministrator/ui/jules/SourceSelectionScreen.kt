@@ -25,7 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SourceSelectionScreen(
-    onSessionCreated: (String) -> Unit
+    onSessionCreated: (String, String) -> Unit
 ) {
     val viewModel: JulesViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -41,13 +41,15 @@ fun SourceSelectionScreen(
             onDismiss = { viewModel.dismissCreateSessionDialog() },
             onCreateSession = { title, prompt ->
                 viewModel.createSession(title, prompt)
-            }
+            },
+            viewModel = viewModel
         )
     }
 
     uiState.createdSession?.let {
+        val selectedRoles = uiState.selectedRoles.joinToString(",")
         LaunchedEffect(it) {
-            onSessionCreated(it.id)
+            onSessionCreated(it.id, selectedRoles)
         }
     }
 

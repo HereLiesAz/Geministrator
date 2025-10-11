@@ -5,9 +5,9 @@ This document contains a collection of tasks for the Geministrator project.
 ## High Priority
 
 - [ ] **GitHub Integration**
-    - [ ] **Natural Language Pull Requests**: The user can describe the changes they've made in plain English, and an agent will generate a well-formatted pull request with a title, description, and relevant labels.
+    - [x] **Natural Language Pull Requests**: The user can describe the changes they've made in plain English, and an agent will generate a well-formatted pull request with a title, description, and relevant labels.
     - [ ] **Automated code review on PRs**: An agent can automatically review pull requests, leaving comments and suggestions.
-    - [ ] **Issue Management**: The user can create and manage GitHub issues from within the IDE using natural language.
+    - [x] **Issue Management**: The user can create and manage GitHub issues from within the IDE using natural language.
     - [ ] **Automated release notes**: An agent can generate release notes based on the commit history since the last release.
 
 ## Medium Priority
@@ -17,6 +17,7 @@ This document contains a collection of tasks for the Geministrator project.
     - [ ] **Automated testing and debugging**: Jules can write tests for a piece of code, and another agent can run them, analyze the results, and suggest fixes.
     - [ ] **Code review and refactoring**: One agent can write code, and another can review it for style, errors, and performance, then suggest or apply refactorings.
     - [x] **Decomposition of large tasks**: The user provides a high-level goal, and one agent breaks it down into smaller, manageable tasks for other agents to work on.
+    - [ ] **ReasoningBank Framework**: Implement a memory framework that distills generalizable reasoning strategies from an agent's self-judged successful and failed experiences.
 
 - [ ] **IDE Features**
     - [ ] **Smarter Autocomplete**: Go beyond basic code completion by using an agent to predict the next few lines of code based on context.
