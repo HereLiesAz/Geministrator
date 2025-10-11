@@ -36,6 +36,8 @@ chaquopy = "16.1.0"
 appauth = "0.11.1"
 firebase-auth-common = "9.8.0"
 play-services-auth = "21.4.0"
+googleid = "1.1.0"
+kotlinx-coroutines-play-services = "1.8.1"
 
 [libraries]
 # Core & Lifecycle
@@ -112,6 +114,8 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-common", version.ref = "firebase-auth-common" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines-play-services" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

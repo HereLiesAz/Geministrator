@@ -35,7 +35,8 @@ fun GeministratorNavHost(
         composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId, roles ->
-                    navController.navigate("session/$sessionId?roles=$roles")
+                    val encodedRoles = java.net.URLEncoder.encode(roles, "UTF-8")
+                    navController.navigate("session/$sessionId?roles=$encodedRoles")
                 }
             )
         }

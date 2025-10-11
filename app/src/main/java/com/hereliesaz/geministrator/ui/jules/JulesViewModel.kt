@@ -9,6 +9,8 @@ import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -99,7 +101,7 @@ class JulesViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, showCreateSessionDialog = false) }
             try {
-                val session = client.createSession(prompt, source, title, selectedRoles.joinToString(","))
+                val session = client.createSession(prompt, source, title, Json.encodeToString(selectedRoles))
                 _uiState.update { it.copy(createdSession = session, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

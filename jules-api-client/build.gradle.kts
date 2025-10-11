@@ -1,8 +1,3 @@
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.serialization)
-}
-
 dependencies {
     // Retrofit for networking
     implementation(libs.retrofit)
