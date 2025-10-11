@@ -196,4 +196,4 @@ data class SettingsUiState(
     val promptsDirty: Boolean = false,
     val username: String? = null,
     val profilePictureUrl: String? = null
-)
+)}

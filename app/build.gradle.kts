@@ -53,11 +53,10 @@ android {
 }
 
 chaquopy {
-    version = "3.12"
     defaultConfig {
-        pyc {
-            src = true
-        }
+        version = "3.12"
+        buildPython("/home/az/Downloads/Python-3.12.8/python")
+
     }
 }
 
@@ -130,6 +129,7 @@ dependencies {
 
     implementation("androidx.credentials:credentials:1.6.0-beta02")
     implementation("androidx.credentials:credentials-play-services-auth:1.6.0-beta02")
+    implementation("net.openid:appauth:0.11.1")
 
     // AppAuth
 }

@@ -44,7 +44,7 @@ fun SettingsScreen(
     LaunchedEffect(key1 = Unit) {
         settingsViewModel.events.collectLatest { event ->
             when (event) {
-                is SettingsViewModel.UiEvent.ShowSaveConfirmation -> {
+                is UiEvent.ShowSaveConfirmation -> {
                     snackbarHostState.showSnackbar("Settings Saved")
                 }
                 is SettingsViewModel.UiEvent.LaunchUrl -> {
