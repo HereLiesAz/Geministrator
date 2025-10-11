@@ -76,8 +76,10 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.firebase.auth.common)
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+    implementation(libs.play.services.tasks)
+    implementation(libs.appauth)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
