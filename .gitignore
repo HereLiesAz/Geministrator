@@ -24,6 +24,8 @@ build/
 # Geministrator
 .orchestrator/
 prompts.json
+google-services.json
+app/libnode/
 
 # Node (for VSCode plugin)
 node_modules/
@@ -50,3 +52,4 @@ package-lock.json
 *.log
 /.kotlin/sessions/kotlin-compiler-17060980992664704555.salive
 kotlin-compiler-*
+/app/google-services.json

@@ -9,6 +9,7 @@ import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
+import com.chaquo.python.Python
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -42,6 +43,7 @@ class SessionViewModel(
     init {
         viewModelScope.launch {
             val apiKey = settingsRepository.apiKey.first()
+            testPythonIntegration(apiKey)
             val gcpProjectId = settingsRepository.gcpProjectId.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
@@ -104,6 +106,21 @@ class SessionViewModel(
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
+        }
+    }
+
+    private fun testPythonIntegration(apiKey: String?) {
+        if (apiKey.isNullOrBlank()) {
+            _uiState.update { it.copy(error = "API Key not found for Python test.") }
+            return
+        }
+        try {
+            val py = Python.getInstance()
+            val module = py.getModule("main")
+            val result = module.callAttr("initialize_and_generate", apiKey, "Tell me a fun fact about the Roman Empire.").toString()
+            _uiState.update { it.copy(geminiResponse = result) }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Python integration failed: ${e.message}") }
         }
     }
 

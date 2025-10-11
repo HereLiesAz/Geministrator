@@ -14,6 +14,7 @@ kotlinx-coroutines-core = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 lifecycle = "2.9.4"
 activity-compose = "1.11.0"
+activity-ktx = "1.11.0"
 compose-bom = "2025.10.00"
 mockk = "1.14.6"
 navigation-compose = "2.9.5"
@@ -32,6 +33,9 @@ github-api = "1.330"
 okhttp = "5.2.0"
 vertexai = "1.36.0"
 chaquopy = "16.1.0"
+appauth = "0.11.1"
+firebase-auth-common = "9.8.0"
+play-services-auth = "21.4.0"
 
 [libraries]
 # Core & Lifecycle
@@ -39,6 +43,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-lifecycle-runtime = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity-ktx" }
 
 # Room Database
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -104,6 +109,9 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
+appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-common", version.ref = "firebase-auth-common" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

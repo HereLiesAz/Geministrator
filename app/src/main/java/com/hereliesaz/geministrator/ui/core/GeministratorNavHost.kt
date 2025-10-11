@@ -7,9 +7,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.hereliesaz.geministrator.ui.authentication.LoginScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
+import com.hereliesaz.geministrator.ui.terminal.TerminalScreen
 
 @Composable
 fun GeministratorNavHost(
@@ -18,10 +20,19 @@ fun GeministratorNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "source_selection",
+        startDestination = "login",
         modifier = modifier
     ) {
-        composable("source_selection") {
+        composable("login") {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate("explorer") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId, roles ->
                     navController.navigate("session/$sessionId?roles=$roles")
@@ -37,8 +48,27 @@ fun GeministratorNavHost(
         ) {
             SessionScreen()
         }
+        composable("ide") {
+            com.hereliesaz.geministrator.ui.ide.IdeScreen()
+        }
         composable("settings") {
-            SettingsScreen()
+            SettingsScreen(
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo(0)
+                    }
+                },
+                onNavigateToRoles = { navController.navigate("roles-settings") }
+            )
+        }
+        composable("cli") {
+            com.hereliesaz.geministrator.ui.cli.CliScreen()
+        }
+        composable("roles-settings") {
+            com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
+        }
+        composable("terminal") {
+            TerminalScreen()
         }
     }
 }
