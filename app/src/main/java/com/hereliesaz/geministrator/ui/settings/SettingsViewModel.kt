@@ -54,27 +54,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.theme,
             settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
-            settingsRepository.geminiModelName,
-            settingsRepository.username,
-            settingsRepository.profilePictureUrl
-        ) { values ->
-            val apiKey = values[0] as String?
-            val theme = values[1] as String?
-            val gcpProjectId = values[2] as String?
-            val gcpLocation = values[3] as String?
-            val geminiModelName = values[4] as String?
-            val username = values[5] as String?
-            val profilePictureUrl = values[6] as String?
-
-            // Create a temporary state object, don't overwrite prompts state
-            SettingsUiState(
-                apiKey = apiKey ?: "",
-                theme = theme ?: "System",
-                gcpProjectId = gcpProjectId ?: "",
-                gcpLocation = gcpLocation ?: "us-central1",
-                geminiModelName = geminiModelName ?: "gemini-1.0-pro",
-                username = username,
-                profilePictureUrl = profilePictureUrl
             settingsRepository.geminiModelName
         ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
             CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
@@ -86,6 +65,28 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 gcpProjectId = combined.gcpProjectId ?: "",
                 gcpLocation = combined.gcpLocation ?: "us-central1",
                 geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
+            settingsRepository.geminiModelName,
+            settingsRepository.username,
+            settingsRepository.profilePictureUrl
+        ) { values ->
+            val apiKey = values[0] as String?
+            val geminiApiKey = values[1] as String?
+            val theme = values[2] as String?
+            val gcpProjectId = values[3] as String?
+            val gcpLocation = values[4] as String?
+            val geminiModelName = values[5] as String?
+            val username = values[6] as String?
+            val profilePictureUrl = values[7] as String?
+            // Create a temporary state object, don't overwrite prompts state
+            SettingsUiState(
+                apiKey = apiKey ?: "",
+                geminiApiKey = geminiApiKey ?: "",
+                theme = theme ?: "System",
+                gcpProjectId = gcpProjectId ?: "",
+                gcpLocation = gcpLocation ?: "us-central1",
+                geminiModelName = geminiModelName ?: "gemini-1.0-pro",
+                username = username,
+                profilePictureUrl = profilePictureUrl
             )
         }.onEach { newSettingsState ->
             _uiState.update {
@@ -95,9 +96,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     theme = newSettingsState.theme,
                     gcpProjectId = newSettingsState.gcpProjectId,
                     gcpLocation = newSettingsState.gcpLocation,
-                    geminiModelName = newSettingsState.geminiModelName,
-                    username = newSettingsState.username,
-                    profilePictureUrl = newSettingsState.profilePictureUrl
+                    geminiModelName = newSettingsState.geminiModelName
                 )
             }
         }.launchIn(viewModelScope)

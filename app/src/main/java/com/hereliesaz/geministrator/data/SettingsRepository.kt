@@ -140,6 +140,9 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveProfilePictureUrl(url: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.PROFILE_PICTURE_URL] = url
+        }
+    }
+
     suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.ENABLED_ROLES] = enabledRoles

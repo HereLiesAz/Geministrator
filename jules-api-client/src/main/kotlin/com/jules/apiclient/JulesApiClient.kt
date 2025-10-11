@@ -7,9 +7,11 @@ import retrofit2.Retrofit
 
 class JulesApiClient(private val apiKey: String) {
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://jules.googleapis.com/")
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
     private val service = retrofit.create(JulesApiService::class.java)
@@ -18,14 +20,15 @@ class JulesApiClient(private val apiKey: String) {
         return service.getSources(apiKey)
     }
 
-    suspend fun createSession(prompt: String, source: Source, title: String): Session {
+    suspend fun createSession(prompt: String, source: Source, title: String, roles: String): Session {
         val request = CreateSessionRequest(
             prompt = prompt,
             sourceContext = SourceContext(
                 source = source.name,
                 githubRepoContext = GithubRepoContext(startingBranch = "main")
             ),
-            title = title
+            title = title,
+            roles = roles
         )
         return service.createSession(apiKey, request)
     }

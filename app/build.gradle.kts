@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
-    alias(libs.plugins.google.services)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -119,13 +118,9 @@ dependencies {
     // AzNavRail
     implementation(libs.aznavrail)
 
-    // Google Sign-In
-    implementation(libs.google.play.services.auth)
-    implementation(libs.kotlinx.coroutines.play.services)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Gemini API
+    implementation(libs.google.cloud.vertexai)
 }
