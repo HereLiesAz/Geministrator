@@ -23,6 +23,9 @@ build/
 
 # Geministrator
 .orchestrator/
+prompts.json
+google-services.json
+app/libnode/
 
 # Node (for VSCode plugin)
 node_modules/
