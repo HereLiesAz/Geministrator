@@ -30,3 +30,4 @@ rootProject.name = "geministrator"
 
 include(":app")
 include(":jules-api-client")
+include(":prompts")

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,6 +82,10 @@ fun SessionScreen() {
                         geminiResponse = uiState.geminiResponse,
                         onAskGemini = { viewModel.askGemini(it) }
                     )
+                    DecompositionSection(
+                        uiState = uiState,
+                        onDecompose = { viewModel.decomposeTask(it) }
+                    )
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -91,6 +96,55 @@ fun SessionScreen() {
                             ActivityItem(activity)
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DecompositionSection(
+    uiState: SessionUiState,
+    onDecompose: (String) -> Unit
+) {
+    var text by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Decompose Task", style = MaterialTheme.typography.titleLarge)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Enter a high-level task") },
+                modifier = Modifier.weight(1f),
+                maxLines = 5
+            )
+            IconButton(
+                onClick = {
+                    onDecompose(text)
+                    text = ""
+                },
+                enabled = text.isNotBlank()
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = "Decompose task"
+                )
+            }
+        }
+        if (uiState.subTasks.isNotEmpty()) {
+            Text("Sub-tasks:", style = MaterialTheme.typography.titleMedium)
+            LazyColumn(modifier = Modifier.height(200.dp)) {
+                items(uiState.subTasks) { subTask ->
+                    Text(subTask, modifier = Modifier.padding(vertical = 4.dp))
                 }
             }
         }

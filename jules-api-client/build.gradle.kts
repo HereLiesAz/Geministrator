@@ -16,7 +16,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     // Gemini API
-    implementation(libs.google.cloud.vertexai)
+    api(libs.google.cloud.vertexai)
 
     // A2A Communication
     implementation(libs.a2a.sdk.client)

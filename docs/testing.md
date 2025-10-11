@@ -4,7 +4,8 @@ This document provides instructions for running the project's tests.
 
 ## Unit Tests
 
-The project has unit tests in the `:app_android` module. To run them, use the following command from the root of the project:
+The project has unit tests in the `:app` module. To run them, use the following command from the
+root of the project:
 
 ```bash
 ./gradlew :app_android:test
