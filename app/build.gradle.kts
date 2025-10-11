@@ -25,6 +25,7 @@ android {
         ndk {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
     }
 
     buildTypes {
@@ -52,9 +53,10 @@ android {
 }
 
 chaquopy {
+    version = "3.12"
     defaultConfig {
-        pip {
-            install("gemini-ai-toolkit")
+        pyc {
+            src = true
         }
     }
 }
@@ -75,6 +77,8 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.firebase.auth.common)
+    implementation(libs.play.services.auth)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
@@ -123,4 +127,9 @@ dependencies {
 
     // Gemini API
     implementation(libs.google.cloud.vertexai)
+
+    implementation("androidx.credentials:credentials:1.6.0-beta02")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0-beta02")
+
+    // AppAuth
 }

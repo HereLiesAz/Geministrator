@@ -34,6 +34,8 @@ okhttp = "5.2.0"
 vertexai = "1.36.0"
 chaquopy = "16.1.0"
 appauth = "0.11.1"
+firebase-auth-common = "9.8.0"
+play-services-auth = "21.4.0"
 
 [libraries]
 # Core & Lifecycle
@@ -108,6 +110,8 @@ mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-common", version.ref = "firebase-auth-common" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

@@ -121,6 +121,9 @@ class SessionViewModel(
             _uiState.update { it.copy(geminiResponse = result) }
         } catch (e: Exception) {
             _uiState.update { it.copy(error = "Python integration failed: ${e.message}") }
+        }
+    }
+
     fun decomposeTask(task: String) {
         val client = geminiApiClient ?: return
         viewModelScope.launch {

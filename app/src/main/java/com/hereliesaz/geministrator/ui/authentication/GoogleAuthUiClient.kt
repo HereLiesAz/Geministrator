@@ -39,11 +39,11 @@ class GoogleAuthUiClient(
         return try {
             val user = auth.signInWithCredential(googleCredentials).await().user
             SignInResult(
-                data = user?.run {
+                data = user?.let {
                     UserData(
-                        userId = uid,
-                        username = displayName,
-                        profilePictureUrl = photoUrl?.toString()
+                        userId = it.uid,
+                        username = it.displayName,
+                        profilePictureUrl = it.photoUrl?.toString()
                     )
                 },
                 errorMessage = null
