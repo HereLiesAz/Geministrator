@@ -23,14 +23,17 @@ fun GeministratorNavHost(
     ) {
         composable("source_selection") {
             SourceSelectionScreen(
-                onSessionCreated = { sessionId ->
-                    navController.navigate("session/$sessionId")
+                onSessionCreated = { sessionId, roles ->
+                    navController.navigate("session/$sessionId?roles=$roles")
                 }
             )
         }
         composable(
-            route = "session/{sessionId}",
-            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+            route = "session/{sessionId}?roles={roles}",
+            arguments = listOf(
+                navArgument("sessionId") { type = NavType.StringType },
+                navArgument("roles") { type = NavType.StringType; nullable = true }
+            )
         ) {
             SessionScreen()
         }
