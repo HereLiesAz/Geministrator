@@ -34,7 +34,9 @@ class SettingsRepository(private val context: Context) {
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
         val USER_ID = stringPreferencesKey("user_id")
         val USERNAME = stringPreferencesKey("username")
+        val GITHUB_USERNAME = stringPreferencesKey("github_username")
         val PROFILE_PICTURE_URL = stringPreferencesKey("profile_picture_url")
+        val GITHUB_ACCESS_TOKEN = stringPreferencesKey("github_access_token")
         val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
 
@@ -82,10 +84,19 @@ class SettingsRepository(private val context: Context) {
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.USERNAME]
         }
+    val githubUsername: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GITHUB_USERNAME]
+        }
 
     val profilePictureUrl: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
             preferences[PreferenceKeys.PROFILE_PICTURE_URL]
+        }
+
+    val githubAccessToken: Flow<String?>
+        get() = context.dataStore.data.map { preferences ->
+            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN]
         }
 
 
@@ -137,9 +148,21 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
+    suspend fun saveGithubUsername(username: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GITHUB_USERNAME] = username
+        }
+    }
+
     suspend fun saveProfilePictureUrl(url: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.PROFILE_PICTURE_URL] = url
+        }
+    }
+
+    suspend fun saveGithubAccessToken(accessToken: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.GITHUB_ACCESS_TOKEN] = accessToken
         }
     }
 

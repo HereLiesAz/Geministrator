@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.hereliesaz.geministrator.ui.authentication
 
 import android.content.Context
@@ -5,9 +7,11 @@ import android.content.Intent
 import android.content.IntentSender
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.firebase.auth.GoogleAuthCredential
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.*
 import com.hereliesaz.geministrator.R
+import kotlinx.coroutines.android.HandlerDispatcher
 import java.util.concurrent.CancellationException
 
 class GoogleAuthUiClient(
@@ -15,7 +19,7 @@ class GoogleAuthUiClient(
     private val oneTapClient: SignInClient
 ) {
 
-    private val auth = Firebase.auth
+    private val auth = GoogleAuthCredential.getInstance()
 
     suspend fun signIn(): IntentSender? {
         val result = try {
@@ -43,8 +47,7 @@ class GoogleAuthUiClient(
                         username = it.displayName,
                         profilePictureUrl = it.photoUrl?.toString()
                     )
-                },
-                errorMessage = null
+                }
             )
         } catch (e: Exception) {
             e.printStackTrace()

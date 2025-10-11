@@ -17,6 +17,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
+sealed class UiEvent {
+    data object ShowSaveConfirmation : UiEvent()
+    data object NavigateToLogin : UiEvent()
+}
+
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
@@ -36,35 +41,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         loadSettings()
-        loadPrompts()
     }
 
     private fun loadSettings() {
-        // Helper data class for type-safe combination of 5 flows
-        data class CombinedSettings(
-            val apiKey: String?,
-            val theme: String?,
-            val gcpProjectId: String?,
-            val gcpLocation: String?,
-            val geminiModelName: String?
-        )
-
         combine(
             settingsRepository.apiKey,
+            settingsRepository.geminiApiKey,
             settingsRepository.theme,
             settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
-            settingsRepository.geminiModelName
-        ) { apiKey, theme, gcpProjectId, gcpLocation, geminiModelName ->
-            CombinedSettings(apiKey, theme, gcpProjectId, gcpLocation, geminiModelName)
-        }.combine(settingsRepository.geminiApiKey) { combined, geminiApiKey ->
-            SettingsUiState(
-                apiKey = combined.apiKey ?: "",
-                geminiApiKey = geminiApiKey ?: "",
-                theme = combined.theme ?: "System",
-                gcpProjectId = combined.gcpProjectId ?: "",
-                gcpLocation = combined.gcpLocation ?: "us-central1",
-                geminiModelName = combined.geminiModelName ?: "gemini-1.0-pro"
             settingsRepository.geminiModelName,
             settingsRepository.username,
             settingsRepository.profilePictureUrl
@@ -96,7 +81,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     theme = newSettingsState.theme,
                     gcpProjectId = newSettingsState.gcpProjectId,
                     gcpLocation = newSettingsState.gcpLocation,
-                    geminiModelName = newSettingsState.geminiModelName
+                    geminiModelName = newSettingsState.geminiModelName,
+                    username = newSettingsState.username,
+                    profilePictureUrl = newSettingsState.profilePictureUrl
                 )
             }
         }.launchIn(viewModelScope)
@@ -169,11 +156,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    sealed class UiEvent {
-        data object ShowSaveConfirmation : UiEvent()
-        data object NavigateToLogin : UiEvent()
-    }
-
     fun logout() {
         viewModelScope.launch {
             googleAuthUiClient.signOut()
@@ -196,4 +178,4 @@ data class SettingsUiState(
     val promptsDirty: Boolean = false,
     val username: String? = null,
     val profilePictureUrl: String? = null
-)}
+)
