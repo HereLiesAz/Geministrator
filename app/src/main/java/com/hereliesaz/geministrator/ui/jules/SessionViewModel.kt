@@ -109,21 +109,6 @@ class SessionViewModel(
         }
     }
 
-    private fun testPythonIntegration(apiKey: String?) {
-        if (apiKey.isNullOrBlank()) {
-            _uiState.update { it.copy(error = "API Key not found for Python test.") }
-            return
-        }
-        try {
-            val py = Python.getInstance()
-            val module = py.getModule("main")
-            val result = module.callAttr("initialize_and_generate", apiKey, "Tell me a fun fact about the Roman Empire.").toString()
-            _uiState.update { it.copy(geminiResponse = result) }
-        } catch (e: Exception) {
-            _uiState.update { it.copy(error = "Python integration failed: ${e.message}") }
-        }
-    }
-
     fun decomposeTask(task: String) {
         val client = geminiApiClient ?: return
         viewModelScope.launch {

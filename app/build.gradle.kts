@@ -126,10 +126,4 @@ dependencies {
 
     // Gemini API
     implementation(libs.google.cloud.vertexai)
-
-    implementation("androidx.credentials:credentials:1.6.0-beta02")
-    implementation("androidx.credentials:credentials-play-services-auth:1.6.0-beta02")
-    implementation("net.openid:appauth:0.11.1")
-
-    // AppAuth
 }
