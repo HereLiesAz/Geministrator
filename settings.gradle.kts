@@ -7,6 +7,7 @@
     }
     plugins {
         id("com.chaquo.python")
+        id("org.jetbrains.kotlin.serialization")
     }
 }
 
@@ -26,7 +27,7 @@ dependencyResolutionManagement {
 }
 
 
-rootProject.name = "geministrator"
+rootProject.name = "Geministrator"
 
 include(":app")
 include(":jules-api-client")
