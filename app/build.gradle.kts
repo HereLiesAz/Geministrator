@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
-    alias(libs.plugins.google.services)
+    id("com.google.gms.google-services")
 }
 
 
@@ -40,6 +40,7 @@ android {
 
         buildConfigField("String", "GITHUB_CLIENT_ID", localProperties.getProperty("github.clientId"))
         buildConfigField("String", "GITHUB_CLIENT_SECRET", localProperties.getProperty("github.clientSecret"))
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", localProperties.getProperty("google.webClientId"))
     }
 
     buildFeatures {
@@ -94,10 +95,13 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.firebase.auth.ktx)
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation(libs.play.services.auth)
     implementation(libs.play.services.tasks)
-    implementation(libs.appauth)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
