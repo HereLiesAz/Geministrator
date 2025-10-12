@@ -9,6 +9,7 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import android.util.Log
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -53,15 +54,68 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
         val client = geminiApiClient ?: return
         val editor = _uiState.value.editor ?: return
         val content = editor.text.toString()
+        val fileType = _uiState.value.currentFile?.substringAfterLast(".") ?: "unknown"
+
+        val prompt = when (fileType) {
+            "kt" -> "Complete the following Kotlin code:\n\n$content"
+            "java" -> "Complete the following Java code:\n\n$content"
+            "py" -> "Complete the following Python code:\n\n$content"
+            else -> "Complete the following code:\n\n$content"
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val response = client.generateContent("Complete the following code:\n\n$content")
+                val response = client.generateContent(prompt)
                 val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
-                editor.insertText(suggestion, suggestion.length)
+
+                if (suggestion.isNotBlank()) {
+                    val cursorPos = editor.cursor.left
+                    val text = editor.text
+                    val commonPrefix = suggestion.commonPrefixWith(text.substring(cursorPos))
+                    val insertionText = suggestion.substring(commonPrefix.length)
+
+                    editor.insertText(insertionText, insertionText.length)
+                }
+
             } catch (e: Exception) {
-                // TODO: Handle error
+                Log.e("IdeViewModel", "Error generating autocomplete", e)
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun onGenerateDocsClick() {
+        val client = geminiApiClient ?: return
+        val editor = _uiState.value.editor ?: return
+        val content = editor.text.toString()
+        val cursorPos = editor.cursor.left
+
+        val textBeforeCursor = content.substring(0, cursorPos)
+        val startOfFunction = textBeforeCursor.lastIndexOf("fun ")
+
+        if (startOfFunction == -1) return
+
+        val endOfFunction = content.indexOf("{", startOfFunction)
+        if (endOfFunction == -1) return
+
+        val functionSignature = content.substring(startOfFunction, endOfFunction)
+
+        val prompt = "Generate KDoc documentation for the following Kotlin function:\n\n$functionSignature"
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val response = client.generateContent(prompt)
+                val documentation = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+
+                if (documentation.isNotBlank()) {
+                    editor.text.insert(startOfFunction, "$documentation\n")
+                }
+
+            } catch (e: Exception) {
+                Log.e("IdeViewModel", "Error generating documentation", e)
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
