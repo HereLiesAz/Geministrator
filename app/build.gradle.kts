@@ -1,15 +1,16 @@
+import java.util.Properties
+import java.io.FileInputStream
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.google.services)
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
+    alias(libs.plugins.googleServices)
 }
 
-import java.util.Properties
-import java.io.FileInputStream
+
 
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")

@@ -7,7 +7,6 @@
     }
     plugins {
         id("com.chaquo.python")
-        id("org.jetbrains.kotlin.serialization")
     }
 }
 
