@@ -9,6 +9,8 @@ import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class TerminalViewModel(application: Application) : AndroidViewModel(application) {
@@ -17,8 +19,8 @@ class TerminalViewModel(application: Application) : AndroidViewModel(application
     private var julesApiClient: JulesApiClient? = null
     private var geminiApiClient: GeminiApiClient? = null
 
-    private val _output = MutableStateFlow("Welcome to the Terminal!")
-    val output: StateFlow<String> = _output
+    private val _uiState = MutableStateFlow(TerminalUiState())
+    val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -40,10 +42,10 @@ class TerminalViewModel(application: Application) : AndroidViewModel(application
 
     fun processInput(input: String) {
         val parsedCommand = parseCommand(input)
-        _output.value += "\n> $input"
+        _uiState.update { it.copy(output = it.output + "\n> " + input, isLoading = true) }
         viewModelScope.launch {
             val result = executeCommand(parsedCommand)
-            _output.value += "\n$result"
+            _uiState.update { it.copy(output = it.output + "\n" + result, isLoading = false) }
         }
     }
 

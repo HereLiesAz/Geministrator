@@ -40,9 +40,15 @@ import com.jules.apiclient.ToolOutputActivity
 import com.jules.apiclient.UserMessageActivity
 
 @Composable
-fun SessionScreen() {
+fun SessionScreen(
+    setLoading: (Boolean) -> Unit
+) {
     val viewModel: SessionViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.isLoading) {
+        setLoading(uiState.isLoading)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadActivities()
