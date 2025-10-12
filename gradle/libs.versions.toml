@@ -36,6 +36,8 @@ chaquopy = "16.1.0"
 appauth = "0.11.1"
 firebase-auth-common = "9.8.0"
 play-services-auth = "21.4.0"
+firebase-auth-ktx = "23.0.0"
+play-services-tasks = "18.2.0"
 
 [libraries]
 # Core & Lifecycle
@@ -112,6 +114,8 @@ androidx-documentfile = { group = "androidx.documentfile", name = "documentfile"
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-common", version.ref = "firebase-auth-common" }
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
+play-services-tasks = { group = "com.google.android.gms", name = "play-services-tasks", version.ref = "play-services-tasks" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
