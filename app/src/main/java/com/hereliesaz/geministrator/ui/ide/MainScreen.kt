@@ -1,29 +1,57 @@
 package com.hereliesaz.geministrator.ui.ide
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
-import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.widget.CodeEditor
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController()
+fun IdeScreen(
+    setLoading: (Boolean) -> Unit,
+    viewModel: IdeViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
-    Row(modifier = Modifier.fillMaxSize()) {
-        GeministratorNavRail(
-            onNavigate = { destination ->
-                navController.navigate(destination) {
-                    launchSingleTop = true
-                    restoreState = true
+    LaunchedEffect(uiState.isLoading) {
+        setLoading(uiState.isLoading)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        AndroidView(
+            modifier = Modifier.weight(1f),
+            factory = { context ->
+                CodeEditor(context).apply {
+                    viewModel.onEditorAttached(this)
+                    subscribeEvent(ContentChangeEvent::class.java) { _, _ ->
+                        viewModel.onContentChanged(text.toString())
+                    }
+                }
+            },
+            update = { editor ->
+                if (editor.text.toString() != uiState.fileContent) {
+                    editor.setText(uiState.fileContent)
                 }
             }
         )
-        GeministratorNavHost(
-            navController = navController,
-            modifier = Modifier.weight(1f)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = { viewModel.onAutocompleteClick() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Autocomplete")
+        }
     }
 }
