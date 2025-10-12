@@ -7,28 +7,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
-    alias(libs.plugins.googleServices)
+    alias(libs.plugins.google.services)
 }
 
 
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(FileInputStream(localPropertiesFile))
-}
-
-import java.util.Properties
-import java.io.FileInputStream
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(FileInputStream(localPropertiesFile))
-}
-
-import java.util.Properties
-import java.io.FileInputStream
 
 val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
