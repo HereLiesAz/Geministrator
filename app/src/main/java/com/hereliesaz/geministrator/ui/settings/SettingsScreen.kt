@@ -22,6 +22,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,10 +34,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    setLoading: (Boolean) -> Unit,
     onLogout: () -> Unit,
     onNavigateToRoles: () -> Unit
 ) {
@@ -40,6 +47,31 @@ fun SettingsScreen(
     val themeOptions = listOf("Light", "Dark", "System")
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val googleAuthUiClient = remember {
+        com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient(
+            context = context,
+            oneTapClient = com.google.android.gms.auth.api.identity.Identity.getSignInClient(context)
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    settingsViewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
+
+    LaunchedEffect(uiState.isLoading) {
+        setLoading(uiState.isLoading)
+    }
 
     LaunchedEffect(key1 = Unit) {
         settingsViewModel.events.collectLatest { event ->
@@ -52,6 +84,9 @@ fun SettingsScreen(
                 }
                 is UiEvent.NavigateToLogin -> {
                     onLogout()
+                }
+                is UiEvent.LaunchIntentSender -> {
+                    launcher.launch(IntentSenderRequest.Builder(event.intentSender).build())
                 }
             }
         }
@@ -139,6 +174,29 @@ fun SettingsScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (uiState.username == null) {
+                Button(
+                    onClick = { settingsViewModel.onSignInWithGoogleClick() },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Sign in with Google")
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Signed in as: ${uiState.username}")
+                    Button(onClick = { settingsViewModel.logout() }) {
+                        Text("Sign out")
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("Theme", style = MaterialTheme.typography.titleLarge)
@@ -179,8 +237,7 @@ fun SettingsScreen(
             Button(
                 onClick = { settingsViewModel.saveSettings() },
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = uiState.apiKey.isNotBlank()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Settings")
             }

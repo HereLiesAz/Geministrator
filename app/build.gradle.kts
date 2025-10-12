@@ -8,6 +8,15 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.hereliesaz.geministrator"
     compileSdk = 36
@@ -27,6 +36,13 @@ android {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
+
+        buildConfigField("String", "GITHUB_CLIENT_ID", localProperties.getProperty("github.clientId"))
+        buildConfigField("String", "GITHUB_CLIENT_SECRET", localProperties.getProperty("github.clientSecret"))
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

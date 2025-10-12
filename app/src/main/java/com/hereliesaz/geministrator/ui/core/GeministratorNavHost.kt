@@ -11,12 +11,13 @@ import com.hereliesaz.geministrator.ui.authentication.LoginScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
-import com.hereliesaz.geministrator.ui.terminal.TerminalScreen
+import com.hereliesaz.geministrator.ui.terminal.CmdScreen
 
 @Composable
 fun GeministratorNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    setLoading: (Boolean) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -47,13 +48,14 @@ fun GeministratorNavHost(
                 navArgument("roles") { type = NavType.StringType; nullable = true }
             )
         ) {
-            SessionScreen()
+            SessionScreen(setLoading = setLoading)
         }
         composable("ide") {
             com.hereliesaz.geministrator.ui.ide.IdeScreen()
         }
         composable("settings") {
             SettingsScreen(
+                setLoading = setLoading,
                 onLogout = {
                     navController.navigate("login") {
                         popUpTo(0)
@@ -68,8 +70,8 @@ fun GeministratorNavHost(
         composable("roles-settings") {
             com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
         }
-        composable("terminal") {
-            TerminalScreen()
+        composable("cmd") {
+            CmdScreen(setLoading = setLoading)
         }
     }
 }

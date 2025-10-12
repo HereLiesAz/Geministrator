@@ -9,11 +9,13 @@ import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
 
 @Composable
-fun MainScreen() {
+fun IdeScreen() {
+    // TODO: Implement a real ViewModel for this screen
     val navController = rememberNavController()
 
     Row(modifier = Modifier.fillMaxSize()) {
         GeministratorNavRail(
+            isLoading = false, // TODO: Replace with actual loading state from ViewModel
             onNavigate = { destination ->
                 navController.navigate(destination) {
                     launchSingleTop = true
@@ -23,7 +25,8 @@ fun MainScreen() {
         )
         GeministratorNavHost(
             navController = navController,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            setLoading = {} // TODO: Replace with actual setLoading from ViewModel
         )
     }
 }

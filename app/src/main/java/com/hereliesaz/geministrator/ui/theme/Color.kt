@@ -18,11 +18,11 @@ val ExpressiveSurfaceVariantLight = Color(0xFFE8EAF6) // Light Indigo tint
 
 // M3 Expressive Palette - Dark
 val ExpressivePrimaryDark = Color(0xFF7986CB)       // Lighter Indigo
-val ExpressiveOnPrimaryDark = Color(0xFF000000)
+val ExpressiveOnPrimaryDark = Color(0xFFFFFFFF)
 val ExpressiveSecondaryDark = Color(0xFF4DB6AC)      // Lighter Teal
-val ExpressiveOnSecondaryDark = Color(0xFF000000)
+val ExpressiveOnSecondaryDark = Color(0xFFFFFFFF)
 val ExpressiveTertiaryDark = Color(0xFFFFD54F)      // Lighter Amber
-val ExpressiveOnTertiaryDark = Color(0xFF000000)
+val ExpressiveOnTertiaryDark = Color(0xFFFFFFFF)
 val ExpressiveErrorDark = Color(0xFFCF6679)
 val ExpressiveBackgroundDark = Color(0xFF121212)
 val ExpressiveOnBackgroundDark = Color(0xFFE2E2E6)
