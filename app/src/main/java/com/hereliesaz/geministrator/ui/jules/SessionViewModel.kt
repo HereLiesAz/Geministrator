@@ -42,7 +42,7 @@ class SessionViewModel(
     init {
         viewModelScope.launch {
             val apiKey = settingsRepository.apiKey.first()
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
+            val githubRepository = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
@@ -50,14 +50,14 @@ class SessionViewModel(
                 _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
                 return@launch
             }
-            if (gcpProjectId.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
+            if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
                 return@launch
             }
 
             julesApiClient = JulesApiClient(apiKey)
             geminiApiClient = GeminiApiClient(
-                projectId = gcpProjectId,
+                projectId = githubRepository,
                 location = gcpLocation,
                 modelName = geminiModelName
             )

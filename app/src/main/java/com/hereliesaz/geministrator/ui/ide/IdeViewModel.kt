@@ -27,12 +27,12 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
+            val githubRepository = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
-            if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
+            if (!githubRepository.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
+                geminiApiClient = GeminiApiClient(githubRepository, gcpLocation, geminiModelName)
             }
         }
     }

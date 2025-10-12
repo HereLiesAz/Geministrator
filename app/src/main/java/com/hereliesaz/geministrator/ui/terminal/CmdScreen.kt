@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,10 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hereliesaz.aznavrail.AzButton
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 
 @Composable
 fun CmdScreen(
@@ -32,29 +32,36 @@ fun CmdScreen(
         setLoading(uiState.isLoading)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = uiState.output,
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    viewModel.processInput(input)
+                    input = ""
+                }
+            ) {
+                Text("Submit")
+            }
+        }
+    ) { padding ->
+        Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        )
-        BasicTextField(
-            value = input,
-            onValueChange = { input = it },
-            modifier = Modifier.fillMaxWidth()
-        )
-        AzButton(
-            onClick = {
-                viewModel.processInput(input)
-                input = ""
-            },
-            modifier = Modifier.fillMaxWidth(),
-            text = "Submit"
-        )
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = uiState.output,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+            BasicTextField(
+                value = input,
+                onValueChange = { input = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }

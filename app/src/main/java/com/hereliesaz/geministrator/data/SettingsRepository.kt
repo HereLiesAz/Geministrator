@@ -29,7 +29,7 @@ class SettingsRepository(private val context: Context) {
         val API_KEY = stringPreferencesKey("api_key")
         val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
         val THEME = stringPreferencesKey("theme")
-        val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
+        val GITHUB_REPOSITORY = stringPreferencesKey("github_repository")
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
         val USER_ID = stringPreferencesKey("user_id")
@@ -60,9 +60,9 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferenceKeys.THEME]
         }
 
-    val gcpProjectId: Flow<String?>
+    val githubRepository: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
-            preferences[PreferenceKeys.GCP_PROJECT_ID]
+            preferences[PreferenceKeys.GITHUB_REPOSITORY]
         }
 
     val gcpLocation: Flow<String?>
@@ -118,9 +118,9 @@ class SettingsRepository(private val context: Context) {
         }
     }
 
-    suspend fun saveGcpProjectId(projectId: String) {
+    suspend fun saveGithubRepository(repository: String) {
         context.dataStore.edit { preferences ->
-            preferences[PreferenceKeys.GCP_PROJECT_ID] = projectId
+            preferences[PreferenceKeys.GITHUB_REPOSITORY] = repository
         }
     }
 
