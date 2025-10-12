@@ -97,6 +97,10 @@ class SessionViewModel(
     fun askGemini(prompt: String) {
         val communicator = a2aCommunicator ?: return
         viewModelScope.launch {
+            if (!roles.contains("researcher")) {
+                _uiState.update { it.copy(error = "The 'researcher' role is not enabled for this session.") }
+                return@launch
+            }
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = communicator.julesToGemini(prompt)
