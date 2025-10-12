@@ -7,11 +7,10 @@ import android.content.Intent
 import android.content.IntentSender
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.auth.oauth2.GoogleCredentials
-import com.google.firebase.auth.GoogleAuthCredential
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.hereliesaz.geministrator.R
-import kotlinx.coroutines.android.HandlerDispatcher
+import kotlinx.coroutines.tasks.await
 import java.util.concurrent.CancellationException
 
 class GoogleAuthUiClient(
@@ -19,7 +18,7 @@ class GoogleAuthUiClient(
     private val oneTapClient: SignInClient
 ) {
 
-    private val auth = GoogleAuthCredential.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     suspend fun signIn(): IntentSender? {
         val result = try {
@@ -47,7 +46,8 @@ class GoogleAuthUiClient(
                         username = it.displayName,
                         profilePictureUrl = it.photoUrl?.toString()
                     )
-                }
+                },
+                errorMessage = null
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -74,8 +74,8 @@ class GoogleAuthUiClient(
 
     suspend fun signOut() {
         try {
-            auth.signOut()
             oneTapClient.signOut().await()
+            auth.signOut()
         } catch (e: Exception) {
             e.printStackTrace()
             if (e is CancellationException) throw e
