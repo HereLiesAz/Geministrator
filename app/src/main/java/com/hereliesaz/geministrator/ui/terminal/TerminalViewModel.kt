@@ -26,7 +26,7 @@ class TerminalViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val apiKey = settingsRepository.apiKey.first()
             val geminiApiKey = settingsRepository.geminiApiKey.first()
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
+            val githubRepository = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
@@ -34,8 +34,8 @@ class TerminalViewModel(application: Application) : AndroidViewModel(application
                 julesApiClient = JulesApiClient(apiKey)
             }
 
-            if (!geminiApiKey.isNullOrBlank() && !gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
+            if (!geminiApiKey.isNullOrBlank() && !githubRepository.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
+                geminiApiClient = GeminiApiClient(githubRepository, gcpLocation, geminiModelName)
             }
         }
     }

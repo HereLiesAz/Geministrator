@@ -28,17 +28,17 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         viewModelScope.launch {
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
+            val githubRepository = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
-            if (gcpProjectId.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
+            if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
                 _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
                 return@launch
             }
 
             geminiApiClient = GeminiApiClient(
-                projectId = gcpProjectId,
+                projectId = githubRepository,
                 location = gcpLocation,
                 modelName = geminiModelName
             )
