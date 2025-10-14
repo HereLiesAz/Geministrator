@@ -111,7 +111,9 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
                 val documentation = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
 
                 if (documentation.isNotBlank()) {
-                    editor.text.insert(startOfFunction, "$documentation\n")
+                    val insertionText = "$documentation\n"
+                    editor.setSelection(startOfFunction, startOfFunction)
+                    editor.insertText(insertionText, insertionText.length)
                 }
 
             } catch (e: Exception) {
