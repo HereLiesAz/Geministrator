@@ -1,11 +1,17 @@
 package com.hereliesaz.geministrator.ui.settings
 
 import android.app.Application
+import android.app.Activity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.identity.Identity
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.OAuthProvider
+import com.hereliesaz.geministrator.BuildConfig
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +26,7 @@ import java.io.File
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
-
-    private val googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
-            context = application.applicationContext,
-            oneTapClient = Identity.getSignInClient(application.applicationContext)
-        )
-    }
+    private val firebaseAuth = FirebaseAuth.getInstance()
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -36,6 +36,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     init {
         loadSettings()
+        checkCurrentUser()
+    }
+
+    private fun checkCurrentUser() {
+        val user = firebaseAuth.currentUser
+        _uiState.update { it.copy(username = user?.displayName, profilePictureUrl = user?.photoUrl?.toString()) }
     }
 
     private fun loadSettings() {
@@ -44,15 +50,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.geminiApiKey,
             settingsRepository.theme,
             settingsRepository.gcpLocation,
-            settingsRepository.geminiModelName,
-            settingsRepository.username,
-            settingsRepository.profilePictureUrl
+            settingsRepository.geminiModelName
         ) { values ->
             val apiKey = values[0] as String?
             val geminiApiKey = values[1] as String?
             val theme = values[2] as String?
+            val gcpProjectId = values[3] as String?
+            val geminiModelName = values[5] as String?
             val gcpLocation = values[3] as String?
-            val geminiModelName = values[4] as String?
             val username = values[5] as String?
             val profilePictureUrl = values[6] as String?
             // Create a temporary state object, don't overwrite prompts state
@@ -61,9 +66,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 geminiApiKey = geminiApiKey ?: "",
                 theme = theme ?: "System",
                 gcpLocation = gcpLocation ?: "us-central1",
-                geminiModelName = geminiModelName ?: "gemini-1.0-pro",
-                username = username,
-                profilePictureUrl = profilePictureUrl
+                geminiModelName = geminiModelName ?: "gemini-1.0-pro"
             )
         }.onEach { newSettingsState ->
             _uiState.update {
@@ -72,9 +75,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     geminiApiKey = newSettingsState.geminiApiKey,
                     theme = newSettingsState.theme,
                     gcpLocation = newSettingsState.gcpLocation,
-                    geminiModelName = newSettingsState.geminiModelName,
-                    username = newSettingsState.username,
-                    profilePictureUrl = newSettingsState.profilePictureUrl
+                    geminiModelName = newSettingsState.geminiModelName
                 )
             }
         }.launchIn(viewModelScope)
@@ -185,20 +186,63 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun onSignInWithGoogleClick() {
+    fun signInWithGitHub(activity: Activity) {
+        val provider = OAuthProvider.newBuilder("github.com")
+            .addCustomParameter("login", uiState.value.username ?: "")
+            .setScopes(listOf("repo", "user"))
+            .build()
+
+        firebaseAuth
+            .startActivityForSignInWithProvider(activity, provider)
+            .addOnSuccessListener {
+                checkCurrentUser()
+            }
+            .addOnFailureListener {
+                // Handle failure.
+            }
+    }
+
+    fun signInWithGoogle(activity: Activity) {
         viewModelScope.launch {
-            val signInIntentSender = googleAuthUiClient.signIn()
-            if (signInIntentSender != null) {
-                _events.emit(UiEvent.LaunchIntentSender(signInIntentSender))
+            val credentialManager = CredentialManager.create(activity)
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                .setFilterByAuthorizedAccounts(false)
+                .build()
+
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+
+            try {
+                val result = credentialManager.getCredential(activity, request)
+                handleGoogleSignIn(result.credential)
+            } catch (e: Exception) {
+                // Handle failure.
             }
         }
     }
 
-    fun onSignInResult(result: com.hereliesaz.geministrator.ui.authentication.SignInResult) {
-        _uiState.update { it.copy(
-            username = result.data?.username,
-            profilePictureUrl = result.data?.profilePictureUrl
-        ) }
+    fun handleGoogleSignIn(credential: androidx.credentials.Credential) {
+        val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
+        firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        firebaseAuth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    checkCurrentUser()
+                } else {
+                    // Handle failure.
+                }
+            }
+    }
+
+    fun signOut() {
+        firebaseAuth.signOut()
+        _uiState.update { it.copy(username = null, profilePictureUrl = null) }
     }
 }
 
