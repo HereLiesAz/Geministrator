@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.FirebaseApp
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.core.MainViewModel
@@ -28,7 +27,6 @@ class MainActivity : ComponentActivity() {
     private lateinit var settingsRepository: SettingsRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        FirebaseApp.initializeApp(this)
         settingsRepository = SettingsRepository(this)
         TextMateLoader.load(this)
         enableEdgeToEdge()
