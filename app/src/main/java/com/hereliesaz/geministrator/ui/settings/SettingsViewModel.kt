@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.FirebaseApp
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val events = _events.asSharedFlow()
 
     init {
+        FirebaseApp.initializeApp(application)
         loadSettings()
     }
 
