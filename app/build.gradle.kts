@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.chaquopy)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.services)
 }
 
 import java.util.Properties
@@ -147,5 +148,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Gemini API
-    implementation(libs.google.cloud.vertexai)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.vertexai)
 }

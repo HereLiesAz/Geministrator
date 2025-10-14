@@ -59,7 +59,7 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
-                val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+                val suggestion = response.text ?: ""
                 editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
                 Log.e("IdeViewModel", "Error generating autocomplete", e)
@@ -86,7 +86,7 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent(prompt)
-                val documentation = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+                val documentation = response.text ?: ""
 
                 if (documentation.isNotBlank()) {
                     val insertionText = "$documentation\n"

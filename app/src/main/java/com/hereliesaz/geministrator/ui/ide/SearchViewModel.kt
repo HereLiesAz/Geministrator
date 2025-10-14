@@ -60,7 +60,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 // This is a placeholder for the actual search logic.
                 // We will need to find a way to provide the codebase as context to the Gemini API.
                 val response = client.generateContent("Find code related to: $query in the project.")
-                val textResponse = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+                val textResponse = response.text ?: ""
                 _uiState.update { it.copy(searchResults = listOf(textResponse), isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

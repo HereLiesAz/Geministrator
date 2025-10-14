@@ -123,7 +123,7 @@ class SessionViewModel(
             try {
                 val prompt = "Decompose the following high-level task into a list of smaller, manageable sub-tasks:\n\n$task"
                 val response = client.generateContent(prompt)
-                val subTasks = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response).split("\n").filter { it.isNotBlank() }
+                val subTasks = (response.text ?: "").split("\n").filter { it.isNotBlank() }
                 _uiState.update { it.copy(subTasks = subTasks, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
