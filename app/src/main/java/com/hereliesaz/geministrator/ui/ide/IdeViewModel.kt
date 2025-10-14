@@ -9,7 +9,6 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import android.util.Log
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -28,12 +27,12 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            val githubRepository = settingsRepository.githubRepository.first()
+            val gcpProjectId = settingsRepository.gcpProjectId.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
-            if (!githubRepository.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(githubRepository, gcpLocation, geminiModelName)
+            if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
+                geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
             }
         }
     }
@@ -54,32 +53,15 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
         val client = geminiApiClient ?: return
         val editor = _uiState.value.editor ?: return
         val content = editor.text.toString()
-        val fileType = _uiState.value.currentFile?.substringAfterLast(".") ?: "unknown"
-
-        val prompt = when (fileType) {
-            "kt" -> "Complete the following Kotlin code:\n\n$content"
-            "java" -> "Complete the following Java code:\n\n$content"
-            "py" -> "Complete the following Python code:\n\n$content"
-            else -> "Complete the following code:\n\n$content"
-        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val response = client.generateContent(prompt)
+                val response = client.generateContent("Complete the following code:\n\n$content")
                 val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
-
-                if (suggestion.isNotBlank()) {
-                    val cursorPos = editor.cursor.left
-                    val text = editor.text
-                    val commonPrefix = suggestion.commonPrefixWith(text.substring(cursorPos))
-                    val insertionText = suggestion.substring(commonPrefix.length)
-
-                    editor.insertText(insertionText, insertionText.length)
-                }
-
+                editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
-                Log.e("IdeViewModel", "Error generating autocomplete", e)
+                // TODO: Handle error
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -90,34 +72,15 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
         val client = geminiApiClient ?: return
         val editor = _uiState.value.editor ?: return
         val content = editor.text.toString()
-        val cursorPos = editor.cursor.left
-
-        val textBeforeCursor = content.substring(0, cursorPos)
-        val startOfFunction = textBeforeCursor.lastIndexOf("fun ")
-
-        if (startOfFunction == -1) return
-
-        val endOfFunction = content.indexOf("{", startOfFunction)
-        if (endOfFunction == -1) return
-
-        val functionSignature = content.substring(startOfFunction, endOfFunction)
-
-        val prompt = "Generate KDoc documentation for the following Kotlin function:\n\n$functionSignature"
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val response = client.generateContent(prompt)
-                val documentation = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
-
-                if (documentation.isNotBlank()) {
-                    val insertionText = "$documentation\n"
-                    editor.setSelection(startOfFunction, startOfFunction)
-                    editor.insertText(insertionText, insertionText.length)
-                }
-
+                val response = client.generateContent("Generate documentation for the following code:\n\n$content")
+                val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+                editor.insertText(suggestion, 0)
             } catch (e: Exception) {
-                Log.e("IdeViewModel", "Error generating documentation", e)
+                // TODO: Handle error
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }

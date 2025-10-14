@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.ui.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
