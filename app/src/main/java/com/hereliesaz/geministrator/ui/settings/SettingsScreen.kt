@@ -53,7 +53,7 @@ fun SettingsScreen(
         settingsViewModel.events.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSaveConfirmation -> {
-                    snackbarHostState.showSnackbar(event.message)
+                    snackbarHostState.showSnackbar(UiEvent.ShowSaveConfirmation.message)
                 }
                 is UiEvent.LaunchUrl -> {
                     context.startActivity(event.intent)
@@ -99,14 +99,6 @@ fun SettingsScreen(
 
             Text("Gemini Settings", style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(
-                value = uiState.gcpProjectId,
-                onValueChange = { settingsViewModel.onGcpProjectIdChange(it) },
-                label = { Text("GCP Project ID") },
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-            OutlinedTextField(
                 value = uiState.gcpLocation,
                 onValueChange = { settingsViewModel.onGcpLocationChange(it) },
                 label = { Text("GCP Location") },
@@ -125,29 +117,6 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (uiState.username == null) {
-                Button(
-                    onClick = { settingsViewModel.onSignInWithGoogleClick() },
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Sign in with Google")
-                }
-            } else {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Signed in as: ${uiState.username}")
-                    Button(onClick = { settingsViewModel.logout() }) {
-                        Text("Sign out")
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -221,7 +190,8 @@ fun SettingsScreen(
             Button(
                 onClick = { settingsViewModel.saveSettings() },
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = uiState.apiKey.isNotBlank()
             ) {
                 Text("Save Settings")
             }

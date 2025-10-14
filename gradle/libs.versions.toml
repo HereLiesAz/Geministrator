@@ -38,7 +38,6 @@ firebase-auth-common = "9.8.0"
 play-services-auth = "21.4.0"
 firebase-auth-ktx = "23.0.0"
 play-services-tasks = "18.2.0"
-google-services = "4.4.2"
 
 [libraries]
 # Core & Lifecycle
@@ -128,4 +127,3 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
