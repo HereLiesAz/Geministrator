@@ -38,8 +38,6 @@ firebase-auth-common = "9.8.0"
 play-services-auth = "21.4.0"
 firebase-auth-ktx = "23.0.0"
 play-services-tasks = "18.2.0"
-google-services = "4.4.2"
-firebase-bom = "33.1.2"
 
 [libraries]
 # Core & Lifecycle
@@ -86,9 +84,6 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 
 # Gemini API
 google-cloud-vertexai = { group = "com.google.cloud", name = "google-cloud-vertexai", version.ref = "vertexai" }
-firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai" }
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
-
 
 # A2A Communication
 a2a-sdk-client = { group = "io.github.a2asdk", name = "a2a-java-sdk-client", version.ref = "a2a" }
@@ -132,4 +127,3 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }

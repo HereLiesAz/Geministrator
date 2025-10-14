@@ -9,7 +9,6 @@ import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import android.util.Log
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -28,12 +27,12 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            val githubRepository = settingsRepository.githubRepository.first()
+            val gcpProjectId = settingsRepository.gcpProjectId.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
-            if (!githubRepository.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(githubRepository, gcpLocation, geminiModelName)
+            if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
+                geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
             }
         }
     }
@@ -59,10 +58,10 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
-                val suggestion = response.text ?: ""
+                val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
                 editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
-                Log.e("IdeViewModel", "Error generating autocomplete", e)
+                // TODO: Handle error
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -73,29 +72,15 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
         val client = geminiApiClient ?: return
         val editor = _uiState.value.editor ?: return
         val content = editor.text.toString()
-        val cursorPos = editor.cursor.left
-
-        val textBeforeCursor = content.substring(0, cursorPos)
-        val startOfFunction = textBeforeCursor.lastIndexOf("fun ")
-
-        if (startOfFunction == -1) return
-
-        val prompt = "Generate KDoc documentation for the following Kotlin function:\n\n$content"
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val response = client.generateContent(prompt)
-                val documentation = response.text ?: ""
-
-                if (documentation.isNotBlank()) {
-                    val insertionText = "$documentation\n"
-                    editor.setSelection(startOfFunction, startOfFunction)
-                    editor.insertText(insertionText, insertionText.length)
-                }
-
+                val response = client.generateContent("Generate documentation for the following code:\n\n$content")
+                val suggestion = com.google.cloud.vertexai.generativeai.ResponseHandler.getText(response)
+                editor.insertText(suggestion, 0)
             } catch (e: Exception) {
-                Log.e("IdeViewModel", "Error generating documentation", e)
+                // TODO: Handle error
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }

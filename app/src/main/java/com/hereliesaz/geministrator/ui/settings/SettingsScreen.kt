@@ -22,6 +22,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +48,26 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val googleAuthUiClient = remember {
+        com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient(
+            context = context,
+            oneTapClient = com.google.android.gms.auth.api.identity.Identity.getSignInClient(context)
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    settingsViewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
 
     LaunchedEffect(uiState.isLoading) {
         setLoading(uiState.isLoading)
@@ -53,13 +77,16 @@ fun SettingsScreen(
         settingsViewModel.events.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSaveConfirmation -> {
-                    snackbarHostState.showSnackbar(UiEvent.ShowSaveConfirmation.message)
+                    snackbarHostState.showSnackbar(event.message)
                 }
                 is UiEvent.LaunchUrl -> {
                     context.startActivity(event.intent)
                 }
                 is UiEvent.NavigateToLogin -> {
                     onLogout()
+                }
+                is UiEvent.LaunchIntentSender -> {
+                    launcher.launch(IntentSenderRequest.Builder(event.intentSender).build())
                 }
             }
         }
@@ -99,6 +126,14 @@ fun SettingsScreen(
 
             Text("Gemini Settings", style = MaterialTheme.typography.titleLarge)
             OutlinedTextField(
+                value = uiState.gcpProjectId,
+                onValueChange = { settingsViewModel.onGcpProjectIdChange(it) },
+                label = { Text("GCP Project ID") },
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            OutlinedTextField(
                 value = uiState.gcpLocation,
                 onValueChange = { settingsViewModel.onGcpLocationChange(it) },
                 label = { Text("GCP Location") },
@@ -117,25 +152,14 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             Text("Integrations", style = MaterialTheme.typography.titleLarge)
-            if (uiState.username == null) {
+            if (uiState.githubUsername == null) {
                 Button(
-                    onClick = { settingsViewModel.signInWithGitHub(context as android.app.Activity) },
+                    onClick = { settingsViewModel.onSignInWithGitHubClick() },
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Sign in with GitHub")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { settingsViewModel.signInWithGoogle(context as android.app.Activity) },
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Sign in with Google")
                 }
             } else {
                 Row(
@@ -143,8 +167,8 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Signed in as: ${uiState.username}")
-                    Button(onClick = { settingsViewModel.signOut() }) {
+                    Text("Signed in as: ${uiState.githubUsername}")
+                    Button(onClick = { settingsViewModel.onSignOutFromGitHubClick() }) {
                         Text("Sign out")
                     }
                 }
