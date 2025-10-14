@@ -48,22 +48,14 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val googleAuthUiClient = remember {
-        com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient(
-            context = context,
-            oneTapClient = com.google.android.gms.auth.api.identity.Identity.getSignInClient(context)
-        )
-    }
+
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult(),
         onResult = { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
-                coroutineScope.launch {
-                    val signInResult = googleAuthUiClient.signInWithIntent(
-                        intent = result.data ?: return@launch
-                    )
-                    settingsViewModel.onSignInResult(signInResult)
+                result.data?.let {
+                    settingsViewModel.signInWithIntent(it)
                 }
             }
         }
@@ -153,6 +145,26 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("Integrations", style = MaterialTheme.typography.titleLarge)
+            if (uiState.username == null) {
+                Button(
+                    onClick = { settingsViewModel.onSignInWithGoogleClick() },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Sign in with Google")
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Signed in as: ${uiState.username}")
+                    Button(onClick = { settingsViewModel.logout() }) {
+                        Text("Sign out")
+                    }
+                }
+            }
             if (uiState.githubUsername == null) {
                 Button(
                     onClick = { settingsViewModel.onSignInWithGitHubClick() },

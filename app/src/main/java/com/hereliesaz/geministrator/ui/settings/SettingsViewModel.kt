@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import android.content.Intent
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -204,10 +205,33 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun onSignInResult(result: com.hereliesaz.geministrator.ui.authentication.SignInResult) {
-        _uiState.update { it.copy(
-            username = result.data?.username,
-            profilePictureUrl = result.data?.profilePictureUrl
-        ) }
+        _uiState.update {
+            it.copy(
+                username = result.data?.username,
+                profilePictureUrl = result.data?.profilePictureUrl
+            )
+        }
+
+        viewModelScope.launch {
+            result.data?.userId?.let {
+                settingsRepository.saveUserId(it)
+            }
+            result.data?.username?.let {
+                settingsRepository.saveUsername(it)
+            }
+            result.data?.profilePictureUrl?.let {
+                settingsRepository.saveProfilePictureUrl(it)
+            }
+        }
+    }
+
+    fun signInWithIntent(intent: Intent) {
+        viewModelScope.launch {
+            val signInResult = googleAuthUiClient.signInWithIntent(
+                intent = intent
+            )
+            onSignInResult(signInResult)
+        }
     }
 }
 
