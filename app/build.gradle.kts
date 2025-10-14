@@ -7,6 +7,15 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
     namespace = "com.hereliesaz.geministrator"
     compileSdk = 36
@@ -26,6 +35,13 @@ android {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
+
+        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId")}\"")
+        buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -76,8 +92,10 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.firebase.auth.common)
+    implementation(libs.firebase.auth.ktx)
     implementation(libs.play.services.auth)
+    implementation(libs.play.services.tasks)
+    implementation(libs.appauth)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials

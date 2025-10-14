@@ -1,13 +1,18 @@
 package com.hereliesaz.geministrator.ui.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.hereliesaz.aznavrail.AzNavRail
 
 @Composable
 fun GeministratorNavRail(
+    isLoading: Boolean,
     onNavigate: (String) -> Unit
 ) {
-    AzNavRail {
+    AzNavRail(modifier = Modifier.background(Color.Transparent)) {
+        azSettings(isLoading = isLoading)
         azRailItem(
             id = "explorer",
             text = "Explorer",
@@ -19,19 +24,19 @@ fun GeministratorNavRail(
             onClick = { onNavigate("ide") }
         )
         azRailItem(
-            id = "terminal",
-            text = "Terminal",
-            onClick = { onNavigate("terminal") }
-        )
-        azRailItem(
-            id = "settings",
-            text = "Settings",
-            onClick = { onNavigate("settings") }
+            id = "cmd",
+            text = "CMD",
+            onClick = { onNavigate("cmd") }
         )
         azRailItem(
             id = "cli",
             text = "CLI",
             onClick = { onNavigate("cli") }
+        )
+        azRailItem(
+            id = "settings",
+            text = "Settings",
+            onClick = { onNavigate("settings") }
         )
     }
 }
