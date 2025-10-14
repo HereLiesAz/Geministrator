@@ -17,11 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
-sealed class UiEvent {
-    data object ShowSaveConfirmation : UiEvent()
-    data object NavigateToLogin : UiEvent()
-}
-
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val settingsRepository = SettingsRepository(application)
     private val promptsFile = File(application.filesDir, "prompts.json")
@@ -158,12 +153,61 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun logout() {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             googleAuthUiClient.signOut()
             settingsRepository.saveUserId("")
             settingsRepository.saveUsername("")
             settingsRepository.saveProfilePictureUrl("")
+            _uiState.update { it.copy(isLoading = false) }
             _events.emit(UiEvent.NavigateToLogin)
         }
+    }
+
+    fun onSignInWithGitHubClick() {
+        viewModelScope.launch {
+            val serviceConfig = net.openid.appauth.AuthorizationServiceConfiguration(
+                android.net.Uri.parse("https://github.com/login/oauth/authorize"),
+                android.net.Uri.parse("https://github.com/login/oauth/access_token")
+            )
+
+            val authRequestBuilder = net.openid.appauth.AuthorizationRequest.Builder(
+                serviceConfig,
+                com.hereliesaz.geministrator.BuildConfig.GITHUB_CLIENT_ID,
+                net.openid.appauth.ResponseTypeValues.CODE,
+                android.net.Uri.parse("com.hereliesaz.geministrator://oauth2redirect")
+            )
+
+            val authRequest = authRequestBuilder
+                .setScope("repo,user")
+                .build()
+
+            val authIntent = android.content.Intent(android.content.Intent.ACTION_VIEW, authRequest.toUri())
+            _events.emit(UiEvent.LaunchUrl(authIntent))
+        }
+    }
+
+    fun onSignOutFromGitHubClick() {
+        viewModelScope.launch {
+            settingsRepository.saveGithubUsername("")
+            settingsRepository.saveGithubAccessToken("")
+            _uiState.update { it.copy(githubUsername = null) }
+        }
+    }
+
+    fun onSignInWithGoogleClick() {
+        viewModelScope.launch {
+            val signInIntentSender = googleAuthUiClient.signIn()
+            if (signInIntentSender != null) {
+                _events.emit(UiEvent.LaunchIntentSender(signInIntentSender))
+            }
+        }
+    }
+
+    fun onSignInResult(result: com.hereliesaz.geministrator.ui.authentication.SignInResult) {
+        _uiState.update { it.copy(
+            username = result.data?.username,
+            profilePictureUrl = result.data?.profilePictureUrl
+        ) }
     }
 }
 
@@ -177,5 +221,7 @@ data class SettingsUiState(
     val promptsJsonString: String = "",
     val promptsDirty: Boolean = false,
     val username: String? = null,
-    val profilePictureUrl: String? = null
+    val profilePictureUrl: String? = null,
+    val githubUsername: String? = null,
+    val isLoading: Boolean = false
 )

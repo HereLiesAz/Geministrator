@@ -22,6 +22,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,10 +34,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = viewModel(),
+    setLoading: (Boolean) -> Unit,
     onLogout: () -> Unit,
     onNavigateToRoles: () -> Unit
 ) {
@@ -40,15 +47,46 @@ fun SettingsScreen(
     val themeOptions = listOf("Light", "Dark", "System")
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val googleAuthUiClient = remember {
+        com.hereliesaz.geministrator.ui.authentication.GoogleAuthUiClient(
+            context = context,
+            oneTapClient = com.google.android.gms.auth.api.identity.Identity.getSignInClient(context)
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+        onResult = { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                coroutineScope.launch {
+                    val signInResult = googleAuthUiClient.signInWithIntent(
+                        intent = result.data ?: return@launch
+                    )
+                    settingsViewModel.onSignInResult(signInResult)
+                }
+            }
+        }
+    )
+
+    LaunchedEffect(uiState.isLoading) {
+        setLoading(uiState.isLoading)
+    }
 
     LaunchedEffect(key1 = Unit) {
         settingsViewModel.events.collectLatest { event ->
             when (event) {
                 is UiEvent.ShowSaveConfirmation -> {
-                    snackbarHostState.showSnackbar("Settings Saved")
+                    snackbarHostState.showSnackbar(event.message)
                 }
-                is SettingsViewModel.UiEvent.LaunchUrl -> {
+                is UiEvent.LaunchUrl -> {
                     context.startActivity(event.intent)
+                }
+                is UiEvent.NavigateToLogin -> {
+                    onLogout()
+                }
+                is UiEvent.LaunchIntentSender -> {
+                    launcher.launch(IntentSenderRequest.Builder(event.intentSender).build())
                 }
             }
         }
