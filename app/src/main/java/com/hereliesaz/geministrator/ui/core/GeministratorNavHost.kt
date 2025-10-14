@@ -7,7 +7,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hereliesaz.geministrator.ui.authentication.LoginScreen
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
@@ -22,18 +21,9 @@ fun GeministratorNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = "login",
+        startDestination = "explorer",
         modifier = modifier
     ) {
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate("explorer") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
-            )
-        }
         composable("explorer") {
             SourceSelectionScreen(
                 onSessionCreated = { sessionId, roles ->
@@ -56,11 +46,6 @@ fun GeministratorNavHost(
         composable("settings") {
             SettingsScreen(
                 setLoading = setLoading,
-                onLogout = {
-                    navController.navigate("login") {
-                        popUpTo(0)
-                    }
-                },
                 onNavigateToRoles = { navController.navigate("roles-settings") }
             )
         }
