@@ -43,7 +43,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.apiKey,
             settingsRepository.geminiApiKey,
             settingsRepository.theme,
-            settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
             settingsRepository.geminiModelName,
             settingsRepository.username,
@@ -52,17 +51,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             val apiKey = values[0] as String?
             val geminiApiKey = values[1] as String?
             val theme = values[2] as String?
-            val gcpProjectId = values[3] as String?
-            val gcpLocation = values[4] as String?
-            val geminiModelName = values[5] as String?
-            val username = values[6] as String?
-            val profilePictureUrl = values[7] as String?
+            val gcpLocation = values[3] as String?
+            val geminiModelName = values[4] as String?
+            val username = values[5] as String?
+            val profilePictureUrl = values[6] as String?
             // Create a temporary state object, don't overwrite prompts state
             SettingsUiState(
                 apiKey = apiKey ?: "",
                 geminiApiKey = geminiApiKey ?: "",
                 theme = theme ?: "System",
-                gcpProjectId = gcpProjectId ?: "",
                 gcpLocation = gcpLocation ?: "us-central1",
                 geminiModelName = geminiModelName ?: "gemini-1.0-pro",
                 username = username,
@@ -74,7 +71,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     apiKey = newSettingsState.apiKey,
                     geminiApiKey = newSettingsState.geminiApiKey,
                     theme = newSettingsState.theme,
-                    gcpProjectId = newSettingsState.gcpProjectId,
                     gcpLocation = newSettingsState.gcpLocation,
                     geminiModelName = newSettingsState.geminiModelName,
                     username = newSettingsState.username,
@@ -107,10 +103,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _uiState.update { it.copy(theme = newTheme) }
     }
 
-    fun onGcpProjectIdChange(newProjectId: String) {
-        _uiState.update { it.copy(gcpProjectId = newProjectId) }
-    }
-
     fun onGcpLocationChange(newLocation: String) {
         _uiState.update { it.copy(gcpLocation = newLocation) }
     }
@@ -124,7 +116,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.saveApiKey(_uiState.value.apiKey)
             settingsRepository.saveGeminiApiKey(_uiState.value.geminiApiKey)
             settingsRepository.saveTheme(_uiState.value.theme)
-            settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
             settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
             _events.emit(UiEvent.ShowSaveConfirmation)
@@ -215,7 +206,6 @@ data class SettingsUiState(
     val apiKey: String = "",
     val geminiApiKey: String = "",
     val theme: String = "System",
-    val gcpProjectId: String = "",
     val gcpLocation: String = "us-central1",
     val geminiModelName: String = "gemini-1.0-pro",
     val promptsJsonString: String = "",

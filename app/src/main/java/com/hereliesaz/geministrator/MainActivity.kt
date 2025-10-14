@@ -21,7 +21,6 @@ import com.hereliesaz.geministrator.ui.core.MainViewModel
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
 import com.hereliesaz.geministrator.ui.theme.GeministratorTheme
 import com.hereliesaz.geministrator.util.TextMateLoader
-import com.hereliesaz.geministrator.ui.core.MainViewModel
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
