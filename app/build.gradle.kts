@@ -64,6 +64,7 @@ android {
             excludes += "META-INF/beans.xml"
             excludes += "META-INF/DEPENDENCIES"
             excludes += "META-INF/INDEX.LIST"
+            excludes += "mozilla/public-suffix-list.txt"
         }
     }
 }
@@ -97,6 +98,7 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.play.services.tasks)
     implementation(libs.appauth)
+    implementation(libs.firebase.crashlytics.buildtools)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials

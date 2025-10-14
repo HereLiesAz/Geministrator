@@ -31,7 +31,7 @@ material-icons = "1.6.5"
 jpackageplugin = "1.7.6"
 github-api = "1.330"
 okhttp = "5.2.1"
-vertexai = "1.36.0"
+vertexai = "1.37.0"
 chaquopy = "16.1.0"
 appauth = "0.11.1"
 firebase-bom = "34.4.0" # Added firebase-bom version
@@ -39,6 +39,7 @@ firebase-auth-common = "9.8.0"
 play-services-auth = "21.4.0"
 firebase-auth-ktx = "23.2.1"
 play-services-tasks = "18.4.0"
+firebase-crashlytics-buildtools = "3.0.6"
 
 [libraries]
 # Core & Lifecycle
@@ -86,6 +87,8 @@ okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhtt
 # Gemini API
 google-cloud-vertexai = { group = "com.google.cloud", name = "google-cloud-vertexai", version.ref = "vertexai" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" } # Added firebase-bom library
+firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai-ktx" }
+
 
 # A2A Communication
 a2a-sdk-client = { group = "io.github.a2asdk", name = "a2a-java-sdk-client", version.ref = "a2a" }
@@ -118,6 +121,7 @@ firebase-auth-common = { group = "com.google.firebase", name = "firebase-auth-co
 play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "play-services-auth" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
 play-services-tasks = { group = "com.google.android.gms", name = "play-services-tasks", version.ref = "play-services-tasks" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

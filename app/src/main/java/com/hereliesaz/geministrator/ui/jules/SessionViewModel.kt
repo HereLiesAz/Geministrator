@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.SettingsRepository
 import com.google.cloud.vertexai.generativeai.ResponseHandler
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
