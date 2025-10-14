@@ -17,14 +17,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.hereliesaz.geministrator.ui.settings.OAuth2RedirectActivity" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${appAuthRedirectScheme}" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
