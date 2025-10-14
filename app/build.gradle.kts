@@ -83,6 +83,7 @@ kotlin {
 
 dependencies {
     implementation(project(":jules-api-client"))
+    implementation(project(":github-api-client"))
 
     // Core & UI
     implementation(libs.androidx.core.ktx)
