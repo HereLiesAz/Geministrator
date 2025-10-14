@@ -1,7 +1,8 @@
 package com.jules.apiclient
 
-import com.google.firebase.vertexai.FirebaseVertexAI
-import com.google.firebase.vertexai.type.GenerateContentResponse
+import com.google.cloud.vertexai.VertexAI
+import com.google.cloud.vertexai.api.GenerateContentResponse
+import com.google.cloud.vertexai.generativeai.GenerativeModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -11,11 +12,12 @@ class GeminiApiClient(
     private val modelName: String
 ) {
 
-    suspend fun generateContent(prompt: String): GenerateContentResponse {
+    private val vertexAI = VertexAI(projectId, location)
+    private val generativeModel = GenerativeModel(modelName, vertexAI)
+    suspend fun generateContent(prompt: String): GenerateContentResponse? {
         return withContext(Dispatchers.IO) {
             try {
-                val model = FirebaseVertexAI.getInstance().generativeModel(modelName)
-                val response = model.generateContent(prompt)
+                val response = generativeModel.generateContent(prompt)
                 response
             } catch (e: Exception) {
                 // In a real application, you would want to handle this exception more gracefully

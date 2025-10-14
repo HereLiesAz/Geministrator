@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.SettingsRepository
+import com.google.cloud.vertexai.generativeai.ResponseHandler
 import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
@@ -123,7 +124,7 @@ class SessionViewModel(
             try {
                 val prompt = "Decompose the following high-level task into a list of smaller, manageable sub-tasks:\n\n$task"
                 val response = client.generateContent(prompt)
-                val subTasks = (response.text ?: "").split("\n").filter { it.isNotBlank() }
+                val subTasks = response?.let { ResponseHandler.getText(it) }.orEmpty().split("\n").filter { it.isNotBlank() }
                 _uiState.update { it.copy(subTasks = subTasks, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

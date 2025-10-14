@@ -27,7 +27,7 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
+            val gcpProjectId = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
             val geminiModelName = settingsRepository.geminiModelName.first()
 
