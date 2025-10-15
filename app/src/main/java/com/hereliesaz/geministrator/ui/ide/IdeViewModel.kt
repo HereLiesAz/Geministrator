@@ -3,7 +3,6 @@ package com.hereliesaz.geministrator.ui.ide
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.cloud.vertexai.generativeai.ResponseHandler
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.GeminiApiClient
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -59,7 +58,7 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
-                val suggestion = ResponseHandler.getText(response)
+                val suggestion = response.text ?: ""
                 editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
                 // TODO: Handle error
@@ -78,7 +77,7 @@ class IdeViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Generate documentation for the following code:\n\n$content")
-                val suggestion = ResponseHandler.getText(response)
+                val suggestion = response.text ?: ""
                 editor.insertText(suggestion, 0)
             } catch (e: Exception) {
                 // TODO: Handle error

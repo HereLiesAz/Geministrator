@@ -1,7 +1,7 @@
 package com.hereliesaz.geministrator.ui.session
 
 // A simple enum to represent different agent types
-enum class Agent {
+enum class AgentType {
     JULES,
     GEMINI,
     USER
@@ -9,7 +9,7 @@ enum class Agent {
 
 // Represents a single log entry in a session
 data class LogEntry(
-    val agent: Agent,
+    val agent: AgentType,
     val message: String,
     val content: String? = null
 )

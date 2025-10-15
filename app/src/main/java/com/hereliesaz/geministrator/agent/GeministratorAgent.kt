@@ -1,6 +1,5 @@
 package com.hereliesaz.geministrator.agent
 
-import com.google.adk.Agent
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.GeminiApiClient
 import kotlinx.coroutines.flow.first
@@ -10,7 +9,7 @@ class GeministratorAgent(
     private val settingsRepository: SettingsRepository
 ) : Agent {
     override fun execute(request: Agent.Request): Agent.Response {
-        val prompt = request.toString() // This is a placeholder
+        val prompt = request.prompt
         val responseText = runBlocking {
             val gcpProjectId = settingsRepository.githubRepository.first()
             val gcpLocation = settingsRepository.gcpLocation.first()
@@ -24,6 +23,6 @@ class GeministratorAgent(
                 response.toString()
             }
         }
-        return Agent.Response.newBuilder().setText(responseText).build()
+        return Agent.Response(responseText)
     }
 }

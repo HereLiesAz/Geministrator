@@ -17,7 +17,7 @@ class CodeReviewService(
             val diff = gitHubApiClient.getPullRequestDiff(pr.diffUrl)
             val prompt = "Please review the following code changes and provide feedback:\n\n$diff"
             val review = geminiApiClient.generateContent(prompt)
-            val comment = review?.let { com.google.cloud.vertexai.generativeai.ResponseHandler.getText(it) }
+            val comment = review.text
             if (comment != null) {
                 gitHubApiClient.createComment(owner, repo, pr.number, Comment(comment))
             }

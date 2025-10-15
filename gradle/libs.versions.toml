@@ -40,6 +40,7 @@ play-services-auth = "21.4.0"
 firebase-auth-ktx = "23.2.1"
 play-services-tasks = "18.4.0"
 firebase-crashlytics-buildtools = "3.0.6"
+firebase-ai = "17.4.0"
 
 [libraries]
 # Core & Lifecycle
@@ -122,6 +123,7 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebase-auth-ktx" }
 play-services-tasks = { group = "com.google.android.gms", name = "play-services-tasks", version.ref = "play-services-tasks" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai", version.ref = "firebase-ai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

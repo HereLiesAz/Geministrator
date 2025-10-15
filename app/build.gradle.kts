@@ -96,6 +96,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.play.services.tasks)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.firebase.ai)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
