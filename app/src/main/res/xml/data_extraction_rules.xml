@@ -2,13 +2,13 @@
 <data-extraction-rules>
     <cloud-backup disableIfSdkLessThan="34">
         <exclude
-            domain="sharedprefs"
+            domain="sharedpref"
             path="your_app_prefs.xml" />
         <!-- Add other rules as needed -->
     </cloud-backup>
     <device-transfer>
         <exclude
-            domain="sharedprefs"
+            domain="sharedpref"
             path="your_app_prefs.xml" />
         <!-- Add other rules as needed -->
     </device-transfer>

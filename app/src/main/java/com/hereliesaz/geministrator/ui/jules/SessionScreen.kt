@@ -98,7 +98,7 @@ fun SessionScreen(
                 ) {
                     val reversedActivities = uiState.activities.reversed()
                     items(reversedActivities) { activity ->
-                        ActivityItem(activity)
+                        ActivityItem(activity = activity)
                     }
 
                     if (uiState.subTasks.isNotEmpty()) {
@@ -131,7 +131,9 @@ fun SessionScreen(
 }
 
 @Composable
-fun ActivityItem(activity: Activity) {
+fun ActivityItem(
+    activity: Activity
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

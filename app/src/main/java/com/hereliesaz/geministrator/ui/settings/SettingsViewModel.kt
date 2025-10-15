@@ -34,7 +34,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.apiKey,
             settingsRepository.geminiApiKey,
             settingsRepository.theme,
-            settingsRepository.githubRepository,
+            settingsRepository.gcpProjectId,
             settingsRepository.gcpLocation,
             settingsRepository.geminiModelName
         ) { values ->
@@ -107,7 +107,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             settingsRepository.saveApiKey(_uiState.value.apiKey)
             settingsRepository.saveGeminiApiKey(_uiState.value.geminiApiKey)
             settingsRepository.saveTheme(_uiState.value.theme)
-            settingsRepository.saveGithubRepository(_uiState.value.gcpProjectId)
+            settingsRepository.saveGcpProjectId(_uiState.value.gcpProjectId)
             settingsRepository.saveGcpLocation(_uiState.value.gcpLocation)
             settingsRepository.saveGeminiModelName(_uiState.value.geminiModelName)
             _events.emit(UiEvent.ShowSaveConfirmation("Settings saved."))

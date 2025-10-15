@@ -16,12 +16,13 @@ The project follows a multi-module architecture, managed by Gradle. The main mod
 
 -   **:app**: The main Android application module. The UI is built entirely with Jetpack Compose, following modern Android development best practices.
 -   **:jules-api-client**: A pure Kotlin module responsible for all communication with the Jules API. It uses Retrofit for networking and `kotlinx.serialization` for JSON parsing.
+-   **:github-api-client**: A pure Kotlin module responsible for all communication with the GitHub API. It uses Retrofit for networking and `kotlinx.serialization` for JSON parsing.
+-   **:editor-core**: An Android library module that encapsulates the Sora Code Editor and provides a clean API for interacting with it.
 
 This modular design promotes separation of concerns, making the codebase easier to maintain, test, and scale.
 
 ## Table of Contents
 
--   [**Authentication** (`auth.md`)](auth.md): Information on how to authenticate with the Jules API.
 -   [**Screens** (`screens.md`)](screens.md): A detailed description of the application's user interface screens.
 -   [**Workflow** (`workflow.md`)](workflow.md): An overview of the intended user workflow.
 -   [**UI/UX** (`UI_UX.md`)](UI_UX.md): Details on the UI components and design principles used in the application.

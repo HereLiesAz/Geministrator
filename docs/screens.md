@@ -30,10 +30,10 @@ The `SettingsScreen` allows the user to configure the application. Currently, it
 -   **API Key Management**: The user can enter and save their Jules API key.
 -   **Theme Selection**: The user can choose between Light, Dark, and System Default themes.
 
-## File Explorer Screen
+## Search Screen
 
-The `FileExplorerScreen` provides a way for the user to browse the files within a selected project. It displays a hierarchical view of the project's directory structure and allows the user to navigate through folders and open files.
+The `SearchScreen` allows the user to search for files within the project. It provides a text input field and a "Search" button. The search results are displayed in a list below the search bar.
 
-## File Viewer Screen
+## IDE Screen
 
-The `FileViewerScreen` is responsible for displaying the content of a selected file. It uses the [Sora Editor](https://github.com/Rosemoe/sora-editor), a native Android code editor, to provide a rich and performant code viewing experience.
+The `IdeScreen` is the code editor. It uses the [Sora Editor](https://github.com/Rosemoe/sora-editor), a native Android code editor, to provide a rich and performant code editing experience. It includes features like syntax highlighting, autocompletion, and in-line diagnostics. The `IdeScreen` is also where the user can interact with the agent to perform code-related tasks, such as generating documentation or autocompleting code.

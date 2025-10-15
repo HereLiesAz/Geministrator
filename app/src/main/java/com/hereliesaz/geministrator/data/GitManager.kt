@@ -60,7 +60,7 @@ class GitManager(private val projectCacheDir: File) {
 
                 if (fileEntry != null) {
                     formatter.format(fileEntry)
-                    out.toString(Charsets.UTF_8)
+                    out.toString("UTF-8")
                 } else {
                     "No changes found for file: $filePath"
                 }

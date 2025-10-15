@@ -41,7 +41,7 @@ firebase-auth-ktx = "23.2.1"
 play-services-tasks = "18.4.0"
 firebase-crashlytics-buildtools = "3.0.6"
 firebase-ai = "17.4.0"
-google-adk = "0.2.0"
+google-adk = "0.1.0"
 
 [libraries]
 # Core & Lifecycle

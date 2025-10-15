@@ -30,5 +30,4 @@ rootProject.name = "Geministrator"
 
 include(":app")
 include(":jules-api-client")
-include(":prompts")
 include(":github-api-client")
