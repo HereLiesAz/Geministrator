@@ -38,11 +38,11 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
 
 *Objective: Re-introduce agent capabilities using the ADK on a stable foundation, starting with a high-value feature.*
 
-- [ ] **Integrate ADK for a Target Feature: Automated Code Review**
-    - [ ] Define a new `CodeReviewAgent` using the ADK.
-    - [ ] Create tool wrappers for existing `GitHubApiClient.kt` methods (`getPullRequests`, `getPullRequestDiff`, `createComment`).
-    - [ ] Develop a `CodeReviewService.kt` to manage the `AdkApp` runner and invoke the agent.
-    - [ ] Create a new UI screen for users to trigger the code review service.
+- [x] **Integrate ADK for a Target Feature: Automated Code Review**
+    - [x] Define a new `CodeReviewAgent` using the ADK.
+    - [x] Create tool wrappers for existing `GitHubApiClient.kt` methods (`getPullRequests`, `getPullRequestDiff`, `createComment`).
+    - [x] Develop a `CodeReviewService.kt` to manage the `AdkApp` runner and invoke the agent.
+    - [x] Create a new UI screen for users to trigger the code review service.
 
 ---
 

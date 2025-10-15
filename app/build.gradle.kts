@@ -135,4 +135,6 @@ dependencies {
 
     // Gemini API
     implementation(libs.google.cloud.vertexai)
+
+    // Agent Development Kit
 }

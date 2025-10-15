@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
 import com.hereliesaz.geministrator.ui.ide.SearchScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
+import com.hereliesaz.geministrator.ui.codereview.CodeReviewScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.ui.terminal.CmdScreen
@@ -40,7 +41,8 @@ fun GeministratorNavHost(
             )
         ) {
             SessionScreen(
-                setLoading = setLoading
+                setLoading = setLoading,
+                navController = navController
             )
         }
         composable("ide") {
@@ -66,6 +68,9 @@ fun GeministratorNavHost(
         }
         composable("cmd") {
             CmdScreen(setLoading = setLoading)
+        }
+        composable("code_review") {
+            CodeReviewScreen()
         }
     }
 }

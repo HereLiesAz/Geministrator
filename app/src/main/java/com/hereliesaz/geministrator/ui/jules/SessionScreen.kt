@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.jules.apiclient.Activity
 import com.jules.apiclient.AgentResponseActivity
 import com.jules.apiclient.PlanActivity
@@ -41,7 +42,8 @@ import com.jules.apiclient.UserMessageActivity
 
 @Composable
 fun SessionScreen(
-    setLoading: (Boolean) -> Unit
+    setLoading: (Boolean) -> Unit,
+    navController: NavController
 ) {
     val viewModel: SessionViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,7 +100,12 @@ fun SessionScreen(
                 ) {
                     val reversedActivities = uiState.activities.reversed()
                     items(reversedActivities) { activity ->
-                        ActivityItem(activity = activity)
+                        ActivityItem(
+                            activity = activity,
+                            onFileClicked = { filePath ->
+                                navController.navigate("editor/${uiState.sessionId}/$filePath")
+                            }
+                        )
                     }
 
                     if (uiState.subTasks.isNotEmpty()) {
@@ -132,12 +139,24 @@ fun SessionScreen(
 
 @Composable
 fun ActivityItem(
-    activity: Activity
+    activity: Activity,
+    onFileClicked: (String) -> Unit
 ) {
+    val isFileAction = activity is ToolOutputActivity && activity.toolName == "file.write"
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .then(
+                if (isFileAction) {
+                    Modifier.clickable {
+                        val filePath = (activity as ToolOutputActivity).output.substringBefore(" ").trim()
+                        onFileClicked(filePath)
+                    }
+                } else {
+                    Modifier
+                }
+            ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             when (activity) {
