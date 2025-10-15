@@ -1,6 +1,7 @@
 package com.jules.apiclient.agent
 
 import com.google.adk.agents.Agent
+import jdk.internal.agent.Agent
 
 fun createCodeReviewAgent(modelName: String) = Agent(
     model = modelName,
