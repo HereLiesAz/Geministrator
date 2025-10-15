@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.chaquopy)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -68,15 +67,6 @@ android {
         }
     }
 }
-
-chaquopy {
-    defaultConfig {
-        version = "3.12"
-        buildPython("/home/az/Downloads/Python-3.12.8/python")
-
-    }
-}
-
 
 kotlin {
     jvmToolchain(17)
@@ -147,5 +137,4 @@ dependencies {
     implementation(libs.google.cloud.vertexai)
 
     // Agent Development Kit
-    implementation("com.google.adk:google-adk:0.2.0")
 }

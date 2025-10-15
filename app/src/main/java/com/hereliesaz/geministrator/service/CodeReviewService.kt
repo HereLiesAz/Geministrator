@@ -1,26 +1,36 @@
 package com.hereliesaz.geministrator.service
 
-import com.github.apiclient.Comment
+import com.google.adk.runtime.AdkApp
+import com.hereliesaz.geministrator.data.SettingsRepository
+import com.jules.apiclient.agent.createCodeReviewAgent
+import com.jules.apiclient.agent.GitHubTools
+import kotlinx.coroutines.flow.first
 import com.github.apiclient.GitHubApiClient
-import com.google.cloud.vertexai.generativeai.ResponseHandler
-import com.jules.apiclient.GeminiApiClient
-import kotlinx.coroutines.coroutineScope
 
 class CodeReviewService(
-    private val gitHubApiClient: GitHubApiClient,
-    private val geminiApiClient: GeminiApiClient
+    private val settingsRepository: SettingsRepository,
 ) {
+    suspend fun reviewPullRequest(owner: String, repo: String, prNumber: Int) {
+        val geminiModelName = settingsRepository.geminiModelName.first()
+        val githubToken = settingsRepository.githubAccessToken.first()
 
-    suspend fun reviewPullRequests(owner: String, repo: String) = coroutineScope {
-        val pullRequests = gitHubApiClient.getPullRequests(owner, repo)
+        if (geminiModelName != null && githubToken != null) {
+            val agent = createCodeReviewAgent(geminiModelName)
+            val gitHubApiClient = GitHubApiClient(githubToken)
+            val tools = GitHubTools(gitHubApiClient)
+            val adkApp = AdkApp(rootAgent = agent)
 
-        for (pr in pullRequests) {
-            val diff = gitHubApiClient.getPullRequestDiff(pr.diffUrl)
-            val prompt = "Please review the following code changes and provide feedback:\n\n$diff"
-            val review = geminiApiClient.generateContent(prompt)
-            val comment = ResponseHandler.getText(review)
-            if (comment != null) {
-                gitHubApiClient.createComment(owner, repo, pr.number, Comment(comment))
+            adkApp.registerTools(tools)
+
+            val prs = tools.getPullRequests(owner, repo)
+            val pr = prs.find { it.number == prNumber }
+
+            if (pr != null) {
+                val diff = tools.getPullRequestDiff(pr.diff_url)
+                val response = adkApp.query("Review the following code diff:\n\n$diff")
+                val lastResponse = response.last()
+                val review = lastResponse.data["text_output"] ?: "No review comments generated."
+                tools.createComment(owner, repo, prNumber, review)
             }
         }
     }
