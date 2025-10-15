@@ -1,34 +1,61 @@
 # TODO
 
-This document contains a collection of tasks for the Geministrator project.
+This document outlines the step-by-step plan to refactor the Geministrator application into a stable, production-ready state, and then to re-introduce agentic features using the Google Agent Development Kit (ADK).
 
-## High Priority
+---
 
-- [ ] **GitHub Integration**
-    - [x] **Natural Language Pull Requests**: The user can describe the changes they've made in plain English, and an agent will generate a well-formatted pull request with a title, description, and relevant labels.
-    - [ ] **Automated code review on PRs**: An agent can automatically review pull requests, leaving comments and suggestions.
-    - [x] **Issue Management**: The user can create and manage GitHub issues from within the IDE using natural language.
-    - [ ] **Automated release notes**: An agent can generate release notes based on the commit history since the last release.
+## Phase 1: Build Stabilization and Code Cleanup
 
-## Medium Priority
+*Objective: Address critical build errors, remove obsolete code, and fix architectural inconsistencies to create a stable foundation.*
 
-- [ ] **A2A Workflows**
-    - [ ] **Jules as a "rubber duck"**: The user can describe a problem to Jules, who then clarifies and helps the user think through the problem. Jules could then hand off the implementation to another agent.
-    - [ ] **Automated testing and debugging**: Jules can write tests for a piece of code, and another agent can run them, analyze the results, and suggest fixes.
-    - [ ] **Code review and refactoring**: One agent can write code, and another can review it for style, errors, and performance, then suggest or apply refactorings.
-    - [x] **Decomposition of large tasks**: The user provides a high-level goal, and one agent breaks it down into smaller, manageable tasks for other agents to work on.
-    - [ ] **ReasoningBank Framework**: Implement a memory framework that distills generalizable reasoning strategies from an agent's self-judged successful and failed experiences.
+- [ ] **Stabilize the Build Environment**
+    - [ ] Remove conflicting `google-adk` dependencies from all `build.gradle.kts` files.
+    - [ ] Remove the obsolete Chaquopy Python integration.
+        - [ ] Delete the `app/src/main/python` directory.
+        - [ ] Remove the `chaquopy` plugin and configuration block from `app/build.gradle.kts`.
+        - [ ] Delete `CliScreen.kt` and `CliViewModel.kt`.
+    - [ ] Synchronize the project structure by removing the `:prompts` module from `settings.gradle.kts`.
+    - [ ] Execute `./gradlew clean build` and resolve any remaining dependency conflicts.
 
-- [ ] **IDE Features**
-    - [ ] **Smarter Autocomplete**: Go beyond basic code completion by using an agent to predict the next few lines of code based on context.
-    - [ ] **On-the-fly documentation**: An agent can automatically generate documentation for a function or class as the user is writing it.
-    - [x] **Intelligent search**: Instead of simple text search, the user can ask questions in natural language like "where is the user authentication logic?".
-    - [ ] **Voice commands**: Allow the user to control the IDE with their voice, e.g., "run the tests", "commit my changes", "find all references to this function".
+- [ ] **Code Cleanup and Bug Fixes**
+    - [ ] Correct the settings-saving bug in `SettingsViewModel.kt` where the GCP Project ID is saved to the wrong DataStore key.
+    - [ ] Resolve duplicate screen definitions by renaming `ui/ide/IDEScreen.kt` to `ui/ide/SearchScreen.kt` and its contained composable.
+    - [ ] Refactor the navigation graph in `GeministratorNavHost.kt` to include all destinations from the `NavRail` and add a route for the code editor.
 
-## Low Priority
+---
 
-- [ ] **Project and Language Management**
-    - [ ] **Project Templates**: Provide pre-configured project templates for different languages and frameworks.
-    - [ ] **Dependency Management**: An agent can help manage project dependencies, suggesting libraries, checking for conflicts, and automating updates.
-    - [ ] **Language Server Protocol (LSP) Integration**: Integrate with LSPs for different languages to provide rich features like go-to-definition, find-references, and hover-information.
-    - [ ] **Environment Configuration**: An agent can help the user set up their development environment, install necessary tools, and configure environment variables.
+## Phase 2: Core IDE Feature Implementation
+
+*Objective: Complete the essential features for the mobile IDE functionality.*
+
+- [ ] **Implement Core IDE Flow**
+    - [ ] Complete the session creation logic in `SourceSelectionScreen.kt`.
+    - [ ] Implement the UI in `SessionScreen.kt` to display the activity stream.
+    - [ ] Connect the Sora Editor in `FileViewerScreen.kt` to the Jules API to reflect file changes from agent activities.
+    - [ ] Implement UI buttons for core actions like "Run" and "Commit" and connect them to ViewModel functions.
+
+---
+
+## Phase 3: ADK Integration and Agentic Features
+
+*Objective: Re-introduce agent capabilities using the ADK on a stable foundation, starting with a high-value feature.*
+
+- [ ] **Integrate ADK for a Target Feature: Automated Code Review**
+    - [ ] Define a new `CodeReviewAgent` using the ADK.
+    - [ ] Create tool wrappers for existing `GitHubApiClient.kt` methods (`getPullRequests`, `getPullRequestDiff`, `createComment`).
+    - [ ] Develop a `CodeReviewService.kt` to manage the `AdkApp` runner and invoke the agent.
+    - [ ] Create a new UI screen for users to trigger the code review service.
+
+---
+
+## Phase 4: Production Readiness
+
+*Objective: Ensure the application is tested, secure, and ready for deployment.*
+
+- [ ] **Testing and Quality Assurance**
+    - [ ] Write unit tests for all ViewModels and Repositories.
+    - [ ] Write integration tests for the Jules and Gemini API clients.
+
+- [ ] **Security and Deployment**
+    - [ ] Replace `local.properties` with the `secrets-gradle-plugin` to secure API keys.
+    - [ ] Establish a CI/CD pipeline using GitHub Actions to automate builds, tests, and releases.
