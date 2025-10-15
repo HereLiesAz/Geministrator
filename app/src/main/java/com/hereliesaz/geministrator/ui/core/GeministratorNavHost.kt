@@ -8,7 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
+import com.hereliesaz.geministrator.ui.ide.SearchScreen
 import com.hereliesaz.geministrator.ui.jules.SessionScreen
+import com.hereliesaz.geministrator.ui.codereview.CodeReviewScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.ui.terminal.CmdScreen
@@ -38,9 +40,21 @@ fun GeministratorNavHost(
                 navArgument("roles") { type = NavType.StringType; nullable = true }
             )
         ) {
-            SessionScreen(setLoading = setLoading)
+            SessionScreen(
+                setLoading = setLoading,
+                navController = navController
+            )
         }
         composable("ide") {
+            SearchScreen()
+        }
+        composable(
+            route = "editor/{sessionId}/{filePath}",
+            arguments = listOf(
+                navArgument("sessionId") { type = NavType.StringType },
+                navArgument("filePath") { type = NavType.StringType }
+            )
+        ) {
             IdeScreen(setLoading = setLoading)
         }
         composable("settings") {
@@ -49,14 +63,14 @@ fun GeministratorNavHost(
                 onNavigateToRoles = { navController.navigate("roles-settings") }
             )
         }
-        composable("cli") {
-            com.hereliesaz.geministrator.ui.cli.CliScreen()
-        }
         composable("roles-settings") {
             com.hereliesaz.geministrator.ui.settings.RolesSettingsScreen()
         }
         composable("cmd") {
             CmdScreen(setLoading = setLoading)
+        }
+        composable("code_review") {
+            CodeReviewScreen()
         }
     }
 }
