@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,41 @@ fun IdeScreen(
             ) {
                 Text("Generate Docs")
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.onRunClick() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Run")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.onCommitClick() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Commit")
+            }
+        }
+    }
+
+    if (uiState.showCommitDialog) {
+        CommitDialog(
+            commitMessage = uiState.commitMessage,
+            onCommitMessageChanged = { viewModel.onCommitMessageChanged(it) },
+            onCommit = { viewModel.onCommitConfirm() },
+            onDismiss = { viewModel.onCommitDialogDismiss() }
+        )
+    }
+
+    uiState.error?.let { error ->
+        Snackbar(
+            action = {
+                Button(onClick = { viewModel.onErrorShown() }) {
+                    Text("Dismiss")
+                }
+            }
+        ) {
+            Text(error)
         }
     }
 }

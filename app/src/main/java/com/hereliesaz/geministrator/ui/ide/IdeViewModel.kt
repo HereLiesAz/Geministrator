@@ -20,7 +20,10 @@ data class IdeUiState(
     val editor: CodeEditor? = null,
     val currentFile: String? = null,
     val fileContent: String = "",
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showCommitDialog: Boolean = false,
+    val commitMessage: String = "",
+    val error: String? = null
 )
 
 class IdeViewModel(
@@ -66,7 +69,7 @@ class IdeViewModel(
                     _uiState.update { it.copy(fileContent = latestContent) }
                 }
             } catch (e: Exception) {
-                // TODO: Handle error
+                _uiState.update { it.copy(error = e.message) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -97,7 +100,7 @@ class IdeViewModel(
                 val suggestion = ResponseHandler.getText(response) ?: ""
                 editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
-                // TODO: Handle error
+                _uiState.update { it.copy(error = e.message) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
@@ -116,10 +119,55 @@ class IdeViewModel(
                 val suggestion = ResponseHandler.getText(response) ?: ""
                 editor.insertText(suggestion, 0)
             } catch (e: Exception) {
-                // TODO: Handle error
+                _uiState.update { it.copy(error = e.message) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
+    }
+
+    fun onRunClick() {
+        val client = julesApiClient ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                client.sendMessage(sessionId, "Run the code in the file `$filePath`")
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            } finally {
+                _uiState.update { it.copy(isLoading = false) }
+            }
+        }
+    }
+
+    fun onCommitClick() {
+        _uiState.update { it.copy(showCommitDialog = true) }
+    }
+
+    fun onCommitDialogDismiss() {
+        _uiState.update { it.copy(showCommitDialog = false, commitMessage = "") }
+    }
+
+    fun onCommitMessageChanged(message: String) {
+        _uiState.update { it.copy(commitMessage = message) }
+    }
+
+    fun onCommitConfirm() {
+        val client = julesApiClient ?: return
+        val message = _uiState.value.commitMessage
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, showCommitDialog = false) }
+            try {
+                client.sendMessage(sessionId, "Commit changes with message: '$message'")
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            } finally {
+                _uiState.update { it.copy(isLoading = false, commitMessage = "") }
+            }
+        }
+    }
+
+    fun onErrorShown() {
+        _uiState.update { it.copy(error = null) }
     }
 }
