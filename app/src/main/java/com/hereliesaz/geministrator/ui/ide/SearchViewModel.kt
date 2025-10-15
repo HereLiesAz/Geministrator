@@ -3,6 +3,7 @@ package com.hereliesaz.geministrator.ui.ide
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.cloud.vertexai.generativeai.ResponseHandler
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.GeminiApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +61,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 // This is a placeholder for the actual search logic.
                 // We will need to find a way to provide the codebase as context to the Gemini API.
                 val response = client.generateContent("Find code related to: $query in the project.")
-                val textResponse = response.text ?: ""
+                val textResponse = ResponseHandler.getText(response) ?: ""
                 _uiState.update { it.copy(searchResults = listOf(textResponse), isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
