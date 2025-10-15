@@ -53,3 +53,5 @@ package-lock.json
 /.kotlin/sessions/kotlin-compiler-17060980992664704555.salive
 kotlin-compiler-*
 /app/google-services.json
+/backup_for_ai.ps1
+/project_backup_full_2025-10-15_14-06-43.txt
