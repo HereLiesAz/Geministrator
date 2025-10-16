@@ -10,6 +10,10 @@ fun createCodeReviewAgent(modelName: String, tools: GitHubTools) = LlmAgent.buil
     .withTools(listOf(tools))
     .build()
 
+private fun Any.build(): Any {
+    TODO("Not yet implemented")
+}
+
 private fun LlmAgent.Builder.withTools(listOf: List<GitHubTools>): Any {
     TODO("Not yet implemented")
 }
