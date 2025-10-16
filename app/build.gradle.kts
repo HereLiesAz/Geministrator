@@ -66,6 +66,12 @@ android {
             excludes += "mozilla/public-suffix-list.txt"
         }
     }
+
+    configurations.all {
+        resolutionStrategy {
+            force("com.google.protobuf:protobuf-java:3.25.8")
+        }
+    }
 }
 
 kotlin {
@@ -73,6 +79,11 @@ kotlin {
 }
 
 dependencies {
+    constraints {
+        implementation("com.google.protobuf:protobuf-java:3.25.8") {
+            because("ADK requires protobuf-java, but a newer version is being pulled in transitively.")
+        }
+    }
     implementation(project(":jules-api-client"))
     implementation(project(":github-api-client"))
 
@@ -137,4 +148,5 @@ dependencies {
     implementation(libs.google.cloud.vertexai)
 
     // Agent Development Kit
+    implementation(libs.google.adk)
 }
