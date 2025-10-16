@@ -69,8 +69,13 @@ fun GeministratorNavHost(
         composable("cmd") {
             CmdScreen(setLoading = setLoading)
         }
-        composable("code_review") {
-            CodeReviewScreen()
+        composable(
+            route = "code_review/{sessionId}",
+            arguments = listOf(
+                navArgument("sessionId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            CodeReviewScreen(sessionId = backStackEntry.arguments?.getString("sessionId") ?: "")
         }
     }
 }
