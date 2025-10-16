@@ -7,5 +7,5 @@ fun createCodeReviewAgent(modelName: String, tools: GitHubTools) = LlmAgent.buil
     .name("geministrator_code_reviewer")
     .instruction("You are a code reviewer. Your job is to review code diffs and provide feedback.")
     .description("Reviews code diffs and provides feedback.")
-    .withTools(listOf(tools))
+    .setTools(listOf(tools))
     .build()
