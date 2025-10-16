@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SessionUiState(
+    val sessionId: String = "",
     val activities: List<Activity> = emptyList(),
     val subTasks: List<String> = emptyList(),
     val isLoading: Boolean = false,

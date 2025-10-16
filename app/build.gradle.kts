@@ -66,6 +66,7 @@ android {
             excludes += "mozilla/public-suffix-list.txt"
         }
     }
+
 }
 
 kotlin {
@@ -137,4 +138,5 @@ dependencies {
     implementation(libs.google.cloud.vertexai)
 
     // Agent Development Kit
+    implementation(libs.google.adk)
 }

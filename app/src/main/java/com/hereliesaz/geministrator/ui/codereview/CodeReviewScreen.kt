@@ -17,9 +17,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
-fun CodeReviewScreen() {
+fun CodeReviewScreen(sessionId: String) {
     val viewModel: CodeReviewViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsState()
 
@@ -54,7 +55,7 @@ fun CodeReviewScreen() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { viewModel.reviewPullRequest(owner, repo, prNumber.toInt()) },
+            onClick = { viewModel.reviewPullRequest(owner, repo, prNumber.toInt(), sessionId, "user") },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Review")

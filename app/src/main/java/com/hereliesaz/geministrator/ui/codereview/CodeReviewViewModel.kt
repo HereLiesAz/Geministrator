@@ -23,11 +23,11 @@ class CodeReviewViewModel(application: Application) : AndroidViewModel(applicati
     private val settingsRepository = SettingsRepository(application)
     private val codeReviewService = CodeReviewService(settingsRepository)
 
-    fun reviewPullRequest(owner: String, repo: String, prNumber: Int) {
+    fun reviewPullRequest(owner: String, repo: String, prNumber: Int, sessionId: String, userId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                codeReviewService.reviewPullRequest(owner, repo, prNumber)
+                codeReviewService.reviewPullRequest(owner, repo, prNumber, userId, sessionId)
                 _uiState.update { it.copy(isLoading = false, reviewResult = "Review complete!") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
