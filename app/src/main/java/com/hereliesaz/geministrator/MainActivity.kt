@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
@@ -51,6 +52,8 @@ fun MainScreen(mainViewModel: MainViewModel) {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
             GeministratorNavRail(
                 isLoading = mainUiState.isLoading,
                 onNavigate = { destination ->
@@ -58,7 +61,9 @@ fun MainScreen(mainViewModel: MainViewModel) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
+                },
+                navController = navController,
+                currentRoute = currentRoute
             )
             GeministratorNavHost(
                 navController = navController,

@@ -1,6 +1,9 @@
 allprojects {
     configurations.all {
         resolutionStrategy {
+            // The Google ADK library has a dependency on an older version of protobuf-java.
+            // A newer version is being pulled in transitively from another dependency,
+            // causing a conflict. This forces the version to the one required by ADK.
             force("com.google.protobuf:protobuf-java:3.25.8")
         }
     }

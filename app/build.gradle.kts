@@ -74,6 +74,7 @@ android {
             excludes += "mozilla/public-suffix-list.txt"
         }
     }
+
 }
 
 kotlin {
