@@ -66,6 +66,12 @@ android {
             excludes += "mozilla/public-suffix-list.txt"
         }
     }
+
+    configurations.all {
+        resolutionStrategy {
+            force("com.google.protobuf:protobuf-java:3.25.8")
+        }
+    }
 }
 
 kotlin {
@@ -73,6 +79,11 @@ kotlin {
 }
 
 dependencies {
+    constraints {
+        implementation("com.google.protobuf:protobuf-java:3.25.8") {
+            because("ADK requires protobuf-java, but a newer version is being pulled in transitively.")
+        }
+    }
     implementation(project(":jules-api-client"))
     implementation(project(":github-api-client"))
 
@@ -134,7 +145,9 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Gemini API
-    implementation(libs.google.cloud.vertexai)
+    implementation(libs.google.cloud.vertexai) {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+    }
 
     // Agent Development Kit
 
@@ -143,4 +156,9 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.google.adk) {
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+    }
+
+    implementation("com.google.protobuf:protobuf-javalite:3.25.3")
 }
