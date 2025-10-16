@@ -36,7 +36,6 @@ fun GeministratorNavRail(
         azRailItem(
             id = "code_review",
             text = "Code Review",
-            enabled = currentRoute?.startsWith("session/") == true,
             onClick = {
                 val sessionId = currentRoute?.substringAfter("session/")?.substringBefore("?")
                 if (sessionId != null) {
