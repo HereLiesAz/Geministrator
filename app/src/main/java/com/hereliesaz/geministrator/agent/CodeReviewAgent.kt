@@ -1,4 +1,4 @@
-package com.jules.apiclient.agent
+package com.hereliesaz.geministrator.agent
 
 import com.google.adk.agents.LlmAgent
 
@@ -9,7 +9,3 @@ fun createCodeReviewAgent(modelName: String, tools: GitHubTools) = LlmAgent.buil
     .description("Reviews code diffs and provides feedback.")
     .withTools(listOf(tools))
     .build()
-
-private fun LlmAgent.Builder.withTools(listOf: List<GitHubTools>): Any {
-    TODO("Not yet implemented")
-}

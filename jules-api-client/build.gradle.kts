@@ -15,4 +15,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
+    implementation(libs.google.adk)
 }
