@@ -137,4 +137,10 @@ dependencies {
     implementation(libs.google.cloud.vertexai)
 
     // Agent Development Kit
+
+    // Testing
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

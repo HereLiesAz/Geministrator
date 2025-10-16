@@ -30,7 +30,7 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
     - [x] Complete the session creation logic in `SourceSelectionScreen.kt`.
     - [x] Implement the UI in `SessionScreen.kt` to display the activity stream.
     - [x] Connect the Sora Editor in `IdeScreen.kt` to the Jules API to reflect file changes from agent activities.
-    - [ ] Implement UI buttons for core actions like "Run" and "Commit" and connect them to ViewModel functions.
+    - [x] Implement UI buttons for core actions like "Run" and "Commit" and connect them to ViewModel functions.
 
 ---
 
@@ -52,6 +52,7 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
 
 - [ ] **Testing and Quality Assurance**
     - [ ] Write unit tests for all ViewModels and Repositories.
+        - [x] `IdeViewModel`
     - [ ] Write integration tests for the Jules and Gemini API clients.
 
 - [ ] **Security and Deployment**

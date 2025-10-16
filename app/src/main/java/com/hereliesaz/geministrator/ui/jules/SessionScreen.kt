@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -103,7 +104,7 @@ fun SessionScreen(
                         ActivityItem(
                             activity = activity,
                             onFileClicked = { filePath ->
-                                navController.navigate("editor/${uiState.sessionId}/$filePath")
+                                navController.navigate("editor/${viewModel.sessionId}/$filePath")
                             }
                         )
                     }
