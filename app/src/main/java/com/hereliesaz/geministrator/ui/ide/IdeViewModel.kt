@@ -28,32 +28,18 @@ data class IdeUiState(
 
 class IdeViewModel(
     application: Application,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val settingsRepository: SettingsRepository,
+    private var julesApiClient: JulesApiClient?,
+    private var geminiApiClient: GeminiApiClient?
 ) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
-    private val settingsRepository = SettingsRepository(application)
-    private var geminiApiClient: GeminiApiClient? = null
-    private var julesApiClient: JulesApiClient? = null
     private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
     private val filePath: String = savedStateHandle.get<String>("filePath")!!
 
     init {
-        viewModelScope.launch {
-            val gcpProjectId = settingsRepository.gcpProjectId.first()
-            val gcpLocation = settingsRepository.gcpLocation.first()
-            val geminiModelName = settingsRepository.geminiModelName.first()
-
-            if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
-            }
-
-            val apiKey = settingsRepository.apiKey.first()
-            if (!apiKey.isNullOrBlank()) {
-                julesApiClient = JulesApiClient(apiKey)
-                loadActivities()
-            }
-        }
+        loadActivities()
     }
 
     private fun loadActivities() {

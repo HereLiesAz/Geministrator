@@ -30,7 +30,7 @@ class SessionViewModel(
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
 
-    private val sessionId: String = savedStateHandle.get<String>("sessionId")
+    internal val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
     private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
     private val settingsRepository = SettingsRepository(application)
