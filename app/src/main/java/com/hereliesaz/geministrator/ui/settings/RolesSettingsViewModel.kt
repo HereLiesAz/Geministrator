@@ -8,6 +8,7 @@ import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,10 +20,11 @@ data class RolesSettingsUiState(
     val error: String? = null
 )
 
-class RolesSettingsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val promptsRepository = PromptsRepository(application)
-    private val settingsRepository = SettingsRepository(application)
+class RolesSettingsViewModel(
+    private val promptsRepository: PromptsRepository,
+    private var settingsRepository: SettingsRepository,
+    private val application: Application
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RolesSettingsUiState())
     val uiState = _uiState.asStateFlow()
@@ -30,6 +32,9 @@ class RolesSettingsViewModel(application: Application) : AndroidViewModel(applic
     init {
         loadPrompts()
         viewModelScope.launch {
+            if (settingsRepository == null) {
+                settingsRepository = SettingsRepository(application)
+            }
             settingsRepository.enabledRoles.collect { enabledRoles ->
                 _uiState.update { it.copy(enabledRoles = enabledRoles) }
             }

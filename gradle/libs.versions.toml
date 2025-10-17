@@ -106,6 +106,7 @@ sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmat
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.7.0" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
 

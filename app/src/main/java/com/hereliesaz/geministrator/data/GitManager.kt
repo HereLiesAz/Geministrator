@@ -111,19 +111,17 @@ class GitManager(private val projectCacheDir: File) {
         status.untracked.forEach { statusStringBuilder.append("UNTRACKED: $it\n") }
         statusStringBuilder.toString().ifEmpty { "No changes." }
     }
+}
 
-    companion object {
-        fun cloneRepository(url: String, context: Context): Result<File> = runCatching {
-            val repoName = url.substringAfterLast('/').substringBeforeLast('.')
-            val destination = File(context.cacheDir, "cloned_repos/${repoName}_${UUID.randomUUID()}")
-            destination.mkdirs()
+fun cloneRepository(url: String, context: Context): Result<File> = runCatching {
+    val repoName = url.substringAfterLast('/').substringBeforeLast('.')
+    val destination = File(context.cacheDir, "cloned_repos/${repoName}_${UUID.randomUUID()}")
+    destination.mkdirs()
 
-            Git.cloneRepository()
-                .setURI(url)
-                .setDirectory(destination)
-                .call()
+    Git.cloneRepository()
+        .setURI(url)
+        .setDirectory(destination)
+        .call()
 
-            destination
-        }
-    }
+    destination
 }

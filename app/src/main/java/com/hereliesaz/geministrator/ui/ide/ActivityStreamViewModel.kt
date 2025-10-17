@@ -8,6 +8,7 @@ import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,21 +19,23 @@ data class ActivityStreamUiState(
     val error: String? = null
 )
 
-class ActivityStreamViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val settingsRepository = SettingsRepository(application)
-    private var apiClient: JulesApiClient? = null
+class ActivityStreamViewModel(
+    private var apiClient: JulesApiClient?,
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ActivityStreamUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
-            if (apiKey.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-            } else {
-                apiClient = JulesApiClient(apiKey)
+            if (apiClient == null) {
+                val apiKey = settingsRepository.apiKey.first()
+                if (apiKey.isNullOrBlank()) {
+                    _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
+                } else {
+                    apiClient = JulesApiClient(apiKey)
+                }
             }
         }
     }
