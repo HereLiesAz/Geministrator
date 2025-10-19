@@ -34,10 +34,10 @@ class CodeReviewService(
                 var review = "No review comments generated."
                 eventStream.blockingForEach { event ->
                     if (event.finalResponse() && event.content().isPresent) {
-                        event.content().get().parts().flatMap { parts ->
-                            if (parts.isEmpty()) Optional.empty() else Optional.of(parts.get(0))
-                        }.flatMap(Part::text).ifPresent { text ->
-                            review = text
+                        event.content().ifPresent { content ->
+                            content.parts().firstOrNull()?.text()?.ifPresent { text ->
+                                review = text
+                            }
                         }
                     }
                 }
