@@ -1,25 +1,24 @@
-package com.jules.apiclient.agent
+package com.hereliesaz.geministrator.agent
 
 import com.github.apiclient.Comment
 import com.github.apiclient.GitHubApiClient
 import com.github.apiclient.PullRequest
 import com.google.adk.tools.Tool
 import com.google.adk.tools.annotations.ToolFunction
-import kotlinx.coroutines.runBlocking
 
 class GitHubTools(private val apiClient: GitHubApiClient) : Tool {
     @ToolFunction
-    fun getPullRequests(owner: String, repo: String): List<PullRequest> = runBlocking {
-        apiClient.getPullRequests(owner, repo)
+    suspend fun getPullRequests(owner: String, repo: String): List<PullRequest> {
+        return apiClient.getPullRequests(owner, repo)
     }
 
     @ToolFunction
-    fun getPullRequestDiff(diffUrl: String): String = runBlocking {
-        apiClient.getPullRequestDiff(diffUrl)
+    suspend fun getPullRequestDiff(diffUrl: String): String {
+        return apiClient.getPullRequestDiff(diffUrl)
     }
 
     @ToolFunction
-    fun createComment(owner: String, repo: String, prNumber: Int, comment: String) = runBlocking {
+    suspend fun createComment(owner: String, repo: String, prNumber: Int, comment: String) {
         apiClient.createComment(owner, repo, prNumber, Comment(comment))
     }
 }

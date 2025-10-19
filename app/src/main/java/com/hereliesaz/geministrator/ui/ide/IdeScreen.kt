@@ -8,22 +8,59 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hereliesaz.geministrator.data.SettingsRepository
+import com.jules.apiclient.GeminiApiClient
+import com.jules.apiclient.JulesApiClient
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun IdeScreen(
     setLoading: (Boolean) -> Unit,
-    viewModel: IdeViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val settingsRepository = SettingsRepository(context)
+    val factory = object : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val julesApiClient = runBlocking {
+                val apiKey = settingsRepository.apiKey.first()
+                if (apiKey != null) JulesApiClient(apiKey) else null
+            }
+            val geminiApiClient = runBlocking {
+                val projectId = settingsRepository.gcpProjectId.first()
+                val location = settingsRepository.gcpLocation.first()
+                val modelName = settingsRepository.geminiModelName.first()
+                if (projectId != null && location != null && modelName != null) {
+                    GeminiApiClient(projectId, location, modelName)
+                } else {
+                    null
+                }
+            }
+            @Suppress("UNCHECKED_CAST")
+            return IdeViewModel(
+                context.applicationContext as android.app.Application,
+                androidx.lifecycle.SavedStateHandle(),
+                settingsRepository,
+                julesApiClient,
+                geminiApiClient
+            ) as T
+        }
+    }
+    val viewModel: IdeViewModel = viewModel(factory = factory)
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.isLoading) {
@@ -62,6 +99,41 @@ fun IdeScreen(
             ) {
                 Text("Generate Docs")
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.onRunClick() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Run")
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = { viewModel.onCommitClick() },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Commit")
+            }
+        }
+    }
+
+    if (uiState.showCommitDialog) {
+        CommitDialog(
+            commitMessage = uiState.commitMessage,
+            onCommitMessageChanged = { viewModel.onCommitMessageChanged(it) },
+            onCommit = { viewModel.onCommitConfirm() },
+            onDismiss = { viewModel.onCommitDialogDismiss() }
+        )
+    }
+
+    uiState.error?.let { error ->
+        Snackbar(
+            action = {
+                Button(onClick = { viewModel.onErrorShown() }) {
+                    Text("Dismiss")
+                }
+            }
+        ) {
+            Text(error)
         }
     }
 }
