@@ -22,7 +22,7 @@ data class RolesSettingsUiState(
 
 class RolesSettingsViewModel(
     private val promptsRepository: PromptsRepository,
-    private var settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     private val application: Application
 ) : ViewModel() {
 
@@ -32,9 +32,6 @@ class RolesSettingsViewModel(
     init {
         loadPrompts()
         viewModelScope.launch {
-            if (settingsRepository == null) {
-                settingsRepository = SettingsRepository(application)
-            }
             settingsRepository.enabledRoles.collect { enabledRoles ->
                 _uiState.update { it.copy(enabledRoles = enabledRoles) }
             }

@@ -8,7 +8,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.GitManager
 import com.hereliesaz.geministrator.data.SafProjectCopier
-import com.hereliesaz.geministrator.data.cloneRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,22 +22,19 @@ import androidx.lifecycle.ViewModelProvider
 class ProjectViewModel(
     private val projectManager: ProjectManager,
     private val application: Application,
-    var gitManager: GitManager? = null
+    private val gitManager: GitManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProjectUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            if (gitManager == null) {
-                projectManager.getProjectFolderUri()?.let { uri ->
-                    _uiState.update { it.copy(projectUri = uri, isLoading = true) }
-                    val localCopyPath = withContext(Dispatchers.IO) {
-                        SafProjectCopier.copyProjectToCache(application, uri)
-                    }
-                    gitManager = GitManager(localCopyPath)
-                    _uiState.update { it.copy(projectUri = uri, localCachePath = localCopyPath, isLoading = false) }
+            projectManager.getProjectFolderUri()?.let { uri ->
+                _uiState.update { it.copy(projectUri = uri, isLoading = true) }
+                val localCopyPath = withContext(Dispatchers.IO) {
+                    SafProjectCopier.copyProjectToCache(application, uri)
                 }
+                _uiState.update { it.copy(projectUri = uri, localCachePath = localCopyPath, isLoading = false) }
             }
         }
     }
@@ -51,12 +47,9 @@ class ProjectViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val result: Result<File> = withContext(Dispatchers.IO) {
-                cloneRepository(url, application)
+                gitManager.cloneRepository(url, application)
             }
             result.onSuccess { localRepoPath ->
-                if (gitManager == null) {
-                    gitManager = GitManager(localRepoPath)
-                }
                 _uiState.update {
                     it.copy(
                         localCachePath = localRepoPath,
@@ -80,7 +73,6 @@ class ProjectViewModel(
                 val localCopyPath = withContext(Dispatchers.IO) {
                     SafProjectCopier.copyProjectToCache(application, it)
                 }
-                gitManager = GitManager(localCopyPath)
                 _uiState.update { state -> state.copy(projectUri = it, localCachePath = localCopyPath, isLoading = false, cloneUrl = null) }
             }
         }

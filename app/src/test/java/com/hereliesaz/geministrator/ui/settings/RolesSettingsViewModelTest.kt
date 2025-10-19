@@ -40,7 +40,9 @@ class RolesSettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        promptsRepository = mockk(relaxed = true)
+        promptsRepository = mockk(relaxed = true) {
+            coEvery { getPrompts() } returns Result.success(emptyList())
+        }
         settingsRepository = mockk(relaxed = true)
         val application = mockk<Application>(relaxed = true)
         coEvery { settingsRepository.enabledRoles } returns flowOf(emptySet())

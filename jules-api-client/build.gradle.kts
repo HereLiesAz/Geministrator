@@ -15,4 +15,10 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
+    testImplementation(libs.system.rules)
+}
+
+tasks.withType<Test> {
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED",
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
