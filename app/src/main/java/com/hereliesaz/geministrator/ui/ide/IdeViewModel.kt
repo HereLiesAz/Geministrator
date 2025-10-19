@@ -11,6 +11,7 @@ import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -27,19 +28,36 @@ data class IdeUiState(
 )
 
 class IdeViewModel(
-    application: Application,
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
-    private var julesApiClient: JulesApiClient?,
-    private var geminiApiClient: GeminiApiClient?
-) : AndroidViewModel(application) {
+    private var geminiApiClient: GeminiApiClient?,
+    private var julesApiClient: JulesApiClient?
+) : ViewModel() {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
     private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
     private val filePath: String = savedStateHandle.get<String>("filePath")!!
 
     init {
-        loadActivities()
+        viewModelScope.launch {
+            if (geminiApiClient == null) {
+                val gcpProjectId = settingsRepository.gcpProjectId.first()
+                val gcpLocation = settingsRepository.gcpLocation.first()
+                val geminiModelName = settingsRepository.geminiModelName.first()
+
+                if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
+                    geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
+                }
+            }
+
+            if (julesApiClient == null) {
+                val apiKey = settingsRepository.apiKey.first()
+                if (!apiKey.isNullOrBlank()) {
+                    julesApiClient = JulesApiClient(apiKey)
+                    loadActivities()
+                }
+            }
+        }
     }
 
     private fun loadActivities() {

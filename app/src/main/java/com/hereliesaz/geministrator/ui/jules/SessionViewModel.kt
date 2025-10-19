@@ -12,6 +12,7 @@ import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,44 +27,48 @@ data class SessionUiState(
 )
 
 class SessionViewModel(
-    application: Application,
-    savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
+    private val savedStateHandle: SavedStateHandle,
+    private val settingsRepository: SettingsRepository,
+    private var julesApiClient: JulesApiClient?,
+    private var geminiApiClient: GeminiApiClient?,
+    private var a2aCommunicator: A2ACommunicator?
+) : ViewModel() {
 
     internal val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
     private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
-    private val settingsRepository = SettingsRepository(application)
-    private var julesApiClient: JulesApiClient? = null
-    private var geminiApiClient: GeminiApiClient? = null
-    private var a2aCommunicator: A2ACommunicator? = null
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
-            val githubRepository = settingsRepository.githubRepository.first()
-            val gcpLocation = settingsRepository.gcpLocation.first()
-            val geminiModelName = settingsRepository.geminiModelName.first()
-
-            if (apiKey.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-                return@launch
+            if (julesApiClient == null) {
+                val apiKey = settingsRepository.apiKey.first()
+                if (apiKey.isNullOrBlank()) {
+                    _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
+                    return@launch
+                }
+                julesApiClient = JulesApiClient(apiKey)
             }
-            if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
-                return@launch
-            }
+            if (geminiApiClient == null) {
+                val githubRepository = settingsRepository.githubRepository.first()
+                val gcpLocation = settingsRepository.gcpLocation.first()
+                val geminiModelName = settingsRepository.geminiModelName.first()
 
-            julesApiClient = JulesApiClient(apiKey)
-            geminiApiClient = GeminiApiClient(
-                projectId = githubRepository,
-                location = gcpLocation,
-                modelName = geminiModelName
-            )
-            a2aCommunicator = A2ACommunicator(julesApiClient!!, geminiApiClient!!)
+                if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
+                    _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
+                    return@launch
+                }
+                geminiApiClient = GeminiApiClient(
+                    projectId = githubRepository,
+                    location = gcpLocation,
+                    modelName = geminiModelName
+                )
+            }
+            if (a2aCommunicator == null) {
+                a2aCommunicator = A2ACommunicator(julesApiClient!!, geminiApiClient!!)
+            }
             loadActivities()
         }
     }

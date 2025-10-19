@@ -1,8 +1,9 @@
-package com.hereliesaz.geministrator.ui.ide
+package com.hereliesaz.geministrator.ui.jules
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.hereliesaz.geministrator.data.SettingsRepository
+import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
 import io.mockk.coEvery
@@ -22,40 +23,43 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 @ExperimentalCoroutinesApi
-class IdeViewModelTest {
+class SessionViewModelTest {
 
     private class TestViewModelFactory(
         private val savedStateHandle: SavedStateHandle,
         private val settingsRepository: SettingsRepository,
+        private val julesApiClient: JulesApiClient,
         private val geminiApiClient: GeminiApiClient,
-        private val julesApiClient: JulesApiClient
+        private val a2aCommunicator: A2ACommunicator
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdeViewModel(savedStateHandle, settingsRepository, geminiApiClient, julesApiClient) as T
+            return SessionViewModel(savedStateHandle, settingsRepository, julesApiClient, geminiApiClient, a2aCommunicator) as T
         }
     }
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var settingsRepository: SettingsRepository
-    private lateinit var geminiApiClient: GeminiApiClient
     private lateinit var julesApiClient: JulesApiClient
-    private lateinit var viewModel: IdeViewModel
+    private lateinit var geminiApiClient: GeminiApiClient
+    private lateinit var a2aCommunicator: A2ACommunicator
+    private lateinit var viewModel: SessionViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         settingsRepository = mockk(relaxed = true)
-        geminiApiClient = mockk(relaxed = true)
         julesApiClient = mockk(relaxed = true)
+        geminiApiClient = mockk(relaxed = true)
+        a2aCommunicator = mockk(relaxed = true)
         val savedStateHandle = SavedStateHandle().apply {
             set("sessionId", "test-session")
-            set("filePath", "test-path")
+            set("roles", "planner,researcher")
         }
         coEvery { settingsRepository.apiKey } returns flowOf("test-api-key")
-        coEvery { settingsRepository.gcpProjectId } returns flowOf("test-project-id")
+        coEvery { settingsRepository.githubRepository } returns flowOf("test-repo")
         coEvery { settingsRepository.gcpLocation } returns flowOf("test-location")
         coEvery { settingsRepository.geminiModelName } returns flowOf("test-model")
-        viewModel = TestViewModelFactory(savedStateHandle, settingsRepository, geminiApiClient, julesApiClient).create(IdeViewModel::class.java)
+        viewModel = TestViewModelFactory(savedStateHandle, settingsRepository, julesApiClient, geminiApiClient, a2aCommunicator).create(SessionViewModel::class.java)
     }
 
     @After
@@ -64,16 +68,15 @@ class IdeViewModelTest {
     }
 
     @Test
-    fun `onAutocompleteClick should call geminiApiClient`() = runTest {
+    fun `sendMessage should call julesApiClient`() = runTest {
         // Given
-        val editor = mockk<io.github.rosemoe.sora.widget.CodeEditor>(relaxed = true)
-        viewModel.onEditorAttached(editor)
-        coEvery { geminiApiClient.generateContent(any()) } returns mockk(relaxed = true)
+        val prompt = "test-prompt"
+        coEvery { julesApiClient.sendMessage("test-session", prompt) } returns Unit
 
         // When
-        viewModel.onAutocompleteClick()
+        viewModel.sendMessage(prompt)
 
         // Then
-        coVerify(exactly = 1) { geminiApiClient.generateContent(any()) }
+        coVerify(exactly = 1) { julesApiClient.sendMessage("test-session", prompt) }
     }
 }

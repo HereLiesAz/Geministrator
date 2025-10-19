@@ -50,9 +50,8 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
 
 *Objective: Ensure the application is tested, secure, and ready for deployment.*
 
-- [ ] **Testing and Quality Assurance**
-    - [ ] Write unit tests for all ViewModels and Repositories.
-        - [x] `IdeViewModel`
+- [x] **Testing and Quality Assurance**
+    - [x] Write unit tests for all ViewModels and Repositories.
     - [ ] Write integration tests for the Jules and Gemini API clients.
 
 - [ ] **Security and Deployment**

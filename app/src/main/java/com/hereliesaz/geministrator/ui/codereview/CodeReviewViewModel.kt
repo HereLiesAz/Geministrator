@@ -7,6 +7,7 @@ import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.service.CodeReviewService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,12 +17,11 @@ data class CodeReviewUiState(
     val reviewResult: String? = null
 )
 
-class CodeReviewViewModel(application: Application) : AndroidViewModel(application) {
+class CodeReviewViewModel(
+    private val codeReviewService: CodeReviewService
+) : ViewModel() {
     private val _uiState = MutableStateFlow(CodeReviewUiState())
     val uiState = _uiState.asStateFlow()
-
-    private val settingsRepository = SettingsRepository(application)
-    private val codeReviewService = CodeReviewService(settingsRepository)
 
     fun reviewPullRequest(owner: String, repo: String, prNumber: Int, sessionId: String, userId: String) {
         viewModelScope.launch {

@@ -1,4 +1,5 @@
 [versions]
+system-rules = "1.19.0"
 a2a = "0.3.0.Beta2"
 aznavrail = "3.13"
 retrofit = "3.0.0"
@@ -107,6 +108,7 @@ sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmat
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.7.0" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
 
@@ -120,6 +122,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.2.1" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+system-rules = { group = "com.github.stefanbirkner", name = "system-rules", version.ref = "system-rules" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-documentfile = { group = "androidx.documentfile", name = "documentfile", version.ref = "documentfile" }
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }

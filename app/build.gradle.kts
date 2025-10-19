@@ -147,4 +147,12 @@ dependencies {
 
     // Agent Development Kit
     implementation(libs.google.adk)
+
+    // Testing
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation("io.mockk:mockk-android:1.13.3")
+    testImplementation(libs.junit)
 }
