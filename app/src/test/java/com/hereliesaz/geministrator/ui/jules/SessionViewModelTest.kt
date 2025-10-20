@@ -3,80 +3,96 @@ package com.hereliesaz.geministrator.ui.jules
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.hereliesaz.geministrator.data.SettingsRepository
+import com.hereliesaz.geministrator.util.ViewModelFactory
 import com.jules.apiclient.A2ACommunicator
+import com.jules.apiclient.ActivityList
 import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @ExperimentalCoroutinesApi
 class SessionViewModelTest {
 
-    private class TestViewModelFactory(
-        private val savedStateHandle: SavedStateHandle,
-        private val settingsRepository: SettingsRepository,
-        private val julesApiClient: JulesApiClient,
-        private val geminiApiClient: GeminiApiClient,
-        private val a2aCommunicator: A2ACommunicator
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SessionViewModel(savedStateHandle, settingsRepository, julesApiClient, geminiApiClient, a2aCommunicator) as T
-        }
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var settingsRepository: SettingsRepository
-    private lateinit var julesApiClient: JulesApiClient
-    private lateinit var geminiApiClient: GeminiApiClient
-    private lateinit var a2aCommunicator: A2ACommunicator
     private lateinit var viewModel: SessionViewModel
+    private val mockJulesApiClient: JulesApiClient = mock()
+    private val mockGeminiApiClient: GeminiApiClient = mock()
+    private val mockA2ACommunicator: A2ACommunicator = mock()
+    private val mockSettingsRepository: SettingsRepository = mock()
+    private val mockApplication: Application = mock()
+    private val savedStateHandle = SavedStateHandle(mapOf("sessionId" to "test_session", "roles" to "planner,researcher"))
 
     @Before
     fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-        settingsRepository = mockk(relaxed = true)
-        julesApiClient = mockk(relaxed = true)
-        geminiApiClient = mockk(relaxed = true)
-        a2aCommunicator = mockk(relaxed = true)
-        val savedStateHandle = SavedStateHandle().apply {
-            set("sessionId", "test-session")
-            set("roles", "planner,researcher")
+        val factory = ViewModelFactory {
+            SessionViewModel(
+                application = mockApplication,
+                savedStateHandle = savedStateHandle,
+                settingsRepository = mockSettingsRepository,
+                julesApiClient = mockJulesApiClient,
+                geminiApiClient = mockGeminiApiClient,
+                a2aCommunicator = mockA2ACommunicator
+            )
         }
-        coEvery { settingsRepository.apiKey } returns flowOf("test-api-key")
-        coEvery { settingsRepository.githubRepository } returns flowOf("test-repo")
-        coEvery { settingsRepository.gcpLocation } returns flowOf("test-location")
-        coEvery { settingsRepository.geminiModelName } returns flowOf("test-model")
-        viewModel = TestViewModelFactory(savedStateHandle, settingsRepository, julesApiClient, geminiApiClient, a2aCommunicator).create(SessionViewModel::class.java)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+        viewModel = factory.create(SessionViewModel::class.java)
     }
 
     @Test
-    fun `sendMessage should call julesApiClient`() = runTest {
+    fun `loadActivities should call getActivities with correct session id`() = runTest {
         // Given
-        val prompt = "test-prompt"
-        coEvery { julesApiClient.sendMessage("test-session", prompt) } returns Unit
+        whenever(mockJulesApiClient.getActivities("test_session")).thenReturn(ActivityList(emptyList()))
+
+        // When
+        viewModel.loadActivities()
+
+        // Then
+        verify(mockJulesApiClient).getActivities("test_session")
+    }
+
+    @Test
+    fun `sendMessage should call sendMessage with correct parameters`() = runTest {
+        // Given
+        val prompt = "test prompt"
+        whenever(mockJulesApiClient.getActivities("test_session")).thenReturn(ActivityList(emptyList()))
 
         // When
         viewModel.sendMessage(prompt)
 
         // Then
-        coVerify(exactly = 1) { julesApiClient.sendMessage("test-session", prompt) }
+        verify(mockJulesApiClient).sendMessage("test_session", prompt)
+    }
+
+    @Test
+    fun `askGemini should call julesToGemini with correct prompt`() = runTest {
+        // Given
+        val prompt = "test prompt"
+
+        // When
+        viewModel.askGemini(prompt)
+
+        // Then
+        verify(mockA2ACommunicator).julesToGemini(prompt)
+    }
+
+    @Test
+    fun `decomposeTask should call generateContent with correct prompt`() = runTest {
+        // Given
+        val task = "test task"
+        val prompt = "Decompose the following high-level task into a list of smaller, manageable sub-tasks:\n\n$task"
+
+        // When
+        viewModel.decomposeTask(task)
+
+        // Then
+        verify(mockGeminiApiClient).generateContent(prompt)
     }
 }

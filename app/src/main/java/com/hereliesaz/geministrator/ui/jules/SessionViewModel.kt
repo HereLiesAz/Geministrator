@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.google.cloud.vertexai.generativeai.ResponseHandler
 import com.hereliesaz.geministrator.data.SettingsRepository
+import androidx.annotation.VisibleForTesting
 import com.jules.apiclient.A2ACommunicator
 import com.jules.apiclient.Activity
 import com.jules.apiclient.GeminiApiClient
@@ -37,6 +38,14 @@ class SessionViewModel(
     internal val sessionId: String = savedStateHandle.get<String>("sessionId")
         ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
     private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
+    @VisibleForTesting
+    internal var settingsRepository = SettingsRepository(application)
+    @VisibleForTesting
+    internal var julesApiClient: JulesApiClient? = null
+    @VisibleForTesting
+    internal var geminiApiClient: GeminiApiClient? = null
+    @VisibleForTesting
+    internal var a2aCommunicator: A2ACommunicator? = null
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState = _uiState.asStateFlow()

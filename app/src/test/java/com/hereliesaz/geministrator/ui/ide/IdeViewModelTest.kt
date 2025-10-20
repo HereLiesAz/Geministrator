@@ -3,77 +3,61 @@ package com.hereliesaz.geministrator.ui.ide
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.GeminiApiClient
+import com.hereliesaz.geministrator.util.ViewModelFactory
 import com.jules.apiclient.JulesApiClient
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 @ExperimentalCoroutinesApi
 class IdeViewModelTest {
 
-    private class TestViewModelFactory(
-        private val savedStateHandle: SavedStateHandle,
-        private val settingsRepository: SettingsRepository,
-        private val geminiApiClient: GeminiApiClient,
-        private val julesApiClient: JulesApiClient
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdeViewModel(savedStateHandle, settingsRepository, geminiApiClient, julesApiClient) as T
-        }
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var settingsRepository: SettingsRepository
-    private lateinit var geminiApiClient: GeminiApiClient
-    private lateinit var julesApiClient: JulesApiClient
     private lateinit var viewModel: IdeViewModel
+    private val mockJulesApiClient: JulesApiClient = mock()
+    private val mockSettingsRepository: SettingsRepository = mock()
+    private val mockApplication: Application = mock()
+    private val savedStateHandle = SavedStateHandle(mapOf("sessionId" to "test_session", "filePath" to "test_file.kt"))
 
     @Before
     fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-        settingsRepository = mockk(relaxed = true)
-        geminiApiClient = mockk(relaxed = true)
-        julesApiClient = mockk(relaxed = true)
-        val savedStateHandle = SavedStateHandle().apply {
-            set("sessionId", "test-session")
-            set("filePath", "test-path")
+        val factory = ViewModelFactory {
+            IdeViewModel(
+                application = mockApplication,
+                savedStateHandle = savedStateHandle,
+                settingsRepository = mockSettingsRepository,
+                julesApiClient = mockJulesApiClient,
+                geminiApiClient = null
+            )
         }
-        coEvery { settingsRepository.apiKey } returns flowOf("test-api-key")
-        coEvery { settingsRepository.gcpProjectId } returns flowOf("test-project-id")
-        coEvery { settingsRepository.gcpLocation } returns flowOf("test-location")
-        coEvery { settingsRepository.geminiModelName } returns flowOf("test-model")
-        viewModel = TestViewModelFactory(savedStateHandle, settingsRepository, geminiApiClient, julesApiClient).create(IdeViewModel::class.java)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+        viewModel = factory.create(IdeViewModel::class.java)
     }
 
     @Test
-    fun `onAutocompleteClick should call geminiApiClient`() = runTest {
-        // Given
-        val editor = mockk<io.github.rosemoe.sora.widget.CodeEditor>(relaxed = true)
-        viewModel.onEditorAttached(editor)
-        coEvery { geminiApiClient.generateContent(any()) } returns mockk(relaxed = true)
-
+    fun `onRunClick should call sendMessage with correct parameters`() = runTest {
         // When
-        viewModel.onAutocompleteClick()
+        viewModel.onRunClick()
 
         // Then
-        coVerify(exactly = 1) { geminiApiClient.generateContent(any()) }
+        verify(mockJulesApiClient).sendMessage("test_session", "Run the code in the file `test_file.kt`")
+    }
+
+    @Test
+    fun `onCommitConfirm should call sendMessage with correct commit message`() = runTest {
+        // Given
+        val commitMessage = "Test commit message"
+        viewModel.onCommitMessageChanged(commitMessage)
+
+        // When
+        viewModel.onCommitConfirm()
+
+        // Then
+        verify(mockJulesApiClient).sendMessage("test_session", "Commit changes with message: '$commitMessage'")
     }
 }

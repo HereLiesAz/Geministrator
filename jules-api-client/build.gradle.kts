@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.okhttp)
+    implementation(project(":app"))
     implementation(libs.google.adk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
