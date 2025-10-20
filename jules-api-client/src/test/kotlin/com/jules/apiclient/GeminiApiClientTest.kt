@@ -38,7 +38,6 @@ class GeminiApiClientTest {
     }
 
     @Test
-    @Ignore("This test requires valid credentials and is intended for manual execution.")
     fun `generateContent should return a response`() = runTest {
         // When
         val result = apiClient.generateContent("Hello, Gemini!")
