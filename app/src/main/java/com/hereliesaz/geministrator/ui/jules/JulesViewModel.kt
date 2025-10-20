@@ -12,6 +12,7 @@ import com.jules.apiclient.Source
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -28,24 +29,26 @@ data class JulesUiState(
     val selectedRoles: Set<String> = emptySet()
 )
 
-class JulesViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val settingsRepository = SettingsRepository(application)
-    private val promptsRepository = PromptsRepository(application)
-    private var apiClient: JulesApiClient? = null
+class JulesViewModel(
+    private val settingsRepository: SettingsRepository,
+    private val promptsRepository: PromptsRepository
+) : ViewModel() {
+    internal var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(JulesUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
-            if (apiKey.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-            } else {
-                apiClient = JulesApiClient(apiKey)
-                loadSources()
+            if (apiClient == null) {
+                val apiKey = settingsRepository.apiKey.first()
+                if (apiKey.isNullOrBlank()) {
+                    _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
+                } else {
+                    apiClient = JulesApiClient(apiKey)
+                }
             }
+            loadSources()
             loadRoles()
         }
     }

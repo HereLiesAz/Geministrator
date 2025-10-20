@@ -7,10 +7,14 @@ import androidx.compose.ui.graphics.Color
 import com.hereliesaz.aznavrail.AzNavRail
 import androidx.compose.foundation.background
 
+import androidx.navigation.NavController
+
 @Composable
 fun GeministratorNavRail(
     isLoading: Boolean,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    navController: NavController,
+    currentRoute: String?
 ) {
     AzNavRail(modifier = Modifier.background(Color.Transparent)) {
         azSettings(isLoading = isLoading)
@@ -32,7 +36,12 @@ fun GeministratorNavRail(
         azRailItem(
             id = "code_review",
             text = "Code Review",
-            onClick = { onNavigate("code_review") }
+            onClick = {
+                val sessionId = currentRoute?.substringAfter("session/")?.substringBefore("?")
+                if (sessionId != null) {
+                    onNavigate("code_review/$sessionId")
+                }
+            }
         )
         azRailItem(
             id = "settings",

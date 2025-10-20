@@ -15,6 +15,14 @@ if (localPropertiesFile.exists()) {
     localProperties.load(FileInputStream(localPropertiesFile))
 }
 
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("com.google.protobuf:protobuf-java"))
+            .using(module("com.google.protobuf:protobuf-javalite:3.25.3"))
+            .because("Android requires the javalite version of protobuf")
+    }
+}
+
 android {
     namespace = "com.hereliesaz.geministrator"
     compileSdk = 36
@@ -66,6 +74,7 @@ android {
             excludes += "mozilla/public-suffix-list.txt"
         }
     }
+
 }
 
 kotlin {
