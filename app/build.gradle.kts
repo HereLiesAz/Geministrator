@@ -10,10 +10,12 @@ plugins {
 }
 
 configurations.all {
-    resolutionStrategy.dependencySubstitution {
-        substitute(module("com.google.protobuf:protobuf-java"))
-            .using(module("com.google.protobuf:protobuf-javalite:3.25.3"))
-            .because("Android requires the javalite version of protobuf")
+    resolutionStrategy {
+        dependencySubstitution {
+            substitute(module("com.google.protobuf:protobuf-java"))
+                .using(module("com.google.protobuf:protobuf-javalite:3.25.3"))
+                .because("Android requires the javalite version of protobuf")
+        }
     }
 }
 
