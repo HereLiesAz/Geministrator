@@ -14,11 +14,7 @@ class A2ACommunicator(
      * Has Jules ask a question to the Gemini agent.
      */
     suspend fun julesToGemini(prompt: String): String {
-        val response = geminiApiClient.generateContent(prompt)
-
-        // In a real scenario, we would translate the Gemini response
-        // into a format that the Jules agent can understand.
-        return response.toString() // This is a simplification.
+        return geminiApiClient.generateContent(prompt)
     }
 
     /**

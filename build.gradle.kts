@@ -1,7 +1,6 @@
 allprojects {
     configurations.all {
         resolutionStrategy {
-            force("com.google.protobuf:protobuf-java:3.25.3")
             force("jakarta.annotation:jakarta.annotation-api:1.3.5")
             force("org.glassfish.hk2.external:jakarta.inject:2.6.1")
         }

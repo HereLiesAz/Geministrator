@@ -36,27 +36,12 @@ fun IdeScreen(
     val settingsRepository = SettingsRepository(context)
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val julesApiClient = runBlocking {
-                val apiKey = settingsRepository.apiKey.first()
-                if (apiKey != null) JulesApiClient(apiKey) else null
-            }
-            val geminiApiClient = runBlocking {
-                val projectId = settingsRepository.gcpProjectId.first()
-                val location = settingsRepository.gcpLocation.first()
-                val modelName = settingsRepository.geminiModelName.first()
-                if (projectId != null && location != null && modelName != null) {
-                    GeminiApiClient(projectId, location, modelName)
-                } else {
-                    null
-                }
-            }
             @Suppress("UNCHECKED_CAST")
             return IdeViewModel(
-                context.applicationContext as android.app.Application,
                 androidx.lifecycle.SavedStateHandle(),
                 settingsRepository,
-                julesApiClient,
-                geminiApiClient
+                null,
+                null
             ) as T
         }
     }

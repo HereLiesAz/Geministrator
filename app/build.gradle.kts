@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -34,6 +36,15 @@ android {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
+
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(localPropertiesFile.inputStream())
+        }
+
+        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId")}\"")
+        buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
     }
 
     buildFeatures {
@@ -133,10 +144,10 @@ dependencies {
     implementation(libs.aznavrail)
 
     // Kotlinx Serialization
+    implementation(libs.google.cloud.vertexai)
     implementation(libs.kotlinx.serialization.json)
 
     // Gemini API
-    implementation(libs.google.cloud.vertexai)
 
     // Agent Development Kit
 

@@ -35,52 +35,11 @@ class SessionViewModel(
     private var a2aCommunicator: A2ACommunicator?
 ) : ViewModel() {
 
-    internal val sessionId: String = savedStateHandle.get<String>("sessionId")
-        ?: throw IllegalArgumentException("Session ID not found in SavedStateHandle")
-    private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",").orEmpty().toSet()
-    @VisibleForTesting
-    internal var settingsRepository = SettingsRepository(application)
-    @VisibleForTesting
-    internal var julesApiClient: JulesApiClient? = null
-    @VisibleForTesting
-    internal var geminiApiClient: GeminiApiClient? = null
-    @VisibleForTesting
-    internal var a2aCommunicator: A2ACommunicator? = null
+    internal val sessionId: String = savedStateHandle.get<String>("sessionId")!!
+    private val roles: Set<String> = savedStateHandle.get<String>("roles")?.split(",")?.toSet() ?: emptySet()
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState = _uiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            if (julesApiClient == null) {
-                val apiKey = settingsRepository.apiKey.first()
-                if (apiKey.isNullOrBlank()) {
-                    _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-                    return@launch
-                }
-                julesApiClient = JulesApiClient(apiKey)
-            }
-            if (geminiApiClient == null) {
-                val githubRepository = settingsRepository.githubRepository.first()
-                val gcpLocation = settingsRepository.gcpLocation.first()
-                val geminiModelName = settingsRepository.geminiModelName.first()
-
-                if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
-                    _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
-                    return@launch
-                }
-                geminiApiClient = GeminiApiClient(
-                    projectId = githubRepository,
-                    location = gcpLocation,
-                    modelName = geminiModelName
-                )
-            }
-            if (a2aCommunicator == null) {
-                a2aCommunicator = A2ACommunicator(julesApiClient!!, geminiApiClient!!)
-            }
-            loadActivities()
-        }
-    }
 
     fun loadActivities() {
         val client = julesApiClient ?: return
@@ -139,7 +98,7 @@ class SessionViewModel(
             try {
                 val prompt = "Decompose the following high-level task into a list of smaller, manageable sub-tasks:\n\n$task"
                 val response = client.generateContent(prompt)
-                val subTasks = response?.let { ResponseHandler.getText(it) }.orEmpty().split("\n").filter { it.isNotBlank() }
+                val subTasks = response.let { ResponseHandler.getText(it) }.split("\n").filter { it.isNotBlank() }
                 _uiState.update { it.copy(subTasks = subTasks, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

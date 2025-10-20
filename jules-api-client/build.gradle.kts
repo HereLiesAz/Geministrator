@@ -25,8 +25,8 @@ kotlin {
 }
 
 dependencies {
+    api(libs.google.genai)
     implementation(project(":github-api-client"))
-    implementation(libs.google.cloud.vertexai)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
