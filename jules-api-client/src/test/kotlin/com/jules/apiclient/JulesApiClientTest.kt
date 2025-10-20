@@ -1,34 +1,21 @@
 package com.jules.apiclient
 
+import com.jules.apiclient.util.TestProperties
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
-import java.io.File
-import java.io.FileInputStream
-import java.util.Properties
 
 class JulesApiClientTest {
 
+    private lateinit var apiKey: String
     private lateinit var apiClient: JulesApiClient
 
     @Before
     fun setUp() {
-        val properties = Properties()
-        // Tests run from the module's directory, so we need to go up one level to find the root local.properties
-        val localPropertiesFile = File("../local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(FileInputStream(localPropertiesFile))
-        } else {
-            // Fallback for different execution contexts
-            val rootProperties = File("local.properties")
-            if (rootProperties.exists()) {
-                properties.load(FileInputStream(rootProperties))
-            } else {
-                println("local.properties file not found at ${localPropertiesFile.absolutePath} or the current directory.")
-            }
-        }
-        val apiKey = properties.getProperty("julesApiKey", "placeholder")
-
+        apiKey = TestProperties.getProperty("julesApiKey") ?: ""
+        assumeTrue("Jules API key is a placeholder, skipping test.", apiKey.isNotEmpty() && apiKey != "placeholder")
         apiClient = JulesApiClient(apiKey)
     }
 
@@ -38,7 +25,7 @@ class JulesApiClientTest {
         val result = apiClient.getSources()
 
         // Then
-        assert(result.sources.isNotEmpty())
+        assertTrue("The sources list should not be empty.", result.sources.isNotEmpty())
     }
 
     @Test
@@ -47,6 +34,6 @@ class JulesApiClientTest {
         val result = apiClient.getSessions()
 
         // Then
-        assert(result.isNotEmpty())
+        assertTrue("The sessions list should not be empty.", result.isNotEmpty())
     }
 }

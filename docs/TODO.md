@@ -56,5 +56,5 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
     - [ ] Write integration tests for the Jules and Gemini API clients.
 
 - [ ] **Security and Deployment**
-    - [ ] Replace `local.properties` with the `secrets-gradle-plugin` to secure API keys.
+    - [x] Replace `local.properties` with the `secrets-gradle-plugin` to secure API keys.
     - [ ] Establish a CI/CD pipeline using GitHub Actions to automate builds, tests, and releases.

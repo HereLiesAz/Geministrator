@@ -4,15 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-}
-
-import java.util.Properties
-import java.io.FileInputStream
-
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localProperties.load(FileInputStream(localPropertiesFile))
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 configurations.all {
@@ -42,13 +34,14 @@ android {
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
-
-        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId")}\"")
-        buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
     }
 
     buildFeatures {
         buildConfig = true
+    }
+
+    secrets {
+        // Use the default properties file (local.properties)
     }
 
     buildTypes {
