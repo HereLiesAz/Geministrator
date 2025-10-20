@@ -13,7 +13,7 @@ The Google Agent Development Kit is a fundamental, non-negotiable component of t
 The ADK is used to:
 
 -   **Define Agent Personas:** The ADK's `LlmAgent` builder provides a fluent API for defining the name, instruction, and description of our AI agents.
--   **Register Agent Tools:** The ADK's `addTool()` method allows us to provide our agents with the tools they need to interact with the outside world, such as the `GitHubApiClient`.
+-   **Register Agent Tools:** The ADK's `addTool()` method allows us to provide our agents with the tools they need to interact with the outside world, for example by passing tool classes that wrap clients like the `GitHubApiClient`.
 -   **Execute Agentic Workflows:** The ADK's `InMemoryRunner` provides a simple, efficient way to execute our agents and manage their lifecycle.
 
 ## Future Development
