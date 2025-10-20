@@ -2,6 +2,7 @@ package com.jules.apiclient.agent
 
 import com.google.adk.agents.LlmAgent
 import com.github.apiclient.GitHubApiClient
+import com.jules.apiclient.agent.GitHubTools
 
 fun createCodeReviewAgent(modelName: String, gitHubApiClient: GitHubApiClient) = LlmAgent.builder()
     .model(modelName)

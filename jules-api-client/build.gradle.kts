@@ -1,7 +1,7 @@
 import org.gradle.internal.impldep.com.jcraft.jsch.ConfigRepository.defaultConfig
 
 plugins {
-    id(com.android.library)
+    id("com.android.library")
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
 }
@@ -32,8 +32,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.okhttp)
-    implementation(project(":app"))
-    implementation(libs.google.adk)
+    api(libs.google.adk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)

@@ -1,11 +1,11 @@
 allprojects {
     configurations.all {
         resolutionStrategy {
-            // The Google ADK library has a dependency on an older version of protobuf-java.
-            // A newer version is being pulled in transitively from another dependency,
-            // causing a conflict. This forces the version to the one required by ADK.
-            force("com.google.protobuf:protobuf-java:3.25.8")
+            force("com.google.protobuf:protobuf-java:3.25.3")
+            force("jakarta.annotation:jakarta.annotation-api:1.3.5")
+            force("org.glassfish.hk2.external:jakarta.inject:2.6.1")
         }
+        exclude(group = "commons-logging", module = "commons-logging")
     }
 }
 
