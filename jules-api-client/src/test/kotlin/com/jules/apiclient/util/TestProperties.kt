@@ -19,7 +19,7 @@ object TestProperties {
         }
 
         if (localPropertiesFile.exists()) {
-            properties.load(FileInputStream(localPropertiesFile))
+            FileInputStream(localPropertiesFile).use { properties.load(it) }
         } else {
             println("Warning: local.properties file not found. Integration tests may be skipped.")
         }
