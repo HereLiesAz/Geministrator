@@ -1,14 +1,8 @@
 package com.hereliesaz.geministrator.service
 
+import com.hereliesaz.geministrator.agent.GitHubTools
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.agent.GitHubTools
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Test
 
 class CodeReviewServiceTest {
 

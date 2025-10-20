@@ -1,15 +1,15 @@
 package com.hereliesaz.geministrator.service
 
 import com.google.adk.runner.InMemoryRunner
+import com.hereliesaz.geministrator.agent.GitHubTools
+import com.hereliesaz.geministrator.agent.createCodeReviewAgent
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.agent.createCodeReviewAgent
-import com.jules.apiclient.agent.GitHubTools
-import com.jules.apiclient.agent.GitHubToolSet
 import kotlinx.coroutines.flow.first
 import com.github.apiclient.GitHubApiClient
 import com.google.genai.types.Content
 import com.google.genai.types.Part
-import java.util.Optional
+import com.google.genai.types.text
+import kotlinx.coroutines.flow.lastOrNull
 
 class CodeReviewService(
     private val settingsRepository: SettingsRepository,
@@ -20,8 +20,8 @@ class CodeReviewService(
 
         if (geminiModelName != null && githubToken != null) {
             val gitHubApiClient = GitHubApiClient(githubToken)
-            val toolSet = GitHubToolSet(gitHubApiClient)
-            val agent = createCodeReviewAgent(geminiModelName, toolSet)
+            val tools = GitHubTools(gitHubApiClient)
+            val agent = createCodeReviewAgent(geminiModelName, tools)
             val runner = InMemoryRunner(agent)
 
             val prs = gitHubApiClient.getPullRequests(owner, repo)
@@ -41,6 +41,8 @@ class CodeReviewService(
                         }
                     }
                 }
+                val response = runner.runAsync(userId, sessionId, userMsg).lastOrNull()
+                val review = response?.text ?: "No review comments generated."
                 gitHubApiClient.createComment(owner, repo, prNumber, com.github.apiclient.Comment(review))
             }
         }
