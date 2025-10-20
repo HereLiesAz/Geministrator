@@ -21,6 +21,12 @@ The project follows a multi-module architecture, managed by Gradle. The main mod
 
 This modular design promotes separation of concerns, making the codebase easier to maintain, test, and scale.
 
+### Core Architectural Principles
+
+A fundamental, non-negotiable principle of the Geministrator project is its reliance on the **Google Agent Development Kit (ADK)**. The ADK is the backbone of the application's agentic features and is integral to its long-term vision.
+
+**Under no circumstances should the ADK be removed, replaced, or refactored without a thorough understanding of its central role in the project.** All future agent-based features must be built on top of the ADK to ensure a consistent and stable architecture. Any attempt to deviate from this principle will be considered a significant regression.
+
 ## Table of Contents
 
 -   [**Screens** (`screens.md`)](screens.md): A detailed description of the application's user interface screens.
