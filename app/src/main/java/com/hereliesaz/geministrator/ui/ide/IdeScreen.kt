@@ -21,8 +21,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.GeminiApiClient
+import com.hereliesaz.geministrator.apis.GeminiApiClient
+import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
 import com.jules.apiclient.JulesApiClient
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.first
@@ -33,7 +33,7 @@ fun IdeScreen(
     setLoading: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
-    val settingsRepository = SettingsRepository(context)
+    val settingsRepository = SettingsRepositoryImpl(context)
     val factory = object : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             @Suppress("UNCHECKED_CAST")

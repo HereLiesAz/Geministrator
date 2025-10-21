@@ -1,8 +1,8 @@
 package com.hereliesaz.geministrator.ui.ide
 
 import android.app.Application
+import com.hereliesaz.geministrator.data.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.GeminiApiClient
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -30,11 +30,7 @@ class SearchViewModelTest {
         Dispatchers.setMain(testDispatcher)
         settingsRepository = mockk(relaxed = true)
         geminiApiClient = mockk(relaxed = true)
-        val application = mockk<Application>(relaxed = true)
-        coEvery { settingsRepository.githubRepository } returns flowOf("test-repo")
-        coEvery { settingsRepository.gcpLocation } returns flowOf("test-location")
-        coEvery { settingsRepository.geminiModelName } returns flowOf("test-model")
-        viewModel = SearchViewModel(application)
+        viewModel = SearchViewModel(settingsRepository)
     }
 
     @After
@@ -47,7 +43,11 @@ class SearchViewModelTest {
         // Given
         val query = "test-query"
         viewModel.onSearchQueryChange(query)
-        coEvery { geminiApiClient.generateContent(any()) } returns mockk(relaxed = true)
+        val mockResponse = mockk<com.google.genai.protocol.GenerateContentResponse>(relaxed = true)
+        coEvery { geminiApiClient.generateContent(any()) } returns mockResponse
+        coEvery { settingsRepository.geminiApiKey } returns flowOf("test-key")
+        viewModel = SearchViewModel(settingsRepository)
+
 
         // When
         viewModel.performSearch()

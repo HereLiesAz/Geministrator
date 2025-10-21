@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.GitManager
+import com.hereliesaz.geministrator.data.ProjectManager
 import com.hereliesaz.geministrator.data.SafProjectCopier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,7 @@ class ProjectViewModel(
         }
     }
 
-    fun writeFile(filePath: String, content: String): Result<Unit> = runCatching {
+    suspend fun writeFile(filePath: String, content: String): Result<Unit> = runCatching {
         var safResult: Result<Unit> = Result.success(Unit)
         // If it's a SAF-based project, write back to the original location.
         _uiState.value.projectUri?.let {

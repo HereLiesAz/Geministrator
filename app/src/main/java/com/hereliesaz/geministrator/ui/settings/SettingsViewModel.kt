@@ -15,8 +15,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-    private val settingsRepository = SettingsRepository(application)
+class SettingsViewModel(
+    application: Application,
+    private val settingsRepository: SettingsRepository
+) : AndroidViewModel(application) {
     private val promptsFile = File(application.filesDir, "prompts.json")
 
     private val _uiState = MutableStateFlow(SettingsUiState())

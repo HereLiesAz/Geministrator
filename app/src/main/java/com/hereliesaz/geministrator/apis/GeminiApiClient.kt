@@ -1,6 +1,6 @@
-package com.jules.apiclient
+package com.hereliesaz.geministrator.apis
 
-import com.google.genai.client.GenerativeModel
+import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.apis.GeminiApiClient
-import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,7 @@ class TerminalViewModel(
 ) : AndroidViewModel(application) {
     private var julesApiClient: JulesApiClient? = null
     private var geminiApiClient: GeminiApiClient? = null
-    private val settingsRepository = SettingsRepositoryImpl(application)
+    private val settingsRepository = SettingsRepository(application)
 
     private val _uiState = MutableStateFlow(TerminalUiState())
     val uiState = _uiState.asStateFlow()

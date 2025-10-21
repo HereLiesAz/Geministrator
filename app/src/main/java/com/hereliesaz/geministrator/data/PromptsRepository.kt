@@ -1,20 +1,25 @@
 package com.hereliesaz.geministrator.data
 
 import android.app.Application
+import com.hereliesaz.geministrator.R
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.io.IOException
+import java.io.InputStream
+
+@Serializable
+data class Prompt(
+    val name: String,
+    val description: String,
+    val template: String
+)
 
 class PromptsRepository(private val application: Application) {
-
-    private val json = Json { ignoreUnknownKeys = true }
-
-    suspend fun getPrompts(): Result<List<Prompt>> {
+    fun getPrompts(): Result<List<Prompt>> {
         return try {
-            val jsonString = application.assets.open("prompts.json").bufferedReader().use { it.readText() }
-            val promptList = json.decodeFromString<PromptList>(jsonString)
-            Result.success(promptList.prompts)
-        } catch (e: IOException) {
-            Result.failure(e)
+            val inputStream: InputStream = application.resources.openRawResource(R.raw.prompts)
+            val jsonString = inputStream.bufferedReader().use { it.readText() }
+            val prompts = Json.decodeFromString<List<Prompt>>(jsonString)
+            Result.success(prompts)
         } catch (e: Exception) {
             Result.failure(e)
         }

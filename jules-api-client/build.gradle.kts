@@ -25,14 +25,12 @@ kotlin {
 }
 
 dependencies {
-    api(libs.google.genai)
     implementation(project(":github-api-client"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.okhttp)
-    api(libs.google.adk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)

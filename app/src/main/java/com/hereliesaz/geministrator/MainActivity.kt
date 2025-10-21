@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.hereliesaz.geministrator.data.SettingsRepository
+import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
 import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.core.MainViewModel
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
@@ -25,10 +25,10 @@ import com.hereliesaz.geministrator.util.TextMateLoader
 
 class MainActivity : ComponentActivity() {
     private val mainViewModel: MainViewModel by viewModels()
-    private lateinit var settingsRepository: SettingsRepository
+    private lateinit var settingsRepository: SettingsRepositoryImpl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        settingsRepository = SettingsRepository(this)
+        settingsRepository = SettingsRepositoryImpl(this)
         TextMateLoader.load(this)
         enableEdgeToEdge()
         setContent {

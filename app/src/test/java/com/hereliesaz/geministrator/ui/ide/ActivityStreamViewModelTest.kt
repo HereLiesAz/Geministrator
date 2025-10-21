@@ -1,65 +1,60 @@
 package com.hereliesaz.geministrator.ui.ide
 
-import android.app.Application
-import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.JulesApiClient
+import com.hereliesaz.geministrator.MainDispatcherRule
+import com.hereliesaz.geministrator.data.HistoryRepository
+import com.hereliesaz.geministrator.util.ViewModelFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import java.util.UUID
 
 @ExperimentalCoroutinesApi
 class ActivityStreamViewModelTest {
 
-    private class TestViewModelFactory(
-        private val julesApiClient: JulesApiClient,
-        private val settingsRepository: SettingsRepository
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ActivityStreamViewModel(julesApiClient, settingsRepository) as T
-        }
-    }
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private lateinit var settingsRepository: SettingsRepository
-    private lateinit var julesApiClient: JulesApiClient
+    private lateinit var historyRepository: HistoryRepository
     private lateinit var viewModel: ActivityStreamViewModel
+    private val sessionId = UUID.randomUUID()
 
     @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-        settingsRepository = mockk(relaxed = true)
-        julesApiClient = mockk(relaxed = true)
-        coEvery { settingsRepository.apiKey } returns flowOf("test-api-key")
-        viewModel = TestViewModelFactory(julesApiClient, settingsRepository).create(ActivityStreamViewModel::class.java)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+    fun setup() {
+        historyRepository = mockk(relaxed = true)
+        viewModel = ViewModelFactory {
+            ActivityStreamViewModel(
+                sessionId = sessionId,
+                historyRepository = historyRepository,
+            )
+        }.create(ActivityStreamViewModel::class.java)
     }
 
     @Test
-    fun `loadActivities should call julesApiClient`() = runTest {
-        // Given
-        val sessionId = "test-session"
-        coEvery { julesApiClient.getActivities(sessionId) } returns mockk(relaxed = true)
+    fun `when session history is loaded then uiState is updated`() = runTest {
+        val message = "Test message"
+        coEvery { historyRepository.getSessionHistory(sessionId) } returns flowOf(listOf(message))
 
-        // When
-        viewModel.loadActivities(sessionId)
+        viewModel.loadSessionHistory()
 
-        // Then
-        coVerify(exactly = 1) { julesApiClient.getActivities(sessionId) }
+        val uiState = viewModel.uiState.value
+        assertEquals(1, uiState.messages.size)
+        assertEquals(message, uiState.messages[0])
+    }
+
+    @Test
+    fun `when a message is sent then it is added to the history`() = runTest {
+        val message = "New message"
+        coEvery { historyRepository.addMessageToHistory(sessionId, message) } returns Unit
+
+        viewModel.onMessageSent(message)
+
+        coVerify { historyRepository.addMessageToHistory(sessionId, message) }
     }
 }

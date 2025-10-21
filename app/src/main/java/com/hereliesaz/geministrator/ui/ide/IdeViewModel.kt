@@ -4,9 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.google.cloud.vertexai.generativeai.ResponseHandler
+import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.GeminiApiClient
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -30,8 +29,8 @@ data class IdeUiState(
 class IdeViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
-    private var geminiApiClient: GeminiApiClient?,
-    private var julesApiClient: JulesApiClient?
+    private var julesApiClient: JulesApiClient?,
+    private val geminiApiClient: GeminiApiClient?
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
@@ -40,16 +39,6 @@ class IdeViewModel(
 
     init {
         viewModelScope.launch {
-            if (geminiApiClient == null) {
-                val gcpProjectId = settingsRepository.gcpProjectId.first()
-                val gcpLocation = settingsRepository.gcpLocation.first()
-                val geminiModelName = settingsRepository.geminiModelName.first()
-
-                if (!gcpProjectId.isNullOrBlank() && !gcpLocation.isNullOrBlank() && !geminiModelName.isNullOrBlank()) {
-                    geminiApiClient = GeminiApiClient(gcpProjectId, gcpLocation, geminiModelName)
-                }
-            }
-
             if (julesApiClient == null) {
                 val apiKey = settingsRepository.apiKey.first()
                 if (!apiKey.isNullOrBlank()) {
@@ -101,7 +90,7 @@ class IdeViewModel(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
-                val suggestion = ResponseHandler.getText(response) ?: ""
+                val suggestion = response
                 editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
@@ -120,7 +109,7 @@ class IdeViewModel(
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Generate documentation for the following code:\n\n$content")
-                val suggestion = ResponseHandler.getText(response) ?: ""
+                val suggestion = response
                 editor.insertText(suggestion, 0)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }

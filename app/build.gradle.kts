@@ -100,8 +100,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.play.services.tasks)
-    implementation(libs.firebase.crashlytics.buildtools)
-    implementation(libs.firebase.ai)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
@@ -146,16 +144,15 @@ dependencies {
     implementation(libs.aznavrail)
 
     // Kotlinx Serialization
-    implementation(libs.google.cloud.vertexai)
     implementation(libs.kotlinx.serialization.json)
 
     // Gemini API
+    implementation(libs.generativeai)
 
     // Agent Development Kit
 
     // Testing
     testImplementation(libs.junit)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
 }

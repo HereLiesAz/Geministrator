@@ -1,10 +1,11 @@
 package com.hereliesaz.geministrator.data
 
 import android.app.Application
-import android.content.res.AssetManager
-import io.mockk.coEvery
+import com.hereliesaz.geministrator.R
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -12,47 +13,42 @@ import java.io.ByteArrayInputStream
 class PromptsRepositoryTest {
 
     private lateinit var application: Application
-    private lateinit var assetManager: AssetManager
-    private lateinit var promptsRepository: PromptsRepository
+    private lateinit var repository: PromptsRepository
 
     @Before
-    fun setUp() {
-        application = mockk(relaxed = true)
-        assetManager = mockk(relaxed = true)
-        coEvery { application.assets } returns assetManager
-        promptsRepository = PromptsRepository(application)
+    fun setup() {
+        application = mockk()
+        repository = PromptsRepository(application)
     }
 
     @Test
-    fun `getPrompts should return a list of prompts`() = runTest {
-        // Given
-        val jsonString = """
-            {
-              "prompts": [
+    fun `when prompts are loaded successfully then a list of prompts is returned`() {
+        val json = """
+            [
                 {
-                  "name": "Test Prompt 1",
-                  "prompt": "This is a test prompt.",
-                  "tags": ["test", "prompt"]
-                },
-                {
-                  "name": "Test Prompt 2",
-                  "prompt": "This is another test prompt.",
-                  "tags": ["test", "another"]
+                    "name": "test",
+                    "description": "test description",
+                    "template": "test template"
                 }
-              ]
-            }
+            ]
         """.trimIndent()
-        val inputStream = ByteArrayInputStream(jsonString.toByteArray())
-        coEvery { assetManager.open("prompts.json") } returns inputStream
+        val inputStream = ByteArrayInputStream(json.toByteArray())
+        every { application.resources.openRawResource(R.raw.prompts) } returns inputStream
 
-        // When
-        val result = promptsRepository.getPrompts()
+        val result = repository.getPrompts()
 
-        // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         val prompts = result.getOrNull()
-        assert(prompts != null)
-        assert(prompts!!.size == 2)
-        assert(prompts[0].name == "Test Prompt 1")
+        assertEquals(1, prompts?.size)
+        assertEquals("test", prompts?.get(0)?.name)
+    }
+
+    @Test
+    fun `when prompts file is not found then an error is returned`() {
+        every { application.resources.openRawResource(R.raw.prompts) } throws Exception("File not found")
+
+        val result = repository.getPrompts()
+
+        assertTrue(result.isFailure)
     }
 }

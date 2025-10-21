@@ -1,9 +1,5 @@
 allprojects {
     configurations.all {
-        resolutionStrategy {
-            force("jakarta.annotation:jakarta.annotation-api:1.3.5")
-            force("org.glassfish.hk2.external:jakarta.inject:2.6.1")
-        }
         exclude(group = "commons-logging", module = "commons-logging")
     }
 }

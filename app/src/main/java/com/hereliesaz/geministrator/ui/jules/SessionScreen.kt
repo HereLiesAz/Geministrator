@@ -63,10 +63,10 @@ fun SessionScreen(
         bottomBar = {
             SendMessageBar(
                 onSendMessage = {
-                    if (it.startsWith("/gemini")) {
-                        viewModel.askGemini(it.substringAfter("/gemini "))
-                    } else if (it.startsWith("/decompose")) {
+                    if (it.startsWith("/decompose")) {
                         viewModel.decomposeTask(it.substringAfter("/decompose "))
+                    } else if (it.startsWith("/gemini")) {
+                        viewModel.sendMessage(it)
                     } else {
                         viewModel.sendMessage(it)
                     }

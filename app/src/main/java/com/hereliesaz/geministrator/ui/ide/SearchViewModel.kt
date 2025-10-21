@@ -2,10 +2,10 @@ package com.hereliesaz.geministrator.ui.ide
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.cloud.vertexai.generativeai.ResponseHandler
+import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.GeminiApiClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -19,30 +19,20 @@ data class SearchUiState(
     val error: String? = null
 )
 
-class SearchViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val settingsRepository = SettingsRepository(application)
-    private var geminiApiClient: GeminiApiClient? = null
+class SearchViewModel(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState = _uiState.asStateFlow()
+    private var geminiApiClient: GeminiApiClient? = null
 
     init {
         viewModelScope.launch {
-            val githubRepository = settingsRepository.githubRepository.first()
-            val gcpLocation = settingsRepository.gcpLocation.first()
-            val geminiModelName = settingsRepository.geminiModelName.first()
-
-            if (githubRepository.isNullOrBlank() || gcpLocation.isNullOrBlank() || geminiModelName.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "Gemini settings not found. Please set them in Settings.") }
-                return@launch
+            val geminiApiKey = settingsRepository.geminiApiKey.first()
+            if (!geminiApiKey.isNullOrBlank()) {
+                geminiApiClient = GeminiApiClient(geminiApiKey)
             }
-
-            geminiApiClient = GeminiApiClient(
-                projectId = githubRepository,
-                location = gcpLocation,
-                modelName = geminiModelName
-            )
         }
     }
 
@@ -61,8 +51,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 // This is a placeholder for the actual search logic.
                 // We will need to find a way to provide the codebase as context to the Gemini API.
                 val response = client.generateContent("Find code related to: $query in the project.")
-                val textResponse = ResponseHandler.getText(response) ?: ""
-                _uiState.update { it.copy(searchResults = listOf(textResponse), isLoading = false, error = null) }
+                _uiState.update { it.copy(searchResults = listOf(response), isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
