@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("dagger.hilt.android.plugin")
 }
 
 configurations.all {
@@ -99,7 +100,6 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.play.services.tasks)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
@@ -150,6 +150,10 @@ dependencies {
     implementation(libs.generativeai)
 
     // Agent Development Kit
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:2.48")
+    ksp("com.google.dagger:hilt-compiler:2.48")
 
     // Testing
     testImplementation(libs.junit)

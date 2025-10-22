@@ -14,83 +14,90 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 class SettingsRepositoryImpl(private val context: Context) : SettingsRepository {
 
-    companion object {
-        private val API_KEY = stringPreferencesKey("jules_api_key")
-        private val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
-        private val THEME = stringPreferencesKey("theme")
-        private val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
-        private val GCP_LOCATION = stringPreferencesKey("gcp_location")
-        private val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
-        private val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
+    private object PreferencesKeys {
+        val API_KEY = stringPreferencesKey("jules_api_key")
+        val GEMINI_API_KEY = stringPreferencesKey("gemini_api_key")
+        val THEME = stringPreferencesKey("theme")
+        val GCP_PROJECT_ID = stringPreferencesKey("gcp_project_id")
+        val GCP_LOCATION = stringPreferencesKey("gcp_location")
+        val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
+        val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
 
-    override val apiKey: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[API_KEY]
-    }
+    override val apiKey: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.API_KEY]
+        }
 
-    override val geminiApiKey: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[GEMINI_API_KEY]
-    }
+    override val geminiApiKey: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.GEMINI_API_KEY]
+        }
 
-    override val theme: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[THEME]
-    }
+    override val theme: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.THEME]
+        }
 
-    override val gcpProjectId: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[GCP_PROJECT_ID]
-    }
+    override val gcpProjectId: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.GCP_PROJECT_ID]
+        }
 
-    override val gcpLocation: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[GCP_LOCATION]
-    }
+    override val gcpLocation: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.GCP_LOCATION]
+        }
 
-    override val geminiModelName: Flow<String?> = context.dataStore.data.map { preferences ->
-        preferences[GEMINI_MODEL_NAME]
-    }
+    override val geminiModelName: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.GEMINI_MODEL_NAME]
+        }
 
-    override val enabledRoles: Flow<Set<String>> = context.dataStore.data.map { preferences ->
-        preferences[ENABLED_ROLES] ?: emptySet()
-    }
+    override val enabledRoles: Flow<Set<String>> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ENABLED_ROLES] ?: emptySet()
+        }
 
     override suspend fun saveApiKey(apiKey: String) {
-        context.dataStore.edit { settings ->
-            settings[API_KEY] = apiKey
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.API_KEY] = apiKey
         }
     }
 
     override suspend fun saveGeminiApiKey(geminiApiKey: String) {
-        context.dataStore.edit { settings ->
-            settings[GEMINI_API_KEY] = geminiApiKey
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.GEMINI_API_KEY] = geminiApiKey
         }
     }
 
     override suspend fun saveTheme(theme: String) {
-        context.dataStore.edit { settings ->
-            settings[THEME] = theme
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME] = theme
         }
     }
 
     override suspend fun saveGcpProjectId(gcpProjectId: String) {
-        context.dataStore.edit { settings ->
-            settings[GCP_PROJECT_ID] = gcpProjectId
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.GCP_PROJECT_ID] = gcpProjectId
         }
     }
 
     override suspend fun saveGcpLocation(gcpLocation: String) {
-        context.dataStore.edit { settings ->
-            settings[GCP_LOCATION] = gcpLocation
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.GCP_LOCATION] = gcpLocation
         }
     }
 
     override suspend fun saveGeminiModelName(geminiModelName: String) {
-        context.dataStore.edit { settings ->
-            settings[GEMINI_MODEL_NAME] = geminiModelName
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.GEMINI_MODEL_NAME] = geminiModelName
         }
     }
 
     override suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
-        context.dataStore.edit { settings ->
-            settings[ENABLED_ROLES] = enabledRoles
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ENABLED_ROLES] = enabledRoles
         }
     }
 }

@@ -1,8 +1,7 @@
 package com.hereliesaz.geministrator.ui.ide
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
@@ -10,7 +9,6 @@ import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -30,7 +28,7 @@ class IdeViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
     private var julesApiClient: JulesApiClient?,
-    private val geminiApiClient: GeminiApiClient?
+    private var geminiApiClient: GeminiApiClient?
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
@@ -44,6 +42,12 @@ class IdeViewModel(
                 if (!apiKey.isNullOrBlank()) {
                     julesApiClient = JulesApiClient(apiKey)
                     loadActivities()
+                }
+            }
+            if (geminiApiClient == null) {
+                val geminiApiKey = settingsRepository.geminiApiKey.first()
+                if (!geminiApiKey.isNullOrBlank()) {
+                    geminiApiClient = GeminiApiClient(geminiApiKey)
                 }
             }
         }

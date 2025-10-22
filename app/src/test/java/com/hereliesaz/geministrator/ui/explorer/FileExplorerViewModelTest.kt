@@ -3,11 +3,11 @@ package com.hereliesaz.geministrator.ui.explorer
 import com.hereliesaz.geministrator.MainDispatcherRule
 import com.hereliesaz.geministrator.ui.project.ProjectUiState
 import com.hereliesaz.geministrator.ui.project.ProjectViewModel
-import com.hereliesaz.geministrator.util.ViewModelFactory
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -22,44 +22,51 @@ class FileExplorerViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var projectViewModel: ProjectViewModel
     private lateinit var viewModel: FileExplorerViewModel
+    private val mockProjectViewModel: ProjectViewModel = mockk(relaxed = true)
     private lateinit var tempDir: File
 
     @Before
-    fun setup() {
+    fun setUp() {
         tempDir = createTempDir()
-        projectViewModel = mockk(relaxed = true)
-        every { projectViewModel.uiState } returns MutableStateFlow(
-            ProjectUiState(
-                localCachePath = tempDir
-            )
-        )
+        val projectUiState = ProjectUiState(localCachePath = tempDir)
+        every { mockProjectViewModel.uiState } returns MutableStateFlow(projectUiState)
+        viewModel = FileExplorerViewModel(mockProjectViewModel)
+    }
 
-        viewModel = ViewModelFactory {
-            FileExplorerViewModel(
-                projectViewModel = projectViewModel
-            )
-        }.create(FileExplorerViewModel::class.java)
+    @After
+    fun tearDown() {
+        tempDir.deleteRecursively()
     }
 
     @Test
-    fun `when a directory is loaded then uiState is updated`() {
-        val file = File(tempDir, "test.txt")
-        file.createNewFile()
+    fun `initial state is correct`() {
+        val uiState = viewModel.uiState.value
+        assertEquals(tempDir, uiState.projectRoot)
+        assertEquals(tempDir, uiState.currentPath)
+        assertTrue(uiState.files.isEmpty())
+        assertFalse(uiState.canNavigateUp)
+    }
 
-        viewModel.navigateTo(tempDir)
+    @Test
+    fun `navigateTo updates current path and files`() {
+        val subDir = File(tempDir, "subDir")
+        subDir.mkdir()
+        File(subDir, "file.txt").createNewFile()
+
+        viewModel.navigateTo(subDir)
 
         val uiState = viewModel.uiState.value
+        assertEquals(subDir, uiState.currentPath)
         assertEquals(1, uiState.files.size)
-        assertEquals(file, uiState.files[0])
+        assertEquals("file.txt", uiState.files[0].name)
+        assertTrue(uiState.canNavigateUp)
     }
 
     @Test
-    fun `when navigating up then uiState is updated`() {
-        val subDir = File(tempDir, "sub")
+    fun `navigateUp updates current path and files`() {
+        val subDir = File(tempDir, "subDir")
         subDir.mkdir()
-
         viewModel.navigateTo(subDir)
         viewModel.navigateUp()
 
@@ -67,12 +74,10 @@ class FileExplorerViewModelTest {
         assertEquals(tempDir, uiState.currentPath)
     }
 
-    private fun createTempDir(): File {
-        val dir = File(System.getProperty("java.io.tmpdir"), "testDir")
-        if (dir.exists()) {
-            dir.deleteRecursively()
-        }
-        dir.mkdir()
-        return dir
+    @Test
+    fun `navigateUp does nothing at root`() {
+        val initialState = viewModel.uiState.value
+        viewModel.navigateUp()
+        assertEquals(initialState, viewModel.uiState.value)
     }
 }
