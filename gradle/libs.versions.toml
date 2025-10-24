@@ -1,22 +1,22 @@
 [versions]
 system-rules = "1.19.0"
 a2a = "0.3.0.Beta2"
-aznavrail = "3.14"
-retrofit = "2.11.0"
+aznavrail = "4.1"
+retrofit = "3.0.0"
 retrofit2-kotlinx-serialization-converter = "1.0.0"
 richtextfx = "0.11.2"
 android-gradle-plugin = "8.13.0"
-kotlin = "2.0.0"
-ksp = "1.9.23-1.0.19"
-room = "2.8.2"
+kotlin = "2.2.20"
+ksp = "2.2.20-2.0.4"
+room = "2.8.3"
 core-ktx = "1.17.0"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines-core = "1.8.1"
-kotlinx-serialization-json = "1.6.3"
+kotlinx-coroutines-core = "1.10.2"
+kotlinx-serialization-json = "1.9.0"
 lifecycle = "2.9.4"
 activity-compose = "1.11.0"
 activity-ktx = "1.11.0"
-compose-bom = "2025.10.00"
+compose-bom = "2025.10.01"
 mockito = "5.20.0"
 mockk = "1.14.6"
 navigation-compose = "2.9.5"
@@ -32,7 +32,7 @@ material3-adaptive-navigation-suite = "1.2.0"
 material-icons = "1.6.5"
 jpackageplugin = "1.7.6"
 github-api = "1.330"
-okhttp = "4.12.0"
+okhttp = "5.2.1"
 vertexai = "1.37.0"
 chaquopy = "16.1.0"
 appauth = "0.11.1"
@@ -43,7 +43,8 @@ play-services-tasks = "18.4.0"
 firebase-crashlytics-buildtools = "3.0.6"
 firebase-ai = "17.4.0"
 google-adk = "0.3.0"
-generativeai = "0.5.0"
+generativeai = "0.9.0"
+hilt = "2.57.2"
 
 [libraries]
 # Core & Lifecycle
@@ -109,6 +110,12 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 androidx-test-core = { group = "androidx.test", name = "core", version = "1.7.0" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+
+
+# Hilt
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 
 # Debugging
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -140,3 +147,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }

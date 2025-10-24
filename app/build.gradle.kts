@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
-    id("dagger.hilt.android.plugin")
+    alias(libs.plugins.hilt.android)
 }
 
 configurations.all {
@@ -151,13 +151,13 @@ dependencies {
     // Agent Development Kit
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation("com.google.dagger:hilt-android-testing:2.48")
-    kspTest("com.google.dagger:hilt-compiler:2.48")
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
 }
