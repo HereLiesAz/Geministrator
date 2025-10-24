@@ -15,12 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.hereliesaz.aznavrail.AzButton
 
 @Composable
 fun CmdScreen(
-    viewModel: TerminalViewModel = viewModel(),
+    viewModel: TerminalViewModel = hiltViewModel(),
     setLoading: (Boolean) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

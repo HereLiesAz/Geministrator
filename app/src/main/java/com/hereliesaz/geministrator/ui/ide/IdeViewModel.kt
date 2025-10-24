@@ -7,24 +7,17 @@ import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-data class IdeUiState(
-    val editor: CodeEditor? = null,
-    val currentFile: String? = null,
-    val fileContent: String = "",
-    val isLoading: Boolean = false,
-    val showCommitDialog: Boolean = false,
-    val commitMessage: String = "",
-    val error: String? = null
-)
-
-class IdeViewModel(
+@HiltViewModel
+class IdeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
     private var julesApiClient: JulesApiClient?,
@@ -78,7 +71,7 @@ class IdeViewModel(
     }
 
     fun onFileOpened(filePath: String, content: String) {
-        _uiState.update { it.copy(currentFile = filePath, fileContent = content) }
+        _uiState.update { it.copy(currentFile = File(filePath), fileContent = content) }
     }
 
     fun onContentChanged(content: String) {

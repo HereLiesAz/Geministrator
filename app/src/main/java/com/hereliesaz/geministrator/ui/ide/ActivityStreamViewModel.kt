@@ -12,12 +12,6 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
-data class IdeUiState(
-    val messages: List<String> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
-
 @HiltViewModel
 class ActivityStreamViewModel @Inject constructor(
     private val historyRepository: HistoryRepository,
