@@ -45,12 +45,16 @@ android {
             localProperties.load(localPropertiesFile.inputStream())
         }
 
-        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId")}\"")
-        buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
+        buildConfigField("String", "GITHUB_CLIENT_ID", "${localProperties.getProperty("github.clientId")}")
+        buildConfigField("String", "GITHUB_CLIENT_SECRET", "${localProperties.getProperty("github.clientSecret")}")
     }
 
     buildFeatures {
         buildConfig = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.2.20"
     }
 
     secrets {
@@ -153,6 +157,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Testing
     testImplementation(libs.junit)

@@ -1,7 +1,8 @@
+
 [versions]
 system-rules = "1.19.0"
 a2a = "0.3.0.Beta2"
-aznavrail = "4.1"
+aznavrail = "4.2"
 retrofit = "3.0.0"
 retrofit2-kotlinx-serialization-converter = "1.0.0"
 richtextfx = "0.11.2"
@@ -26,25 +27,26 @@ documentfile = "1.1.0"
 junit = "4.13.2"
 androidx-test-ext = "1.3.0"
 espresso-core = "3.7.0"
-ui = "1.6.5"
+ui = "1.6.7"
 intellij-platform = "2.10.1"
-material3-adaptive-navigation-suite = "1.2.0"
-material-icons = "1.6.5"
+material3-adaptive-navigation-suite = "1.0.0-alpha05"
+material-icons = "1.6.7"
 jpackageplugin = "1.7.6"
 github-api = "1.330"
 okhttp = "5.2.1"
-vertexai = "1.37.0"
+vertexai = "0.1.0"
 chaquopy = "16.1.0"
 appauth = "0.11.1"
-firebase-auth-common = "9.8.0"
+firebase-auth-common = "22.3.0"
 play-services-auth = "21.4.0"
 firebase-auth-ktx = "23.2.1"
 play-services-tasks = "18.4.0"
 firebase-crashlytics-buildtools = "3.0.6"
-firebase-ai = "17.4.0"
+firebase-ai = "19.0.0-beta-01"
 google-adk = "0.3.0"
 generativeai = "0.9.0"
 hilt = "2.57.2"
+hilt-navigation-compose = "1.3.0"
 
 [libraries]
 # Core & Lifecycle
@@ -112,10 +114,10 @@ androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espres
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 
-
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 
 # Debugging
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -125,7 +127,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.2.1" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "6.1.0" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 system-rules = { group = "com.github.stefanbirkner", name = "system-rules", version.ref = "system-rules" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
@@ -148,3 +150,5 @@ intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "int
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+

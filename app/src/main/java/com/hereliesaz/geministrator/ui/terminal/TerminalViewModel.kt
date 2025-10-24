@@ -1,35 +1,34 @@
 package com.hereliesaz.geministrator.ui.terminal
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.apis.GeminiApiClient
-import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
+import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
-import kotlinx.coroutines.flow.first
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TerminalViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+@HiltViewModel
+class TerminalViewModel @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) : ViewModel() {
     private var julesApiClient: JulesApiClient? = null
     private var geminiApiClient: GeminiApiClient? = null
-    private val settingsRepository = SettingsRepositoryImpl(application)
 
     private val _uiState = MutableStateFlow(TerminalUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
+            val apiKey = settingsRepository.getApiKey()
             if (!apiKey.isNullOrBlank()) {
                 julesApiClient = JulesApiClient(apiKey)
             }
-            val geminiApiKey = settingsRepository.geminiApiKey.first()
+            val geminiApiKey = settingsRepository.getGeminiApiKey()
             if (!geminiApiKey.isNullOrBlank()) {
                 geminiApiClient = GeminiApiClient(geminiApiKey)
             }

@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -24,19 +25,28 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
 
-    override suspend fun getApiKey(): String? = context.dataStore.data.map { it[PreferencesKeys.API_KEY] }.first()
+    override val apiKey: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.API_KEY] }
+    override val geminiApiKey: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GEMINI_API_KEY] }
+    override val theme: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.THEME] }
+    override val gcpProjectId: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GCP_PROJECT_ID] }
+    override val gcpLocation: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GCP_LOCATION] }
+    override val geminiModelName: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GEMINI_MODEL_NAME] }
+    override val enabledRoles: Flow<Set<String>> = context.dataStore.data.map { it[PreferencesKeys.ENABLED_ROLES] ?: emptySet() }
 
-    override suspend fun getGeminiApiKey(): String? = context.dataStore.data.map { it[PreferencesKeys.GEMINI_API_KEY] }.first()
 
-    override suspend fun getTheme(): String? = context.dataStore.data.map { it[PreferencesKeys.THEME] }.first()
+    override suspend fun getApiKey(): String? = apiKey.first()
 
-    override suspend fun getGcpProjectId(): String? = context.dataStore.data.map { it[PreferencesKeys.GCP_PROJECT_ID] }.first()
+    override suspend fun getGeminiApiKey(): String? = geminiApiKey.first()
 
-    override suspend fun getGcpLocation(): String? = context.dataStore.data.map { it[PreferencesKeys.GCP_LOCATION] }.first()
+    override suspend fun getTheme(): String? = theme.first()
 
-    override suspend fun getGeminiModelName(): String? = context.dataStore.data.map { it[PreferencesKeys.GEMINI_MODEL_NAME] }.first()
+    override suspend fun getGcpProjectId(): String? = gcpProjectId.first()
 
-    override suspend fun getEnabledRoles(): Set<String> = context.dataStore.data.map { it[PreferencesKeys.ENABLED_ROLES] ?: emptySet() }.first()
+    override suspend fun getGcpLocation(): String? = gcpLocation.first()
+
+    override suspend fun getGeminiModelName(): String? = geminiModelName.first()
+
+    override suspend fun getEnabledRoles(): Set<String> = enabledRoles.first()
 
     override suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->

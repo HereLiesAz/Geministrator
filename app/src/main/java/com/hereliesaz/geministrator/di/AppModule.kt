@@ -1,6 +1,8 @@
 package com.hereliesaz.geministrator.di
 
 import android.content.Context
+import com.hereliesaz.geministrator.data.HistoryRepository
+import com.hereliesaz.geministrator.data.HistoryRepositoryImpl
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
 import dagger.Module
@@ -18,5 +20,11 @@ object AppModule {
     @Singleton
     fun provideSettingsRepository(@ApplicationContext context: Context): SettingsRepository {
         return SettingsRepositoryImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHistoryRepository(): HistoryRepository {
+        return HistoryRepositoryImpl()
     }
 }

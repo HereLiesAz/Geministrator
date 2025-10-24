@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 
 class GitHubApiClient(private val accessToken: String) {
 
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json(Json.Default) { this.ignoreUnknownKeys = true }
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.github.com/")

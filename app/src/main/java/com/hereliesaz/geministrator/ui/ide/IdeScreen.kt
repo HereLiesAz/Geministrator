@@ -14,61 +14,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.rosemoe.sora.widget.CodeEditor
 
 @Composable
 fun IdeScreen(
     setLoading: (Boolean) -> Unit,
+    viewModel: IdeViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
-    val settingsRepository = SettingsRepositoryImpl(context)
-    val factory = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            @Suppress("UNCHECKED_CAST")
-            return IdeViewModel(
-                androidx.lifecycle.SavedStateHandle(),
-                settingsRepository,
-                null,
-                null
-            ) as T
-        }
-    }
-    val viewModel: IdeViewModel = viewModel(factory = factory)
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val editor = remember { CodeEditor(context) }
 
     LaunchedEffect(uiState.isLoading) {
         setLoading(uiState.isLoading)
     }
 
+    uiState.textInsertion?.let {
+        LaunchedEffect(it) {
+            editor.text.insert(it.line, it.column, it.text)
+            viewModel.onTextInsertionConsumed()
+        }
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         AndroidView(
             modifier = Modifier.weight(1f),
-            factory = { context ->
-                CodeEditor(context).apply {
-                    viewModel.onEditorAttached(this)
+            factory = { 
+                editor.apply {
                     subscribeEvent(io.github.rosemoe.sora.event.ContentChangeEvent::class.java) { _, _ ->
                         viewModel.onContentChanged(text.toString())
                     }
                 }
             },
-            update = { editor ->
-                if (editor.text.toString() != uiState.fileContent) {
-                    editor.setText(uiState.fileContent)
+            update = { codeEditor ->
+                if (codeEditor.text.toString() != uiState.fileContent) {
+                    codeEditor.setText(uiState.fileContent ?: "")
                 }
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             Button(
-                onClick = { viewModel.onAutocompleteClick() },
+                onClick = { 
+                    val cursor = editor.cursor
+                    viewModel.onAutocompleteClick(cursor.leftLine, cursor.leftColumn)
+                 },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Autocomplete")
