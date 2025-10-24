@@ -1,10 +1,13 @@
 package com.hereliesaz.geministrator.data
 
-import android.app.Application
+import android.content.Context
 import com.hereliesaz.geministrator.R
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.InputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Serializable
 data class Prompt(
@@ -13,15 +16,12 @@ data class Prompt(
     val template: String
 )
 
-class PromptsRepository(private val application: Application) {
-    fun getPrompts(): Result<List<Prompt>> {
-        return try {
-            val inputStream: InputStream = application.resources.openRawResource(R.raw.prompts)
-            val jsonString = inputStream.bufferedReader().use { it.readText() }
-            val prompts = Json.decodeFromString<List<Prompt>>(jsonString)
-            Result.success(prompts)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+@Singleton
+class PromptsRepository @Inject constructor(@ApplicationContext private val context: Context) {
+    @Throws(Exception::class)
+    fun getPrompts(): List<Prompt> {
+        val inputStream: InputStream = context.resources.openRawResource(R.raw.prompts)
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+        return Json.decodeFromString<List<Prompt>>(jsonString)
     }
 }

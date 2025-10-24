@@ -1,7 +1,6 @@
 package com.hereliesaz.geministrator.ui.jules
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.Prompt
 import com.hereliesaz.geministrator.data.PromptsRepository
@@ -9,14 +8,15 @@ import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import javax.inject.Inject
 
 data class JulesUiState(
     val sources: List<Source> = emptyList(),
@@ -29,7 +29,8 @@ data class JulesUiState(
     val selectedRoles: Set<String> = emptySet()
 )
 
-class JulesViewModel(
+@HiltViewModel
+class JulesViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val promptsRepository: PromptsRepository
 ) : ViewModel() {
@@ -55,13 +56,12 @@ class JulesViewModel(
 
     private fun loadRoles() {
         viewModelScope.launch {
-            promptsRepository.getPrompts()
-                .onSuccess { roles ->
-                    _uiState.update { it.copy(roles = roles) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(error = error.message) }
-                }
+            try {
+                val roles = promptsRepository.getPrompts()
+                _uiState.update { it.copy(roles = roles) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message) }
+            }
         }
     }
 

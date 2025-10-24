@@ -10,11 +10,11 @@ class GitHubApiClient(private val accessToken: String) {
     private val json = Json { ignoreUnknownKeys = true }
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.github.com")
+        .baseUrl("https://api.github.com/")
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
-    private val service = retrofit.create(GitHubApiService::class.java)
+    private val service: GitHubApiService = retrofit.create(GitHubApiService::class.java)
 
     private val authHeader = "Bearer $accessToken"
 

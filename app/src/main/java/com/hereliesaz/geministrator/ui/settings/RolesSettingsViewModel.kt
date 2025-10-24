@@ -1,17 +1,17 @@
 package com.hereliesaz.geministrator.ui.settings
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hereliesaz.geministrator.data.Prompt
 import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class RolesSettingsUiState(
     val prompts: List<Prompt> = emptyList(),
@@ -20,10 +20,10 @@ data class RolesSettingsUiState(
     val error: String? = null
 )
 
-class RolesSettingsViewModel(
+@HiltViewModel
+class RolesSettingsViewModel @Inject constructor(
     private val promptsRepository: PromptsRepository,
     private val settingsRepository: SettingsRepository,
-    private val application: Application
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RolesSettingsUiState())
@@ -41,13 +41,12 @@ class RolesSettingsViewModel(
     private fun loadPrompts() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            promptsRepository.getPrompts()
-                .onSuccess { prompts ->
-                    _uiState.update { it.copy(prompts = prompts, isLoading = false, error = null) }
-                }
-                .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message) }
-                }
+            try {
+                val prompts = promptsRepository.getPrompts()
+                _uiState.update { it.copy(prompts = prompts, isLoading = false, error = null) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
         }
     }
 

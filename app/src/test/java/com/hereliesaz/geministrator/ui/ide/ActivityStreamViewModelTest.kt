@@ -1,8 +1,8 @@
 package com.hereliesaz.geministrator.ui.ide
 
+import androidx.lifecycle.SavedStateHandle
 import com.hereliesaz.geministrator.MainDispatcherRule
 import com.hereliesaz.geministrator.data.HistoryRepository
-import com.hereliesaz.geministrator.util.ViewModelFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -28,12 +28,11 @@ class ActivityStreamViewModelTest {
     @Before
     fun setup() {
         historyRepository = mockk(relaxed = true)
-        viewModel = ViewModelFactory {
-            ActivityStreamViewModel(
-                sessionId = sessionId,
-                historyRepository = historyRepository,
-            )
-        }.create(ActivityStreamViewModel::class.java)
+        val savedStateHandle = SavedStateHandle(mapOf("sessionId" to sessionId.toString()))
+        viewModel = ActivityStreamViewModel(
+            historyRepository = historyRepository,
+            savedStateHandle = savedStateHandle
+        )
     }
 
     @Test
@@ -51,8 +50,6 @@ class ActivityStreamViewModelTest {
     @Test
     fun `when a message is sent then it is added to the history`() = runTest {
         val message = "New message"
-        coEvery { historyRepository.addMessageToHistory(sessionId, message) } returns Unit
-
         viewModel.onMessageSent(message)
 
         coVerify { historyRepository.addMessageToHistory(sessionId, message) }

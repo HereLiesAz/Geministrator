@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -24,40 +24,19 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
     }
 
-    override val apiKey: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.API_KEY]
-        }
+    override suspend fun getApiKey(): String? = context.dataStore.data.map { it[PreferencesKeys.API_KEY] }.first()
 
-    override val geminiApiKey: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.GEMINI_API_KEY]
-        }
+    override suspend fun getGeminiApiKey(): String? = context.dataStore.data.map { it[PreferencesKeys.GEMINI_API_KEY] }.first()
 
-    override val theme: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.THEME]
-        }
+    override suspend fun getTheme(): String? = context.dataStore.data.map { it[PreferencesKeys.THEME] }.first()
 
-    override val gcpProjectId: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.GCP_PROJECT_ID]
-        }
+    override suspend fun getGcpProjectId(): String? = context.dataStore.data.map { it[PreferencesKeys.GCP_PROJECT_ID] }.first()
 
-    override val gcpLocation: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.GCP_LOCATION]
-        }
+    override suspend fun getGcpLocation(): String? = context.dataStore.data.map { it[PreferencesKeys.GCP_LOCATION] }.first()
 
-    override val geminiModelName: Flow<String?> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.GEMINI_MODEL_NAME]
-        }
+    override suspend fun getGeminiModelName(): String? = context.dataStore.data.map { it[PreferencesKeys.GEMINI_MODEL_NAME] }.first()
 
-    override val enabledRoles: Flow<Set<String>> = context.dataStore.data
-        .map { preferences ->
-            preferences[PreferencesKeys.ENABLED_ROLES] ?: emptySet()
-        }
+    override suspend fun getEnabledRoles(): Set<String> = context.dataStore.data.map { it[PreferencesKeys.ENABLED_ROLES] ?: emptySet() }.first()
 
     override suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->

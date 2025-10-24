@@ -1,24 +1,27 @@
 package com.hereliesaz.geministrator.data
 
-import android.app.Application
+import android.content.Context
+import android.content.res.Resources
 import com.hereliesaz.geministrator.R
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import java.io.ByteArrayInputStream
 
 class PromptsRepositoryTest {
 
-    private lateinit var application: Application
+    private lateinit var context: Context
     private lateinit var repository: PromptsRepository
 
     @Before
     fun setup() {
-        application = mockk()
-        repository = PromptsRepository(application)
+        context = mockk()
+        val resources: Resources = mockk()
+        every { context.resources } returns resources
+        repository = PromptsRepository(context)
     }
 
     @Test
@@ -33,22 +36,20 @@ class PromptsRepositoryTest {
             ]
         """.trimIndent()
         val inputStream = ByteArrayInputStream(json.toByteArray())
-        every { application.resources.openRawResource(R.raw.prompts) } returns inputStream
+        every { context.resources.openRawResource(R.raw.prompts) } returns inputStream
 
-        val result = repository.getPrompts()
+        val prompts = repository.getPrompts()
 
-        assertTrue(result.isSuccess)
-        val prompts = result.getOrNull()
-        assertEquals(1, prompts?.size)
-        assertEquals("test", prompts?.get(0)?.name)
+        assertEquals(1, prompts.size)
+        assertEquals("test", prompts[0].name)
     }
 
     @Test
-    fun `when prompts file is not found then an error is returned`() {
-        every { application.resources.openRawResource(R.raw.prompts) } throws Exception("File not found")
+    fun `when prompts file is not found then an error is thrown`() {
+        every { context.resources.openRawResource(R.raw.prompts) } throws Exception("File not found")
 
-        val result = repository.getPrompts()
-
-        assertTrue(result.isFailure)
+        assertThrows(Exception::class.java) {
+            repository.getPrompts()
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.hereliesaz.geministrator.ui.jules
 import com.hereliesaz.geministrator.MainDispatcherRule
 import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
+import com.hereliesaz.geministrator.util.ViewModelFactory
 import com.jules.apiclient.GithubRepo
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
@@ -36,9 +37,11 @@ class JulesViewModelTest {
     @Before
     fun setUp() {
         coEvery { mockSettingsRepository.apiKey } returns MutableStateFlow("test_api_key")
-        coEvery { mockPromptsRepository.getPrompts() } returns Result.success(emptyList())
+        coEvery { mockPromptsRepository.getPrompts() } returns emptyList()
 
-        viewModel = JulesViewModel(mockSettingsRepository, mockPromptsRepository)
+        viewModel = ViewModelFactory {
+            JulesViewModel(mockSettingsRepository, mockPromptsRepository)
+        }.create(JulesViewModel::class.java)
         viewModel.apiClient = mockApiClient // Manually inject the mock client
     }
 
