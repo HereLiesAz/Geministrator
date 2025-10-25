@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,7 +89,7 @@ class IdeViewModel @Inject constructor(
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
                 val suggestion = response
-                editor.insertText(suggestion, suggestion.length)
+                editor.text.insert(editor.text.length, suggestion)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
             } finally {
@@ -107,7 +108,7 @@ class IdeViewModel @Inject constructor(
             try {
                 val response = client.generateContent("Generate documentation for the following code:\n\n$content")
                 val suggestion = response
-                editor.insertText(suggestion, 0)
+                editor.text.insert(0, suggestion)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
             } finally {

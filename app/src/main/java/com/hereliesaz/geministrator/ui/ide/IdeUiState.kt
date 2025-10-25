@@ -1,6 +1,6 @@
 package com.hereliesaz.geministrator.ui.ide
 
-import com.hereliesaz.geministrator.service.Editor
+import io.github.rosemoe.sora.widget.Editor
 import java.io.File
 
 data class IdeUiState(
