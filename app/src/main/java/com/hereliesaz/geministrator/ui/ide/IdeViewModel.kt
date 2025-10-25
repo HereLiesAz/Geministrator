@@ -8,12 +8,12 @@ import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,23 +66,29 @@ class IdeViewModel @Inject constructor(
         }
     }
 
+    fun onEditorAttached(editor: CodeEditor) {
+        _uiState.update { it.copy(editor = editor) }
+    }
+
     fun onFileOpened(filePath: String, content: String) {
         _uiState.update { it.copy(currentFile = File(filePath), fileContent = content) }
     }
 
     fun onContentChanged(content: String) {
-        _uiState.update { it.copy(fileContent = content, textInsertion = null) }
+        _uiState.update { it.copy(fileContent = content) }
     }
 
-    fun onAutocompleteClick(line: Int, column: Int) {
+    fun onAutocompleteClick() {
         val client = geminiApiClient ?: return
-        val content = _uiState.value.fileContent ?: return
+        val editor = _uiState.value.editor ?: return
+        val content = editor.text.toString()
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
                 val response = client.generateContent("Complete the following code:\n\n$content")
-                _uiState.update { it.copy(textInsertion = TextInsertion(response, line, column)) }
+                val suggestion = response
+                editor.insertText(suggestion, suggestion.length)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
             } finally {
@@ -93,23 +99,21 @@ class IdeViewModel @Inject constructor(
 
     fun onGenerateDocsClick() {
         val client = geminiApiClient ?: return
+        val editor = _uiState.value.editor ?: return
+        val content = editor.text.toString()
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val response = client.generateContent("Generate documentation for the following code:\n\n${_uiState.value.fileContent}")
-                val newText = response + "\n\n"
-                _uiState.update { it.copy(textInsertion = TextInsertion(newText, 0, 0)) }
+                val response = client.generateContent("Generate documentation for the following code:\n\n$content")
+                val suggestion = response
+                editor.insertText(suggestion, 0)
             } catch (e: Exception) {
                 _uiState.update { it.copy(error = e.message) }
             } finally {
                 _uiState.update { it.copy(isLoading = false) }
             }
         }
-    }
-    
-    fun onTextInsertionConsumed() {
-        _uiState.update { it.copy(textInsertion = null) }
     }
 
     fun onRunClick() {

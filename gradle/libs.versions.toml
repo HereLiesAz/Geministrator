@@ -150,5 +150,3 @@ intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "int
 jpackage = { id = "org.panteleyev.jpackageplugin", version.ref = "jpackageplugin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
-
