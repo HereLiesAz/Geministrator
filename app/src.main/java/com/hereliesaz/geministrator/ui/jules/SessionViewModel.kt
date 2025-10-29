@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 //import com.hereliesaz.geministrator.apis.GeminiApiClient
-//import com.hereliesaz.geministrator.data.A2ACommunicator
+import com.hereliesaz.geministrator.data.A2ACommunicator
 import com.hereliesaz.geministrator.data.SettingsRepository
 import androidx.annotation.VisibleForTesting
 import com.jules.apiclient.Activity
@@ -31,7 +31,7 @@ class SessionViewModel(
     private val settingsRepository: SettingsRepository,
     private var julesApiClient: JulesApiClient?,
 //    private val geminiApiClient: GeminiApiClient?,
-//    private val a2aCommunicator: A2ACommunicator?
+    private val a2aCommunicator: A2ACommunicator?
 ) : ViewModel() {
 
     internal val sessionId: String = savedStateHandle.get<String>("sessionId")!!

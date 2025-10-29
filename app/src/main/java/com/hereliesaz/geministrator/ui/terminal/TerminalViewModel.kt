@@ -2,7 +2,7 @@ package com.hereliesaz.geministrator.ui.terminal
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.apis.GeminiApiClient
+//import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ class TerminalViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     private var julesApiClient: JulesApiClient? = null
-    private var geminiApiClient: GeminiApiClient? = null
+//    private var geminiApiClient: GeminiApiClient? = null
 
     private val _uiState = MutableStateFlow(TerminalUiState())
     val uiState = _uiState.asStateFlow()
@@ -28,10 +28,10 @@ class TerminalViewModel @Inject constructor(
             if (!apiKey.isNullOrBlank()) {
                 julesApiClient = JulesApiClient(apiKey)
             }
-            val geminiApiKey = settingsRepository.getGeminiApiKey()
-            if (!geminiApiKey.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(geminiApiKey)
-            }
+//            val geminiApiKey = settingsRepository.getGeminiApiKey()
+//            if (!geminiApiKey.isNullOrBlank()) {
+//                geminiApiClient = GeminiApiClient(geminiApiKey)
+//            }
         }
     }
 
@@ -47,7 +47,7 @@ class TerminalViewModel @Inject constructor(
     private suspend fun executeCommand(parsedCommand: ParsedCommand): String {
         return when (parsedCommand.command) {
             "jules" -> executeJulesCommand(parsedCommand.args)
-            "gemini" -> executeGeminiCommand(parsedCommand.args)
+//            "gemini" -> executeGeminiCommand(parsedCommand.args)
             else -> "Unknown command: ${parsedCommand.command}"
         }
     }
@@ -95,16 +95,16 @@ class TerminalViewModel @Inject constructor(
         }
     }
 
-    private suspend fun executeGeminiCommand(args: List<String>): String {
-        val client = geminiApiClient ?: return "Gemini API key not configured. Please set it in the settings screen."
-        if (args.isEmpty()) {
-            return "Please provide a prompt for the Gemini command."
-        }
-        val prompt = args.joinToString(" ")
-        return try {
-            client.generateContent(prompt)
-        } catch (e: Exception) {
-            "Error executing Gemini command: ${e.message}"
-        }
-    }
+//    private suspend fun executeGeminiCommand(args: List<String>): String {
+//        val client = geminiApiClient ?: return "Gemini API key not configured. Please set it in the settings screen."
+//        if (args.isEmpty()) {
+//            return "Please provide a prompt for the Gemini command."
+//        }
+//        val prompt = args.joinToString(" ")
+//        return try {
+//            client.generateContent(prompt)
+//        } catch (e: Exception) {
+//            "Error executing Gemini command: ${e.message}"
+//        }
+//    }
 }

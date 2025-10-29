@@ -2,8 +2,8 @@ package com.hereliesaz.geministrator.ui.jules
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.Prompt
-import com.hereliesaz.geministrator.data.PromptsRepository
+//import com.hereliesaz.geministrator.data.Prompt
+//import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
@@ -25,14 +25,14 @@ data class JulesUiState(
     val createdSession: Session? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val roles: List<Prompt> = emptyList(),
+//    val roles: List<Prompt> = emptyList(),
     val selectedRoles: Set<String> = emptySet()
 )
 
 @HiltViewModel
 class JulesViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
-    private val promptsRepository: PromptsRepository
+//    private val promptsRepository: PromptsRepository
 ) : ViewModel() {
     internal var apiClient: JulesApiClient? = null
 
@@ -50,20 +50,20 @@ class JulesViewModel @Inject constructor(
                 }
             }
             loadSources()
-            loadRoles()
+//            loadRoles()
         }
     }
 
-    private fun loadRoles() {
-        viewModelScope.launch {
-            try {
-                val roles = promptsRepository.getPrompts()
-                _uiState.update { it.copy(roles = roles) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
-            }
-        }
-    }
+//    private fun loadRoles() {
+//        viewModelScope.launch {
+//            try {
+//                val roles = promptsRepository.getPrompts()
+//                _uiState.update { it.copy(roles = roles) }
+//            } catch (e: Exception) {
+//                _uiState.update { it.copy(error = e.message) }
+//            }
+//        }
+//    }
 
     fun onRoleSelected(roleName: String, isSelected: Boolean) {
         val selectedRoles = _uiState.value.selectedRoles.toMutableSet()
