@@ -139,9 +139,9 @@ dependencies {
     implementation(libs.androidx.documentfile)
 
     // Sora Editor
-    implementation(platform(libs.sora.editor.bom))
-    implementation(libs.sora.editor)
-    implementation(libs.sora.language.textmate)
+    // implementation(platform(libs.sora.editor.bom))
+    // implementation(libs.sora.editor)
+    // implementation(libs.sora.language.textmate)
 
     // AzNavRail
     implementation(libs.aznavrail)

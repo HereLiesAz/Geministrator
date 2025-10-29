@@ -17,14 +17,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.hereliesaz.geministrator.ui.project.ProjectViewModel
-import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
-import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
-import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
-import io.github.rosemoe.sora.widget.CodeEditor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,27 +31,6 @@ fun FileViewerScreen(
     val fileContent = projectState.localCachePath?.let {
         projectViewModel.readFile(filePath).getOrNull()
     } ?: "Error: Could not read file."
-
-    val context = LocalContext.current
-    val editor = remember { CodeEditor(context) }
-
-    val scopeName = when (filePath.substringAfterLast('.')) {
-        "kt", "kts" -> "source.kotlin"
-        "java" -> "source.java"
-        "json" -> "source.json"
-        else -> null
-    }
-
-    if (scopeName != null) {
-        editor.setEditorLanguage(TextMateLanguage.create(scopeName, true))
-        editor.colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance())
-    }
-
-    DisposableEffect(editor) {
-        onDispose {
-            editor.release()
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -76,12 +49,7 @@ fun FileViewerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            AndroidView(
-                factory = { editor },
-                modifier = Modifier.fillMaxSize()
-            ) { codeEditor ->
-                codeEditor.setText(fileContent)
-            }
+            Text(text = fileContent)
         }
     }
 }
