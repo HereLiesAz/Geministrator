@@ -16,9 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.rosemoe.sora.widget.CodeEditor
 
 @Composable
 fun IdeScreen(
@@ -32,38 +30,12 @@ fun IdeScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AndroidView(
-            modifier = Modifier.weight(1f),
-            factory = { context ->
-                CodeEditor(context).apply {
-                    viewModel.onEditorAttached(this)
-                    subscribeEvent(io.github.rosemoe.sora.event.ContentChangeEvent::class.java) { _, _ ->
-                        viewModel.onContentChanged(text.toString())
-                    }
-                }
-            },
-            update = { editor ->
-                if (editor.text.toString() != uiState.fileContent) {
-                    editor.setText(uiState.fileContent ?: "")
-                }
-            }
+        Text(
+            text = uiState.fileContent ?: "",
+            modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
-            Button(
-                onClick = { viewModel.onAutocompleteClick() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Autocomplete")
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = { viewModel.onGenerateDocsClick() },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Generate Docs")
-            }
-            Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = { viewModel.onRunClick() },
                 modifier = Modifier.weight(1f)

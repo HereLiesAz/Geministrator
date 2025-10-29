@@ -7,8 +7,8 @@ retrofit = "2.9.0"
 retrofit2-kotlinx-serialization-converter = "1.0.0"
 richtextfx = "0.11.2"
 android-gradle-plugin = "8.13.0"
-kotlin = "1.9.24"
-ksp = "1.9.24-1.0.20"
+kotlin = "2.2.20"
+ksp = "2.2.20-2.0.3"
 room = "2.6.1"
 core-ktx = "1.13.1"
 kotlinx-cli = "0.3.6"
@@ -17,7 +17,7 @@ kotlinx-serialization-json = "1.6.3"
 lifecycle = "2.8.0"
 activity-compose = "1.9.0"
 activity-ktx = "1.9.0"
-compose-bom = "2024.06.00"
+compose-bom = "2025.09.00"
 mockito = "5.11.0"
 mockk = "1.13.10"
 navigation-compose = "2.7.7"
@@ -45,7 +45,7 @@ firebase-crashlytics-buildtools = "2.9.9"
 firebase-ai = "19.0.0-beta-01"
 google-adk = "0.3.0"
 generativeai = "0.5.0"
-hilt = "2.51.1"
+hilt = "2.57.2"
 hilt-navigation-compose = "1.2.0"
 
 [libraries]
@@ -103,8 +103,8 @@ a2a-sdk-client = { group = "io.github.a2asdk", name = "a2a-java-sdk-client", ver
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2-kotlinx-serialization-converter" }
 sora-editor-bom = { group = "io.github.rosemoe", name = "editor-bom", version = "0.23.7" }
-sora-editor = { group = "io.github.rosemoe", name = "editor" }
-sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmate" }
+sora-editor = { group = "io.github.rosemoe", name = "editor", version = "0.23.7" }
+sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmate", version = "0.23.7" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,7 +22,6 @@ import com.hereliesaz.geministrator.ui.core.GeministratorNavHost
 import com.hereliesaz.geministrator.ui.core.MainViewModel
 import com.hereliesaz.geministrator.ui.navigation.GeministratorNavRail
 import com.hereliesaz.geministrator.ui.theme.GeministratorTheme
-import com.hereliesaz.geministrator.util.TextMateLoader
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
     lateinit var settingsRepository: SettingsRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        TextMateLoader.load(this)
         enableEdgeToEdge()
         setContent {
             val theme by settingsRepository.theme.collectAsState(initial = "System")
@@ -51,13 +50,13 @@ fun MainScreen(mainViewModel: MainViewModel) {
     Scaffold(
         containerColor = Color.Transparent
     ) { innerPadding ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
+        Box(modifier = Modifier.padding(innerPadding)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
             GeministratorNavRail(
                 isLoading = mainUiState.isLoading,
                 onNavigate = { destination ->
@@ -74,6 +73,6 @@ fun MainScreen(mainViewModel: MainViewModel) {
                 modifier = Modifier.weight(1f),
                 setLoading = mainViewModel::setLoading
             )
-        }
+        }}
     }
 }
