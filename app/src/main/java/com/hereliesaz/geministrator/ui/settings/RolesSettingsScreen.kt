@@ -37,23 +37,23 @@ fun RolesSettingsScreen(
             } else if (uiState.error != null) {
                 Text(text = "Error: ${uiState.error}")
             } else {
-                LazyColumn {
-                    items(uiState.prompts) { prompt ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(text = prompt.name, modifier = Modifier.weight(1f))
-                            Switch(
-                                checked = uiState.enabledRoles.contains(prompt.name),
-                                onCheckedChange = { isEnabled ->
-                                    viewModel.onRoleEnabledChanged(prompt.name, isEnabled)
-                                }
-                            )
-                        }
-                    }
-                }
+//                LazyColumn {
+//                    items(uiState.prompts) { prompt ->
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(16.dp)
+//                        ) {
+//                            Text(text = prompt.name, modifier = Modifier.weight(1f))
+//                            Switch(
+//                                checked = uiState.enabledRoles.contains(prompt.name),
+//                                onCheckedChange = { isEnabled ->
+//                                    viewModel.onRoleEnabledChanged(prompt.name, isEnabled)
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
             }
         }
     }

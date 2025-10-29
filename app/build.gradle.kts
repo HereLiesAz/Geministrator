@@ -149,9 +149,6 @@ dependencies {
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // Gemini API
-    implementation(libs.generativeai)
-
     // Agent Development Kit
 
     // Hilt

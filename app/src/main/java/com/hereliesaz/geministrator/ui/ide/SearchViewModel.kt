@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.apis.GeminiApiClient
+//import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,14 +25,14 @@ class SearchViewModel(
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState = _uiState.asStateFlow()
-    private var geminiApiClient: GeminiApiClient? = null
+//    private var geminiApiClient: GeminiApiClient? = null
 
     init {
         viewModelScope.launch {
-            val geminiApiKey = settingsRepository.geminiApiKey.first()
-            if (!geminiApiKey.isNullOrBlank()) {
-                geminiApiClient = GeminiApiClient(geminiApiKey)
-            }
+//            val geminiApiKey = settingsRepository.geminiApiKey.first()
+//            if (!geminiApiKey.isNullOrBlank()) {
+//                geminiApiClient = GeminiApiClient(geminiApiKey)
+//            }
         }
     }
 
@@ -41,7 +41,7 @@ class SearchViewModel(
     }
 
     fun performSearch() {
-        val client = geminiApiClient ?: return
+//        val client = geminiApiClient ?: return
         val query = _uiState.value.searchQuery
         if (query.isBlank()) return
 
@@ -50,8 +50,8 @@ class SearchViewModel(
             try {
                 // This is a placeholder for the actual search logic.
                 // We will need to find a way to provide the codebase as context to the Gemini API.
-                val response = client.generateContent("Find code related to: $query in the project.")
-                _uiState.update { it.copy(searchResults = listOf(response), isLoading = false, error = null) }
+//                val response = client.generateContent("Find code related to: $query in the project.")
+//                _uiState.update { it.copy(searchResults = listOf(response), isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

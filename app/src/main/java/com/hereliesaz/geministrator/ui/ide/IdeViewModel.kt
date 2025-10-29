@@ -3,7 +3,7 @@ package com.hereliesaz.geministrator.ui.ide
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.apis.GeminiApiClient
+//import com.hereliesaz.geministrator.apis.GeminiApiClient
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.ToolOutputActivity
@@ -21,7 +21,7 @@ class IdeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
     private var julesApiClient: JulesApiClient?,
-    private var geminiApiClient: GeminiApiClient?
+//    private var geminiApiClient: GeminiApiClient?
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
@@ -37,12 +37,12 @@ class IdeViewModel @Inject constructor(
                     loadActivities()
                 }
             }
-            if (geminiApiClient == null) {
-                val geminiApiKey = settingsRepository.geminiApiKey.first()
-                if (!geminiApiKey.isNullOrBlank()) {
-                    geminiApiClient = GeminiApiClient(geminiApiKey)
-                }
-            }
+//            if (geminiApiClient == null) {
+//                val geminiApiKey = settingsRepository.geminiApiKey.first()
+//                if (!geminiApiKey.isNullOrBlank()) {
+//                    geminiApiClient = GeminiApiClient(geminiApiKey)
+//                }
+//            }
         }
     }
 

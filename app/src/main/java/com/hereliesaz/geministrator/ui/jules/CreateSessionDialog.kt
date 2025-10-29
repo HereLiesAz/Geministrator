@@ -57,31 +57,31 @@ fun CreateSessionDialog(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 5
                 )
-                Text("Select Roles", style = MaterialTheme.typography.titleMedium)
-                if (uiState.roles.isEmpty()) {
-                    Text(
-                        text = "No roles available",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                } else {
-                    LazyColumn {
-                        items(uiState.roles) { role ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = uiState.selectedRoles.contains(role.name),
-                                    onCheckedChange = { isSelected ->
-                                        viewModel.onRoleSelected(role.name, isSelected)
-                                    }
-                                )
-                                Text(role.name)
-                            }
-                        }
-                    }
-                }
+//                Text("Select Roles", style = MaterialTheme.typography.titleMedium)
+//                if (uiState.roles.isEmpty()) {
+//                    Text(
+//                        text = "No roles available",
+//                        style = MaterialTheme.typography.bodyMedium,
+//                        modifier = Modifier.padding(vertical = 8.dp)
+//                    )
+//                } else {
+//                    LazyColumn {
+//                        items(uiState.roles) { role ->
+//                            Row(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+//                            ) {
+//                                Checkbox(
+//                                    checked = uiState.selectedRoles.contains(role.name),
+//                                    onCheckedChange = { isSelected ->
+//                                        viewModel.onRoleSelected(role.name, isSelected)
+//                                    }
+//                                )
+//                                Text(role.name)
+//                            }
+//                        }
+//                    }
+//                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End

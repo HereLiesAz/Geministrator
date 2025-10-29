@@ -35,7 +35,6 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
     testImplementation(libs.system.rules)
-    implementation(libs.google.adk)
 
 }
 
