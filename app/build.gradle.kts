@@ -16,6 +16,13 @@ configurations.all {
                 .using(module("com.google.protobuf:protobuf-javalite:3.25.3"))
                 .because("Android requires the javalite version of protobuf")
         }
+        force("jakarta.annotation:jakarta.annotation-api:1.3.5")
+        force("commons-logging:commons-logging:1.2")
+
+        // Resolve duplicate classes
+        exclude(group = "org.slf4j", module = "jcl-over-slf4j")
+        exclude(group = "javax.annotation", module = "javax.annotation-api")
+        exclude(group = "org.glassfish.hk2.external", module = "jakarta.inject")
     }
 }
 

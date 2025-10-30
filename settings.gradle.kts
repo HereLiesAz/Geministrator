@@ -26,7 +26,6 @@ dependencyResolutionManagement {
     }
 }
 
-
 rootProject.name = "Geministrator"
 
 include(":app")
