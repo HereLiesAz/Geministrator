@@ -60,10 +60,6 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "2.2.20"
-    }
-
     secrets {
         // Use the default properties file (local.properties)
     }
