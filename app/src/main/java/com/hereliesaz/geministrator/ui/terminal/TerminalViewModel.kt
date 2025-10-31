@@ -65,7 +65,7 @@ class TerminalViewModel @Inject constructor(
             "sources" -> {
                 try {
                     val sources = julesApiClient?.getSources()
-                    sources?.sources?.joinToString("\n") { it.name } ?: "No sources found."
+                    sources?.joinToString("\n") { it.name } ?: "No sources found."
                 } catch (e: Exception) {
                     "Error getting sources: ${e.message}"
                 }

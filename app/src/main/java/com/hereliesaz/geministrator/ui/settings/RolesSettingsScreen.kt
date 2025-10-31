@@ -17,12 +17,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RolesSettingsScreen(
-    viewModel: RolesSettingsViewModel = viewModel()
+    viewModel: RolesSettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -37,23 +37,23 @@ fun RolesSettingsScreen(
             } else if (uiState.error != null) {
                 Text(text = "Error: ${uiState.error}")
             } else {
-//                LazyColumn {
-//                    items(uiState.prompts) { prompt ->
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(16.dp)
-//                        ) {
-//                            Text(text = prompt.name, modifier = Modifier.weight(1f))
-//                            Switch(
-//                                checked = uiState.enabledRoles.contains(prompt.name),
-//                                onCheckedChange = { isEnabled ->
-//                                    viewModel.onRoleEnabledChanged(prompt.name, isEnabled)
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
+                LazyColumn {
+                    items(uiState.prompts) { prompt ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(text = prompt.name, modifier = Modifier.weight(1f))
+                            Switch(
+                                checked = uiState.enabledRoles.contains(prompt.name),
+                                onCheckedChange = { isEnabled ->
+                                    viewModel.onRoleEnabledChanged(prompt.name, isEnabled)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
     }

@@ -2,8 +2,8 @@ package com.hereliesaz.geministrator.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-//import com.hereliesaz.geministrator.data.Prompt
-//import com.hereliesaz.geministrator.data.PromptsRepository
+import com.hereliesaz.geministrator.data.Prompt
+import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class RolesSettingsUiState(
-//    val prompts: List<Prompt> = emptyList(),
+    val prompts: List<Prompt> = emptyList(),
     val enabledRoles: Set<String> = emptySet(),
     val isLoading: Boolean = false,
     val error: String? = null
@@ -22,7 +22,7 @@ data class RolesSettingsUiState(
 
 @HiltViewModel
 class RolesSettingsViewModel @Inject constructor(
-//    private val promptsRepository: PromptsRepository,
+    private val promptsRepository: PromptsRepository,
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
@@ -30,7 +30,7 @@ class RolesSettingsViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-//        loadPrompts()
+        loadPrompts()
         viewModelScope.launch {
             settingsRepository.enabledRoles.collect { enabledRoles ->
                 _uiState.update { it.copy(enabledRoles = enabledRoles) }
@@ -38,17 +38,17 @@ class RolesSettingsViewModel @Inject constructor(
         }
     }
 
-//    private fun loadPrompts() {
-//        viewModelScope.launch {
-//            _uiState.update { it.copy(isLoading = true) }
-//            try {
-//                val prompts = promptsRepository.getPrompts()
-//                _uiState.update { it.copy(prompts = prompts, isLoading = false, error = null) }
-//            } catch (e: Exception) {
-//                _uiState.update { it.copy(isLoading = false, error = e.message) }
-//            }
-//        }
-//    }
+    private fun loadPrompts() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val prompts = promptsRepository.getPrompts()
+                _uiState.update { it.copy(prompts = prompts, isLoading = false, error = null) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
 
     fun onRoleEnabledChanged(roleName: String, isEnabled: Boolean) {
         viewModelScope.launch {
