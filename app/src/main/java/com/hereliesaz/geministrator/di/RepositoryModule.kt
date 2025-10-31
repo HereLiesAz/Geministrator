@@ -1,6 +1,8 @@
 package com.hereliesaz.geministrator.di
 
 import android.content.Context
+import com.hereliesaz.geministrator.data.GithubRepository
+import com.hereliesaz.geministrator.data.GithubRepositoryImpl
 import com.hereliesaz.geministrator.data.HistoryRepository
 import com.hereliesaz.geministrator.data.HistoryRepositoryImpl
 import com.hereliesaz.geministrator.data.JulesRepository
@@ -58,5 +60,11 @@ object RepositoryModule {
         julesRepository: JulesRepository
     ): SessionRepository {
         return SessionRepositoryImpl(julesRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGithubRepository(): GithubRepository {
+        return GithubRepositoryImpl()
     }
 }

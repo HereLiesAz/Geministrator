@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.data
 
+import com.jules.apiclient.Activity
 import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
@@ -38,5 +39,17 @@ class JulesRepositoryImpl @Inject constructor(
 
     override suspend fun getSession(sessionId: String): Session {
         return getClient().getSession(sessionId)
+    }
+
+    override suspend fun listSessions(): List<Session> {
+        return getClient().getSessions()
+    }
+
+    override suspend fun approvePlan(sessionId: String) {
+        return getClient().approvePlan(sessionId)
+    }
+
+    override suspend fun listActivities(sessionId: String): List<Activity> {
+        return getClient().getActivities(sessionId).activities
     }
 }
