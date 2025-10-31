@@ -9,31 +9,31 @@ import org.junit.Test
 
 class JulesApiClientTest {
 
-    private lateinit var apiKey: String
-    private lateinit var apiClient: JulesApiClient
+    private var apiKey: String? = null
+    private var apiClient: JulesApiClient? = null
 
     @Before
     fun setUp() {
-        apiKey = TestProperties.getProperty("julesApiKey") ?: ""
-        assumeTrue("Jules API key is a placeholder, skipping test.", apiKey.isNotEmpty() && apiKey != "placeholder")
-        apiClient = JulesApiClient(apiKey)
+        apiKey = TestProperties.getProperty("julesApiKey")
+        assumeTrue("Jules API key is a placeholder, skipping test.", !apiKey.isNullOrEmpty() && apiKey != "placeholder")
+        apiClient = JulesApiClient(apiKey!!)
     }
 
     @Test
     fun `getSources should return a list of sources`() = runTest {
         // When
-        val result = apiClient.getSources()
+        val result = apiClient?.getSources()
 
         // Then
-        assertTrue("The sources list should not be empty.", result.sources.isNotEmpty())
+        assertTrue("The sources list should not be empty.", result?.sources?.isNotEmpty() == true)
     }
 
     @Test
     fun `getSessions should return a list of sessions`() = runTest {
         // When
-        val result = apiClient.getSessions()
+        val result = apiClient?.getSessions()
 
         // Then
-        assertTrue("The sessions list should not be empty.", result.isNotEmpty())
+        assertTrue("The sessions list should not be empty.", result?.isNotEmpty() == true)
     }
 }
