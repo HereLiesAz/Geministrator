@@ -1,52 +1,52 @@
 
 [versions]
 system-rules = "1.19.0"
-a2a = "0.3.0.Final"
-aznavrail = "4.3"
-retrofit = "3.0.0"
+a2a = "0.3.0.Beta2"
+aznavrail = "4.2"
+retrofit = "2.9.0"
 retrofit2-kotlinx-serialization-converter = "1.0.0"
 richtextfx = "0.11.2"
 android-gradle-plugin = "8.13.0"
-kotlin = "2.2.21"
-ksp = "2.2.20-2.0.4"
-room = "2.8.3"
-core-ktx = "1.17.0"
+kotlin = "2.2.20"
+ksp = "2.2.20-2.0.3"
+room = "2.6.1"
+core-ktx = "1.13.1"
 kotlinx-cli = "0.3.6"
-kotlinx-coroutines-core = "1.10.2"
-kotlinx-serialization-json = "1.9.0"
-lifecycle = "2.9.4"
-activity-compose = "1.11.0"
-activity-ktx = "1.11.0"
-compose-bom = "2025.10.01"
-mockito = "5.20.0"
-mockk = "1.14.6"
-navigation-compose = "2.9.5"
+kotlinx-coroutines-core = "1.8.0"
+kotlinx-serialization-json = "1.6.3"
+lifecycle = "2.8.0"
+activity-compose = "1.9.0"
+activity-ktx = "1.9.0"
+compose-bom = "2024.05.00"
+mockito = "5.11.0"
+mockk = "1.13.10"
+navigation-compose = "2.7.7"
 jgit = "6.9.0.202403050737-r"
-datastore = "1.1.7"
-documentfile = "1.1.0"
+datastore = "1.1.1"
+documentfile = "1.0.1"
 junit = "4.13.2"
-androidx-test-ext = "1.3.0"
-espresso-core = "3.7.0"
+androidx-test-ext = "1.1.5"
+espresso-core = "3.5.1"
 ui = "1.6.7"
-intellij-platform = "2.10.2"
+intellij-platform = "1.17.0"
 material3-adaptive-navigation-suite = "1.0.0-alpha05"
 material-icons = "1.6.7"
 jpackageplugin = "1.7.6"
-github-api = "1.330"
-okhttp = "5.2.1"
+github-api = "1.319"
+okhttp = "4.12.0"
 vertexai = "0.1.0"
-chaquopy = "16.1.0"
+chaquopy = "15.0.1"
 appauth = "0.11.1"
 firebase-auth-common = "22.3.0"
-play-services-auth = "21.4.0"
-firebase-auth-ktx = "23.2.1"
-play-services-tasks = "18.4.0"
-firebase-crashlytics-buildtools = "3.0.6"
+play-services-auth = "21.0.0"
+firebase-auth-ktx = "22.3.0"
+play-services-tasks = "18.1.0"
+firebase-crashlytics-buildtools = "2.9.9"
 firebase-ai = "19.0.0-beta-01"
 google-adk = "0.3.0"
-generativeai = "0.9.0"
+generativeai = "0.5.0"
 hilt = "2.57.2"
-hilt-navigation-compose = "1.3.0"
+hilt-navigation-compose = "1.2.0"
 
 [libraries]
 # Core & Lifecycle
@@ -109,7 +109,7 @@ sora-language-textmate = { group = "io.github.rosemoe", name = "language-textmat
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext" }
-androidx-test-core = { group = "androidx.test", name = "core", version = "1.7.0" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.5.0" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-.test-junit4" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
@@ -127,7 +127,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-core" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "6.1.0" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "5.2.1" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 system-rules = { group = "com.github.stefanbirkner", name = "system-rules", version.ref = "system-rules" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
