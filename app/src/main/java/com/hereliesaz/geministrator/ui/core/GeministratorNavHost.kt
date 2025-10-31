@@ -9,8 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
 import com.hereliesaz.geministrator.ui.ide.SearchScreen
-import com.hereliesaz.geministrator.ui.jules.SessionScreen
 import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
+import com.hereliesaz.geministrator.ui.session.SessionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.ui.terminal.CmdScreen
 
@@ -39,10 +39,7 @@ fun GeministratorNavHost(
                 navArgument("roles") { type = NavType.StringType; nullable = true }
             )
         ) {
-            SessionScreen(
-                setLoading = setLoading,
-                navController = navController
-            )
+            SessionScreen()
         }
         composable("ide") {
             SearchScreen()

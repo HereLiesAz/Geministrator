@@ -2,16 +2,14 @@ package com.hereliesaz.geministrator.ui.jules
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hereliesaz.geministrator.data.JulesRepository
 import com.hereliesaz.geministrator.data.Prompt
 import com.hereliesaz.geministrator.data.PromptsRepository
-import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.JulesApiClient
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -31,25 +29,16 @@ data class JulesUiState(
 
 @HiltViewModel
 class JulesViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
+    private val julesRepository: JulesRepository,
     private val promptsRepository: PromptsRepository
 ) : ViewModel() {
-    internal var apiClient: JulesApiClient? = null
 
     private val _uiState = MutableStateFlow(JulesUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
-            if (apiKey.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-            } else {
-                apiClient = JulesApiClient(apiKey)
-                loadSources()
-            }
-            loadRoles()
-        }
+        loadSources()
+        loadRoles()
     }
 
     private fun loadRoles() {
@@ -74,11 +63,10 @@ class JulesViewModel @Inject constructor(
     }
 
     fun loadSources() {
-        val client = apiClient ?: return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val sources = client.getSources().sources
+                val sources = julesRepository.getSources()
                 _uiState.update { it.copy(sources = sources, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -95,14 +83,13 @@ class JulesViewModel @Inject constructor(
     }
 
     fun createSession(title: String, prompt: String) {
-        val client = apiClient ?: return
         val source = _uiState.value.selectedSource ?: return
         val selectedRoles = _uiState.value.selectedRoles
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, showCreateSessionDialog = false) }
             try {
-                val session = client.createSession(prompt, source, title, Json.encodeToString(selectedRoles))
+                val session = julesRepository.createSession(prompt, source, title, Json.encodeToString(selectedRoles))
                 _uiState.update { it.copy(createdSession = session, isLoading = false, error = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

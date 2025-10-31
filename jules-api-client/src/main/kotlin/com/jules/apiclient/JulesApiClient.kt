@@ -37,6 +37,15 @@ class JulesApiClient(private val apiKey: String) {
         return service.getSessions(apiKey)
     }
 
+    suspend fun getSession(sessionId: String): Session {
+        return service.getSession(apiKey, sessionId)
+    }
+
+    suspend fun nextTurn(sessionId: String, prompt: String): Turn {
+        val request = NextTurnRequest(prompt)
+        return service.nextTurn(apiKey, sessionId, request)
+    }
+
     suspend fun approvePlan(sessionId: String) {
         service.approvePlan(apiKey, sessionId)
     }

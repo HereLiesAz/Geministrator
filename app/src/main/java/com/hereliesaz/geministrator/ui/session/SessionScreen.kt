@@ -1,8 +1,7 @@
-package com.hereliesaz.geministrator.ui.ide
+package com.hereliesaz.geministrator.ui.session
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,47 +11,55 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun SearchScreen(
-    viewModel: SearchViewModel = hiltViewModel()
+fun SessionScreen(
+    viewModel: SessionViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var prompt by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        OutlinedTextField(
-            value = uiState.searchQuery,
-            onValueChange = { viewModel.onSearchQueryChange(it) },
-            label = { Text("Enter your search query") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Button(
-            onClick = { viewModel.performSearch() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Text("Search")
-        }
-
         if (uiState.isLoading) {
             CircularProgressIndicator()
         } else if (uiState.error != null) {
             Text(text = "Error: ${uiState.error}")
         } else {
-            LazyColumn {
-                items(uiState.searchResults) { result ->
-                    Text(text = result, modifier = Modifier.padding(vertical = 4.dp))
+            LazyColumn(
+                modifier = Modifier.weight(1f)
+            ) {
+                uiState.session?.history?.let { history ->
+                    items(history) { turn ->
+                        Text(text = "${turn.role}: ${turn.content}")
+                    }
                 }
+            }
+
+            OutlinedTextField(
+                value = prompt,
+                onValueChange = { prompt = it },
+                label = { Text("Enter a prompt") }
+            )
+
+            Button(
+                onClick = {
+                    viewModel.sendMessage(prompt)
+                    prompt = ""
+                },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Send")
             }
         }
     }

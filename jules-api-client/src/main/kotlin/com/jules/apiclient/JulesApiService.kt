@@ -36,7 +36,8 @@ data class Session(
     val id: String,
     val title: String,
     val sourceContext: SourceContext,
-    val prompt: String
+    val prompt: String,
+    val history: List<Turn> = emptyList()
 )
 
 @Serializable
@@ -115,6 +116,18 @@ data class SendMessageRequest(
     val prompt: String
 )
 
+@Serializable
+data class NextTurnRequest(
+    val prompt: String
+)
+
+@Serializable
+data class Turn(
+    val role: String,
+    val content: String,
+    val state: String? = null
+)
+
 interface JulesApiService {
     @GET("v1alpha/sources")
     suspend fun getSources(@Header("X-Goog-Api-Key") apiKey: String): SourceList
@@ -130,6 +143,19 @@ interface JulesApiService {
         @Header("X-Goog-Api-Key") apiKey: String,
         @Query("pageSize") pageSize: Int = 10
     ): List<Session>
+
+    @GET("v1alpha/sessions/{sessionId}")
+    suspend fun getSession(
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Path("sessionId") sessionId: String
+    ): Session
+
+    @POST("v1alpha/sessions/{sessionId}:nextTurn")
+    suspend fun nextTurn(
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Path("sessionId") sessionId: String,
+        @Body request: NextTurnRequest
+    ): Turn
 
     @POST("v1alpha/sessions/{sessionId}:approvePlan")
     suspend fun approvePlan(
