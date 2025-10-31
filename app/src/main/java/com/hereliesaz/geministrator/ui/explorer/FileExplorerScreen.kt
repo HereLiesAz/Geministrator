@@ -3,6 +3,7 @@ package com.hereliesaz.geministrator.ui.explorer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,12 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,107 +25,77 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.hereliesaz.geministrator.ui.project.ProjectViewModel
-import java.io.File
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import com.jules.apiclient.Source
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileExplorerScreen(
-    projectViewModel: ProjectViewModel,
-    onNavigateToFile: (String) -> Unit,
+    onSourceClicked: (Source) -> Unit,
 ) {
-    val viewModel: FileExplorerViewModel = viewModel(
-        factory = FileExplorerViewModel.provideFactory(projectViewModel)
-    )
+    val viewModel: FileExplorerViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = uiState.currentPath.relativeTo(uiState.projectRoot).path.ifEmpty { "." },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    if (uiState.canNavigateUp) {
-                        IconButton(onClick = { viewModel.navigateUp() }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Navigate Up"
-                            )
-                        }
-                    }
-                }
-            )
+            TopAppBar(title = { Text(text = "Sources") })
         }
     ) { padding ->
-        val error = uiState.error
-        if (error != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = error, color = MaterialTheme.colorScheme.error)
-            }
-            return@Scaffold
-        }
-
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(padding)
         ) {
-            items(items = uiState.files, key = { it.absolutePath }) { file ->
-                FileListItem(
-                    file = file,
-                    onFileClicked = { clickedFile ->
-                        val relativePath = clickedFile.relativeTo(uiState.projectRoot).path
-                        val encodedPath =
-                            URLEncoder.encode(relativePath, StandardCharsets.UTF_8.toString())
-                        onNavigateToFile(encodedPath)
-                    },
-                    onDirectoryClicked = { clickedDirectory -> viewModel.navigateTo(clickedDirectory) }
-                )
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            val error = uiState.error
+            if (error != null) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = error, color = MaterialTheme.colorScheme.error)
+                    Button(onClick = { viewModel.retry() }) {
+                        Text(text = "Retry")
+                    }
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(items = uiState.sources, key = { it.name }) { source ->
+                    SourceListItem(source = source, onSourceClicked = onSourceClicked)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun FileListItem(
-    file: File,
-    onFileClicked: (File) -> Unit,
-    onDirectoryClicked: (File) -> Unit,
+private fun SourceListItem(
+    source: Source,
+    onSourceClicked: (Source) -> Unit,
 ) {
-    val isDirectory = file.isDirectory
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                if (isDirectory) onDirectoryClicked(file) else onFileClicked(file)
-            }
+            .clickable { onSourceClicked(source) }
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Icon(
-            imageVector = if (isDirectory) Icons.Default.Folder else Icons.Default.Description,
+            imageVector = Icons.Default.Storage,
             contentDescription = null,
-            tint = if (isDirectory) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.colorScheme.primary
         )
-        Text(text = file.name, style = MaterialTheme.typography.bodyLarge)
+        Text(text = source.id, style = MaterialTheme.typography.bodyLarge)
     }
 }

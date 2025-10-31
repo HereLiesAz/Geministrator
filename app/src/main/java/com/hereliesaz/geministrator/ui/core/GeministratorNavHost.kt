@@ -7,9 +7,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.hereliesaz.geministrator.ui.explorer.FileExplorerScreen
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
 import com.hereliesaz.geministrator.ui.ide.SearchScreen
-import com.hereliesaz.geministrator.ui.jules.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.session.SessionScreen
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.ui.terminal.CmdScreen
@@ -26,9 +26,9 @@ fun GeministratorNavHost(
         modifier = modifier
     ) {
         composable("explorer") {
-            SourceSelectionScreen(
-                onSessionCreated = { sessionId, roles ->
-                    navController.navigate("session/$sessionId?roles=$roles")
+            FileExplorerScreen(
+                onSourceClicked = { source ->
+                    navController.navigate("session/${source.id}")
                 }
             )
         }

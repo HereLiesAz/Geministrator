@@ -130,7 +130,10 @@ data class Turn(
 
 interface JulesApiService {
     @GET("v1alpha/sources")
-    suspend fun getSources(@Header("X-Goog-Api-Key") apiKey: String): SourceList
+    suspend fun getSources(
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Query("pageToken") pageToken: String? = null
+    ): SourceList
 
     @POST("v1alpha/sessions")
     suspend fun createSession(

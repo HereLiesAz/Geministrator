@@ -16,8 +16,15 @@ class JulesApiClient(private val apiKey: String) {
 
     private val service = retrofit.create(JulesApiService::class.java)
 
-    suspend fun getSources(): SourceList {
-        return service.getSources(apiKey)
+    suspend fun getSources(): List<Source> {
+        val allSources = mutableListOf<Source>()
+        var pageToken: String? = null
+        do {
+            val sourceList = service.getSources(apiKey, pageToken)
+            allSources.addAll(sourceList.sources)
+            pageToken = sourceList.nextPageToken
+        } while (pageToken != null)
+        return allSources
     }
 
     suspend fun createSession(prompt: String, source: Source, title: String, roles: String): Session {

@@ -26,7 +26,7 @@ class JulesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getSources(): List<Source> {
-        return getClient().getSources().sources
+        return getClient().getSources()
     }
 
     override suspend fun createSession(prompt: String, source: Source, title: String, context: String): Session {
