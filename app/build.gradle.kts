@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.compose)
 }
 
 configurations.all {
@@ -52,8 +53,8 @@ android {
             localProperties.load(localPropertiesFile.inputStream())
         }
 
-        buildConfigField("String", "GITHUB_CLIENT_ID", "${localProperties.getProperty("github.clientId")}")
-        buildConfigField("String", "GITHUB_CLIENT_SECRET", "${localProperties.getProperty("github.clientSecret")}")
+        buildConfigField("String", "GITHUB_CLIENT_ID", "\"${localProperties.getProperty("github.clientId")}\"")
+        buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
     }
 
     buildFeatures {
