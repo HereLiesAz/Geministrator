@@ -29,19 +29,9 @@ fun GeministratorNavRail(
             onClick = { onNavigate("ide") }
         )
         azRailItem(
-            id = "cmd",
-            text = "CMD",
-            onClick = { onNavigate("cmd") }
-        )
-        azRailItem(
             id = "code_review",
             text = "Code Review",
-            onClick = {
-                val sessionId = currentRoute?.substringAfter("session/")?.substringBefore("?")
-                if (sessionId != null) {
-                    onNavigate("code_review/$sessionId")
-                }
-            }
+            onClick = { onNavigate("cmd") }
         )
         azRailItem(
             id = "settings",
