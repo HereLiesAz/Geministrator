@@ -41,15 +41,13 @@ class JulesViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            if (apiClient == null) {
-                val apiKey = settingsRepository.apiKey.first()
-                if (apiKey.isNullOrBlank()) {
-                    _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-                } else {
-                    apiClient = JulesApiClient(apiKey)
-                }
+            val apiKey = settingsRepository.apiKey.first()
+            if (apiKey.isNullOrBlank()) {
+                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
+            } else {
+                apiClient = JulesApiClient(apiKey)
+                loadSources()
             }
-            loadSources()
             loadRoles()
         }
     }

@@ -20,22 +20,22 @@ import javax.inject.Inject
 class IdeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val settingsRepository: SettingsRepository,
-    private var julesApiClient: JulesApiClient?,
 //    private var geminiApiClient: GeminiApiClient?
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
     private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
     private val filePath: String = savedStateHandle.get<String>("filePath")!!
+    private var julesApiClient: JulesApiClient? = null
 
     init {
         viewModelScope.launch {
-            if (julesApiClient == null) {
-                val apiKey = settingsRepository.apiKey.first()
-                if (!apiKey.isNullOrBlank()) {
-                    julesApiClient = JulesApiClient(apiKey)
-                    loadActivities()
-                }
+            val apiKey = settingsRepository.apiKey.first()
+            if (apiKey.isNullOrBlank()) {
+                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
+            } else {
+                julesApiClient = JulesApiClient(apiKey)
+                loadActivities()
             }
 //            if (geminiApiClient == null) {
 //                val geminiApiKey = settingsRepository.geminiApiKey.first()
