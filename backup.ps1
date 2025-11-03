@@ -23,7 +23,6 @@ $KeepLastNBackups = 5
 # Directories to exclude from the backup entirely, regardless of nesting level.
 $excludeDirs = @(
     ".git",
-    ".github", # Exclude GitHub Actions workflows
     ".gradle",
     ".idea",
     ".vscode", # VS Code workspace settings
@@ -157,9 +156,8 @@ else {
 Write-Host "---"
 Write-Host "Cleaning up old backups..." -ForegroundColor Yellow
 
-# Get all backups, sort by name (which contains the timestamp), newest first
-# This is required for GitHub Actions, as CreationTime is not preserved on checkout
-$allBackups = Get-ChildItem -Path $PSScriptRoot -Filter "${BackupPrefix}_*.txt" | Sort-Object Name -Descending
+# Get all backups, sort by creation time (newest first)
+$allBackups = Get-ChildItem -Path $PSScriptRoot -Filter "${BackupPrefix}_*.txt" | Sort-Object CreationTime -Descending
 
 # Select all backups *except* the N most recent
 $oldBackups = $allBackups | Select-Object -Skip $KeepLastNBackups
@@ -167,8 +165,6 @@ $oldBackups = $allBackups | Select-Object -Skip $KeepLastNBackups
 if ($oldBackups) {
     foreach ($oldFile in $oldBackups) {
         Write-Host "Removing old backup: $($oldFile.Name)"
-        # This removes the file from the local filesystem.
-        # The GitHub Action will then commit this deletion.
         Remove-Item -Path $oldFile.FullName -ErrorAction SilentlyContinue
     }
 }
