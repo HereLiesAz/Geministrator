@@ -1,0 +1,57 @@
+name: Project Backup
+
+on:
+  # Run on pushes to the main branch
+  push:
+    branches:
+      - main
+      - master
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+# Grant the workflow permissions to write back to the repository
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    # Stop the action if the last commit was from this action itself
+    # This prevents an infinite loop of [push -> backup -> commit -> push]
+    if: "contains(github.event.head_commit.message, 'Chore: Update project backups') == false"
+
+    steps:
+      - name: 1. Check out repository
+        uses: actions/checkout@v4
+
+      - name: 2. Run the backup script
+        run: ./backup.ps1
+        shell: pwsh # Use PowerShell 7+
+
+      - name: 3. Check for backup changes
+        id: git-check
+        run: |
+          # Check if any files matching the pattern were added or deleted
+          git_status=$(git status --porcelain ${BackupPrefix}_*.txt)
+          
+          if [ -n "$git_status" ]; then
+            echo "Changes detected."
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No backup changes."
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          BackupPrefix: "project_backup" # Must match the variable in backup.ps1
+
+      - name: 4. Commit and push backup changes
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${BackupPrefix}_*.txt
+          git commit -m "Chore: Update project backups [skip ci]"
+          git push
+        env:
+          BackupPrefix: "project_backup" # Must match the variable in backup.ps1
