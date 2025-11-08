@@ -1,60 +1,62 @@
-This document outlines the step-by-step plan to refactor the Geministrator application into a stable, production-ready state, and then to re-introduce agentic features using the Google Agent Development Kit (ADK).
+This document outlines the step-by-step plan to get the Jules IDE application to a production-ready state.
 
 ---
 
-## Phase 1: Build Stabilization and Code Cleanup
+## Phase 1: Documentation and Codebase Cleanup
 
-*Objective: Address critical build errors, remove obsolete code, and fix architectural inconsistencies to create a stable foundation.*
+*Objective: Align all documentation and code with the "Jules IDE" pivot, removing all obsolete artifacts from previous project iterations.*
 
-- [x] **Stabilize the Build Environment**
-    - [x] Remove conflicting `google-adk` dependencies from all `build.gradle.kts` files.
-    - [x] Remove the obsolete Chaquopy Python integration.
-        - [x] Delete the `app/src/main/python` directory.
-        - [x] Remove the `chaquopy` plugin and configuration block from `app/build.gradle.kts`.
-        - [x] Delete `CliScreen.kt` and `CliViewModel.kt`.
-    - [x] Synchronize the project structure by removing the `:prompts` module from `settings.gradle.kts`.
-    - [x] Execute `./gradlew clean build` and resolve any remaining dependency conflicts.
-
-- [x] **Code Cleanup and Bug Fixes**
-    - [x] Correct the settings-saving bug in `SettingsViewModel.kt` where the GCP Project ID is saved to the wrong DataStore key.
-    - [x] Resolve duplicate screen definitions by renaming `ui/ide/IDEScreen.kt` to `ui/ide/SearchScreen.kt` and its contained composable.
-    - [x] Refactor the navigation graph in `GeministratorNavHost.kt` to include all destinations from the `NavRail` and add a route for the code editor.
+- [x] Audit all documentation (`.md` files) to reflect the "Jules IDE" project.
+- [x] Remove all references to "Geministrator," "ADK," and "A2A" from `README.md` and `/docs`.
+- [x] Delete `Transforming an Android Device into a Standalone Pwnagotchi.md` (irrelevant Pwnagotchi project).
+- [x] Delete `docs/adk_integration.md` (obsolete ADK documentation).
+- [x] Consolidate and update `docs/screens.md`, `docs/workflow.md`, and `docs/task_flow.md` to use consistent terminology (e.g., "Editor Screen").
+- [x] Update `README.md` and `docs/INDEX.md` to reflect the current 2-module architecture (`:app`, `:jules-api-client`).
+- [ ] Investigate and remove any remaining obsolete code from the `:app` module related to the old "Geministrator" framework, ADK, or Chaquopy.
 
 ---
 
 ## Phase 2: Core IDE Feature Implementation
 
-*Objective: Complete the essential features for the mobile IDE functionality.*
+*Objective: Complete the essential features for the mobile IDE functionality as defined in the 2.0.0 changelog.*
 
-- [x] **Implement Core IDE Flow**
-    - [x] Complete the session creation logic in `SourceSelectionScreen.kt`.
-    - [x] Implement the UI in `SessionScreen.kt` to display the activity stream.
-    - [x] Connect the Sora Editor in `IdeScreen.kt` to the Jules API to reflect file changes from agent activities.
-    - [x] Implement UI buttons for core actions like "Run" and "Commit" and connect them to ViewModel functions.
+- [ ] **Complete Jules API Integration**
+    - [ ] Implement the UI and logic in `SourceSelectionScreen` to allow a user to select a source and be prompted to create a new session.
+    - [ ] Implement the `SessionScreen` UI to display the full activity stream (conversation with the Jules API, including user prompts and agent responses).
+
+- [ ] **Refine UI/UX**
+    - [ ] Configure the Sora Editor with language-specific syntax highlighting (using the `textmate` files in `app/src/main/assets`).
+    - [ ] Connect the Sora Editor to the Jules API to reflect file changes made by the agent.
+    - [ ] Create a dedicated UI component (e.g., a bottom sheet or separate tab) to display terminal output from code execution via the Jules API.
+
+- [ ] **Implement Core Actions**
+    - [ ] Implement a "Run" button in the `EditorScreen` UI that triggers the execution of the currently open file via the Jules API.
+    - [ ] Implement a "Commit" button to commit the current changes to the repository via the Jules API.
 
 ---
 
-## Phase 3: ADK Integration and Agentic Features
+## Phase 3: Git & Version Control
 
-*Objective: Re-introduce agent capabilities using the ADK on a stable foundation, starting with a high-value feature.*
+*Objective: Expose on-device and remote Git operations to the user.*
 
-- [x] **Integrate ADK for a Target Feature: Automated Code Review**
-    - [x] Define a new `CodeReviewAgent` using the ADK.
-    - [x] Create tool wrappers for existing `GitHubApiClient.kt` methods (`getPullRequests`, `getPullRequestDiff`, `createComment`).
-    - [x] Develop a `CodeReviewService.kt` to manage the `AdkApp` runner and invoke the agent.
-    - [x] Create a new UI screen for users to trigger the code review service.
+- [ ] Create a UI component to display the output of `git status` from the Jules API (or the bundled JGit).
+- [ ] Implement a `git diff` viewer to show changes in a selected file.
+- [ ] Expose JGit's `init`, `add`, and `commit` functions through a dedicated Git management screen.
 
 ---
 
 ## Phase 4: Production Readiness
 
-*Objective: Ensure the application is tested, secure, and ready for deployment.*
+*Objective: Ensure the application is stable, tested, secure, and ready for deployment.*
 
 - [ ] **Testing and Quality Assurance**
-    - [ ] Write unit tests for all ViewModels and Repositories.
-        - [x] `IdeViewModel`
-    - [ ] Write integration tests for the Jules and Gemini API clients.
+    - [ ] Add KDoc comments to all new and existing public classes, methods, and composables.
+    - [ ] Write unit tests for all ViewModels (e.g., `SessionViewModel`, `SettingsViewModel`, `IdeViewModel`).
+    - [ ] Write integration tests for the `:jules-api-client` module to verify API contracts.
 
 - [ ] **Security and Deployment**
-    - [x] Replace `local.properties` with the `secrets-gradle-plugin` to secure API keys.
+    - [ ] Verify that the `secrets-gradle-plugin` is fully implemented and that no API keys are stored in `local.properties` or version control.
     - [ ] Establish a CI/CD pipeline using GitHub Actions to automate builds, tests, and releases.
+
+- [ ] **Performance**
+    - [ ] Profile the app to identify and address performance bottlenecks, especially around editor loading and rendering large files.
