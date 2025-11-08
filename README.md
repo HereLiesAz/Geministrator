@@ -1,24 +1,30 @@
 # Geministrator
 
-**An A2A mobile IDE powered by the Jules and Gemini.**
+**An A2A mobile IDE powered by the Google ADK, Jules, and Gemini.**
 
 ---
 
-## 🤖 Key Capabilities
+## 🤖 Project Vision
 
-- **Jules API Integration**: The application's core functionality is powered by the Jules API, allowing you to automate and enhance your software development lifecycle.
-- **Native Code Editor**: The app uses the [Sora Editor](https://github.com/Rosemoe/sora-editor), a native Android code editor, to provide a performant and feature-rich editing experience.
-- **File Management**: The app includes a file explorer for browsing project files. It uses Android's Storage Access Framework (SAF) for file system access.
-- **Git Integration**: The app uses JGit to provide basic Git functionality, such as viewing the status of your repository.
+Geministrator is an experimental, agent-driven mobile IDE. Its architecture is built on the **Google Agent Development Kit (ADK)** to enable complex, automated development workflows and Agent-to-Agent (A2A) communication.
 
----
+## 🏗️ Current Status: Jules IDE Implementation
 
-## 🏗️ Architecture
+As a foundational step toward the full vision, the application is currently focused on providing a stable mobile IDE powered by the **Jules API**. This phase involves building the core editor, file management, and session-based interaction with the Jules API.
 
-The project is a multi-module Gradle project with the following structure:
+Future phases will re-integrate the ADK to introduce agentic features (such as automated code review) on top of this stable IDE foundation.
 
--   **:app_android**: The main Android application, built with Jetpack Compose. It contains all the UI and application logic.
--   **:jules-api-client**: A pure Kotlin module responsible for all communication with the Jules API. It uses Retrofit for networking and `kotlinx.serialization` for JSON parsing.
+### Key Capabilities (Current)
+
+-   **Jules API Integration**: Core functionality is currently powered by the Jules API for repository management and agentic tasks.
+-   **Native Code Editor**: Uses the [Sora Editor](https://github.com/Rosemoe/sora-editor) for a performant code editing experience.
+-   **File Management**: Includes a file explorer for browsing project files.
+
+### Architecture
+
+-   **:app**: The main Android application (Jetpack Compose).
+-   **:jules-api-client**: Kotlin module for Jules API communication.
+-   **:github-api-client**: Kotlin module for GitHub API communication.
 
 ---
 
@@ -26,38 +32,33 @@ The project is a multi-module Gradle project with the following structure:
 
 ### Prerequisites
 
-* **Android 8.0 (API 26) or higher**
-* **A Jules API Key**
+-   **Android 8.0 (API 26) or higher**
+-   **A Jules API Key**
 
 ### Installation
 
 1.  **Build the APK:**
-    From the root of the project, run the following command:
     ```bash
-    ./gradlew :app_android:assembleDebug
+    ./gradlew :app:assembleDebug
     ```
 2.  **Install the APK:**
-    Install the generated APK on your Android device. The APK will be located in `app_android/build/outputs/apk/debug/`.
+    The APK is in `app/build/outputs/apk/debug/`.
 
 ---
 
 ## ⚙️ Configuration
 
-The first time you run the application, you will need to enter your Jules API key in the settings screen.
-
-1.  Open the app and navigate to the **Settings** screen.
-2.  Enter your Jules API key in the "Jules API Key" field.
+1.  Open the app and navigate to **Settings**.
+2.  Enter your Jules API key.
 3.  Tap "Save Settings".
 
 ---
 
-## 💻 Usage
+## 💻 Usage (Current)
 
-Once you have configured your API key, you can start using the application.
-
-1.  The application will display a list of your available source repositories from the Jules API.
-2.  Select a repository to work with.
-3.  You can then browse the files in the repository and open them in the code editor.
+1.  The app will display your available source repositories from the Jules API.
+2.  Select a repository to start a new session.
+3.  You can then browse files and interact with the Jules agent.
 
 ---
 
