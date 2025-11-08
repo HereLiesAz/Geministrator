@@ -21,9 +21,12 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val settingsRepository: SettingsRepository,
-    private val adkApp: AdkApp, // The ADK is now injected
+    private val adkApp: AdkApp, // The ADK is injected
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    // The sessionId is now a required navigation argument
+    private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
 
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
@@ -32,15 +35,21 @@ class SessionViewModel @Inject constructor(
     private var conversation: Conversation? = null
 
     init {
+        // TODO: We should load the *Jules* activity history here
+        // instead of the generic "HistoryRepository".
+        // For now, we load the local-only chat history.
         loadHistory()
     }
 
     private fun getConversation(): Conversation {
         if (conversation == null) {
             // Create a new conversation with a default system prompt
+            // Crucially, we prime the agent with the current session ID.
             conversation = adkApp.startConversation(
                 "You are Geministrator, a mobile AI assistant. " +
-                        "You can use tools to interact with Jules and GitHub."
+                        "You are currently working inside a session with ID: $sessionId. " +
+                        "All tool calls that require a 'sessionId' (like sendMessage) " +
+                        "MUST use this ID."
             )
         }
         return conversation!!
@@ -48,11 +57,13 @@ class SessionViewModel @Inject constructor(
 
     fun loadHistory() {
         viewModelScope.launch {
+            // This is still loading the local history.
+            // A future step is to replace this with a call to the
+            // ADK's `getActivities(sessionId)` tool.
             val history = historyRepository.getHistory()
             _uiState.update {
                 it.copy(
                     history = history,
-                    // TODO: We may need to re-hydrate the ADK conversation here
                 )
             }
         }
@@ -77,6 +88,9 @@ class SessionViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val adkConversation = getConversation()
+                
+                // The ADK will now intelligently call `sendMessage(sessionId, text)`
+                // because its system prompt knows the sessionId.
                 val response = adkConversation.send(text)
 
                 // Process and save the agent's response
@@ -84,8 +98,6 @@ class SessionViewModel @Inject constructor(
                     id = UUID.randomUUID().toString(),
                     text = response.text, // The final text from the agent
                     isFromUser = false,
-                    // TODO: We could parse tool calls from response.messages
-                    // and display them in a structured way.
                 )
                 historyRepository.addPrompt(agentResponse)
 
