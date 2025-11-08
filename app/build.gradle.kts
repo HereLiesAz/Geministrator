@@ -154,6 +154,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Agent Development Kit
+    implementation(libsServices.google.adk)
+    implementation(libs.generativeai)
 
     // Hilt
     implementation(libs.hilt.android)
