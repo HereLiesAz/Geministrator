@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.adk.AdkApp
 import com.google.adk.conversation.Conversation
+import com.google.adk.tool.ToolCall
+import com.google.adk.tool.ToolResult
 import com.hereliesaz.geministrator.data.JulesRepository
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
@@ -23,7 +25,7 @@ data class JulesUiState(
 
 @HiltViewModel
 class JulesViewModel @Inject constructor(
-    private val julesRepository: JulesRepository, // Still needed for non-ADK logic if any
+    private val julesRepository: JulesRepository, // Keep for direct, non-agent calls
     private val adkApp: AdkApp // Inject the ADK
 ) : ViewModel() {
 
@@ -50,15 +52,9 @@ class JulesViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                // Instead of calling the repo, we ask the agent.
-                // The ADK will use the JulesTools.listSources tool.
-                val adkConversation = getConversation()
-                val response = adkConversation.send("List all my source repositories.")
-
-                // This is a major assumption: that the agent's text response
-                // can be parsed, or that it returns structured data.
-                // For now, we will *also* call the repo directly just to populate the UI.
-                // TODO: Refine this to parse the agent's tool-call response.
+                // For simple read operations like this, calling the repo
+                // directly is acceptable and more efficient than parsing
+                // an agent response.
                 val sources = julesRepository.getSources()
                 _uiState.update {
                     it.copy(sources = sources, isLoading = false, error = null)
@@ -84,16 +80,22 @@ class JulesViewModel @Inject constructor(
                 
                 val response = adkConversation.send(agentPrompt)
 
-                // TODO: The response here is just text. We need to find the
-                // actual session ID from the tool call's result.
-                // This is a temporary, non-functional workaround
-                // to get the flow compiling. We will use the *repo* for now.
-                
-                val session = julesRepository.createSession(sourceId, title, prompt)
-                _uiState.update {
-                    it.copy(isLoading = false, error = null, createdSession = session)
+                // *** THIS IS THE FIX ***
+                // Find the result of the `createSession` tool call
+                val toolResult = response.messages.lastOrNull { it is ToolResult } as? ToolResult
+                val session = toolResult?.result as? Session
+
+                if (session != null) {
+                    _uiState.update {
+                        it.copy(isLoading = false, error = null, createdSession = session)
+                    }
+                    // Pass the real session ID from the tool call
+                    onSessionCreated(session.id)
+                } else {
+                    // The agent failed to call the tool or the tool failed
+                    val error = "Agent failed to create session. Response: ${response.text}"
+                    _uiState.update { it.copy(isLoading = false, error = error) }
                 }
-                onSessionCreated(session.id)
 
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
