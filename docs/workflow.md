@@ -18,8 +18,8 @@ This document outlines the intended user workflow for the Jules IDE application.
 4.  **Interacting with the Session**:
     -   Upon successful session creation, the application navigates to the **Session Screen**.
     -   The Session Screen displays the activity stream for the newly created session, including the initial prompt and any responses from the Jules agent.
-    -   The user can send new messages to the agent using the message input bar at the bottom of the screen.
+    -   The user can send new messages to the Jules agent (default) or a remote ADK agent (via `/gemini`).
 
 5.  **File Browsing and Editing**:
-    -   The user can navigate to the **File Explorer** screen to browse the files within the selected project.
-    -   Tapping on a file opens it in the **File Viewer Screen**, which uses the native Sora Editor for a rich code viewing experience.
+    -   When the Jules agent modifies a file, that activity appears in the stream.
+    -   Tapping on a file activity opens it in the **IDE Screen**, which uses the native Sora Editor for a rich code editing and viewing experience.

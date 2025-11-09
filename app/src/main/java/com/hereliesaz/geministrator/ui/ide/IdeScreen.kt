@@ -14,6 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,6 +27,7 @@ fun IdeScreen(
     viewModel: IdeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showCommitDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.isLoading) {
         setLoading(uiState.isLoading)
@@ -31,20 +35,21 @@ fun IdeScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            text = uiState.fileContent ?: "",
+            text = uiState.fileContent,
             modifier = Modifier.weight(1f)
         )
+        // TODO: This should be the Sora Editor, not a Text composable
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             Button(
-                onClick = { viewModel.onRunClick() },
+                onClick = { viewModel.onRunClicked() },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Run")
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
-                onClick = { viewModel.onCommitClick() },
+                onClick = { showCommitDialog = true },
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Commit")
@@ -52,12 +57,16 @@ fun IdeScreen(
         }
     }
 
-    if (uiState.showCommitDialog) {
+    if (showCommitDialog) {
+        var commitMessage by remember { mutableStateOf("") }
         CommitDialog(
-            commitMessage = uiState.commitMessage,
-            onCommitMessageChanged = { viewModel.onCommitMessageChanged(it) },
-            onCommit = { viewModel.onCommitConfirm() },
-            onDismiss = { viewModel.onCommitDialogDismiss() }
+            commitMessage = commitMessage,
+            onCommitMessageChanged = { commitMessage = it },
+            onCommit = {
+                viewModel.onCommitClicked(commitMessage)
+                showCommitDialog = false
+            },
+            onDismiss = { showCommitDialog = false }
         )
     }
 

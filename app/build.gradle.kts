@@ -16,6 +16,7 @@ configurations.all {
             substitute(module("com.google.protobuf:protobuf-java"))
                 .using(module("com.google.protobuf:protobuf-javalite:3.25.3"))
                 .because("Android requires the javalite version of protobuf")
+
         }
         force("jakarta.annotation:jakarta.annotation-api:1.3.5")
         force("commons-logging:commons-logging:1.2")
@@ -43,6 +44,7 @@ android {
             useSupportLibrary = true
         }
         ndk {
+
             abiFilters.addAll(listOf("x86_64", "arm64-v8a"))
         }
         manifestPlaceholders["appAuthRedirectScheme"] = "com.hereliesaz.geministrator.oauth2redirect"
@@ -57,6 +59,7 @@ android {
         buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${localProperties.getProperty("github.clientSecret")}\"")
     }
 
+
     buildFeatures {
         buildConfig = true
     }
@@ -70,6 +73,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
+
                 "proguard-rules.pro"
             )
         }
@@ -82,6 +86,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+
             excludes += "META-INF/beans.xml"
             excludes += "META-INF/DEPENDENCIES"
             excludes += "META-INF/INDEX.LIST"
@@ -134,6 +139,7 @@ dependencies {
 
     // Debugging
     debugImplementation(libs.androidx.compose.ui.tooling)
+
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // DataStore for settings
@@ -154,8 +160,12 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Agent Development Kit
-    implementation(libsServices.google.adk)
+    implementation(libs.google.adk)
+    ksp(libs.google.adk) // This allows Hilt to see the ADK classes
     implementation(libs.generativeai)
+
+    // A2A Communication
+    implementation(libs.a2a.sdk.client)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -163,6 +173,7 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Testing
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

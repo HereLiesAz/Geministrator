@@ -3,116 +3,80 @@ package com.hereliesaz.geministrator.ui.ide
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-//import com.hereliesaz.geministrator.apis.GeminiApiClient
-import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.JulesApiClient
-import com.jules.apiclient.ToolOutputActivity
+import com.hereliesaz.geministrator.data.GitManager
+import com.hereliesaz.geministrator.data.GithubRepository
+import com.hereliesaz.geministrator.data.JulesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class IdeViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val settingsRepository: SettingsRepository,
-//    private var geminiApiClient: GeminiApiClient?
+    private val julesRepository: JulesRepository,
+    private val githubRepository: GithubRepository,
+    private val gitManager: GitManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(IdeUiState())
-    val uiState = _uiState.asStateFlow()
+
     private val sessionId: String = savedStateHandle.get<String>("sessionId")!!
     private val filePath: String = savedStateHandle.get<String>("filePath")!!
-    private var julesApiClient: JulesApiClient? = null
+
+    private val _uiState = MutableStateFlow(IdeUiState(filePath = filePath))
+    val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            val apiKey = settingsRepository.apiKey.first()
-            if (apiKey.isNullOrBlank()) {
-                _uiState.update { it.copy(error = "API Key not found. Please set it in Settings.") }
-            } else {
-                julesApiClient = JulesApiClient(apiKey)
-                loadActivities()
-            }
-//            if (geminiApiClient == null) {
-//                val geminiApiKey = settingsRepository.geminiApiKey.first()
-//                if (!geminiApiKey.isNullOrBlank()) {
-//                    geminiApiClient = GeminiApiClient(geminiApiKey)
-//                }
-//            }
-        }
+        loadFileContent()
     }
 
-    private fun loadActivities() {
-        val client = julesApiClient ?: return
+    private fun loadFileContent() {
+        _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             try {
-                val activities = client.getActivities(sessionId).activities
-                val fileWriteActivities = activities.filterIsInstance<ToolOutputActivity>()
-                    .filter { it.toolName == "file.write" && it.output.startsWith(filePath) }
-                if (fileWriteActivities.isNotEmpty()) {
-                    val latestContent = fileWriteActivities.last().output.substringAfter(filePath).trim()
-                    _uiState.update { it.copy(fileContent = latestContent) }
+                val content = julesRepository.getFileContent(sessionId, filePath)
+                _uiState.update {
+                    it.copy(fileContent = content, isLoading = false)
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
 
-    fun onFileOpened(filePath: String, content: String) {
-        _uiState.update { it.copy(currentFile = File(filePath), fileContent = content) }
-    }
-
-    fun onContentChanged(content: String) {
-        _uiState.update { it.copy(fileContent = content) }
-    }
-
-    fun onRunClick() {
-        val client = julesApiClient ?: return
+    fun onRunClicked() {
+        _uiState.update { it.copy(isLoading = true, consoleOutput = "Sending run command...") }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             try {
-                client.sendMessage(sessionId, "Run the code in the file `$filePath`")
+                val output = julesRepository.runFile(sessionId, filePath)
+                _uiState.update { it.copy(isLoading = false, consoleOutput = output) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
-            } finally {
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, consoleOutput = "Error: ${e.message}") }
             }
         }
     }
 
-    fun onCommitClick() {
-        _uiState.update { it.copy(showCommitDialog = true) }
-    }
-
-    fun onCommitDialogDismiss() {
-        _uiState.update { it.copy(showCommitDialog = false, commitMessage = "") }
-    }
-
-    fun onCommitMessageChanged(message: String) {
-        _uiState.update { it.copy(commitMessage = message) }
-    }
-
-    fun onCommitConfirm() {
-        val client = julesApiClient ?: return
-        val message = _uiState.value.commitMessage
+    fun onCommitClicked(commitMessage: String) {
+        _uiState.update { it.copy(isLoading = true, consoleOutput = "Saving and committing...") }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, showCommitDialog = false) }
+            val currentContent = _uiState.value.fileContent
             try {
-                client.sendMessage(sessionId, "Commit changes with message: '$message'")
+                // Step 1: Update the file content
+                julesRepository.updateFileContent(sessionId, filePath, currentContent)
+
+                // Step 2: Commit the changes
+                val output = julesRepository.commitChanges(sessionId, commitMessage)
+
+                _uiState.update { it.copy(isLoading = false, consoleOutput = output) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message) }
-            } finally {
-                _uiState.update { it.copy(isLoading = false, commitMessage = "") }
+                _uiState.update { it.copy(isLoading = false, consoleOutput = "Error: ${e.message}") }
             }
         }
+    }
+
+    fun onFileContentChanged(newContent: String) {
+        _uiState.update { it.copy(fileContent = newContent) }
     }
 
     fun onErrorShown() {

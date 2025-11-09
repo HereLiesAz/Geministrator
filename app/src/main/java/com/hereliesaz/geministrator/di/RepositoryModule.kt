@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.di
 
 import android.content.Context
+import com.hereliesaz.geministrator.data.GitManager
 import com.hereliesaz.geministrator.data.GithubRepository
 import com.hereliesaz.geministrator.data.GithubRepositoryImpl
 import com.hereliesaz.geministrator.data.HistoryRepository
@@ -66,5 +67,13 @@ object RepositoryModule {
     @Singleton
     fun provideGithubRepository(): GithubRepository {
         return GithubRepositoryImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGitManager(
+        @ApplicationContext context: Context
+    ): GitManager {
+        return GitManager(context)
     }
 }

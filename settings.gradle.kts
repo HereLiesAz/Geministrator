@@ -23,6 +23,7 @@ dependencyResolutionManagement {
         mavenLocal()
         maven("https://jitpack.io")
         maven { url = uri("https://chaquo.com/maven") }
+        maven { url = uri("https://maven.google.com") } 
     }
 }
 

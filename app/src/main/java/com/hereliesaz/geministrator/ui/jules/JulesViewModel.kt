@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.adk.AdkApp
 import com.google.adk.conversation.Conversation
-import com.google.adk.tool.ToolCall
 import com.google.adk.tool.ToolResult
 import com.hereliesaz.geministrator.data.JulesRepository
 import com.jules.apiclient.Session
@@ -25,8 +24,8 @@ data class JulesUiState(
 
 @HiltViewModel
 class JulesViewModel @Inject constructor(
-    private val julesRepository: JulesRepository, // Keep for direct, non-agent calls
-    private val adkApp: AdkApp // Inject the ADK
+    private val julesRepository: JulesRepository, // For direct reads
+    private val adkApp: AdkApp
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(JulesUiState())
@@ -41,8 +40,7 @@ class JulesViewModel @Inject constructor(
     private fun getConversation(): Conversation {
         if (conversation == null) {
             conversation = adkApp.startConversation(
-                "You are an assistant that manages Jules API resources. " +
-                        "You will help list sources and create sessions."
+                "You are an assistant that manages Jules API resources."
             )
         }
         return conversation!!
@@ -52,9 +50,7 @@ class JulesViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                // For simple read operations like this, calling the repo
-                // directly is acceptable and more efficient than parsing
-                // an agent response.
+                // For a simple read, calling the repo directly is fine.
                 val sources = julesRepository.getSources()
                 _uiState.update {
                     it.copy(sources = sources, isLoading = false, error = null)
@@ -69,19 +65,15 @@ class JulesViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             try {
-                // Send the creation request to the ADK.
-                // The ADK will use the JulesTools.createSession tool.
                 val adkConversation = getConversation()
                 val agentPrompt = """
                     Create a new session for source ID "$sourceId"
                     with the title "$title"
                     and the initial prompt: "$prompt"
                 """.trimIndent()
-                
+
                 val response = adkConversation.send(agentPrompt)
 
-                // *** THIS IS THE FIX ***
-                // Find the result of the `createSession` tool call
                 val toolResult = response.messages.lastOrNull { it is ToolResult } as? ToolResult
                 val session = toolResult?.result as? Session
 
@@ -89,10 +81,8 @@ class JulesViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(isLoading = false, error = null, createdSession = session)
                     }
-                    // Pass the real session ID from the tool call
                     onSessionCreated(session.id)
                 } else {
-                    // The agent failed to call the tool or the tool failed
                     val error = "Agent failed to create session. Response: ${response.text}"
                     _uiState.update { it.copy(isLoading = false, error = error) }
                 }

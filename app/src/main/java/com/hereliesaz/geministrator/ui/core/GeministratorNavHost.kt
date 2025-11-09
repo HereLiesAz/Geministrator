@@ -7,10 +7,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.hereliesaz.geministrator.ui.explorer.FileExplorerScreen
+import com.hereliesaz.geministrator.ui.explorer.SourceSelectionScreen
 import com.hereliesaz.geministrator.ui.ide.IdeScreen
 import com.hereliesaz.geministrator.ui.ide.SearchScreen
-import com.hereliesaz.geministrator.ui.session.SessionScreen
+import com.hereliesaz.geministrator.ui.jules.SessionScreen // CORRECTED IMPORT
 import com.hereliesaz.geministrator.ui.settings.SettingsScreen
 import com.hereliesaz.geministrator.ui.terminal.CmdScreen
 
@@ -26,9 +26,9 @@ fun GeministratorNavHost(
         modifier = modifier
     ) {
         composable("explorer") {
-            FileExplorerScreen(
-                onSourceClicked = { source ->
-                    navController.navigate("session/${source.id}")
+            SourceSelectionScreen(
+                onSessionCreated = { sessionId ->
+                    navController.navigate("session/$sessionId")
                 }
             )
         }
@@ -39,7 +39,10 @@ fun GeministratorNavHost(
                 navArgument("roles") { type = NavType.StringType; nullable = true }
             )
         ) {
-            SessionScreen()
+            SessionScreen(
+                setLoading = setLoading,
+                navController = navController
+            )
         }
         composable("ide") {
             SearchScreen()

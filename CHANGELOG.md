@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 -   **Architectural Overhaul**: The application has been completely reworked from the ground up to be a mobile IDE powered by the Jules API. The old "Geministrator" AI agent framework has been removed entirely.
+    -   *Note: This removal was a temporary measure to stabilize the build. The ADK/A2A architecture is being re-implemented as a client-side service.*
 -   **Jules API Integration**:
     -   A new `:jules-api-client` module has been created to handle all communication with the Jules API.
     -   The application now fetches and displays a list of the user's available source repositories from the Jules API.

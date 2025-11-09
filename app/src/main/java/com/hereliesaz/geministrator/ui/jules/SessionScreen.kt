@@ -31,10 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.clickable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.foundation.clickable
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.jules.apiclient.Activity
 import com.jules.apiclient.AgentResponseActivity
@@ -48,15 +46,12 @@ fun SessionScreen(
     setLoading: (Boolean) -> Unit,
     navController: NavController
 ) {
-    val viewModel: SessionViewModel = viewModel()
+    // This now correctly uses the Hilt-injected ViewModel
+    val viewModel: SessionViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.isLoading) {
         setLoading(uiState.isLoading)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.loadActivities()
     }
 
     Scaffold(
@@ -65,8 +60,6 @@ fun SessionScreen(
                 onSendMessage = {
                     if (it.startsWith("/decompose")) {
                         viewModel.decomposeTask(it.substringAfter("/decompose "))
-                    } else if (it.startsWith("/gemini")) {
-                        viewModel.sendMessage(it)
                     } else {
                         viewModel.sendMessage(it)
                     }
@@ -109,30 +102,6 @@ fun SessionScreen(
                                 navController.navigate("editor/${viewModel.sessionId}/$filePath")
                             }
                         )
-                    }
-
-                    if (uiState.subTasks.isNotEmpty()) {
-                        item {
-                            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text("Sub-tasks", style = MaterialTheme.typography.titleMedium)
-                                    uiState.subTasks.forEach {
-                                        Text(it)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    uiState.geminiResponse?.let {
-                        item {
-                            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Text("Gemini Response", style = MaterialTheme.typography.titleMedium)
-                                    Text(it)
-                                }
-                            }
-                        }
                     }
                 }
             }

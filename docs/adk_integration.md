@@ -1,23 +1,23 @@
-# Google Agent Development Kit (ADK) Integration
+# A2A / Remote ADK Integration
 
-This document provides a detailed overview of the Google Agent Development Kit (ADK) and its central role in the Geministrator project.
+This document provides a detailed overview of the Agent-to-Agent (A2A) protocol and its role in connecting Geministrator to remote Google ADK agents.
 
-## The ADK as a Core Technology
+## The A2A SDK as a Core Technology
 
-The Google Agent Development Kit is a fundamental, non-negotiable component of the Geministrator architecture. It provides the core framework for creating, managing, and executing the AI agents that power the application's most advanced features.
+The **A2A Java SDK Client** is a fundamental, non-negotiable component of the Geministrator architecture. It provides the core framework for communicating with remote, specialized AI agents built with the Google Agent Development Kit (ADK).
 
-**Under no circumstances should the ADK be removed, replaced, or refactored without a thorough understanding of its central role in the project.** All future agent-based features **must** be built on top of the ADK to ensure a consistent and stable architecture.
+This application does **not** run the ADK locally. It is a **client** that consumes remote ADK agents via the A2A protocol.
 
-## The Role of the ADK in Geministrator
+**Under no circumstances should the A2A SDK be removed.** All future agent-based features beyond the core Jules IDE **must** be built on top of the A2A SDK to ensure a consistent and stable architecture.
 
-The ADK is used to:
+## The Role of the A2A SDK in Geministrator
 
--   **Define Agent Personas:** The ADK's `LlmAgent` builder provides a fluent API for defining the name, instruction, and description of our AI agents.
--   **Register Agent Tools:** The ADK's `addTool()` method allows us to provide our agents with the tools they need to interact with the outside world, for example by passing tool classes that wrap clients like the `GitHubApiClient`.
--   **Execute Agentic Workflows:** The ADK's `InMemoryRunner` provides a simple, efficient way to execute our agents and manage their lifecycle.
+The A2A SDK is used to:
+
+-   **Define a Communicator:** A Hilt-injected `A2ACommunicator` class wraps the SDK client.
+-   **Route User Prompts:** The `SessionViewModel` is designed to check for specific commands (e.g., `/gemini`) and route those prompts to the `A2ACommunicator` instead of the Jules API.
+-   **Enable Specialized Agents:** This architecture allows the app to send tasks to dedicated agents (e.g., "Planner Agent," "Code Review Agent") that have their own toolsets (like the `GitHubApiClient`) and are hosted remotely.
 
 ## Future Development
 
-All future agent-based features, such as the planned central planner and researcher agents, must be implemented using the ADK. This will ensure that our agentic architecture remains consistent, maintainable, and scalable.
-
-Any developer working on the Geministrator project should familiarize themselves with the ADK and its principles before attempting to implement any new agentic features.
+All future agent-based features, such as the planned central planner and researcher agents, must be implemented as remote ADK agents and consumed via the `A2ACommunicator`.

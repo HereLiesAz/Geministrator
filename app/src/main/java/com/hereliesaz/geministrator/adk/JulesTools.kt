@@ -8,8 +8,6 @@ import com.jules.apiclient.Source
 import javax.inject.Inject
 
 class JulesTools @Inject constructor(
-    // We will inject a factory or provider to create this client dynamically
-    // For now, let's assume it can be provided, or we'll adjust the service.
     private val julesApiClient: JulesApiClient
 ) {
 
@@ -43,4 +41,41 @@ class JulesTools @Inject constructor(
     suspend fun getActivities(
         @Description("The ID of the session to fetch history for.") sessionId: String
     ) = julesApiClient.getActivities(sessionId)
+
+    @Tool
+    @Description("Get the full text content of a single file within a session.")
+    suspend fun getFileContent(
+        @Description("The ID of the session.") sessionId: String,
+        @Description("The full path of the file to read.") filePath: String
+    ): String {
+        return julesApiClient.getFileContent(sessionId, filePath)
+    }
+
+    @Tool
+    @Description("Update the content of a file within a session.")
+    suspend fun updateFileContent(
+        @Description("The ID of the session.") sessionId: String,
+        @Description("The full path of the file to write.") filePath: String,
+        @Description("The new content to write to the file.") content: String
+    ) {
+        julesApiClient.updateFileContent(sessionId, filePath, content)
+    }
+
+    @Tool
+    @Description("Run a file (e.g., a script) within the session's environment.")
+    suspend fun runFile(
+        @Description("The ID of the session.") sessionId: String,
+        @Description("The full path of the file to run.") filePath: String
+    ): String {
+        return julesApiClient.runFile(sessionId, filePath)
+    }
+
+    @Tool
+    @Description("Commit all current changes in the session with a given message.")
+    suspend fun commitChanges(
+        @Description("The ID of the session.") sessionId: String,
+        @Description("The commit message.") message: String
+    ): String {
+        return julesApiClient.commitChanges(sessionId, message)
+    }
 }

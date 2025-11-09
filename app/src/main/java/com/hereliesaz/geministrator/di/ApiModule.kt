@@ -2,11 +2,9 @@ package com.hereliesaz.geministrator.di
 
 import android.content.Context
 import com.github.apiclient.GitHubApiClient
-import com.google.adk.AdkApp
-import com.google.adk.provider.GeminiModelProvider
 import com.google.ai.client.generativeai.GenerativeModel
-import com.hereliesaz.geministrator.adk.GitHubTools
-import com.hereliesaz.geministrator.adk.JulesTools
+import com.google.ai.client.generativeai.GoogleGenerativeAI
+import com.hereliesaz.geministrator.data.A2ACommunicator
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.jules.apiclient.JulesApiClient
 import dagger.Module
@@ -22,51 +20,33 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ApiModule {
 
-    /**
-     * Provides the raw GitHub API client.
-     */
-    @Provides
-    @Singleton
-    fun provideGithubApiClient(): GitHubApiClient {
-        return GitHubApiClient()
-    }
-
-    /**
-     * Provides the ADK Tool wrapper for GitHub.
-     */
-    @Provides
-    @Singleton
-    fun provideGithubTools(apiClient: GitHubApiClient): GitHubTools {
-        return GitHubTools(apiClient)
-    }
-
-    /**
-     * Provides the raw Jules API client.
-     * This is complex because it requires an API key that must be read
-     * from DataStore (via SettingsRepository) at startup.
-     */
     @Provides
     @Singleton
     fun provideJulesApiClient(settingsRepository: SettingsRepository): JulesApiClient {
-        // Warning: This blocks the main thread on startup to get the key.
-        // This is necessary for Hilt's synchronous @Provides.
-        // A better long-term solution would be a custom factory or provider.
         val apiKey = runBlocking { settingsRepository.julesApiKey.first() }
         return JulesApiClient(apiKey = apiKey ?: "")
     }
 
-    /**
-     * Provides the ADK Tool wrapper for Jules.
-     */
     @Provides
     @Singleton
-    fun provideJulesTools(apiClient: JulesApiClient): JulesTools {
-        return JulesTools(apiClient)
+    fun provideGithubApiClient(): GitHubApiClient {
+        // TODO: This client will also need authentication
+        return GitHubApiClient()
     }
 
     /**
-     * Provides the GenerativeModel for the ADK.
-     * This also requires an API key from settings.
+     * Provides the A2A Communicator.
+     * This is the correct way to interact with the remote ADK.
+     */
+    @Provides
+    @Singleton
+    fun provideA2ACommunicator(settingsRepository: SettingsRepository): A2ACommunicator {
+        return A2ACommunicator(settingsRepository)
+    }
+
+    /**
+     * Provides a basic Gemini model for any on-device, non-agent tasks
+     * (like the old "decompose" feature).
      */
     @Provides
     @Singleton
@@ -75,25 +55,6 @@ object ApiModule {
         settingsRepository: SettingsRepository
     ): GenerativeModel {
         val geminiApiKey = runBlocking { settingsRepository.geminiApiKey.first() }
-        return GeminiModelProvider.create(
-            context = context,
-            apiKey = geminiApiKey ?: ""
-        )
-    }
-
-    /**
-     * Provides the central ADK App runner.
-     */
-    @Provides
-    @Singleton
-    fun provideAdkApp(
-        model: GenerativeModel,
-        julesTools: JulesTools,
-        gitHubTools: GitHubTools
-    ): AdkApp {
-        return AdkApp.builder(model)
-            .addTool(julesTools)
-            .addTool(gitHubTools)
-            .build()
+        return GoogleGenerativeAI(context, geminiApiKey ?: "").generativeModel("gemini-pro")
     }
 }

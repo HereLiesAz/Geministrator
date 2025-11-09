@@ -15,7 +15,6 @@ class GitHubTools @Inject constructor(
         @Description("The owner of the repository (e.g., 'hereliesaz').") owner: String,
         @Description("The name of the repository (e.g., 'geministrator').") repo: String
     ): List<String> {
-        // Assuming GitHubApiClient returns a complex object, we simplify it for the agent.
         return gitHubApiClient.getPullRequests(owner, repo).map {
             "PR #${it.number}: ${it.title}"
         }

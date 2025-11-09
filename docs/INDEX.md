@@ -8,7 +8,7 @@ Welcome to the official documentation for the Geministrator project. This docume
 
 Geministrator is a mobile IDE (Integrated Development Environment) for the Jules API. The primary goal of the project is to provide a fully-featured development environment on mobile devices, leveraging the power of the Jules API for code generation, execution, and repository management.
 
-A secondary, long-term goal is to integrate the Gemini API via the Google ADK to enable Agent-to-Agent (A2A) communication, allowing for complex, automated development workflows.
+A secondary goal is to integrate the **A2A (Agent-to-Agent) protocol** to enable communication with remote, ADK-powered agents, allowing for complex, automated development workflows.
 
 ### Architecture Overview
 
@@ -22,11 +22,12 @@ This modular design promotes separation of concerns, making the codebase easier 
 
 ### Core Architectural Principles
 
-A fundamental, non-negotiable principle of the Geministrator project is its reliance on the **Google Agent Development Kit (ADK)**. The ADK is the backbone of the application's agentic features and is integral to its long-term vision.
+A fundamental, non-negotiable principle of the Geministrator project is its role as a **multi-agent client**. The application is designed to communicate with different agentic backends based on the user's needs.
 
-**Under no circumstances should the ADK be removed, replaced, or refactored without a thorough understanding of its central role in the project.** All future agent-based features must be built on top of the ADK to ensure a consistent and stable architecture.
+-   **Jules API:** The primary backend for all in-session coding tasks.
+-   **A2A Protocol:** The secondary backend for communicating with remote Google ADK agents for specialized, out-of-session tasks (e.g., code review, planning).
 
-(Note: The ADK was temporarily removed during a build stabilization phase but is being re-integrated, as detailed in `TODO.md`.)
+**Under no circumstances should the A2A client be removed.** All future agent-based features (beyond the core Jules IDE) must be built on top of the A2A-SDK to ensure a consistent and stable architecture.
 
 ## Table of Contents
 
@@ -34,7 +35,7 @@ A fundamental, non-negotiable principle of the Geministrator project is its reli
 -   [**Workflow** (`workflow.md`)](workflow.md): An overview of the intended user workflow.
 -   [**UI/UX** (`UI_UX.md`)](UI_UX.md): Details on the UI components and design principles.
 -   [**Data Layer** (`data_layer.md`)](data_layer.md): A description of the application's data layer.
--   [**ADK Integration** (`adk_integration.md`)](adk_integration.md): Overview of the core agent framework.
+-   [**A2A / ADK Integration** (`adk_integration.md`)](adk_integration.md): Overview of the remote agent framework.
 -   [**Testing** (`testing.md`)](testing.md): Instructions for running the project's tests.
 -   [**Task Flow** (`task_flow.md`)](task_flow.md): A high-level overview of the application's task flow.
 -   [**Code of Conduct** (`conduct.md`)](conduct.md): Guidelines for contributing to the project.
