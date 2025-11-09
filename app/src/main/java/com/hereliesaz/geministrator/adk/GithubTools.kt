@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.adk
 
+import com.github.apiclient.Comment
 import com.github.apiclient.GitHubApiClient
 import com.google.adk.annotations.Description
 import com.google.adk.annotations.Tool
@@ -27,7 +28,9 @@ class GitHubTools @Inject constructor(
         @Description("The name of the repository.") repo: String,
         @Description("The number of the pull request.") prNumber: Int
     ): String {
-        return gitHubApiClient.getPullRequestDiff(owner, repo, prNumber)
+        val pr = gitHubApiClient.getPullRequests(owner, repo).find { it.number == prNumber }
+            ?: throw Exception("Pull request #$prNumber not found in $owner/$repo")
+        return gitHubApiClient.getPullRequestDiff(pr.diffUrl)
     }
 
     @Tool
@@ -38,6 +41,6 @@ class GitHubTools @Inject constructor(
         @Description("The number of the pull request.") prNumber: Int,
         @Description("The text of the comment to post.") comment: String
     ) {
-        gitHubApiClient.createComment(owner, repo, prNumber, comment)
+        gitHubApiClient.createComment(owner, repo, prNumber, Comment(comment))
     }
 }

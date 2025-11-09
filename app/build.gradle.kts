@@ -112,6 +112,7 @@ dependencies {
     // Room Database
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.litertlm)
     ksp(libs.androidx.room.compiler)
 
     // Compose Bill of Materials
@@ -161,7 +162,7 @@ dependencies {
 
     // Agent Development Kit
     implementation(libs.google.adk)
-    ksp(libs.google.adk) // This allows Hilt to see the ADK classes
+    ksp(libs.google.adk)
     implementation(libs.generativeai)
 
     // A2A Communication

@@ -2,9 +2,9 @@ package com.hereliesaz.geministrator.ui.jules
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.adk.AdkApp
-import com.google.adk.conversation.Conversation
+import com.google.adk.sessions.Session
 import com.google.adk.tool.ToolResult
+import com.google.ai.edge.litertlm.Conversation
 import com.hereliesaz.geministrator.data.JulesRepository
 import com.jules.apiclient.Session
 import com.jules.apiclient.Source
@@ -25,7 +25,6 @@ data class JulesUiState(
 @HiltViewModel
 class JulesViewModel @Inject constructor(
     private val julesRepository: JulesRepository, // For direct reads
-    private val adkApp: AdkApp
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(JulesUiState())
@@ -39,7 +38,7 @@ class JulesViewModel @Inject constructor(
 
     private fun getConversation(): Conversation {
         if (conversation == null) {
-            conversation = adkApp.startConversation(
+            conversation = Session.startConversation(
                 "You are an assistant that manages Jules API resources."
             )
         }

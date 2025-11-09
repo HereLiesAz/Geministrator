@@ -46,6 +46,7 @@ googleAdk = "0.3.0" # <-- RENAMED from google-adk
 generativeai = "0.5.0"
 hilt = "2.57.2"
 hilt-navigation-compose = "1.2.0"
+litertlm = "0.0.0-alpha05"
 
 [libraries]
 # Core & Lifecycle
@@ -138,6 +139,7 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 play-services-tasks = { group = "com.google.android.gms", name = "play-services-tasks", version.ref = "play-services-tasks" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebase-crashlytics-buildtools" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai", version.ref = "firebase-ai" }
+litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm", version.ref = "litertlm" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 chaquopy = { id = "com.chaquo.python", version.ref = "chaquopy" }
