@@ -52,23 +52,4 @@ class JulesRepositoryImpl @Inject constructor(
     override suspend fun listActivities(sessionId: String): List<Activity> {
         return getClient().getActivities(sessionId).activities
     }
-
-    override suspend fun getFileContent(sessionId: String, filePath: String): String {
-        // TODO: Implement this method
-        return ""
-    }
-
-    override suspend fun runFile(sessionId: String, filePath: String): String {
-        // TODO: Implement this method
-        return ""
-    }
-
-    override suspend fun updateFileContent(sessionId: String, filePath: String, content: String) {
-        // TODO: Implement this method
-    }
-
-    override suspend fun commitChanges(sessionId: String, message: String): String {
-        // TODO: Implement this method
-        return ""
-    }
 }

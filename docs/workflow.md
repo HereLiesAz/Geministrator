@@ -18,7 +18,7 @@ This document outlines the intended user workflow for the Jules IDE application.
 4.  **Interacting with the Session**:
     -   Upon successful session creation, the application navigates to the **Session Screen**.
     -   The Session Screen displays the activity stream for the newly created session, including the initial prompt and any responses from the Jules agent.
-    -   The user can send new messages to the Jules agent (default) or a remote ADK agent (via `/gemini`).
+    -   The user can send new messages to the Jules agent via the A2A protocol.
 
 5.  **File Browsing and Editing**:
     -   When the Jules agent modifies a file, that activity appears in the stream.

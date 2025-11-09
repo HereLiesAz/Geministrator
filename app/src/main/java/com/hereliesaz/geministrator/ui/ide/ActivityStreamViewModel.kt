@@ -7,16 +7,10 @@ import com.hereliesaz.geministrator.data.HistoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.hereliesaz.geministrator.data.Message
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
-
-data class ActivityStreamUiState(
-    val messages: List<Message> = emptyList(),
-    val isLoading: Boolean = false
-)
 
 @HiltViewModel
 class ActivityStreamViewModel @Inject constructor(
@@ -25,7 +19,7 @@ class ActivityStreamViewModel @Inject constructor(
 ) : ViewModel() {
     private val sessionId: UUID = UUID.fromString(savedStateHandle.get<String>("sessionId")!!)
 
-    private val _uiState = MutableStateFlow(ActivityStreamUiState())
+    private val _uiState = MutableStateFlow(IdeUiState())
     val uiState = _uiState.asStateFlow()
 
     fun loadSessionHistory() {
@@ -35,7 +29,7 @@ class ActivityStreamViewModel @Inject constructor(
                 .collect { messages ->
                     _uiState.update {
                         it.copy(
-                            messages = messages.map { Message(it.id, it.text, it.timestamp) },
+                            messages = messages,
                             isLoading = false
                         )
                     }

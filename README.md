@@ -1,12 +1,14 @@
 # Geministrator
 
-**An A2A (Agent-to-Agent) mobile client for the Jules API.**
+**An A2A (Agent-to-Agent) mobile client for the Jules API and other AI providers.**
 
 ---
 
 ## 🤖 Project Vision
 
-Geministrator is an experimental, agent-driven mobile IDE. Its architecture is designed to act as a central hub for interacting with the Jules API via the A2A (Agent-to-Agent) protocol. This allows the app to offload complex, specialized tasks (like project-wide analysis, code reviews, or planning) to the Jules API.
+Geministrator is an experimental, agent-driven mobile IDE. Its architecture is designed to act as a central hub for interacting with multiple, distinct AI agents via the A2A (Agent-to-Agent) protocol. The primary goal of this project is to integrate the ADK and A2A SDK with the Jules API, but the architecture should remain open to other AI providers in the future.
+
+**The A2A integration with the Jules API is the primary, but not exclusive, core of this application. All development should be focused on this goal, while keeping the architecture flexible enough to support other AI providers in the future.**
 
 ## 🏗️ Current Status: Jules IDE Implementation
 
@@ -15,7 +17,7 @@ The application is currently focused on providing a stable mobile IDE powered by
 ### Key Capabilities
 
 -   **Jules API Integration**: Core functionality is powered by the Jules API for repository management and agentic coding tasks.
--   **A2A Protocol Client**: Includes the `a2a-java-sdk-client` for communication with the Jules API.
+-   **A2A Protocol Client**: Includes the `a2a-java-sdk-client` for communication with the Jules API and other AI providers.
 -   **Native Code Editor**: Uses the [Sora Editor](https://github.com/Rosemoe/sora-editor).
 -   **File Management**: Provides a file explorer for browsing project files.
 
@@ -57,7 +59,7 @@ The application is currently focused on providing a stable mobile IDE powered by
 
 1.  The app will display your available source repositories from the Jules API.
 2.  Select a repository to start a new session.
-3.  You can then browse files and interact with the Jules agent.
+3.  You can then browse files and interact with the Jules agent via the A2A protocol.
 
 ---
 

@@ -8,7 +8,9 @@ The project has unit tests in the `:app` module. To run them, use the following 
 root of the project:
 
 ```bash
-./gradlew :app_android:test
+./gradlew :app:test
 ```
 
-**Note:** The project is currently experiencing a build issue that prevents the tests from running. This issue needs to be resolved before the tests can be executed.
+## Integration Tests
+
+The project has integration tests for the `JulesApiClient` and `A2ACommunicator`. These tests are located in the `:app` module and can be run with the same command as the unit tests.

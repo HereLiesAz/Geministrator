@@ -10,7 +10,6 @@ interface SettingsRepository {
     val gcpLocation: Flow<String?>
     val geminiModelName: Flow<String?>
     val enabledRoles: Flow<Set<String>>
-    val githubAccessToken: Flow<String?>
 
     suspend fun getApiKey(): String?
     suspend fun getGeminiApiKey(): String?
@@ -19,7 +18,6 @@ interface SettingsRepository {
     suspend fun getGcpLocation(): String?
     suspend fun getGeminiModelName(): String?
     suspend fun getEnabledRoles(): Set<String>
-    suspend fun getGithubAccessToken(): String?
 
     suspend fun saveApiKey(apiKey: String)
     suspend fun saveGeminiApiKey(geminiApiKey: String)
@@ -28,5 +26,4 @@ interface SettingsRepository {
     suspend fun saveGcpLocation(gcpLocation: String)
     suspend fun saveGeminiModelName(geminiModelName: String)
     suspend fun saveEnabledRoles(enabledRoles: Set<String>)
-    suspend fun saveGithubAccessToken(githubAccessToken: String)
 }
