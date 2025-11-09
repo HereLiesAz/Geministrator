@@ -23,6 +23,7 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
         val GCP_LOCATION = stringPreferencesKey("gcp_location")
         val GEMINI_MODEL_NAME = stringPreferencesKey("gemini_model_name")
         val ENABLED_ROLES = stringSetPreferencesKey("enabled_roles")
+        val GITHUB_ACCESS_TOKEN = stringPreferencesKey("github_access_token")
     }
 
     override val apiKey: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.API_KEY] }
@@ -32,6 +33,7 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
     override val gcpLocation: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GCP_LOCATION] }
     override val geminiModelName: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GEMINI_MODEL_NAME] }
     override val enabledRoles: Flow<Set<String>> = context.dataStore.data.map { it[PreferencesKeys.ENABLED_ROLES] ?: emptySet() }
+    override val githubAccessToken: Flow<String?> = context.dataStore.data.map { it[PreferencesKeys.GITHUB_ACCESS_TOKEN] }
 
 
     override suspend fun getApiKey(): String? = apiKey.first()
@@ -47,6 +49,8 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
     override suspend fun getGeminiModelName(): String? = geminiModelName.first()
 
     override suspend fun getEnabledRoles(): Set<String> = enabledRoles.first()
+
+    override suspend fun getGithubAccessToken(): String? = githubAccessToken.first()
 
     override suspend fun saveApiKey(apiKey: String) {
         context.dataStore.edit { preferences ->
@@ -87,6 +91,12 @@ class SettingsRepositoryImpl(private val context: Context) : SettingsRepository 
     override suspend fun saveEnabledRoles(enabledRoles: Set<String>) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.ENABLED_ROLES] = enabledRoles
+        }
+    }
+
+    override suspend fun saveGithubAccessToken(githubAccessToken: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.GITHUB_ACCESS_TOKEN] = githubAccessToken
         }
     }
 }

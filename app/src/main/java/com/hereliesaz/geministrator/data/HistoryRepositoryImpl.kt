@@ -10,14 +10,14 @@ import javax.inject.Singleton
 @Singleton
 class HistoryRepositoryImpl @Inject constructor() : HistoryRepository {
 
-    private val sessionHistories = mutableMapOf<UUID, MutableStateFlow<List<String>>>()
+    private val sessionHistories = mutableMapOf<UUID, MutableStateFlow<List<Message>>>()
 
-    override fun getSessionHistory(sessionId: UUID): Flow<List<String>> {
+    override fun getSessionHistory(sessionId: UUID): Flow<List<Message>> {
         return sessionHistories.getOrPut(sessionId) { MutableStateFlow(emptyList()) }.asStateFlow()
     }
 
     override suspend fun addMessageToHistory(sessionId: UUID, message: String) {
         val history = sessionHistories.getOrPut(sessionId) { MutableStateFlow(emptyList()) }
-        history.value = history.value + message
+        history.value = history.value + Message(UUID.randomUUID(), message, System.currentTimeMillis())
     }
 }

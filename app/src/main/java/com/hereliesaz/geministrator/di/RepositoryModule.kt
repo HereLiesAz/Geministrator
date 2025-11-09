@@ -74,6 +74,6 @@ object RepositoryModule {
     fun provideGitManager(
         @ApplicationContext context: Context
     ): GitManager {
-        return GitManager(context)
+        return GitManager(context.cacheDir)
     }
 }
