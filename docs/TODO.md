@@ -19,18 +19,14 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
 
 ---
 
-## Phase 2: Core Jules IDE and A2A/ADK Integration
+## Phase 2: Core Jules IDE Feature Implementation
 
-*Objective: Complete the essential features for the mobile IDE functionality, with the A2A/ADK integration as the core component, powered by the Jules API. The architecture should be flexible enough to support other AI providers in the future.*
+*Objective: Complete the essential features for the mobile IDE functionality as described in the CHANGELOG. This is the current, active phase.*
 
 - [ ] **Implement Core IDE Flow**
     - [ ] Complete the session creation logic in `SourceSelectionScreen.kt` and `JulesViewModel.kt` (this is partially done).
     - [ ] Implement the UI in `SessionScreen.kt` to display the full Jules activity stream (this is partially done).
     - [ ] Connect the Sora Editor in `IdeScreen.kt` to the `IdeViewModel` to load and save file content.
-
-- [ ] **Implement `A2ACommunicator`**
-    - [ ] Fully initialize the `A2AClient` in `A2ACommunicator` to use the Jules API.
-    - [ ] Implement the real `sendMessage` logic to correctly serialize and send a prompt to the Jules API.
 
 - [ ] **Implement UI Buttons**
     - [ ] Connect the "Run" button in `IdeScreen.kt` to the `IdeViewModel.onRunClicked()` function.
@@ -42,7 +38,23 @@ This document outlines the step-by-step plan to refactor the Geministrator appli
 
 ---
 
-## Phase 3: Production Readiness
+## Phase 3: A2A / ADK Integration
+
+*Objective: Implement the client-side services to communicate with remote ADK agents.*
+
+- [ ] **Implement `A2ACommunicator`**
+    - [ ] Add settings in the `SettingsScreen` to configure the A2A remote agent URL.
+    - [ ] Fully initialize the `A2AClient` in `A2ACommunicator` using the saved settings.
+    - [ ] Implement the real `sendMessage` logic to correctly serialize and send a prompt to the remote agent.
+
+- [ ] **Target Feature: Automated Code Review**
+    - [ ] Create a new UI screen for selecting a GitHub repository and PR.
+    - [ ] Create a new `CodeReviewViewModel` that calls the `A2ACommunicator`.
+    - [ ] The prompt should instruct the remote agent to use its `GitHubTools` (like `getPullRequestDiff` and `createComment`) to perform a review.
+
+---
+
+## Phase 4: Production Readiness
 
 *Objective: Ensure the application is tested, secure, and ready for deployment.*
 
