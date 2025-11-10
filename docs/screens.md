@@ -18,16 +18,16 @@ The `SourceSelectionScreen` (formerly File Explorer) is the first screen the use
 
 ## Session Screen
 
-The `SessionScreen` is where the user interacts with the Jules agent via the A2A protocol. Its key features include:
+The `SessionScreen` is where the user interacts with the Jules agent and remote A2A agents. Its key features include:
 
 -   **Activity Stream**: It displays a chronological list of all activities within a session from the Jules API.
--   **Message Input**: A text input field and a "Send" button at the bottom of the screen allow the user to send new messages to the Jules agent.
+-   **Message Input**: A text input field and a "Send" button at the bottom of the screen allow the user to send new messages to the Jules agent, or to a remote ADK agent (e.g., via the `/gemini` command).
 
 ## Settings Screen
 
 The `SettingsScreen` allows the user to configure the application. Currently, it provides the following options:
 
--   **API Key Management**: The user can enter and save their Jules API key.
+-   **API Key Management**: The user can enter and save their Jules API key and Gemini API key.
 -   **Theme Selection**: The user can choose between Light, Dark, and System Default themes.
 
 ## IDE Screen

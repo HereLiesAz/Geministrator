@@ -1,12 +1,12 @@
-# A2A / Jules API Integration
+# A2A / Remote ADK Integration
 
-This document provides a detailed overview of the Agent-to-Agent (A2A) protocol and its role in connecting Geministrator to the Jules API and other AI providers.
+This document provides a detailed overview of the Agent-to-Agent (A2A) protocol and its role in connecting Geministrator to remote Google ADK agents.
 
-## The A2A SDK as the Core Technology
+## The A2A SDK as a Core Technology
 
-The **A2A Java SDK Client** is the absolute core of the Geministrator architecture. It is a non-negotiable component that provides the framework for communicating with various AI backends. The primary goal is to use the Jules API as the main AI provider, but the architecture is designed to be flexible enough to support other providers in the future.
+The **A2A Java SDK Client** is a fundamental, non-negotiable component of the Geministrator architecture. It provides the core framework for communicating with remote, specialized AI agents built with the Google Agent Development Kit (ADK).
 
-This application is a **client** that consumes AI providers via the A2A protocol.
+This application does **not** run the ADK locally. It is a **client** that consumes remote ADK agents via the A2A protocol.
 
 **Under no circumstances should the A2A SDK be removed.** All future agent-based features beyond the core Jules IDE **must** be built on top of the A2A SDK to ensure a consistent and stable architecture.
 
@@ -14,10 +14,10 @@ This application is a **client** that consumes AI providers via the A2A protocol
 
 The A2A SDK is used to:
 
--   **Define a Communicator:** A Hilt-injected `A2ACommunicator` class wraps the SDK client and integrates it with the `JulesRepository`.
--   **Route User Prompts:** The `SessionViewModel` routes all user prompts to the `A2ACommunicator`, which in turn uses the Jules API.
--   **Enable Specialized Agents:** This architecture allows the app to send tasks to the Jules API, which can be configured to act as a variety of specialized agents (e.g., "Planner Agent," "Code Review Agent").
+-   **Define a Communicator:** A Hilt-injected `A2ACommunicator` class wraps the SDK client.
+-   **Route User Prompts:** The `SessionViewModel` is designed to check for specific commands (e.g., `/gemini`) and route those prompts to the `A2ACommunicator` instead of the Jules API.
+-   **Enable Specialized Agents:** This architecture allows the app to send tasks to dedicated agents (e.g., "Planner Agent," "Code Review Agent") that have their own toolsets (like the `GitHubApiClient`) and are hosted remotely.
 
 ## Future Development
 
-All future agent-based features, such as the planned central planner and researcher agents, must be implemented by leveraging the Jules API via the `A2ACommunicator`. The architecture should also be open to integrating other AI providers in the future.
+All future agent-based features, such as the planned central planner and researcher agents, must be implemented as remote ADK agents and consumed via the `A2ACommunicator`.
