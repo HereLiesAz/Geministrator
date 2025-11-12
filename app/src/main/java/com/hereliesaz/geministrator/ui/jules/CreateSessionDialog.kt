@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.jules.apiclient.Source
+import com.hereliesaz.julesapisdk.Source
 
 @Composable
 fun CreateSessionDialog(
@@ -42,7 +42,7 @@ fun CreateSessionDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    viewModel.createSession(source.id, title, prompt, onSessionCreated)
+                    viewModel.createSession(source, title, prompt, onSessionCreated)
                 },
                 enabled = title.isNotBlank() && prompt.isNotBlank()
             ) {

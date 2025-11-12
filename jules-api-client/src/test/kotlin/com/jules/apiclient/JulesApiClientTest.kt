@@ -25,7 +25,7 @@ class JulesApiClientTest {
         val result = apiClient?.getSources()
 
         // Then
-        assertTrue("The sources list should not be empty.", result?.sources?.isNotEmpty() == true)
+        assertTrue("The sources list should not be empty.", result?.isNotEmpty() == true)
     }
 
     @Test

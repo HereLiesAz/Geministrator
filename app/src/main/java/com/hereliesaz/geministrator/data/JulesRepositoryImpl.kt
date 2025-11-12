@@ -1,10 +1,9 @@
 package com.hereliesaz.geministrator.data
 
-import com.jules.apiclient.Activity
+import com.hereliesaz.julesapisdk.Activity
 import com.jules.apiclient.JulesApiClient
-import com.jules.apiclient.Session
-import com.jules.apiclient.Source
-import com.jules.apiclient.Turn
+import com.hereliesaz.julesapisdk.Session
+import com.hereliesaz.julesapisdk.Source
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -29,12 +28,8 @@ class JulesRepositoryImpl @Inject constructor(
         return getClient().getSources()
     }
 
-    override suspend fun createSession(prompt: String, source: Source, title: String, context: String): Session {
-        return getClient().createSession(prompt, source, title, context)
-    }
-
-    override suspend fun nextTurn(sessionId: String, prompt: String): Turn {
-        return getClient().nextTurn(sessionId, prompt)
+    override suspend fun createSession(prompt: String, source: Source, title: String): Session {
+        return getClient().createSession(prompt, source, title)
     }
 
     override suspend fun getSession(sessionId: String): Session {
@@ -50,6 +45,10 @@ class JulesRepositoryImpl @Inject constructor(
     }
 
     override suspend fun listActivities(sessionId: String): List<Activity> {
-        return getClient().getActivities(sessionId).activities
+        return getClient().getActivities(sessionId)
+    }
+
+    override suspend fun sendMessage(sessionId: String, prompt: String) {
+        return getClient().sendMessage(sessionId, prompt)
     }
 }
