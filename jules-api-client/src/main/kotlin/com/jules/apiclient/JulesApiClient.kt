@@ -1,68 +1,72 @@
 package com.jules.apiclient
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import retrofit2.Retrofit
+import com.hereliesaz.julesapisdk.JulesClient
+import com.hereliesaz.julesapisdk.JulesApiException
+import com.hereliesaz.julesapisdk.CreateSessionRequest
+import com.hereliesaz.julesapisdk.Source
+import com.hereliesaz.julesapisdk.Session
+import com.hereliesaz.julesapisdk.Activity
+import com.hereliesaz.julesapisdk.SourceContext
+import com.hereliesaz.julesapisdk.GithubRepoContext
 
 class JulesApiClient(private val apiKey: String) {
 
-    private val json = Json { ignoreUnknownKeys = true }
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://jules.googleapis.com/")
-        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-        .build()
-
-    private val service = retrofit.create(JulesApiService::class.java)
+    private val client = JulesClient(apiKey)
 
     suspend fun getSources(): List<Source> {
         val allSources = mutableListOf<Source>()
         var pageToken: String? = null
         do {
-            val sourceList = service.getSources(apiKey, pageToken)
-            allSources.addAll(sourceList.sources)
+            val sourceList = client.listSources(pageToken = pageToken)
+            sourceList.sources?.let { allSources.addAll(it) }
             pageToken = sourceList.nextPageToken
         } while (pageToken != null)
         return allSources
     }
 
-    suspend fun createSession(prompt: String, source: Source, title: String, roles: String): Session {
+    suspend fun createSession(prompt: String, source: Source, title: String): Session {
         val request = CreateSessionRequest(
             prompt = prompt,
             sourceContext = SourceContext(
                 source = source.name,
                 githubRepoContext = GithubRepoContext(startingBranch = "main")
             ),
-            title = title,
-            roles = roles
+            title = title
         )
-        return service.createSession(apiKey, request)
+        return client.createSession(request)
     }
 
     suspend fun getSessions(): List<Session> {
-        return service.getSessions(apiKey)
+        val allSessions = mutableListOf<Session>()
+        var pageToken: String? = null
+        do {
+            val sessionList = client.listSessions(pageToken = pageToken)
+            sessionList.sessions?.let { allSessions.addAll(it) }
+            pageToken = sessionList.nextPageToken
+        } while (pageToken != null)
+        return allSessions
     }
 
     suspend fun getSession(sessionId: String): Session {
-        return service.getSession(apiKey, sessionId)
-    }
-
-    suspend fun nextTurn(sessionId: String, prompt: String): Turn {
-        val request = NextTurnRequest(prompt)
-        return service.nextTurn(apiKey, sessionId, request)
+        return client.getSession(sessionId)
     }
 
     suspend fun approvePlan(sessionId: String) {
-        service.approvePlan(apiKey, sessionId)
+        client.approvePlan(sessionId)
     }
 
-    suspend fun getActivities(sessionId: String): ActivityList {
-        return service.getActivities(apiKey, sessionId)
+    suspend fun getActivities(sessionId: String): List<Activity> {
+        val allActivities = mutableListOf<Activity>()
+        var pageToken: String? = null
+        do {
+            val activityList = client.listActivities(sessionId, pageToken = pageToken)
+            activityList.activities?.let { allActivities.addAll(it) }
+            pageToken = activityList.nextPageToken
+        } while (pageToken != null)
+        return allActivities
     }
 
     suspend fun sendMessage(sessionId: String, prompt: String) {
-        val request = SendMessageRequest(prompt)
-        service.sendMessage(apiKey, sessionId, request)
+        client.sendMessage(sessionId, prompt)
     }
 }

@@ -1,23 +1,8 @@
 import org.gradle.internal.impldep.com.jcraft.jsch.ConfigRepository.defaultConfig
 
 plugins {
-    id("com.android.library")
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-}
-
-android {
-    namespace = "com.jules.apiclient"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 26
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
 }
 
 kotlin {
@@ -25,12 +10,10 @@ kotlin {
 }
 
 dependencies {
+    implementation("com.github.HereLiesAz:julesapisdk:1.0.1")
     implementation(project(":github-api-client"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
-    implementation(libs.okhttp)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
