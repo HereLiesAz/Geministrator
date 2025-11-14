@@ -30,5 +30,5 @@ dependencyResolutionManagement {
 rootProject.name = "Geministrator"
 
 include(":app")
-include(":jules-api-client")
 include(":github-api-client")
+include(":jules-cli-client")

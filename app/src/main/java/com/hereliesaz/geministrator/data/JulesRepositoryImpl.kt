@@ -1,54 +1,21 @@
 package com.hereliesaz.geministrator.data
 
-import com.hereliesaz.julesapisdk.Activity
-import com.jules.apiclient.JulesApiClient
-import com.hereliesaz.julesapisdk.Session
-import com.hereliesaz.julesapisdk.Source
-import kotlinx.coroutines.flow.first
+import com.jules.cliclient.JulesCliClient
 import javax.inject.Inject
 
 class JulesRepositoryImpl @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val julesCliClient: JulesCliClient
 ) : JulesRepository {
 
-    private var apiClient: JulesApiClient? = null
-
-    private suspend fun getClient(): JulesApiClient {
-        if (apiClient == null) {
-            val apiKey = settingsRepository.apiKey.first()
-            if (apiKey.isNullOrBlank()) {
-                throw IllegalStateException("Jules API key not found")
-            }
-            apiClient = JulesApiClient(apiKey)
-        }
-        return apiClient!!
+    override suspend fun createSession(repo: String, prompt: String): String {
+        return julesCliClient.newSession(repo, prompt)
     }
 
-    override suspend fun getSources(): List<Source> {
-        return getClient().getSources()
+    override suspend fun listSessions(): String {
+        return julesCliClient.listSessions()
     }
 
-    override suspend fun createSession(prompt: String, source: Source, title: String): Session {
-        return getClient().createSession(prompt, source, title)
-    }
-
-    override suspend fun getSession(sessionId: String): Session {
-        return getClient().getSession(sessionId)
-    }
-
-    override suspend fun listSessions(): List<Session> {
-        return getClient().getSessions()
-    }
-
-    override suspend fun approvePlan(sessionId: String) {
-        return getClient().approvePlan(sessionId)
-    }
-
-    override suspend fun listActivities(sessionId: String): List<Activity> {
-        return getClient().getActivities(sessionId)
-    }
-
-    override suspend fun sendMessage(sessionId: String, prompt: String) {
-        return getClient().sendMessage(sessionId, prompt)
+    override suspend fun pull(sessionId: String): String {
+        return julesCliClient.pull(sessionId)
     }
 }
