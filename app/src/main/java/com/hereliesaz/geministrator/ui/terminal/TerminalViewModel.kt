@@ -3,8 +3,7 @@ package com.hereliesaz.geministrator.ui.terminal
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 //import com.hereliesaz.geministrator.apis.GeminiApiClient
-import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.JulesApiClient
+import com.hereliesaz.geministrator.data.JulesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,9 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TerminalViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val julesRepository: JulesRepository
 ) : ViewModel() {
-    private var julesApiClient: JulesApiClient? = null
 //    private var geminiApiClient: GeminiApiClient? = null
 
     private val _uiState = MutableStateFlow(TerminalUiState())
@@ -24,10 +22,6 @@ class TerminalViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val apiKey = settingsRepository.getApiKey()
-            if (!apiKey.isNullOrBlank()) {
-                julesApiClient = JulesApiClient(apiKey)
-            }
 //            val geminiApiKey = settingsRepository.getGeminiApiKey()
 //            if (!geminiApiKey.isNullOrBlank()) {
 //                geminiApiClient = GeminiApiClient(geminiApiKey)
@@ -53,42 +47,39 @@ class TerminalViewModel @Inject constructor(
     }
 
     private suspend fun executeJulesCommand(args: List<String>): String {
-        if (julesApiClient == null) {
-            return "Jules API key not configured. Please set it in the settings screen."
-        }
-
         if (args.isEmpty()) {
-            return "Please provide a subcommand for the Jules command. Available commands: sources, sessions, send"
+            return "Please provide a subcommand for the Jules command. Available commands: new, list, pull"
         }
 
         return when (val subcommand = args.first()) {
-            "sources" -> {
-                try {
-                    val sources = julesApiClient?.getSources()
-                    sources?.joinToString("\n") { it.name } ?: "No sources found."
-                } catch (e: Exception) {
-                    "Error getting sources: ${e.message}"
-                }
-            }
-            "sessions" -> {
-                try {
-                    val sessions = julesApiClient?.getSessions()
-                    sessions?.joinToString("\n") { "${it.id}: ${it.title}" } ?: "No sessions found."
-                } catch (e: Exception) {
-                    "Error getting sessions: ${e.message}"
-                }
-            }
-            "send" -> {
+            "new" -> {
                 if (args.size < 3) {
-                    return "Usage: jules send <sessionId> <prompt>"
+                    return "Usage: jules new <repo> <prompt>"
                 }
-                val sessionId = args[1]
+                val repo = args[1]
                 val prompt = args.drop(2).joinToString(" ")
                 try {
-                    julesApiClient?.sendMessage(sessionId, prompt)
-                    "Message sent to session $sessionId."
+                    julesRepository.createSession(repo, prompt)
                 } catch (e: Exception) {
-                    "Error sending message: ${e.message}"
+                    "Error creating session: ${e.message}"
+                }
+            }
+            "list" -> {
+                try {
+                    julesRepository.listSessions()
+                } catch (e: Exception) {
+                    "Error listing sessions: ${e.message}"
+                }
+            }
+            "pull" -> {
+                if (args.size < 2) {
+                    return "Usage: jules pull <sessionId>"
+                }
+                val sessionId = args[1]
+                try {
+                    julesRepository.pull(sessionId)
+                } catch (e: Exception) {
+                    "Error pulling session: ${e.message}"
                 }
             }
             else -> "Unknown Jules command: $subcommand"

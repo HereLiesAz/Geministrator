@@ -101,7 +101,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":jules-api-client"))
+    implementation(project(":jules-cli-client"))
     implementation(project(":github-api-client"))
 
     // Core & UI
