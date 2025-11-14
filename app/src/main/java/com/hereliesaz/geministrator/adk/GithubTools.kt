@@ -4,6 +4,7 @@ import com.github.apiclient.Comment
 import com.github.apiclient.GitHubApiClient
 import com.google.adk.annotations.Description
 import com.google.adk.annotations.Tool
+import com.google.ai.edge.litertlm.Tool
 import javax.inject.Inject
 
 class GitHubTools @Inject constructor(
@@ -11,10 +12,12 @@ class GitHubTools @Inject constructor(
 ) {
 
     @Tool
-    @Description("Get a list of pull requests for a given repository.")
+     ("Get a list of pull requests for a given repository.")
     suspend fun getPullRequests(
-        @Description("The owner of the repository (e.g., 'hereliesaz').") owner: String,
-        @Description("The name of the repository (e.g., 'geministrator').") repo: String
+       @Description
+       ("The owner of the repository (e.g., 'hereliesaz').") owner: String,
+         (" {
+    }The name of the repository (e.g., 'geministrator').") repo: String
     ): List<String> {
         return gitHubApiClient.getPullRequests(owner, repo).map {
             "PR #${it.number}: ${it.title}"
@@ -22,11 +25,11 @@ class GitHubTools @Inject constructor(
     }
 
     @Tool
-    @Description("Get the diff (file changes) for a specific pull request.")
+     ("Get the diff (file changes) for a specific pull request.")
     suspend fun getPullRequestDiff(
-        @Description("The owner of the repository.") owner: String,
-        @Description("The name of the repository.") repo: String,
-        @Description("The number of the pull request.") prNumber: Int
+         ("The owner of the repository.") owner: String,
+         ("The name of the repository.") repo: String,
+         ("The number of the pull request.") prNumber: Int
     ): String {
         val pr = gitHubApiClient.getPullRequests(owner, repo).find { it.number == prNumber }
             ?: throw Exception("Pull request #$prNumber not found in $owner/$repo")
@@ -34,12 +37,12 @@ class GitHubTools @Inject constructor(
     }
 
     @Tool
-    @Description("Create a comment on a pull request.")
+     ("Create a comment on a pull request.")
     suspend fun createComment(
-        @Description("The owner of the repository.") owner: String,
-        @Description("The name of the repository.") repo: String,
-        @Description("The number of the pull request.") prNumber: Int,
-        @Description("The text of the comment to post.") comment: String
+         ("The owner of the repository.") owner: String,
+         ("The name of the repository.") repo: String,
+         ("The number of the pull request.") prNumber: Int,
+         ("The text of the comment to post.") comment: String
     ) {
         gitHubApiClient.createComment(owner, repo, prNumber, Comment(comment))
     }

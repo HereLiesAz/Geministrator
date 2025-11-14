@@ -1,6 +1,5 @@
 package com.hereliesaz.geministrator.data
 
-import io.github.a2asdk.client.A2AClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
