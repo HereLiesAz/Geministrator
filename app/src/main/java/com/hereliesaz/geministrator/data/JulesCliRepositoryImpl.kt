@@ -47,7 +47,7 @@ class JulesCliRepositoryImpl @Inject constructor(
     private fun parseSessionId(output: String): String {
         val regex = Regex("Session ID: (\\d+)")
         val matchResult = regex.find(output)
-        return matchResult?.groups?.get(1)?.value ?: ""
+        return matchResult?.groups?.get(1)?.value ?: throw IllegalArgumentException("Could not parse session ID from output: $output")
     }
 
     private fun parseSessions(output: String): List<Session> {
