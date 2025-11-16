@@ -7,13 +7,14 @@ import com.hereliesaz.geministrator.data.GithubRepositoryImpl
 import com.hereliesaz.geministrator.data.HistoryRepository
 import com.hereliesaz.geministrator.data.HistoryRepositoryImpl
 import com.hereliesaz.geministrator.data.JulesRepository
-import com.hereliesaz.geministrator.data.JulesRepositoryImpl
+import com.hereliesaz.geministrator.data.JulesCliRepositoryImpl
 import com.hereliesaz.geministrator.data.PromptsRepository
 import com.hereliesaz.geministrator.data.PromptsRepositoryImpl
 import com.hereliesaz.geministrator.data.SessionRepository
 import com.hereliesaz.geministrator.data.SessionRepositoryImpl
 import com.hereliesaz.geministrator.data.SettingsRepository
 import com.hereliesaz.geministrator.data.SettingsRepositoryImpl
+import com.jules.cliclient.JulesCliClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -50,9 +51,9 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideJulesRepository(
-        settingsRepository: SettingsRepository
+        julesCliClient: JulesCliClient
     ): JulesRepository {
-        return JulesRepositoryImpl(settingsRepository)
+        return JulesCliRepositoryImpl(julesCliClient)
     }
 
     @Provides

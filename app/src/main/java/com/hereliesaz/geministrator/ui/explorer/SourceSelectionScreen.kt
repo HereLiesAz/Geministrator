@@ -1,58 +1,52 @@
 package com.hereliesaz.geministrator.ui.explorer
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.hereliesaz.geministrator.data.JulesRepository
-import com.jules.apiclient.Source
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.hereliesaz.geministrator.view.CreateSessionDialog
 
-data class SourceSelectionUiState(
-    val sources: List<Source> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+@Composable
+fun SourceSelectionScreen(
+    onSessionCreated: (String) -> Unit,
+    viewModel: SourceSelectionViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
-@HiltViewModel
-class SourceSelectionViewModel @Inject constructor(
-    private val julesRepository: JulesRepository
-) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(SourceSelectionUiState())
-    val uiState = _uiState.asStateFlow()
-
-    init {
-        loadSources()
-    }
-
-    private fun loadSources() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val sources = julesRepository.getSources()
-                _uiState.update {
-                    it.copy(
-                        sources = sources,
-                        isLoading = false,
-                        error = null
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message
-                    )
-                }
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Loading sources...")
+        }
+    } else if (uiState.error != null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Error: ${uiState.error}")
+        }
+    } else {
+        LazyColumn(modifier = Modifier.padding(16.dp)) {
+            items(uiState.sources) { source ->
+                Text(
+                    text = source.name,
+                    modifier = Modifier.clickable {
+                        // TODO: Show session creation dialog
+                    }
+                )
             }
         }
-    }
-
-    fun retry() {
-        loadSources()
     }
 }

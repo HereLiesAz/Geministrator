@@ -6,7 +6,7 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.GoogleGenerativeAI
 import com.hereliesaz.geministrator.data.A2ACommunicator
 import com.hereliesaz.geministrator.data.SettingsRepository
-import com.jules.apiclient.JulesApiClient
+import com.jules.cliclient.JulesCliClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,9 +22,8 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun provideJulesApiClient(settingsRepository: SettingsRepository): JulesApiClient {
-        val apiKey = runBlocking { settingsRepository.julesApiKey.first() }
-        return JulesApiClient(apiKey = apiKey ?: "")
+    fun provideJulesCliClient(): JulesCliClient {
+        return JulesCliClient()
     }
 
     @Provides
