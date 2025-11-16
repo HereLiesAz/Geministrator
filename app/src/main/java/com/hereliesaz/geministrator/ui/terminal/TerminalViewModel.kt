@@ -63,7 +63,7 @@ class TerminalViewModel @Inject constructor(
             "sessions" -> {
                 try {
                     val sessions = julesRepository.listSessions()
-                    sessions.joinToString("\n") { "${it.id}: ${it.title}" }
+                    sessions.joinToString("\n") { "${it.id}: ${it.title}" }.ifEmpty { "No sessions found." }
                 } catch (e: Exception) {
                     "Error getting sessions: ${e.message}"
                 }
