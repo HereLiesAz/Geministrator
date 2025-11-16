@@ -48,38 +48,24 @@ class TerminalViewModel @Inject constructor(
 
     private suspend fun executeJulesCommand(args: List<String>): String {
         if (args.isEmpty()) {
-            return "Please provide a subcommand for the Jules command. Available commands: new, list, pull"
+            return "Please provide a subcommand for the Jules command. Available commands: sources, sessions"
         }
 
         return when (val subcommand = args.first()) {
-            "new" -> {
-                if (args.size < 3) {
-                    return "Usage: jules new <repo> <prompt>"
-                }
-                val repo = args[1]
-                val prompt = args.drop(2).joinToString(" ")
+            "sources" -> {
                 try {
-                    julesRepository.createSession(repo, prompt)
+                    val sources = julesRepository.getSources()
+                    sources.joinToString("\n") { it.name }.ifEmpty { "No sources found." }
                 } catch (e: Exception) {
-                    "Error creating session: ${e.message}"
+                    "Error getting sources: ${e.message}"
                 }
             }
-            "list" -> {
+            "sessions" -> {
                 try {
-                    julesRepository.listSessions()
+                    val sessions = julesRepository.listSessions()
+                    sessions.joinToString("\n") { "${it.id}: ${it.title}" }.ifEmpty { "No sessions found." }
                 } catch (e: Exception) {
-                    "Error listing sessions: ${e.message}"
-                }
-            }
-            "pull" -> {
-                if (args.size < 2) {
-                    return "Usage: jules pull <sessionId>"
-                }
-                val sessionId = args[1]
-                try {
-                    julesRepository.pull(sessionId)
-                } catch (e: Exception) {
-                    "Error pulling session: ${e.message}"
+                    "Error getting sessions: ${e.message}"
                 }
             }
             else -> "Unknown Jules command: $subcommand"
