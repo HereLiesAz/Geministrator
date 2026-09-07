@@ -89,7 +89,7 @@ private val GeministratorEdges = listOf(
 
 @Composable
 internal fun GeministratorWorkflowMindMap(
-    selectedTaskId: String,
+    selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
