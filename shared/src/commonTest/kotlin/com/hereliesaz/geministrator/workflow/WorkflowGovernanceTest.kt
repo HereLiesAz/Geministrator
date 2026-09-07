@@ -6,11 +6,9 @@ import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.EnvironmentPlanningPolicy
-import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.ProviderRunId
 import com.hereliesaz.geministrator.domain.RetryPolicy
 import com.hereliesaz.geministrator.domain.RetryReason
-import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRun
@@ -39,16 +37,16 @@ import kotlin.test.assertTrue
 class WorkflowGovernanceTest {
     @Test
     fun providerRequiredEnvironmentPlanningInjectsEpaBeforeWorker() = runBlocking {
-        val worker = FakeProvider(
+        val worker = GovernanceFakeProvider(
             id = AgentProviderId("worker"),
-            capabilities = AgentCapabilities(
+            providerCapabilities = AgentCapabilities(
                 supported = setOf(AgentCapability.RepositoryRead, AgentCapability.RepositoryWrite),
                 requiresEnvironmentPlanning = true,
             ),
         )
-        val epa = FakeProvider(
+        val epa = GovernanceFakeProvider(
             id = AgentProviderId("epa"),
-            capabilities = AgentCapabilities(setOf(AgentCapability.EnvironmentPlanning)),
+            providerCapabilities = AgentCapabilities(setOf(AgentCapability.EnvironmentPlanning)),
         )
         val preparer = WorkflowDefinitionPreparer(
             providerRegistry = AgentProviderRegistry(listOf(worker, epa)),
@@ -147,11 +145,11 @@ private class MemoryGateRepository : ApprovalGateRepository {
         gates.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
 }
 
-private class FakeProvider(
+private class GovernanceFakeProvider(
     override val id: AgentProviderId,
-    private val capabilities: AgentCapabilities,
+    private val providerCapabilities: AgentCapabilities,
 ) : AgentProvider {
-    override suspend fun capabilities(): AgentCapabilities = capabilities
+    override suspend fun capabilities(): AgentCapabilities = providerCapabilities
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle = AgentRunHandle(ProviderRunId("run"))
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = emptyFlow()
     override suspend fun sendMessage(runId: ProviderRunId, message: String): ProviderActionResult = ProviderActionResult.Accepted
