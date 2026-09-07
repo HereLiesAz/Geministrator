@@ -10,12 +10,14 @@ enum class AgentCapability {
     Testing,
     PullRequestCreation,
     Research,
+    EnvironmentPlanning,
 }
 
 enum class RoleAuthority {
     ProposePlan,
     RejectPlan,
     ApprovePlan,
+    SelectEnvironment,
     Implement,
     Verify,
     ReviewCode,
@@ -74,6 +76,15 @@ object BuiltInRoles {
             RoleAuthority.ApprovePlan,
             RoleAuthority.RejectPlan,
         ),
+    )
+
+    val EpaRepresentative = RoleDefinition(
+        id = RoleDefinitionId("epa-representative"),
+        name = "EPA Representative",
+        description = "Determines the best execution environment for agents that require one.",
+        instructions = "Assess the assigned task, provider capabilities, repository constraints, required runtimes, tools, services, secrets, isolation, and resource needs. Select the smallest reproducible environment that can complete the task safely. Produce an environment specification for downstream execution; do not implement the task or certify its result.",
+        capabilitiesRequired = setOf(AgentCapability.EnvironmentPlanning),
+        authorities = setOf(RoleAuthority.SelectEnvironment),
     )
 
     val UxDesigner = RoleDefinition(
@@ -142,6 +153,7 @@ object BuiltInRoles {
         ProductManager,
         Researcher,
         Architect,
+        EpaRepresentative,
         UxDesigner,
         ImplementationEngineer,
         QaEngineer,
