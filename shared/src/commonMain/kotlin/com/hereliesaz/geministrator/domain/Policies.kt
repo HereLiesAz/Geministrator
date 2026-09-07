@@ -1,19 +1,24 @@
 package com.hereliesaz.geministrator.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed interface ApprovalPolicy {
-    data object None : ApprovalPolicy
-    data class RoleApproval(val authority: RoleAuthority) : ApprovalPolicy
-    data object HumanApproval : ApprovalPolicy
+    @Serializable data object None : ApprovalPolicy
+    @Serializable data class RoleApproval(val authority: RoleAuthority) : ApprovalPolicy
+    @Serializable data object HumanApproval : ApprovalPolicy
 }
 
+@Serializable
 sealed interface VerificationPolicy {
-    data object None : VerificationPolicy
-    data class Required(
+    @Serializable data object None : VerificationPolicy
+    @Serializable data class Required(
         val verifierRoleId: RoleDefinitionId,
         val criteria: List<String> = emptyList(),
     ) : VerificationPolicy
 }
 
+@Serializable
 enum class TestDesignPolicy {
     None,
     BeforeImplementation,
@@ -21,12 +26,14 @@ enum class TestDesignPolicy {
     BeforeAndAfterImplementation,
 }
 
+@Serializable
 enum class PromptReusePolicy {
     ProviderDefault,
     PreferCache,
     DisableCache,
 }
 
+@Serializable
 data class RetryPolicy(
     val maxAttempts: Int = 2,
     val retryOn: Set<RetryReason> = setOf(
@@ -41,6 +48,7 @@ data class RetryPolicy(
     }
 }
 
+@Serializable
 enum class RetryReason {
     ProviderFailure,
     PlanRejected,
@@ -49,18 +57,21 @@ enum class RetryReason {
     IntegrationConflict,
 }
 
+@Serializable
 sealed interface EscalationPolicy {
-    data object FailWorkflow : EscalationPolicy
-    data object RequireHumanDecision : EscalationPolicy
-    data class Reassign(val roleId: RoleDefinitionId) : EscalationPolicy
+    @Serializable data object FailWorkflow : EscalationPolicy
+    @Serializable data object RequireHumanDecision : EscalationPolicy
+    @Serializable data class Reassign(val roleId: RoleDefinitionId) : EscalationPolicy
 }
 
+@Serializable
 sealed interface ProviderConstraints {
-    data object None : ProviderConstraints
-    data class RequireCapabilities(val capabilities: Set<AgentCapability>) : ProviderConstraints
-    data class RequireProvider(val providerId: AgentProviderId) : ProviderConstraints
+    @Serializable data object None : ProviderConstraints
+    @Serializable data class RequireCapabilities(val capabilities: Set<AgentCapability>) : ProviderConstraints
+    @Serializable data class RequireProvider(val providerId: AgentProviderId) : ProviderConstraints
 }
 
+@Serializable
 data class ConcurrencyPolicy(
     val maxConcurrentTasks: Int = 4,
     val perProviderLimits: Map<AgentProviderId, Int> = emptyMap(),
@@ -71,6 +82,7 @@ data class ConcurrencyPolicy(
     }
 }
 
+@Serializable
 enum class IntegrationPolicy {
     Manual,
     PullRequest,
