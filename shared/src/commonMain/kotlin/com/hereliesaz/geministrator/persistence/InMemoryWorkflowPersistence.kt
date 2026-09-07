@@ -29,65 +29,52 @@ class InMemoryWorkflowPersistence : WorkflowPersistence {
     private val gateItems = mutableMapOf<ApprovalGateId, ApprovalGate>()
 
     override val projects: ProjectRepository = object : ProjectRepository {
-        override suspend fun put(project: Project) = mutex.withLock {
-            projectItems[project.id] = project
+        override suspend fun put(project: Project) {
+            mutex.withLock { projectItems[project.id] = project }
         }
-
         override suspend fun get(id: ProjectId): Project? = mutex.withLock { projectItems[id] }
-
         override suspend fun all(): List<Project> = mutex.withLock { projectItems.values.toList() }
     }
 
     override val definitions: WorkflowDefinitionRepository = object : WorkflowDefinitionRepository {
-        override suspend fun put(definition: WorkflowDefinition) = mutex.withLock {
-            definitionItems[definition.id] = definition
+        override suspend fun put(definition: WorkflowDefinition) {
+            mutex.withLock { definitionItems[definition.id] = definition }
         }
-
-        override suspend fun get(id: WorkflowDefinitionId): WorkflowDefinition? =
-            mutex.withLock { definitionItems[id] }
-
-        override suspend fun all(): List<WorkflowDefinition> =
-            mutex.withLock { definitionItems.values.toList() }
+        override suspend fun get(id: WorkflowDefinitionId): WorkflowDefinition? = mutex.withLock { definitionItems[id] }
+        override suspend fun all(): List<WorkflowDefinition> = mutex.withLock { definitionItems.values.toList() }
     }
 
     override val runs: WorkflowRunRepository = object : WorkflowRunRepository {
-        override suspend fun put(run: WorkflowRun) = mutex.withLock {
-            runItems[run.id] = run
+        override suspend fun put(run: WorkflowRun) {
+            mutex.withLock { runItems[run.id] = run }
         }
-
         override suspend fun get(id: WorkflowRunId): WorkflowRun? = mutex.withLock { runItems[id] }
-
         override suspend fun byProject(projectId: ProjectId): List<WorkflowRun> = mutex.withLock {
             runItems.values.filter { it.projectId == projectId }
         }
     }
 
     override val events: WorkflowEventRepository = object : WorkflowEventRepository {
-        override suspend fun append(event: WorkflowEvent) = mutex.withLock {
-            eventItems.getOrPut(event.workflowRunId) { mutableListOf() }.add(event)
+        override suspend fun append(event: WorkflowEvent) {
+            mutex.withLock { eventItems.getOrPut(event.workflowRunId) { mutableListOf() }.add(event) }
         }
-
         override suspend fun forRun(workflowRunId: WorkflowRunId): List<WorkflowEvent> =
             mutex.withLock { eventItems[workflowRunId]?.toList().orEmpty() }
     }
 
     override val roles: RoleRepository = object : RoleRepository {
-        override suspend fun put(role: RoleDefinition) = mutex.withLock {
-            roleItems[role.id] = role
+        override suspend fun put(role: RoleDefinition) {
+            mutex.withLock { roleItems[role.id] = role }
         }
-
         override suspend fun get(id: RoleDefinitionId): RoleDefinition? = mutex.withLock { roleItems[id] }
-
         override suspend fun all(): List<RoleDefinition> = mutex.withLock { roleItems.values.toList() }
     }
 
     override val artifacts: ArtifactRepository = object : ArtifactRepository {
-        override suspend fun put(artifact: ArtifactRef) = mutex.withLock {
-            artifactItems[artifact.id] = artifact
+        override suspend fun put(artifact: ArtifactRef) {
+            mutex.withLock { artifactItems[artifact.id] = artifact }
         }
-
         override suspend fun get(id: ArtifactId): ArtifactRef? = mutex.withLock { artifactItems[id] }
-
         override suspend fun forRun(run: WorkflowRun): List<ArtifactRef> = mutex.withLock {
             val taskRunIds = run.taskRuns.values.map { it.id }.toSet()
             artifactItems.values.filter { it.taskRunId in taskRunIds }
@@ -95,16 +82,12 @@ class InMemoryWorkflowPersistence : WorkflowPersistence {
     }
 
     override val approvalGates: ApprovalGateRepository = object : ApprovalGateRepository {
-        override suspend fun put(gate: ApprovalGate) = mutex.withLock {
-            gateItems[gate.id] = gate
+        override suspend fun put(gate: ApprovalGate) {
+            mutex.withLock { gateItems[gate.id] = gate }
         }
-
         override suspend fun get(id: ApprovalGateId): ApprovalGate? = mutex.withLock { gateItems[id] }
-
         override suspend fun unresolved(workflowRunId: WorkflowRunId): List<ApprovalGate> = mutex.withLock {
-            gateItems.values.filter {
-                it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending
-            }
+            gateItems.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
         }
     }
 }
