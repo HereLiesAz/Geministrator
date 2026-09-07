@@ -1,23 +1,29 @@
 package com.hereliesaz.geministrator.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class EnvironmentPlanningPolicy {
     NotRequired,
     WhenProviderRequires,
     Always,
 }
 
+@Serializable
 enum class NetworkAccessPolicy {
     None,
     Restricted,
     Internet,
 }
 
+@Serializable
 enum class IsolationLevel {
     Shared,
     Isolated,
     Ephemeral,
 }
 
+@Serializable
 data class EnvironmentSpecification(
     val runtime: String? = null,
     val runtimeVersion: String? = null,
