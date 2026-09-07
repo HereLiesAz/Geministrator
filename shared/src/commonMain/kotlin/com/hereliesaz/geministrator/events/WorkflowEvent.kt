@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.events
 
+import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
@@ -38,7 +39,17 @@ data class TaskStarted(
 data class ApprovalRequired(
     override val workflowRunId: WorkflowRunId,
     val taskDefinitionId: TaskDefinitionId,
+    val gateId: ApprovalGateId? = null,
     val reason: String,
+    override val occurredAtEpochMillis: Long,
+) : WorkflowEvent
+
+data class ApprovalDecisionReceived(
+    override val workflowRunId: WorkflowRunId,
+    val taskDefinitionId: TaskDefinitionId?,
+    val gateId: ApprovalGateId,
+    val approved: Boolean,
+    val decidedByRoleId: RoleDefinitionId?,
     override val occurredAtEpochMillis: Long,
 ) : WorkflowEvent
 
@@ -61,6 +72,14 @@ data class RetryScheduled(
     val taskDefinitionId: TaskDefinitionId,
     val nextAttempt: Int,
     val reason: String,
+    override val occurredAtEpochMillis: Long,
+) : WorkflowEvent
+
+data class TaskEscalated(
+    override val workflowRunId: WorkflowRunId,
+    val taskDefinitionId: TaskDefinitionId,
+    val reason: String,
+    val reassignedRoleId: RoleDefinitionId? = null,
     override val occurredAtEpochMillis: Long,
 ) : WorkflowEvent
 
