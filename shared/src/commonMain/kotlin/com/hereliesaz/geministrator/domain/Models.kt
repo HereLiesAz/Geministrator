@@ -32,6 +32,7 @@ data class TaskDefinition(
     val retryPolicy: RetryPolicy = RetryPolicy(),
     val escalationPolicy: EscalationPolicy = EscalationPolicy.FailWorkflow,
     val providerConstraints: ProviderConstraints = ProviderConstraints.None,
+    val environmentPlanningPolicy: EnvironmentPlanningPolicy = EnvironmentPlanningPolicy.WhenProviderRequires,
 )
 
 data class WorkflowDefinition(
