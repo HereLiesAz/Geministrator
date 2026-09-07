@@ -32,5 +32,8 @@ data class ArtifactRef(
     val taskRunId: TaskRunId,
     val label: String,
     val uri: String? = null,
+    val textContent: String? = null,
+    val mediaType: String? = null,
+    val metadata: Map<String, String> = emptyMap(),
     val createdAtEpochMillis: Long,
 )
