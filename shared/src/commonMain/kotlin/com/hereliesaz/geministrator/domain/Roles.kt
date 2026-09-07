@@ -8,6 +8,7 @@ enum class AgentCapability {
     Messaging,
     ShellExecution,
     Testing,
+    TestAuthoring,
     PullRequestCreation,
     Research,
     EnvironmentPlanning,
@@ -19,6 +20,7 @@ enum class RoleAuthority {
     ApprovePlan,
     SelectEnvironment,
     Implement,
+    AuthorTests,
     Verify,
     ReviewCode,
     ApproveIntegration,
@@ -107,6 +109,19 @@ object BuiltInRoles {
         ),
     )
 
+    val CrashTestDummy = RoleDefinition(
+        id = RoleDefinitionId("crash-test-dummy"),
+        name = "Crash Test Dummy",
+        description = "Produces tests for approved implementation artifacts.",
+        instructions = "Work only from approved code or approved implementation artifacts. Derive high-value automated tests from acceptance criteria, architecture, known risks, and changed behavior. Prefer tests that expose regressions and edge cases. You may author test code and test plans, but you must not approve the implementation, certify the result, or weaken tests to make code pass.",
+        capabilitiesRequired = setOf(
+            AgentCapability.RepositoryRead,
+            AgentCapability.RepositoryWrite,
+            AgentCapability.TestAuthoring,
+        ),
+        authorities = setOf(RoleAuthority.AuthorTests),
+    )
+
     val QaEngineer = RoleDefinition(
         id = RoleDefinitionId("qa-engineer"),
         name = "QA Engineer",
@@ -156,6 +171,7 @@ object BuiltInRoles {
         EpaRepresentative,
         UxDesigner,
         ImplementationEngineer,
+        CrashTestDummy,
         QaEngineer,
         AdversarialReviewer,
         CodeReviewer,
