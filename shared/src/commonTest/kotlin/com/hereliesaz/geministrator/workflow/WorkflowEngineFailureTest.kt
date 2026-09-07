@@ -99,6 +99,7 @@ class WorkflowEngineFailureTest {
 
 private object NoOpGateway : ManagedSessionGateway {
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle = error("not used")
+    override suspend fun reconnect(handle: ManagedSessionHandle, initialStatus: ManagedSessionStatus) = Unit
     override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus = ManagedSessionStatus.Unknown
     override suspend fun message(handle: ManagedSessionHandle, message: String) = error("not used")
     override suspend fun approvePlan(handle: ManagedSessionHandle) = error("not used")
