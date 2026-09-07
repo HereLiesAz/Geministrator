@@ -4,13 +4,40 @@ import com.hereliesaz.geministrator.domain.AcceptanceCriterion
 import com.hereliesaz.geministrator.domain.AgentCapability
 import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ArtifactRef
+import com.hereliesaz.geministrator.domain.PromptReusePolicy
 import com.hereliesaz.geministrator.domain.ProviderRunId
 import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskRunId
 import kotlinx.coroutines.flow.Flow
 
+enum class PromptCacheMode {
+    Unsupported,
+    ImplicitPrefix,
+    ExplicitReusableContext,
+    ExplicitBreakpoints,
+    SessionScoped,
+}
+
+data class PromptCacheCapabilities(
+    val modes: Set<PromptCacheMode> = setOf(PromptCacheMode.Unsupported),
+    val reportsCacheUsage: Boolean = false,
+)
+
 data class AgentCapabilities(
     val supported: Set<AgentCapability>,
+    val promptCaching: PromptCacheCapabilities = PromptCacheCapabilities(),
+)
+
+data class PromptContextBlock(
+    val label: String,
+    val content: String,
+)
+
+data class PromptContext(
+    val stablePrefix: List<PromptContextBlock> = emptyList(),
+    val dynamicContext: List<PromptContextBlock> = emptyList(),
+    val reusePolicy: PromptReusePolicy = PromptReusePolicy.ProviderDefault,
+    val cacheNamespace: String? = null,
 )
 
 data class AgentTaskRequest(
@@ -22,6 +49,7 @@ data class AgentTaskRequest(
     val repository: RepositoryRef? = null,
     val isolationHint: IsolationHint = IsolationHint.ProviderDefault,
     val requirePlanApproval: Boolean = false,
+    val promptContext: PromptContext = PromptContext(),
 )
 
 enum class IsolationHint {
