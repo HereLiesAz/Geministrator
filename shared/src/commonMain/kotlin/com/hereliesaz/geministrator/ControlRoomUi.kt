@@ -108,9 +108,12 @@ fun ControlRoom(
                     onTaskSelected = onTaskSelected,
                     modifier = Modifier.weight(1f),
                 )
-                if (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs) {
+                if (
+                    selectedTaskId != null &&
+                    (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs)
+                ) {
                     TechnicalInspector(
-                        selectedTaskId = selectedTaskId ?: "implementation",
+                        selectedTaskId = selectedTaskId,
                         modifier = Modifier.width(310.dp).fillMaxHeight(),
                     )
                 }
