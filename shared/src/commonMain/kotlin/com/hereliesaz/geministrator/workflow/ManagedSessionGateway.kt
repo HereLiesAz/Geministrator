@@ -1,11 +1,11 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.AgentProviderId
-import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.ProviderRunId
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.providers.AgentTaskRequest
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.providers.ProviderArtifact
 
 data class ManagedSessionRequest(
     val providerSelection: ProviderSelectionRequest,
@@ -39,5 +39,5 @@ interface ManagedSessionGateway {
 
     suspend fun approvePlan(handle: ManagedSessionHandle): ProviderActionResult
 
-    suspend fun artifacts(handle: ManagedSessionHandle): List<ArtifactRef>
+    suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact>
 }
