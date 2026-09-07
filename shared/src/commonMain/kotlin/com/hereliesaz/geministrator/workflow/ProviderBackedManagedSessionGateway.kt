@@ -31,23 +31,23 @@ class ProviderBackedManagedSessionGateway(
             providerRunId = run.providerRunId,
         )
 
-        mutex.withLock {
-            snapshots[handle] = SessionSnapshot(
-                status = if (request.taskRequest.requirePlanApproval) {
-                    ManagedSessionStatus.Planning
-                } else {
-                    ManagedSessionStatus.Running
-                },
-            )
-        }
-
-        scope.launch {
-            provider.observe(run.providerRunId).collect { event ->
-                applyEvent(handle, event)
-            }
-        }
+        registerAndObserve(
+            handle = handle,
+            initialStatus = if (request.taskRequest.requirePlanApproval) {
+                ManagedSessionStatus.Planning
+            } else {
+                ManagedSessionStatus.Running
+            },
+        )
 
         return handle
+    }
+
+    override suspend fun reconnect(
+        handle: ManagedSessionHandle,
+        initialStatus: ManagedSessionStatus,
+    ) {
+        registerAndObserve(handle, initialStatus)
     }
 
     override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus =
@@ -71,6 +71,28 @@ class ProviderBackedManagedSessionGateway(
 
     override suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact> =
         mutex.withLock { snapshots[handle]?.artifacts.orEmpty() }
+
+    private suspend fun registerAndObserve(
+        handle: ManagedSessionHandle,
+        initialStatus: ManagedSessionStatus,
+    ) {
+        val shouldObserve = mutex.withLock {
+            if (snapshots.containsKey(handle)) {
+                false
+            } else {
+                snapshots[handle] = SessionSnapshot(initialStatus)
+                true
+            }
+        }
+        if (!shouldObserve) return
+
+        val provider = providerFor(handle)
+        scope.launch {
+            provider.observe(handle.providerRunId).collect { event ->
+                applyEvent(handle, event)
+            }
+        }
+    }
 
     private fun providerFor(handle: ManagedSessionHandle) =
         requireNotNull(providerRegistry.provider(handle.providerId)) {
