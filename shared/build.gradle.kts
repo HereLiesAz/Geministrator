@@ -44,7 +44,7 @@ kotlin {
             implementation(compose.animation)
             implementation(compose.material3)
             implementation(compose.ui)
-            implementation("com.github.HereLiesAz:conveyance-h2g2:main-SNAPSHOT")
+            implementation("com.github.HereLiesAz:conveyance-h2g2:4c6c8c9e3b810c63f7a6352478e034beab103416")
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings.no.arg)
@@ -55,8 +55,4 @@ kotlin {
             implementation(libs.multiplatform.settings.test)
         }
     }
-}
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
 }
