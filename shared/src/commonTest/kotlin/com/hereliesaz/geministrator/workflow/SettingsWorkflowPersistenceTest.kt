@@ -1,0 +1,78 @@
+package com.hereliesaz.geministrator.workflow
+
+import com.hereliesaz.geministrator.domain.BuiltInRoles
+import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.ProjectId
+import com.hereliesaz.geministrator.domain.TaskDefinition
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskRunId
+import com.hereliesaz.geministrator.domain.WorkflowDefinition
+import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRunId
+import com.hereliesaz.geministrator.events.TaskStarted
+import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
+import com.russhwolf.settings.MapSettings
+import kotlinx.coroutines.runBlocking
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
+class SettingsWorkflowPersistenceTest {
+    @Test
+    fun repositoriesRoundTripAcrossPersistenceRecreation() = runBlocking {
+        val settings = MapSettings()
+        val first = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("project"),
+            name = "Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        val definition = WorkflowDefinition(
+            id = WorkflowDefinitionId("workflow"),
+            name = "Workflow",
+            tasks = listOf(
+                TaskDefinition(
+                    id = TaskDefinitionId("task"),
+                    name = "Task",
+                    objective = "Do work",
+                    roleId = BuiltInRoles.ImplementationEngineer.id,
+                ),
+            ),
+        )
+        val run = WorkflowRunFactory.create(
+            definition = definition,
+            workflowRunId = WorkflowRunId("run"),
+            projectId = project.id,
+            objective = "Objective",
+            nowEpochMillis = 2L,
+            taskRunIdFactory = { TaskRunId("task-run") },
+        )
+
+        first.projects.put(project)
+        first.definitions.put(definition)
+        first.runs.put(run)
+        first.roles.put(BuiltInRoles.ImplementationEngineer)
+        first.events.append(TaskStarted(run.id, TaskDefinitionId("task"), 1, 3L))
+        first.approvalGates.put(
+            ApprovalGate(
+                id = com.hereliesaz.geministrator.domain.ApprovalGateId("gate"),
+                workflowRunId = run.id,
+                taskDefinitionId = TaskDefinitionId("task"),
+                kind = ApprovalGateKind.PlanApproval,
+                reason = "Review plan",
+                createdAtEpochMillis = 4L,
+            ),
+        )
+
+        val restored = SettingsWorkflowPersistence(settings)
+
+        assertEquals(project, restored.projects.get(project.id))
+        assertEquals(definition, restored.definitions.get(definition.id))
+        assertEquals(run, restored.runs.get(run.id))
+        assertEquals(BuiltInRoles.ImplementationEngineer, restored.roles.get(BuiltInRoles.ImplementationEngineer.id))
+        assertEquals(1, restored.events.forRun(run.id).size)
+        assertNotNull(restored.approvalGates.get(com.hereliesaz.geministrator.domain.ApprovalGateId("gate")))
+        assertEquals(SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION, restored.snapshotVersion())
+    }
+}
