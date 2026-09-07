@@ -1,8 +1,8 @@
 package com.hereliesaz.geministrator.workflow
 
-import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.providers.AgentEvent
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.providers.ProviderArtifact
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ class ProviderBackedManagedSessionGateway(
 
     private data class SessionSnapshot(
         val status: ManagedSessionStatus,
-        val artifacts: List<ArtifactRef> = emptyList(),
+        val artifacts: List<ProviderArtifact> = emptyList(),
     )
 
     private val mutex = Mutex()
@@ -69,7 +69,7 @@ class ProviderBackedManagedSessionGateway(
         return result
     }
 
-    override suspend fun artifacts(handle: ManagedSessionHandle): List<ArtifactRef> =
+    override suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact> =
         mutex.withLock { snapshots[handle]?.artifacts.orEmpty() }
 
     private fun providerFor(handle: ManagedSessionHandle) =
