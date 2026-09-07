@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.providers.AgentEvent
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
@@ -21,6 +22,9 @@ class ProviderBackedManagedSessionGateway(
 
     private val mutex = Mutex()
     private val snapshots = mutableMapOf<ManagedSessionHandle, SessionSnapshot>()
+
+    override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId =
+        providerRegistry.select(selection).id
 
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle {
         val provider = providerRegistry.select(request.providerSelection)
