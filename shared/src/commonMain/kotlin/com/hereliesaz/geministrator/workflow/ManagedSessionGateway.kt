@@ -28,6 +28,8 @@ enum class ManagedSessionStatus {
 }
 
 interface ManagedSessionGateway {
+    suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId
+
     suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle
 
     suspend fun reconnect(
