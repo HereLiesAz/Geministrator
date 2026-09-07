@@ -42,6 +42,8 @@ data class WorkflowDefinition(
     val tasks: List<TaskDefinition>,
     val integrationPolicy: IntegrationPolicy = IntegrationPolicy.PullRequest,
     val concurrencyPolicy: ConcurrencyPolicy = ConcurrencyPolicy(),
+    val testDesignPolicy: TestDesignPolicy = TestDesignPolicy.BeforeAndAfterImplementation,
+    val promptReusePolicy: PromptReusePolicy = PromptReusePolicy.PreferCache,
 )
 
 enum class WorkflowRunStatus {
