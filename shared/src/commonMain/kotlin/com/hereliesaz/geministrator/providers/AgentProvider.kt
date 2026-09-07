@@ -3,6 +3,7 @@ package com.hereliesaz.geministrator.providers
 import com.hereliesaz.geministrator.domain.AcceptanceCriterion
 import com.hereliesaz.geministrator.domain.AgentCapability
 import com.hereliesaz.geministrator.domain.AgentProviderId
+import com.hereliesaz.geministrator.domain.ArtifactKind
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.PromptReusePolicy
 import com.hereliesaz.geministrator.domain.ProviderRunId
@@ -63,6 +64,15 @@ data class AgentRunHandle(
     val providerRunId: ProviderRunId,
 )
 
+data class ProviderArtifact(
+    val kind: ArtifactKind,
+    val label: String,
+    val uri: String? = null,
+    val textContent: String? = null,
+    val mediaType: String? = null,
+    val metadata: Map<String, String> = emptyMap(),
+)
+
 sealed interface ProviderActionResult {
     data object Accepted : ProviderActionResult
     data class Rejected(val reason: String) : ProviderActionResult
@@ -76,6 +86,15 @@ sealed interface AgentEvent {
         val summary: String,
     ) : AgentEvent
 
+    data class PlanApproved(
+        override val runId: ProviderRunId,
+    ) : AgentEvent
+
+    data class Message(
+        override val runId: ProviderRunId,
+        val content: String,
+    ) : AgentEvent
+
     data class Progress(
         override val runId: ProviderRunId,
         val message: String,
@@ -83,7 +102,7 @@ sealed interface AgentEvent {
 
     data class ArtifactProduced(
         override val runId: ProviderRunId,
-        val artifact: ArtifactRef,
+        val artifact: ProviderArtifact,
     ) : AgentEvent
 
     data class Completed(
