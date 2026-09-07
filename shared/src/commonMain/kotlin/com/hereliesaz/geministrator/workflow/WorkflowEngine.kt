@@ -4,6 +4,7 @@ import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.ProviderConstraints
 import com.hereliesaz.geministrator.domain.RetryReason
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
@@ -55,23 +56,39 @@ class WorkflowEngine(
     ): DispatchResult {
         val refreshed = WorkflowRunFactory.refreshReadiness(definition, run, nowEpochMillis)
         val activeCount = refreshed.taskRuns.values.count { it.status.isActive() }
-        val availableSlots = (definition.concurrencyPolicy.maxConcurrentTasks - activeCount).coerceAtLeast(0)
-        if (availableSlots == 0) return DispatchResult(refreshed, existingHandles)
+        var remainingSlots = (definition.concurrencyPolicy.maxConcurrentTasks - activeCount).coerceAtLeast(0)
+        if (remainingSlots == 0) return DispatchResult(refreshed, existingHandles)
 
         val definitionsById = definition.tasks.associateBy { it.id }
         var nextRun = refreshed.copy(status = WorkflowRunStatus.Running)
         val handles = existingHandles.toMutableMap()
+        val activeByProvider = refreshed.taskRuns.values
+            .filter { it.status.isActive() && it.assignedProviderId != null }
+            .groupingBy { requireNotNull(it.assignedProviderId) }
+            .eachCount()
+            .toMutableMap()
 
         val dispatchable = refreshed.taskRuns.values
             .filter { it.status == TaskRunStatus.Ready || it.status == TaskRunStatus.Retrying }
-            .take(availableSlots)
 
         for (taskRun in dispatchable) {
+            if (remainingSlots == 0) break
+
             val task = requireNotNull(definitionsById[taskRun.taskDefinitionId])
             val role = requireNotNull(rolesById[taskRun.assignedRoleId]) {
                 "Role ${taskRun.assignedRoleId.value} is not registered"
             }
             require(role.enabled) { "Role ${role.name} is disabled" }
+
+            val selection = ProviderSelectionRequest(
+                preferredProviderId = role.preferredProviderId,
+                requiredCapabilities = role.capabilitiesRequired,
+                constraints = task.providerConstraints,
+            )
+            val providerId = sessionGateway.resolveProvider(selection)
+            val providerLimit = definition.concurrencyPolicy.perProviderLimits[providerId] ?: Int.MAX_VALUE
+            val providerActive = activeByProvider[providerId] ?: 0
+            if (providerActive >= providerLimit) continue
 
             val dependencyArtifacts = task.dependsOn
                 .mapNotNull(nextRun.taskRuns::get)
@@ -101,10 +118,9 @@ class WorkflowEngine(
 
             val handle = sessionGateway.createSession(
                 ManagedSessionRequest(
-                    providerSelection = ProviderSelectionRequest(
-                        preferredProviderId = role.preferredProviderId,
-                        requiredCapabilities = role.capabilitiesRequired,
-                        constraints = task.providerConstraints,
+                    providerSelection = selection.copy(
+                        preferredProviderId = providerId,
+                        constraints = ProviderConstraints.RequireProvider(providerId),
                     ),
                     taskRequest = request,
                 ),
@@ -124,6 +140,9 @@ class WorkflowEngine(
                 ),
                 updatedAtEpochMillis = nowEpochMillis,
             )
+            activeByProvider[providerId] = providerActive + 1
+            remainingSlots -= 1
+
             eventSink.append(
                 AgentAssigned(
                     workflowRunId = nextRun.id,
