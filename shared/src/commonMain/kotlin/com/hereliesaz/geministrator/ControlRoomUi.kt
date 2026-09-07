@@ -211,7 +211,7 @@ private fun MainDestination(
         when (place) {
             ControlRoomDestination.Overview,
             ControlRoomDestination.Runs,
-            -> RunControlRoom(Modifier.fillMaxSize(), selectedTaskId, onTaskSelected, compact)
+            -> MindMapRunScreen(Modifier.fillMaxSize(), selectedTaskId, onTaskSelected, compact)
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(Modifier.fillMaxSize())
