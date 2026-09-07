@@ -2,6 +2,7 @@ package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.AgentCapability
 import com.hereliesaz.geministrator.domain.AgentProviderId
+import com.hereliesaz.geministrator.domain.ArtifactKind
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.ProviderConstraints
 import com.hereliesaz.geministrator.domain.ProviderRunId
@@ -24,26 +25,40 @@ import kotlin.test.assertTrue
 
 class WorkflowEngineFoundationTest {
     @Test
-    fun preCodeTestTaskIsInjectedBeforeImplementation() {
+    fun defaultTestPolicyInjectsIndependentPreAndPostCodePasses() {
         val implementation = TaskDefinition(
             id = TaskDefinitionId("implementation"),
             name = "Implementation",
             objective = "Build it",
             roleId = BuiltInRoles.ImplementationEngineer.id,
         )
+        val qa = TaskDefinition(
+            id = TaskDefinitionId("qa"),
+            name = "QA",
+            objective = "Verify it",
+            roleId = BuiltInRoles.QaEngineer.id,
+            dependsOn = setOf(implementation.id),
+        )
         val expanded = WorkflowDefinitionExpander.expand(
             WorkflowDefinition(
                 id = WorkflowDefinitionId("workflow"),
                 name = "Workflow",
-                tasks = listOf(implementation),
+                tasks = listOf(implementation, qa),
             ),
         )
 
-        val preCode = expanded.tasks.single { it.roleId == BuiltInRoles.CrashTestDummy.id }
+        val preCode = expanded.tasks.single { it.id.value == "implementation--pre-code-tests" }
+        val postCode = expanded.tasks.single { it.id.value == "implementation--post-code-tests" }
         val implementationAfterExpansion = expanded.tasks.single { it.id == implementation.id }
+        val qaAfterExpansion = expanded.tasks.single { it.id == qa.id }
 
+        assertEquals(BuiltInRoles.CrashTestDummy.id, preCode.roleId)
+        assertEquals(BuiltInRoles.CrashTestDummy.id, postCode.roleId)
         assertTrue(preCode.id in implementationAfterExpansion.dependsOn)
         assertTrue(preCode.dependsOn.isEmpty())
+        assertEquals(setOf(implementation.id), postCode.dependsOn)
+        assertTrue(ArtifactKind.RegressionTest in postCode.requiredArtifacts)
+        assertEquals(setOf(postCode.id), qaAfterExpansion.dependsOn)
     }
 
     @Test
