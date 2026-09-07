@@ -68,8 +68,8 @@ class WorkflowEngine(
 
         for (taskRun in dispatchable) {
             val task = requireNotNull(definitionsById[taskRun.taskDefinitionId])
-            val role = requireNotNull(rolesById[task.roleId]) {
-                "Role ${task.roleId.value} is not registered"
+            val role = requireNotNull(rolesById[taskRun.assignedRoleId]) {
+                "Role ${taskRun.assignedRoleId.value} is not registered"
             }
             require(role.enabled) { "Role ${role.name} is disabled" }
 
