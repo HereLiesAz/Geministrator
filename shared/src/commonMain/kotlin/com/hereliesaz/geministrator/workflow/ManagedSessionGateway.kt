@@ -1,13 +1,20 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.ProviderRunId
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.providers.AgentTaskRequest
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 
+data class ManagedSessionRequest(
+    val providerSelection: ProviderSelectionRequest,
+    val taskRequest: AgentTaskRequest,
+)
+
 data class ManagedSessionHandle(
     val taskRunId: TaskRunId,
+    val providerId: AgentProviderId,
     val providerRunId: ProviderRunId,
 )
 
@@ -21,7 +28,7 @@ enum class ManagedSessionStatus {
 }
 
 interface ManagedSessionGateway {
-    suspend fun createSession(request: AgentTaskRequest): ManagedSessionHandle
+    suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle
 
     suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus
 
