@@ -13,8 +13,14 @@ object WorkflowDefinitionExpander {
 
         val includePreCodeTests = definition.testDesignPolicy == TestDesignPolicy.BeforeImplementation ||
             definition.testDesignPolicy == TestDesignPolicy.BeforeAndAfterImplementation
+        val includePostCodeTests = definition.testDesignPolicy == TestDesignPolicy.AfterImplementation ||
+            definition.testDesignPolicy == TestDesignPolicy.BeforeAndAfterImplementation
 
-        if (!includePreCodeTests) return definition
+        if (!includePreCodeTests && !includePostCodeTests) return definition
+
+        val originalIds = definition.tasks.map { it.id }.toSet()
+        val postTaskByImplementation = mutableMapOf<TaskDefinitionId, TaskDefinitionId>()
+        val injectedPostIds = mutableSetOf<TaskDefinitionId>()
 
         val expanded = buildList {
             definition.tasks.forEach { task ->
@@ -23,41 +29,88 @@ object WorkflowDefinitionExpander {
                     return@forEach
                 }
 
-                val testTaskId = TaskDefinitionId("${task.id.value}--pre-code-tests")
-                require(definition.tasks.none { it.id == testTaskId }) {
-                    "Cannot inject pre-code test task because ${testTaskId.value} already exists"
+                var implementation = task
+
+                if (includePreCodeTests) {
+                    val preCodeId = TaskDefinitionId("${task.id.value}--pre-code-tests")
+                    require(preCodeId !in originalIds) {
+                        "Cannot inject pre-code test task because ${preCodeId.value} already exists"
+                    }
+                    add(
+                        TaskDefinition(
+                            id = preCodeId,
+                            name = "Pre-code tests: ${task.name}",
+                            objective = "Derive the verification contract for '${task.name}' from approved specifications, architecture, acceptance criteria, and concepts without inspecting implementation code.",
+                            roleId = BuiltInRoles.CrashTestDummy.id,
+                            dependsOn = task.dependsOn,
+                            acceptanceCriteria = task.acceptanceCriteria,
+                            requiredArtifacts = setOf(
+                                ArtifactKind.AcceptanceTestPlan,
+                                ArtifactKind.BehavioralTest,
+                                ArtifactKind.ContractTest,
+                                ArtifactKind.FailureScenario,
+                            ),
+                            approvalPolicy = task.approvalPolicy,
+                            retryPolicy = task.retryPolicy,
+                            escalationPolicy = task.escalationPolicy,
+                            providerConstraints = task.providerConstraints,
+                            environmentPlanningPolicy = task.environmentPlanningPolicy,
+                        ),
+                    )
+                    implementation = implementation.copy(
+                        dependsOn = implementation.dependsOn + preCodeId,
+                    )
                 }
 
-                add(
-                    TaskDefinition(
-                        id = testTaskId,
-                        name = "Pre-code tests: ${task.name}",
-                        objective = "Derive the verification contract for '${task.name}' from approved specifications, architecture, acceptance criteria, and concepts without inspecting implementation code.",
-                        roleId = BuiltInRoles.CrashTestDummy.id,
-                        dependsOn = task.dependsOn,
-                        acceptanceCriteria = task.acceptanceCriteria,
-                        requiredArtifacts = setOf(
-                            ArtifactKind.AcceptanceTestPlan,
-                            ArtifactKind.BehavioralTest,
-                            ArtifactKind.ContractTest,
-                            ArtifactKind.FailureScenario,
-                        ),
-                        approvalPolicy = task.approvalPolicy,
-                        retryPolicy = task.retryPolicy,
-                        escalationPolicy = task.escalationPolicy,
-                        providerConstraints = task.providerConstraints,
-                        environmentPlanningPolicy = task.environmentPlanningPolicy,
-                    ),
-                )
+                add(implementation)
 
-                add(
-                    task.copy(
-                        dependsOn = task.dependsOn + testTaskId,
-                    ),
-                )
+                if (includePostCodeTests) {
+                    val postCodeId = TaskDefinitionId("${task.id.value}--post-code-tests")
+                    require(postCodeId !in originalIds) {
+                        "Cannot inject post-code test task because ${postCodeId.value} already exists"
+                    }
+                    postTaskByImplementation[task.id] = postCodeId
+                    injectedPostIds += postCodeId
+                    add(
+                        TaskDefinition(
+                            id = postCodeId,
+                            name = "Post-code tests: ${task.name}",
+                            objective = "Inspect the approved implementation for '${task.name}' and author regression tests, implementation-specific edge cases, and coverage-gap tests without certifying that the implementation passes them.",
+                            roleId = BuiltInRoles.CrashTestDummy.id,
+                            dependsOn = setOf(task.id),
+                            acceptanceCriteria = task.acceptanceCriteria,
+                            requiredArtifacts = setOf(
+                                ArtifactKind.TestPlan,
+                                ArtifactKind.TestCode,
+                                ArtifactKind.RegressionTest,
+                            ),
+                            approvalPolicy = task.approvalPolicy,
+                            retryPolicy = task.retryPolicy,
+                            escalationPolicy = task.escalationPolicy,
+                            providerConstraints = task.providerConstraints,
+                            environmentPlanningPolicy = task.environmentPlanningPolicy,
+                        ),
+                    )
+                }
             }
         }
 
-        return definition.copy(tasks = expanded).also(WorkflowGraphValidator::requireValid)
+        val rewired = if (includePostCodeTests) {
+            expanded.map { task ->
+                if (task.id in injectedPostIds) {
+                    task
+                } else {
+                    task.copy(
+                        dependsOn = task.dependsOn.mapTo(mutableSetOf()) { dependency ->
+                            postTaskByImplementation[dependency] ?: dependency
+                        },
+                    )
+                }
+            }
+        } else {
+            expanded
+        }
+
+        return definition.copy(tasks = rewired).also(WorkflowGraphValidator::requireValid)
     }
 }
