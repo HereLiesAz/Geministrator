@@ -71,7 +71,7 @@ internal val ActiveWorkflow = listOf(
 fun ControlRoom(
     destination: ControlRoomDestination,
     onDestinationSelected: (ControlRoomDestination) -> Unit,
-    selectedTaskId: String,
+    selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     compact: Boolean,
     contentPadding: PaddingValues,
@@ -110,7 +110,7 @@ fun ControlRoom(
                 )
                 if (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs) {
                     TechnicalInspector(
-                        selectedTaskId = selectedTaskId,
+                        selectedTaskId = selectedTaskId ?: "implementation",
                         modifier = Modifier.width(310.dp).fillMaxHeight(),
                     )
                 }
@@ -202,7 +202,7 @@ private fun CompactNavigation(
 @Composable
 private fun MainDestination(
     destination: ControlRoomDestination,
-    selectedTaskId: String,
+    selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
