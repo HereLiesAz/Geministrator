@@ -27,6 +27,7 @@ data class PromptCacheCapabilities(
 data class AgentCapabilities(
     val supported: Set<AgentCapability>,
     val promptCaching: PromptCacheCapabilities = PromptCacheCapabilities(),
+    val requiresEnvironmentPlanning: Boolean = false,
 )
 
 data class PromptContextBlock(
