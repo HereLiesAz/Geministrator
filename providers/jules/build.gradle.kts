@@ -45,20 +45,28 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        androidMain.dependencies {
-            implementation(libs.ktor.client.cio)
+        named("androidMain") {
+            dependencies {
+                implementation(libs.ktor.client.cio)
+            }
         }
 
-        desktopMain.dependencies {
-            implementation(libs.ktor.client.cio)
+        named("desktopMain") {
+            dependencies {
+                implementation(libs.ktor.client.cio)
+            }
         }
 
-        jsMain.dependencies {
-            implementation(libs.ktor.client.js)
+        named("jsMain") {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
         }
 
-        wasmJsMain.dependencies {
-            implementation(libs.ktor.client.js)
+        named("wasmJsMain") {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
         }
     }
 }
