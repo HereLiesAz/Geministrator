@@ -16,6 +16,8 @@ enum class ArtifactKind {
     TestPlan,
     TestCode,
     RegressionTest,
+    CommandOutput,
+    Media,
     PullRequest,
     TestResult,
     Review,
