@@ -14,6 +14,19 @@ sealed interface VerificationPolicy {
     ) : VerificationPolicy
 }
 
+enum class TestDesignPolicy {
+    None,
+    BeforeImplementation,
+    AfterImplementation,
+    BeforeAndAfterImplementation,
+}
+
+enum class PromptReusePolicy {
+    ProviderDefault,
+    PreferCache,
+    DisableCache,
+}
+
 data class RetryPolicy(
     val maxAttempts: Int = 2,
     val retryOn: Set<RetryReason> = setOf(
