@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 fun App() {
     GeministratorTheme {
         var destination by remember { mutableStateOf(ControlRoomDestination.Overview) }
-        var selectedTaskId by remember { mutableStateOf("implementation") }
+        var selectedTaskId by remember { mutableStateOf<String?>(null) }
 
         Scaffold { paddingValues ->
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
@@ -23,7 +23,9 @@ fun App() {
                     destination = destination,
                     onDestinationSelected = { destination = it },
                     selectedTaskId = selectedTaskId,
-                    onTaskSelected = { selectedTaskId = it },
+                    onTaskSelected = { taskId ->
+                        selectedTaskId = if (selectedTaskId == taskId) null else taskId
+                    },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                 )
