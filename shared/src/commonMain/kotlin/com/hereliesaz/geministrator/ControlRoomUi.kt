@@ -1,5 +1,12 @@
 package com.hereliesaz.geministrator
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +33,8 @@ import androidx.compose.ui.unit.dp
 internal object ControlRoomBreakpoints {
     val Wide: Dp = 820.dp
 }
+
+private val InspectorEase = CubicBezierEasing(0f, .9f, .1f, 1f)
 
 enum class ControlRoomDestination(val label: String) {
     Overview("Overview"),
@@ -108,14 +117,24 @@ fun ControlRoom(
                     onTaskSelected = onTaskSelected,
                     modifier = Modifier.weight(1f),
                 )
-                if (
-                    selectedTaskId != null &&
-                    (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs)
+                AnimatedVisibility(
+                    visible = selectedTaskId != null &&
+                        (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs),
+                    enter = expandHorizontally(
+                        animationSpec = tween(360, easing = InspectorEase),
+                        expandFrom = Alignment.Start,
+                    ) + fadeIn(tween(150)),
+                    exit = shrinkHorizontally(
+                        animationSpec = tween(280, easing = InspectorEase),
+                        shrinkTowards = Alignment.Start,
+                    ) + fadeOut(tween(120)),
                 ) {
-                    TechnicalInspector(
-                        selectedTaskId = selectedTaskId,
-                        modifier = Modifier.width(310.dp).fillMaxHeight(),
-                    )
+                    selectedTaskId?.let { taskId ->
+                        TechnicalInspector(
+                            selectedTaskId = taskId,
+                            modifier = Modifier.width(310.dp).fillMaxHeight(),
+                        )
+                    }
                 }
             }
         }
