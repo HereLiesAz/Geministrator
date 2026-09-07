@@ -104,6 +104,8 @@ private class ResumeRecordingGateway : ManagedSessionGateway {
     var createCount: Int = 0
     val reconnected = mutableListOf<Pair<ManagedSessionHandle, ManagedSessionStatus>>()
 
+    override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId = AgentProviderId("jules")
+
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle {
         createCount += 1
         error("resume must not create a new session")
