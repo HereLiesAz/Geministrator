@@ -6,6 +6,16 @@ pluginManagement {
     }
 }
 
+val localH2g2 = file("vendor/conveyance-h2g2")
+if (localH2g2.exists()) {
+    includeBuild(localH2g2) {
+        dependencySubstitution {
+            substitute(module("com.github.HereLiesAz:conveyance-h2g2"))
+                .using(project(":"))
+        }
+    }
+}
+
 dependencyResolutionManagement {
     repositories {
         google()
