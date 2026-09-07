@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun MindMapRunScreen(
     modifier: Modifier,
-    selectedTaskId: String,
+    selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     compact: Boolean,
 ) {
