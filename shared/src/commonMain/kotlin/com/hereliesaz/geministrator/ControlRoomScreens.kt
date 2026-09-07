@@ -153,7 +153,7 @@ internal fun CompanyScreen(modifier: Modifier = Modifier) {
                         "Crash Test Dummy" -> "Author tests · cannot verify or approve"
                         "EPA Representative" -> "Select environment · cannot implement or verify"
                         "Implementation Engineer" -> "Implement · cannot certify own work"
-                        else -> "Company position",
+                        else -> "Company position"
                     },
                 )
             }
