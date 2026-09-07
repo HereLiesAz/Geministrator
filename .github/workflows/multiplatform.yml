@@ -26,6 +26,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Test shared domain
+        run: ./gradlew :shared:desktopTest
+
       - name: Build Android
         run: ./gradlew :androidApp:assembleDebug
 
