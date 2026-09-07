@@ -30,6 +30,11 @@ enum class ManagedSessionStatus {
 interface ManagedSessionGateway {
     suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle
 
+    suspend fun reconnect(
+        handle: ManagedSessionHandle,
+        initialStatus: ManagedSessionStatus,
+    )
+
     suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus
 
     suspend fun message(
