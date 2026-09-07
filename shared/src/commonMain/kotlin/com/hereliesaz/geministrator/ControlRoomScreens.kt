@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,10 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -35,6 +35,8 @@ internal fun RunControlRoom(
     onTaskSelected: (String) -> Unit,
     compact: Boolean,
 ) {
+    val executionEntrance = remember { AzphaltEntrance.roll() }
+    val activityEntrance = remember { AzphaltEntrance.childBand() }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(if (compact) 16.dp else 26.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp),
@@ -54,8 +56,13 @@ internal fun RunControlRoom(
             endCap = "Clear",
         )
         SectionLabel("Company execution")
-        ActiveWorkflow.forEach { node ->
-            WorkOrder(node, node.id == selectedTaskId) { onTaskSelected(node.id) }
+        ActiveWorkflow.forEachIndexed { index, node ->
+            WorkOrder(
+                node = node,
+                selected = node.id == selectedTaskId,
+                onClick = { onTaskSelected(node.id) },
+                modifier = Modifier.azphaltEntrance(executionEntrance, index, ActiveWorkflow.size),
+            )
         }
         SectionLabel("Company activity")
         listOf(
@@ -69,6 +76,7 @@ internal fun RunControlRoom(
                 seed = "event-$index",
                 label = event.first,
                 value = event.second,
+                modifier = Modifier.azphaltEntrance(activityEntrance, index, 5),
             )
         }
         Spacer(Modifier.height(24.dp))
@@ -76,7 +84,12 @@ internal fun RunControlRoom(
 }
 
 @Composable
-private fun WorkOrder(node: WorkNode, selected: Boolean, onClick: () -> Unit) {
+private fun WorkOrder(
+    node: WorkNode,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     AzphaltRecord(
         seed = node.id,
         eyebrow = node.position,
@@ -91,6 +104,7 @@ private fun WorkOrder(node: WorkNode, selected: Boolean, onClick: () -> Unit) {
         endCap = node.state.label,
         selected = selected,
         onClick = onClick,
+        modifier = modifier,
         well = node.injectedReason?.let { reason ->
             {
                 Text("AUTO-ASSIGNED", style = AzphaltType.eyebrow, color = Azphalt.Yellow)
@@ -188,6 +202,7 @@ private fun DecisionRecord(seed: String, kind: String, title: String, body: Stri
 
 @Composable
 internal fun WorkflowTemplateScreen(modifier: Modifier = Modifier) {
+    val entrance = remember { AzphaltEntrance.roll() }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -198,7 +213,14 @@ internal fun WorkflowTemplateScreen(modifier: Modifier = Modifier) {
             Triple("Bug Fix", "Diagnosis → Contract → Fix → Regression → QA → Review", "Template"),
             Triple("Research Spike", "Product → Research → Architecture → Decision", "Template"),
         ).forEachIndexed { index, item ->
-            AzphaltRecord("workflow-$index", "Workflow", item.first, item.second, item.third)
+            AzphaltRecord(
+                "workflow-$index",
+                "Workflow",
+                item.first,
+                item.second,
+                item.third,
+                modifier = Modifier.azphaltEntrance(entrance, index, 3),
+            )
         }
     }
 }
@@ -234,6 +256,7 @@ private val ArtifactTree = listOf(
 internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
     var openId by remember { mutableStateOf<String?>("spec") }
     var previewId by remember { mutableStateOf<String?>(null) }
+    val rootEntrance = remember { AzphaltEntrance.roll() }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -244,8 +267,12 @@ internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
             AzphaltPill("Search", "artifact-search", onClick = {})
             AzphaltPill("Storage", "artifact-storage", onClick = {})
         }
-        ArtifactTree.forEach { entry ->
+        ArtifactTree.forEachIndexed { rootIndex, entry ->
             val open = openId == entry.id
+            val siblingFraction by animateFloatAsState(
+                targetValue = if (openId == null || open) 1f else 0.42f,
+                label = "artifact-sibling-yield-${entry.id}",
+            )
             AzphaltRecord(
                 seed = entry.id,
                 eyebrow = if (entry.children.isEmpty()) "Artifact" else "Collection",
@@ -253,15 +280,24 @@ internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
                 body = entry.detail,
                 endCap = if (open) "Open" else entry.children.size.takeIf { it > 0 }?.toString(),
                 selected = open,
-                onClick = { openId = if (open) null else entry.id },
+                onClick = {
+                    previewId = null
+                    openId = if (open) null else entry.id
+                },
+                modifier = Modifier
+                    .fillMaxWidth(siblingFraction)
+                    .azphaltEntrance(rootEntrance, rootIndex, ArtifactTree.size),
                 well = if (open && entry.children.isNotEmpty()) {
                     {
+                        val childEntrance = remember(entry.id) { AzphaltEntrance.childBand() }
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            entry.children.forEach { child ->
+                            entry.children.forEachIndexed { childIndex, child ->
                                 val childSelected = previewId == child.id
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .azphaltEntrance(childEntrance, childIndex, entry.children.size)
+                                        .azphaltSelectedTransform(childSelected)
                                         .clip(RoundedCornerShape(999.dp))
                                         .background(if (childSelected) Azphalt.Yellow else Azphalt.hue(child.id))
                                         .clickable { previewId = if (childSelected) null else child.id }
@@ -271,7 +307,7 @@ internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
                                     Text(child.name.uppercase(), style = AzphaltType.capsule, color = if (childSelected) Azphalt.Ink else Azphalt.hue(child.id).contrastingText)
                                     Text(child.detail.uppercase(), style = AzphaltType.endCap, color = if (childSelected) Azphalt.Ink else Azphalt.hue(child.id).contrastingText)
                                 }
-                                if (childSelected) {
+                                AzphaltChildBand(visible = childSelected) {
                                     Box(
                                         modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF0F0F0F)).padding(12.dp),
                                     ) {
