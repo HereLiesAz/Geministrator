@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import com.hereliesaz.conveyance.h2g2.H2g2WorkflowBand
 import com.hereliesaz.conveyance.h2g2.H2g2WorkflowEdge
 import com.hereliesaz.conveyance.h2g2.H2g2WorkflowMap
+import com.hereliesaz.conveyance.h2g2.H2g2WorkflowMotion
 import com.hereliesaz.conveyance.h2g2.H2g2WorkflowNode
 import com.hereliesaz.conveyance.h2g2.H2g2WorkflowState
 
@@ -16,6 +17,27 @@ private fun WorkState.toH2g2State(): H2g2WorkflowState = when (this) {
     WorkState.Blocked -> H2g2WorkflowState.Blocked
 }
 
+/**
+ * Motion is part of a company position's identity. A role keeps the same physical mannerism across
+ * projects and runs, independent of whichever provider happens to staff it.
+ */
+private fun roleMotion(role: String): H2g2WorkflowMotion = when (role) {
+    "Orchestrator" -> H2g2WorkflowMotion.Orbit
+    "Product Manager" -> H2g2WorkflowMotion.Nod
+    "Researcher" -> H2g2WorkflowMotion.Float
+    "Architect" -> H2g2WorkflowMotion.Pendulum
+    "EPA Representative" -> H2g2WorkflowMotion.Hover
+    "UX Designer" -> H2g2WorkflowMotion.Sway
+    "Implementation Engineer" -> H2g2WorkflowMotion.Scoot
+    "Crash Test Dummy" -> H2g2WorkflowMotion.Wag
+    "QA Engineer" -> H2g2WorkflowMotion.Skitter
+    "Adversarial Reviewer" -> H2g2WorkflowMotion.Shimmy
+    "Code Reviewer" -> H2g2WorkflowMotion.Tilt
+    "Recovery Engineer" -> H2g2WorkflowMotion.Bob
+    "Release Engineer" -> H2g2WorkflowMotion.Pulse
+    else -> H2g2WorkflowMotion.Breathe
+}
+
 private val WorkflowNodes = ActiveWorkflow.associate { work ->
     work.id to H2g2WorkflowNode(
         id = work.id,
@@ -23,6 +45,7 @@ private val WorkflowNodes = ActiveWorkflow.associate { work ->
         subtitle = work.assignment,
         hueSeed = work.position,
         motionSeed = work.position,
+        motion = roleMotion(work.position),
         state = work.state.toH2g2State(),
         injected = work.injectedReason != null,
         detail = buildString {
