@@ -22,6 +22,7 @@ private val WorkflowNodes = ActiveWorkflow.associate { work ->
         label = work.position,
         subtitle = work.assignment,
         hueSeed = work.position,
+        motionSeed = work.position,
         state = work.state.toH2g2State(),
         injected = work.injectedReason != null,
         detail = buildString {
