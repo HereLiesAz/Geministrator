@@ -4,6 +4,7 @@ enum class ArtifactKind {
     Requirement,
     Research,
     Architecture,
+    EnvironmentSpecification,
     Design,
     TaskPlan,
     CodeChange,
