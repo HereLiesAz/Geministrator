@@ -17,9 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -125,6 +125,7 @@ private fun PillNavigation(
     onDestinationSelected: (ControlRoomDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val entrance = remember { AzphaltEntrance.roll() }
     Column(
         modifier = modifier.padding(start = 14.dp, top = 22.dp, bottom = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -143,7 +144,9 @@ private fun PillNavigation(
                     else -> null
                 },
                 onClick = { onDestinationSelected(item) },
-                modifier = Modifier.fillMaxWidth(if (item == destination) 0.96f else 0.84f - (index % 3) * 0.03f),
+                modifier = Modifier
+                    .fillMaxWidth(if (item == destination) 0.96f else 0.84f - (index % 3) * 0.03f)
+                    .azphaltEntrance(entrance, index, ControlRoomDestination.entries.size),
             )
         }
         Spacer(Modifier.weight(1f))
@@ -178,6 +181,7 @@ private fun CompactNavigation(
     destination: ControlRoomDestination,
     onDestinationSelected: (ControlRoomDestination) -> Unit,
 ) {
+    val entrance = remember { AzphaltEntrance.roll() }
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -189,6 +193,7 @@ private fun CompactNavigation(
                 selected = item == destination,
                 endCap = if (item == ControlRoomDestination.Inbox) "2" else null,
                 onClick = { onDestinationSelected(item) },
+                modifier = Modifier.azphaltEntrance(entrance, index, ControlRoomDestination.entries.size),
             )
         }
     }
@@ -202,14 +207,16 @@ private fun MainDestination(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
 ) {
-    when (destination) {
-        ControlRoomDestination.Overview,
-        ControlRoomDestination.Runs,
-        -> RunControlRoom(modifier, selectedTaskId, onTaskSelected, compact)
-        ControlRoomDestination.Workflows -> WorkflowTemplateScreen(modifier)
-        ControlRoomDestination.Company -> CompanyScreen(modifier)
-        ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(modifier)
-        ControlRoomDestination.Inbox -> InboxScreen(modifier)
-        ControlRoomDestination.Settings -> SettingsScreen(modifier)
+    AzphaltPlaceTransition(target = destination, modifier = modifier.fillMaxSize()) { place ->
+        when (place) {
+            ControlRoomDestination.Overview,
+            ControlRoomDestination.Runs,
+            -> RunControlRoom(Modifier.fillMaxSize(), selectedTaskId, onTaskSelected, compact)
+            ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Inbox -> InboxScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(Modifier.fillMaxSize())
+        }
     }
 }
