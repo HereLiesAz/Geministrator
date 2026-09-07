@@ -1,34 +1,24 @@
-﻿pluginManagement {
+pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://chaquo.com/maven") }
     }
-    plugins {
-        id("com.chaquo.python")
-        id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1" apply false
-    }
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        gradlePluginPortal()
-        mavenLocal()
-        maven("https://jitpack.io")
-        maven { url = uri("https://chaquo.com/maven") }
-        maven { url = uri("https://maven.google.com") } 
     }
 }
 
 rootProject.name = "Geministrator"
 
-include(":app")
-include(":github-api-client")
-include(":jules-cli-client")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+include(":shared")
+include(":androidApp")
+include(":desktopApp")
+include(":webApp")
