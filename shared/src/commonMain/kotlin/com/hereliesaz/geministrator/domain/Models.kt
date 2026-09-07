@@ -1,11 +1,15 @@
 package com.hereliesaz.geministrator.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class RepositoryRef(
     val owner: String,
     val name: String,
     val defaultBranch: String? = null,
 )
 
+@Serializable
 data class Project(
     val id: ProjectId,
     val name: String,
@@ -15,10 +19,12 @@ data class Project(
     val updatedAtEpochMillis: Long,
 )
 
+@Serializable
 data class AcceptanceCriterion(
     val description: String,
 )
 
+@Serializable
 data class TaskDefinition(
     val id: TaskDefinitionId,
     val name: String,
@@ -35,6 +41,7 @@ data class TaskDefinition(
     val environmentPlanningPolicy: EnvironmentPlanningPolicy = EnvironmentPlanningPolicy.WhenProviderRequires,
 )
 
+@Serializable
 data class WorkflowDefinition(
     val id: WorkflowDefinitionId,
     val name: String,
@@ -46,6 +53,7 @@ data class WorkflowDefinition(
     val promptReusePolicy: PromptReusePolicy = PromptReusePolicy.PreferCache,
 )
 
+@Serializable
 enum class WorkflowRunStatus {
     Created,
     Running,
@@ -55,6 +63,7 @@ enum class WorkflowRunStatus {
     Cancelled,
 }
 
+@Serializable
 enum class TaskRunStatus {
     Created,
     Blocked,
@@ -70,11 +79,13 @@ enum class TaskRunStatus {
     Cancelled,
 }
 
+@Serializable
 data class BlockingReason(
     val code: String,
     val message: String,
 )
 
+@Serializable
 data class TaskRun(
     val id: TaskRunId,
     val taskDefinitionId: TaskDefinitionId,
@@ -87,6 +98,7 @@ data class TaskRun(
     val blockingReason: BlockingReason? = null,
 )
 
+@Serializable
 data class WorkflowRun(
     val id: WorkflowRunId,
     val projectId: ProjectId,
