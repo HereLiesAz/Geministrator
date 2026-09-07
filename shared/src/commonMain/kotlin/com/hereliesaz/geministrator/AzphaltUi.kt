@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -163,6 +162,7 @@ internal fun AzphaltPill(
     val content = if (selected) Azphalt.Yellow else hue.contrastingText
     Row(
         modifier = modifier
+            .azphaltSelectedTransform(selected)
             .clip(RoundedCornerShape(999.dp))
             .background(hue)
             .clickable(onClick = onClick)
@@ -203,11 +203,13 @@ internal fun AzphaltRecord(
 ) {
     val hue = if (selected) Azphalt.Ink else Azphalt.hue(seed)
     val content = if (selected) Azphalt.Yellow else hue.contrastingText
-    val clickable = if (onClick == null) modifier else modifier.clickable(onClick = onClick)
+    val radius = animatedRecordRadius(selected)
+    val interactive = if (onClick == null) modifier else modifier.clickable(onClick = onClick)
     Column(
-        modifier = clickable
+        modifier = interactive
+            .azphaltSelectedTransform(selected)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(radius))
             .background(hue)
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -229,10 +231,12 @@ internal fun AzphaltRecord(
         }
         Text(title, style = AzphaltType.lead, color = content)
         if (body != null) Text(body, style = AzphaltType.body, color = content.copy(alpha = 0.86f))
-        if (well != null) {
+        AzphaltChildBand(visible = well != null) {
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Azphalt.Ink).padding(14.dp),
-            ) { well() }
+            ) {
+                well?.invoke()
+            }
         }
     }
 }
