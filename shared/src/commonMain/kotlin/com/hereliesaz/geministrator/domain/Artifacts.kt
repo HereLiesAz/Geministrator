@@ -1,5 +1,8 @@
 package com.hereliesaz.geministrator.domain
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class ArtifactKind {
     Requirement,
     Research,
@@ -26,6 +29,7 @@ enum class ArtifactKind {
     Release,
 }
 
+@Serializable
 data class ArtifactRef(
     val id: ArtifactId,
     val kind: ArtifactKind,
