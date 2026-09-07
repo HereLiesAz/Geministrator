@@ -29,6 +29,18 @@ jobs:
       - name: Test shared domain
         run: ./gradlew :shared:desktopTest
 
+      - name: Test Jules provider
+        run: ./gradlew :providers:jules:desktopTest
+
+      - name: Compile Jules provider Android
+        run: ./gradlew :providers:jules:compileAndroidMain
+
+      - name: Compile Jules provider JS
+        run: ./gradlew :providers:jules:compileKotlinJs
+
+      - name: Compile Jules provider Wasm
+        run: ./gradlew :providers:jules:compileKotlinWasmJs
+
       - name: Build Android
         run: ./gradlew :androidApp:assembleDebug
 
