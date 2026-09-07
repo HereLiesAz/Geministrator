@@ -5,7 +5,9 @@ import com.hereliesaz.geministrator.domain.RoleAuthority
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRunId
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class ApprovalGateKind {
     PlanApproval,
     ScopeChange,
@@ -15,12 +17,14 @@ enum class ApprovalGateKind {
     FailureEscalation,
 }
 
+@Serializable
 enum class ApprovalGateStatus {
     Pending,
     Approved,
     Rejected,
 }
 
+@Serializable
 data class ApprovalGate(
     val id: ApprovalGateId,
     val workflowRunId: WorkflowRunId,
@@ -36,22 +40,14 @@ data class ApprovalGate(
     val createdAtEpochMillis: Long,
     val decidedAtEpochMillis: Long? = null,
 ) {
-    fun approve(
-        decidedByRoleId: RoleDefinitionId?,
-        note: String?,
-        nowEpochMillis: Long,
-    ): ApprovalGate = copy(
+    fun approve(decidedByRoleId: RoleDefinitionId?, note: String?, nowEpochMillis: Long): ApprovalGate = copy(
         status = ApprovalGateStatus.Approved,
         decidedByRoleId = decidedByRoleId,
         decisionNote = note,
         decidedAtEpochMillis = nowEpochMillis,
     )
 
-    fun reject(
-        decidedByRoleId: RoleDefinitionId?,
-        note: String?,
-        nowEpochMillis: Long,
-    ): ApprovalGate = copy(
+    fun reject(decidedByRoleId: RoleDefinitionId?, note: String?, nowEpochMillis: Long): ApprovalGate = copy(
         status = ApprovalGateStatus.Rejected,
         decidedByRoleId = decidedByRoleId,
         decisionNote = note,
