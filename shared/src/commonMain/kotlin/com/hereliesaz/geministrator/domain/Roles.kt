@@ -101,7 +101,7 @@ object BuiltInRoles {
         id = RoleDefinitionId("implementation-engineer"),
         name = "Implementation Engineer",
         description = "Implements approved tasks.",
-        instructions = "Implement only the assigned task and satisfy declared acceptance criteria.",
+        instructions = "Implement only the assigned task and satisfy declared acceptance criteria and immutable approved pre-code verification artifacts.",
         authorities = setOf(RoleAuthority.Implement),
         capabilitiesRequired = setOf(
             AgentCapability.RepositoryRead,
@@ -112,8 +112,8 @@ object BuiltInRoles {
     val CrashTestDummy = RoleDefinition(
         id = RoleDefinitionId("crash-test-dummy"),
         name = "Crash Test Dummy",
-        description = "Produces tests for approved implementation artifacts.",
-        instructions = "Work only from approved code or approved implementation artifacts. Derive high-value automated tests from acceptance criteria, architecture, known risks, and changed behavior. Prefer tests that expose regressions and edge cases. You may author test code and test plans, but you must not approve the implementation, certify the result, or weaken tests to make code pass.",
+        description = "Designs tests before implementation and expands them after implementation without certifying results.",
+        instructions = "In specification mode, work only from approved requirements, concepts, architecture, UX specifications, constraints, and acceptance criteria; do not inspect implementation code. Produce acceptance test plans, behavioral tests, contract tests, invariants, edge cases, and failure scenarios that define what correct implementation must satisfy. In implementation mode, work from approved code changes plus the pre-code test contract to add regression tests and implementation-specific coverage. You may author test code and test plans, but you must not approve implementation, certify results, or weaken an approved pre-code test to make code pass. Any proposed change to an approved pre-code test must be escalated for Product or Architect approval.",
         capabilitiesRequired = setOf(
             AgentCapability.RepositoryRead,
             AgentCapability.RepositoryWrite,
@@ -126,7 +126,7 @@ object BuiltInRoles {
         id = RoleDefinitionId("qa-engineer"),
         name = "QA Engineer",
         description = "Verifies acceptance criteria independently from implementation.",
-        instructions = "Attempt to falsify completion claims using the declared acceptance and verification criteria.",
+        instructions = "Attempt to falsify completion claims using the approved specification, pre-code verification contract, declared acceptance criteria, and post-code tests.",
         authorities = setOf(RoleAuthority.Verify),
         capabilitiesRequired = setOf(AgentCapability.Testing),
     )
@@ -134,8 +134,8 @@ object BuiltInRoles {
     val AdversarialReviewer = RoleDefinition(
         id = RoleDefinitionId("adversarial-reviewer"),
         name = "Adversarial Reviewer",
-        description = "Challenges plans before execution.",
-        instructions = "Act as a cynical principal engineer. Find missing steps, hidden assumptions, risk, and inadequate verification. Approve only when objections are resolved.",
+        description = "Challenges plans and pre-code verification contracts before execution.",
+        instructions = "Act as a cynical principal engineer. Find missing steps, hidden assumptions, risk, inadequate verification, and gaps in the pre-code test contract. Approve only when objections are resolved.",
         authorities = setOf(RoleAuthority.RejectPlan, RoleAuthority.ApprovePlan),
     )
 
@@ -143,7 +143,7 @@ object BuiltInRoles {
         id = RoleDefinitionId("code-reviewer"),
         name = "Code Reviewer",
         description = "Reviews code changes independently from implementation.",
-        instructions = "Review correctness, maintainability, side effects, and adherence to the approved plan.",
+        instructions = "Review correctness, maintainability, side effects, and adherence to the approved plan and pre-code verification contract.",
         authorities = setOf(RoleAuthority.ReviewCode, RoleAuthority.RejectPlan),
     )
 
