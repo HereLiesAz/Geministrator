@@ -1,50 +1,68 @@
-# Geministrator Architecture
+# The Haive architecture
 
 ## Product definition
 
-Geministrator is a Compose Multiplatform control room for governed software-development workflows.
+The Haive is a Compose Multiplatform control room for governed software-development workflows.
 
-> Geministrator is not an agent. It is the company that hires agents.
+> The Haive is not an agent. It is the company that hires agents.
 
-The product is not an IDE. It does not own source editing, terminals, or generic filesystem tooling. Its job is to turn an objective into an observable, resumable, governed workflow and supervise the people, agents, and systems that execute it.
+Its job is to turn an objective into explicit work, establish dependency and verification structure, assign that work to appropriate executors, observe the run, and surface only the human decisions that genuinely require a person.
 
-## Product targets
+The Haive is not an IDE. Source editing, terminals, and generic filesystem tooling are outside the product boundary.
 
-- Android
+## First principles
+
+1. A task describes **what must happen**.
+2. A role describes **responsibility and authority**.
+3. An executor describes **who or what performs the work**.
+4. A provider is one possible execution mechanism, not workflow semantics.
+5. Dependencies are explicit edges in a DAG.
+6. Parallelism is derived from the graph and policy.
+7. The same worker should not define, execute, and certify its own work when independent verification is available.
+8. Human intervention happens through explicit gates and decisions.
+9. Provider or executor failure must not corrupt durable workflow state.
+10. The UI projects runtime truth; it does not invent a second source of execution state.
+
+## Targets
+
+- Android — application ID and namespace `com.hereliesaz.haive`
 - Desktop JVM
 - Web JavaScript
 - WebAssembly
 
-Web is a first-class runtime target.
+Shared code must remain portable across all four targets.
 
 ## Active modules
 
 ```text
-shared/       domain, orchestration, persistence, policies, shared Compose UI
+shared/       domain, workflow engine, policies, persistence, shared Compose UI
 providers/    provider adapters, beginning with Jules
-androidApp/   Android application
-desktopApp/   Desktop application
-webApp/       Browser application
+androidApp/   Android launcher
+desktopApp/   Desktop launcher
+webApp/       browser launcher
 ```
 
-The repository root Gradle settings define the complete active build graph. Source that is not in that graph is not part of the product.
+The root Gradle settings are the authoritative active build graph.
 
-## Architectural rules
+## Work, roles, and executors
 
-1. Roles are responsibilities, not providers.
-2. Providers do not leak into workflow-domain semantics.
-3. Tasks declare dependencies explicitly; workflow structure is a DAG.
-4. Parallelism is derived from the DAG and policy, not prose.
-5. The same worker should not determine the job, execute it, and certify its own success when independent verification is available.
-6. Meaningful workflow state is durable and resumable.
-7. Human attention appears through explicit decisions and gates.
-8. Provider failure must not corrupt workflow state.
-9. Shared code must remain portable across Android, Desktop, JS, and Wasm.
-10. The workflow UI is a projection of runtime truth, not a second source of execution state.
+A workflow node is a unit of work, not a synonym for an agent.
+
+Examples of valid execution include:
+
+- a Jules-backed Implementation Engineer
+- a human approval gate
+- a GitHub Actions build
+- a test runner
+- a deployment job
+- a release operation
+- a future provider-backed role
+
+The current domain still carries role assignment in places where the earlier engine assumed agent-backed work. The direction is executor-neutral: responsibility and execution mechanism are separate concepts, and non-agent systems must not masquerade as fake employees merely to satisfy a type.
 
 ## Company model
 
-The built-in company includes responsibilities such as:
+Built-in responsibilities include:
 
 - Orchestrator
 - Product Manager
@@ -60,61 +78,81 @@ The built-in company includes responsibilities such as:
 - Recovery Engineer
 - Release Engineer
 
-A role owns responsibility and authority. A provider supplies execution capability. The same role can be staffed by different providers without changing workflow semantics.
+Roles are data. They carry responsibility, instructions, capabilities, and authority. A role can be staffed by different providers without changing its meaning.
 
-## Workflow runtime
+## Workflow definition and run state
 
-`WorkflowDefinition` describes the dependency graph. `WorkflowRun` and `TaskRun` carry durable execution state.
+`WorkflowDefinition` is immutable execution structure: tasks, dependencies, acceptance requirements, policies, and gates.
+
+`WorkflowRun` and `TaskRun` are durable state. They carry status, attempts, assignments, provider/executor identifiers, artifacts, blocking reasons, and progress.
 
 The engine owns:
 
 - DAG validation
 - readiness and blocking
-- role/provider assignment
 - bounded parallel dispatch
+- role/executor selection
 - plan approval
 - progress reconciliation
 - artifact collection
-- verification
-- retry and escalation
-- persistence and resume
+- independent verification
+- retries and escalation
+- durable state transitions
+- resume after process death or restart
 
-Task progress is executor-neutral. When an executor supplies an exact fraction, Geministrator preserves it. When only qualitative lifecycle evidence exists, the UI may show lifecycle progress without pretending that it is an exact percentage.
+## Progress
+
+Progress belongs to `TaskRun`, not to agents.
+
+An executor may provide an exact fraction. When it does, the runtime preserves that value. Some executors, including the currently exposed Jules activity model, provide only qualitative progress. In that case The Haive may present lifecycle progress such as planning, running, and verifying without pretending it is an exact percentage.
+
+This makes the same UI capable of representing both a provider activity like “Writing tests” and an automated executor that knows “7 of 11 steps complete.”
 
 ## Provider boundary
 
-Provider adapters translate between Geministrator's neutral contracts and external systems. Jules is the first provider.
+Provider adapters translate external APIs into neutral runtime contracts.
 
-Provider-specific identifiers, payloads, credentials, and activity schemas stay behind the provider boundary.
+Jules is the first provider. Jules source IDs, session IDs, request payloads, credentials, and activity schemas remain inside the Jules adapter.
 
-## Execution beyond agents
-
-Workflow nodes are not inherently visual representations of agents. Builds, test runners, GitHub Actions, deployments, approvals, and other systems can also be workflow work.
-
-The runtime progress and mindmap projection APIs are already executor-neutral. The remaining engine refactor is to separate task responsibility from the concrete executor so non-agent execution does not need to masquerade as a company role.
-
-## Workflow UI
-
-The main execution surface is the animated H2G2 workflow mindmap.
-
-Each node derives presentation from real workflow state:
-
-- dependency position
-- role identity
-- status
-- provider assignment
-- attempt
-- progress
-- blocking reason
-- artifacts
-
-Role personality motion remains local to the role. Nodes also inherit diminishing motion from their workflow ancestry so a branch behaves like a related physical system rather than disconnected animated objects.
-
-Active nodes may express work through shape/motion and by filling the existing node with progress rather than attaching a separate progress surface.
+Future providers can implement the same neutral contracts without changing workflow semantics.
 
 ## Artifacts and evidence
 
-Agents and systems communicate through explicit artifacts and events rather than implicit shared transcript state. Verification and integration decisions should rely on concrete evidence wherever possible.
+Workers and systems communicate through explicit artifacts and events rather than implicit shared transcript inheritance.
+
+Examples include requirements, research, architecture, plans, code changes, test results, reviews, verification evidence, failure analysis, pull requests, and release outputs.
+
+Verification and integration decisions should rely on concrete evidence rather than a worker merely claiming completion.
+
+## The workflow mindmap
+
+The primary execution surface is the animated H2G2 workflow mindmap.
+
+Each visible node is projected from real workflow state, including:
+
+- graph position and dependencies
+- task identity
+- responsibility/role identity when present
+- status
+- executor/provider assignment
+- retry attempt
+- blocking reason
+- artifacts
+- progress and progress message
+
+Role personality motion remains local to the node. A node also inherits diminishing motion from its workflow ancestry, so branches behave like related physical systems rather than disconnected animated widgets.
+
+Active nodes can express work through motion and by filling the existing node with progress instead of attaching a conventional progress bar.
+
+## Human attention
+
+The Inbox is for unresolved decisions and gates, not general conversation. Human attention is treated as scarce and should be requested only when policy or judgment actually requires it.
+
+## Security boundary
+
+Workflow persistence must never contain provider credentials, OAuth tokens, private signing material, or secret values. The runtime may persist references to required secret names, but secret values belong in platform-secure credential handling or an external service boundary.
+
+See the [privacy policy](../PRIVACY.md) for user-facing data handling.
 
 ## Delivery
 
@@ -122,12 +160,12 @@ Agents and systems communicate through explicit artifacts and events rather than
 
 Pushes to `main`:
 
-- test shared workflow code
+- run shared workflow tests
 - test and compile provider targets
-- build Android
+- build Android release artifacts
 - build a Desktop distribution
 - build JS and Wasm web targets
 - upload Android and Desktop artifacts
 - deploy the JS production bundle to GitHub Pages after a successful build
 
-Android signing is used when repository keystore material is available. Google Play publishing is a separate delivery concern and will use the existing Play service-account secret when enabled.
+Android signing is used when signing secrets are available. Play publishing is a separate delivery step and will use the repository Play service-account secret when enabled.
