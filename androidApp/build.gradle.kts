@@ -13,31 +13,26 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 3
-        versionName = "2.0.0-alpha01"
+        versionName = "0.1.0-alpha01"
     }
 
-    val ciKeystorePath = System.getenv("GEMINISTRATOR_KEYSTORE_PATH")
-    val ciKeystorePassword = System.getenv("KEYSTORE_PASSWORD")
-    val ciKeyAlias = System.getenv("KEY_ALIAS")
-    val ciKeyPassword = System.getenv("KEY_PASSWORD")
-
-    if (
-        !ciKeystorePath.isNullOrBlank() &&
-        !ciKeystorePassword.isNullOrBlank() &&
-        !ciKeyAlias.isNullOrBlank() &&
-        !ciKeyPassword.isNullOrBlank()
-    ) {
-        signingConfigs {
-            create("ciRelease") {
-                storeFile = file(ciKeystorePath)
-                storePassword = ciKeystorePassword
-                keyAlias = ciKeyAlias
-                keyPassword = ciKeyPassword
+    signingConfigs {
+        create("release") {
+            val keyStorePath = System.getenv("GEMINISTRATOR_KEYSTORE_PATH")
+            if (!keyStorePath.isNullOrBlank()) {
+                storeFile = file(keyStorePath)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
-        buildTypes {
-            getByName("release") {
-                signingConfig = signingConfigs.getByName("ciRelease")
+    }
+
+    buildTypes {
+        release {
+            val keyStorePath = System.getenv("GEMINISTRATOR_KEYSTORE_PATH")
+            if (!keyStorePath.isNullOrBlank()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }

@@ -19,7 +19,7 @@ compose.desktop {
 
         nativeDistributions {
             packageName = "Geministrator"
-            packageVersion = "2.0.0"
+            packageVersion = "0.1.0"
         }
     }
 }
