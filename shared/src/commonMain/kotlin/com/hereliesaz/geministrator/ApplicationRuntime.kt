@@ -2,11 +2,19 @@ package com.hereliesaz.geministrator
 
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
+import com.hereliesaz.geministrator.domain.EnvironmentPlanningPolicy
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.RoleDefinition
+import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
+import com.hereliesaz.geministrator.domain.TaskRunId
+import com.hereliesaz.geministrator.domain.TestDesignPolicy
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
+import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
@@ -16,7 +24,9 @@ import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
 import com.hereliesaz.geministrator.workflow.ManagedSessionGateway
 import com.hereliesaz.geministrator.workflow.ProviderBackedManagedSessionGateway
+import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
+import com.hereliesaz.geministrator.workflow.WorkflowLaunchService
 import com.hereliesaz.geministrator.workflow.WorkflowRuntimeCoordinator
 import com.hereliesaz.geministrator.workflow.WorkflowRuntimeState
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +119,63 @@ class ApplicationRuntime private constructor(
     }
 
     suspend fun refresh() = loadLatest()
+
+    suspend fun launchStarterWorkflow(
+        projectName: String,
+        objective: String,
+        existingProject: Project? = null,
+    ) {
+        val cleanProjectName = projectName.trim()
+        val cleanObjective = objective.trim()
+        require(cleanProjectName.isNotEmpty()) { "Project name is required" }
+        require(cleanObjective.isNotEmpty()) { "Objective is required" }
+
+        val now = nowEpochMillis()
+        val project = existingProject?.copy(
+            name = cleanProjectName,
+            updatedAtEpochMillis = now,
+        ) ?: Project(
+            id = ProjectId("project-$now"),
+            name = cleanProjectName,
+            createdAtEpochMillis = now,
+            updatedAtEpochMillis = now,
+        )
+        val implementationRole = BuiltInRoles.ImplementationEngineer
+        val taskId = TaskDefinitionId("implementation")
+        val definition = WorkflowDefinition(
+            id = WorkflowDefinitionId("workflow-$now"),
+            name = cleanObjective.take(80),
+            description = "Starter workflow created from the live runtime empty state.",
+            tasks = listOf(
+                TaskDefinition(
+                    id = taskId,
+                    name = "Implement objective",
+                    objective = cleanObjective,
+                    roleId = implementationRole.id,
+                    executor = TaskExecutor.RoleAgent(implementationRole.id),
+                    environmentPlanningPolicy = EnvironmentPlanningPolicy.NotRequired,
+                ),
+            ),
+            testDesignPolicy = TestDesignPolicy.None,
+        )
+        val launchService = WorkflowLaunchService(
+            preparer = WorkflowDefinitionPreparer(providerRegistry, roles),
+            persistence = persistence,
+            eventSink = RepositoryWorkflowEventSink(persistence.events),
+            roles = roles,
+        )
+        val (prepared, state) = launchService.launch(
+            project = project,
+            definition = definition,
+            workflowRunId = WorkflowRunId("run-$now"),
+            objective = cleanObjective,
+            nowEpochMillis = now,
+            taskRunIdFactory = { id -> TaskRunId("run-$now-${id.value}") },
+        )
+        current = Current(project, prepared, state)
+        publishCurrent()
+        startCycling()
+    }
 
     fun close() {
         cycleJob?.cancel()
