@@ -13,7 +13,7 @@ import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 
-internal data class LiveWorkflowPresentation(
+data class LiveWorkflowPresentation(
     val definition: WorkflowDefinition,
     val run: WorkflowRun,
     val roles: Collection<RoleDefinition>,
