@@ -113,6 +113,7 @@ class WorkflowRuntimeCoordinator(
                 status != TaskRunStatus.Escalated
         }
 
+        nextRun = blockUndrivenSystemExecutors(definition, nextRun)
         var nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
 
@@ -125,7 +126,7 @@ class WorkflowRuntimeCoordinator(
             existingHandles = nextHandles,
             nowEpochMillis = nowEpochMillis,
         )
-        nextRun = markUndrivenSystemExecutorsBlocked(definition, dispatched.run)
+        nextRun = dispatched.run
         nextHandles = dispatched.handles.filterKeys { taskId ->
             nextRun.taskRuns[taskId]?.status?.isActiveProviderStatus() == true
         }
@@ -156,7 +157,7 @@ class WorkflowRuntimeCoordinator(
         )
     }
 
-    private fun markUndrivenSystemExecutorsBlocked(
+    private fun blockUndrivenSystemExecutors(
         definition: WorkflowDefinition,
         run: WorkflowRun,
     ): WorkflowRun {
@@ -164,12 +165,15 @@ class WorkflowRuntimeCoordinator(
         var changed = false
         val taskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
             val executor = taskRun.executor ?: definitions[taskId]?.executor
-            if (taskRun.status == TaskRunStatus.Running && executor.isUndrivenSystemExecutor()) {
+            val dispatchable = taskRun.status == TaskRunStatus.Ready ||
+                taskRun.status == TaskRunStatus.Retrying ||
+                taskRun.status == TaskRunStatus.Running
+            if (dispatchable && executor.isUndrivenSystemExecutor()) {
                 changed = true
                 taskRun.copy(
                     status = TaskRunStatus.Blocked,
                     blockingReason = BlockingReason(
-                        code = "executor_integration_unavailable",
+                        code = WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
                         message = "${executor.displayLabel()} is not wired into the live runtime yet.",
                     ),
                     progress = null,
