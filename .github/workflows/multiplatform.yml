@@ -49,12 +49,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Prepare Android signing key
+      - name: Prepare Android signing key when available
         if: github.event_name != 'pull_request'
         env:
           KEYSTORE_RAW: ${{ secrets.KEYSTORE_RAW }}
         run: |
-          test -n "$KEYSTORE_RAW"
+          if [ -z "$KEYSTORE_RAW" ]; then
+            echo "KEYSTORE_RAW is not exposed to this workflow run; release will be built unsigned."
+            exit 0
+          fi
           KEYSTORE_PATH="$RUNNER_TEMP/geministrator-release.keystore"
           if printf '%s' "$KEYSTORE_RAW" | base64 --decode > "$KEYSTORE_PATH" 2>/dev/null; then
             echo "Decoded KEYSTORE_RAW as base64."
@@ -79,12 +82,7 @@ jobs:
       - name: Compile Jules provider Wasm
         run: ./gradlew :providers:jules:compileKotlinWasmJs
 
-      - name: Build Android debug
-        if: github.event_name == 'pull_request'
-        run: ./gradlew :androidApp:assembleDebug
-
-      - name: Build signed Android release
-        if: github.event_name != 'pull_request'
+      - name: Build Android
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -100,7 +98,7 @@ jobs:
       - name: Build Web Wasm
         run: ./gradlew :webApp:wasmJsBrowserProductionWebpack
 
-      - name: Upload Android release artifacts
+      - name: Upload Android build
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
