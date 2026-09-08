@@ -18,6 +18,17 @@ data class ManagedSessionHandle(
     val providerRunId: ProviderRunId,
 )
 
+data class ManagedSessionProgress(
+    val fraction: Float? = null,
+    val message: String? = null,
+) {
+    init {
+        require(fraction == null || fraction in 0f..1f) {
+            "Managed session progress must be normalized 0f..1f"
+        }
+    }
+}
+
 enum class ManagedSessionStatus {
     Planning,
     AwaitingApproval,
@@ -38,6 +49,8 @@ interface ManagedSessionGateway {
     )
 
     suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus
+
+    suspend fun progress(handle: ManagedSessionHandle): ManagedSessionProgress?
 
     suspend fun message(
         handle: ManagedSessionHandle,
