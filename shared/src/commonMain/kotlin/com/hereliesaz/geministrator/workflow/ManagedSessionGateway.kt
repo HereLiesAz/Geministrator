@@ -46,11 +46,11 @@ interface ManagedSessionGateway {
     suspend fun reconnect(
         handle: ManagedSessionHandle,
         initialStatus: ManagedSessionStatus,
-    )
+    ) = Unit
 
     suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus
 
-    suspend fun progress(handle: ManagedSessionHandle): ManagedSessionProgress?
+    suspend fun progress(handle: ManagedSessionHandle): ManagedSessionProgress? = null
 
     suspend fun message(
         handle: ManagedSessionHandle,
