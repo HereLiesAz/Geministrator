@@ -15,7 +15,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: geministrator-${{ github.workflow }}-${{ github.ref }}
+  group: haive-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -58,14 +58,14 @@ jobs:
             echo "KEYSTORE_RAW is not exposed to this workflow run; release will be built unsigned."
             exit 0
           fi
-          KEYSTORE_PATH="$RUNNER_TEMP/geministrator-release.keystore"
+          KEYSTORE_PATH="$RUNNER_TEMP/haive-release.keystore"
           if printf '%s' "$KEYSTORE_RAW" | base64 --decode > "$KEYSTORE_PATH" 2>/dev/null; then
             echo "Decoded KEYSTORE_RAW as base64."
           else
             printf '%s' "$KEYSTORE_RAW" > "$KEYSTORE_PATH"
             echo "Used KEYSTORE_RAW as literal keystore content."
           fi
-          echo "GEMINISTRATOR_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "HAIVE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
 
       - name: Test shared domain
         run: ./gradlew :shared:desktopTest
@@ -102,7 +102,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: geministrator-android-release
+          name: haive-android-release
           path: |
             androidApp/build/outputs/apk/release/*.apk
             androidApp/build/outputs/bundle/release/*.aab
@@ -111,7 +111,7 @@ jobs:
       - name: Upload Desktop build
         uses: actions/upload-artifact@v4
         with:
-          name: geministrator-desktop-linux
+          name: haive-desktop-linux
           path: desktopApp/build/compose/binaries/main/**
           if-no-files-found: error
 
