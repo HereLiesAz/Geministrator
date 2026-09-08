@@ -25,11 +25,54 @@ data class AcceptanceCriterion(
 )
 
 @Serializable
+sealed interface TaskExecutor {
+    @Serializable
+    data class RoleAgent(val roleId: RoleDefinitionId) : TaskExecutor
+
+    @Serializable
+    data class GitHubAction(val workflow: String, val ref: String? = null) : TaskExecutor
+
+    @Serializable
+    data class TestRunner(val command: String? = null) : TaskExecutor
+
+    @Serializable
+    data class Deployment(val environment: String) : TaskExecutor
+
+    @Serializable
+    data class RepositoryOperation(val operation: String) : TaskExecutor
+
+    @Serializable
+    data class HumanApproval(val label: String = "Human approval") : TaskExecutor
+
+    @Serializable
+    data class ExternalService(val service: String, val operation: String? = null) : TaskExecutor
+
+    @Serializable
+    data class NestedWorkflow(val workflowDefinitionId: WorkflowDefinitionId) : TaskExecutor
+}
+
+fun TaskDefinition.effectiveExecutor(): TaskExecutor = executor
+    ?: roleId?.let(TaskExecutor::RoleAgent)
+    ?: error("Task ${id.value} has neither an executor nor a responsible role")
+
+fun TaskExecutor.displayName(): String = when (this) {
+    is TaskExecutor.RoleAgent -> "Agent"
+    is TaskExecutor.GitHubAction -> "GitHub Action"
+    is TaskExecutor.TestRunner -> "Test Runner"
+    is TaskExecutor.Deployment -> "Deployment"
+    is TaskExecutor.RepositoryOperation -> "Repository Operation"
+    is TaskExecutor.HumanApproval -> label
+    is TaskExecutor.ExternalService -> service
+    is TaskExecutor.NestedWorkflow -> "Nested Workflow"
+}
+
+@Serializable
 data class TaskDefinition(
     val id: TaskDefinitionId,
     val name: String,
     val objective: String,
-    val roleId: RoleDefinitionId,
+    val roleId: RoleDefinitionId?,
+    val executor: TaskExecutor? = null,
     val dependsOn: Set<TaskDefinitionId> = emptySet(),
     val acceptanceCriteria: List<AcceptanceCriterion> = emptyList(),
     val requiredArtifacts: Set<ArtifactKind> = emptySet(),
@@ -91,9 +134,11 @@ data class TaskRun(
     val taskDefinitionId: TaskDefinitionId,
     val status: TaskRunStatus,
     val attempt: Int = 1,
-    val assignedRoleId: RoleDefinitionId,
+    val assignedRoleId: RoleDefinitionId?,
+    val executor: TaskExecutor? = null,
     val assignedProviderId: AgentProviderId? = null,
     val providerRunId: ProviderRunId? = null,
+    val externalRunId: String? = null,
     val artifacts: List<ArtifactRef> = emptyList(),
     val blockingReason: BlockingReason? = null,
     val progress: Float? = null,
