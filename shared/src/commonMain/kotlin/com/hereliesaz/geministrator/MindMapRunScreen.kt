@@ -22,8 +22,14 @@ internal fun MindMapRunScreen(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     compact: Boolean,
+    liveWorkflow: LiveWorkflowPresentation? = null,
 ) {
     val activityEntrance = remember { AzphaltEntrance.childBand() }
+    val title = liveWorkflow?.run?.objective ?: "ADD AUTHENTICATION"
+    val subtitle = liveWorkflow?.definition?.name?.uppercase() ?: "FOO · STANDARD FEATURE"
+    val completed = liveWorkflow?.run?.taskRuns?.values?.count { it.status == com.hereliesaz.geministrator.domain.TaskRunStatus.Completed }
+    val total = liveWorkflow?.run?.taskRuns?.size
+
     Column(
         modifier = modifier
             .fillMaxHeight()
@@ -32,18 +38,23 @@ internal fun MindMapRunScreen(
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Text(
-            "ADD AUTHENTICATION",
+            title.uppercase(),
             style = if (compact) AzphaltType.section else AzphaltType.hero,
             color = Azphalt.currentGround.onPage,
         )
         Text(
-            "FOO · STANDARD FEATURE",
+            subtitle,
             style = AzphaltType.eyebrow,
             color = Azphalt.currentGround.onPage,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AzphaltPill("Pause", "pause", onClick = {})
-            AzphaltPill("Running", "run", endCap = "4/9", onClick = {})
+            AzphaltPill(
+                "Running",
+                "run",
+                endCap = if (completed != null && total != null) "$completed/$total" else "4/9",
+                onClick = {},
+            )
             AzphaltPill("Cancel", "cancel", onClick = {})
         }
         AzphaltRecord(
@@ -55,11 +66,22 @@ internal fun MindMapRunScreen(
         )
 
         Text("COMPANY EXECUTION", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
-        GeministratorWorkflowMindMap(
-            selectedTaskId = selectedTaskId,
-            onTaskSelected = onTaskSelected,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        if (liveWorkflow != null) {
+            GeministratorWorkflowMindMap(
+                definition = liveWorkflow.definition,
+                run = liveWorkflow.run,
+                roles = liveWorkflow.roles,
+                selectedTaskId = selectedTaskId,
+                onTaskSelected = onTaskSelected,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else {
+            GeministratorWorkflowMindMap(
+                selectedTaskId = selectedTaskId,
+                onTaskSelected = onTaskSelected,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         Text("COMPANY ACTIVITY", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
         listOf(
