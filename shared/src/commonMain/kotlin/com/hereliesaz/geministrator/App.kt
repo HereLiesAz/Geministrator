@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,14 +18,32 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun App(
-    providers: Collection<AgentProvider> = emptyList(),
+    providers: Collection<AgentProvider>,
 ) {
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
+    var runtime by remember { mutableStateOf<ApplicationRuntime?>(null) }
 
     LaunchedEffect(providers) {
-        val runtime = ApplicationRuntime.create(providers = providers, scope = scope)
-        runtime.state.collectLatest { runtimeState = it }
+        runtime?.close()
+        runtime = null
+        runtimeState = ApplicationRuntimeState.Loading
+        try {
+            val created = ApplicationRuntime.create(providers = providers, scope = scope)
+            runtime = created
+            created.state.collectLatest { runtimeState = it }
+        } catch (failure: Throwable) {
+            val message = failure.message?.takeIf(String::isNotBlank)
+                ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime bootstrap failed" }
+            runtimeState = ApplicationRuntimeState.ResumeFailed(message)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            runtime?.close()
+            runtime = null
+        }
     }
 
     GeministratorTheme {
