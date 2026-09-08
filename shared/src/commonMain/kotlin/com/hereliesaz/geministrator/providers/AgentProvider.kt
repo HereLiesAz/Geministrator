@@ -96,10 +96,22 @@ sealed interface AgentEvent {
         val content: String,
     ) : AgentEvent
 
+    /**
+     * Provider-reported execution progress. [fraction] is normalized 0f..1f when the provider
+     * exposes a real numeric value. Providers that only expose qualitative progress should leave
+     * it null and still report [message].
+     */
     data class Progress(
         override val runId: ProviderRunId,
         val message: String,
-    ) : AgentEvent
+        val fraction: Float? = null,
+    ) : AgentEvent {
+        init {
+            require(fraction == null || fraction in 0f..1f) {
+                "Progress fraction must be normalized 0f..1f"
+            }
+        }
+    }
 
     data class ArtifactProduced(
         override val runId: ProviderRunId,
