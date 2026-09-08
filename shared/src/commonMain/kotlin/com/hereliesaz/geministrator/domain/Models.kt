@@ -96,7 +96,15 @@ data class TaskRun(
     val providerRunId: ProviderRunId? = null,
     val artifacts: List<ArtifactRef> = emptyList(),
     val blockingReason: BlockingReason? = null,
-)
+    val progress: Float? = null,
+    val progressMessage: String? = null,
+) {
+    init {
+        require(progress == null || progress in 0f..1f) {
+            "Task progress must be normalized 0f..1f"
+        }
+    }
+}
 
 @Serializable
 data class WorkflowRun(
