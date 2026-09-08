@@ -85,6 +85,7 @@ fun ControlRoom(
     onTaskSelected: (String) -> Unit,
     compact: Boolean,
     contentPadding: PaddingValues,
+    liveWorkflow: LiveWorkflowPresentation? = null,
 ) {
     val ground = Azphalt.currentGround
     Box(
@@ -103,6 +104,7 @@ fun ControlRoom(
                     onTaskSelected = onTaskSelected,
                     modifier = Modifier.weight(1f),
                     compact = true,
+                    liveWorkflow = liveWorkflow,
                 )
             }
         } else {
@@ -117,6 +119,7 @@ fun ControlRoom(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
                     modifier = Modifier.weight(1f),
+                    liveWorkflow = liveWorkflow,
                 )
                 AnimatedVisibility(
                     visible = selectedTaskId != null &&
@@ -133,6 +136,7 @@ fun ControlRoom(
                     selectedTaskId?.let { taskId ->
                         TechnicalInspector(
                             selectedTaskId = taskId,
+                            liveWorkflow = liveWorkflow,
                             modifier = Modifier.width(310.dp).fillMaxHeight(),
                         )
                     }
@@ -229,12 +233,19 @@ private fun MainDestination(
     onTaskSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    liveWorkflow: LiveWorkflowPresentation? = null,
 ) {
     AzphaltPlaceTransition(target = destination, modifier = modifier.fillMaxSize()) { place ->
         when (place) {
             ControlRoomDestination.Overview,
             ControlRoomDestination.Runs,
-            -> MindMapRunScreen(Modifier.fillMaxSize(), selectedTaskId, onTaskSelected, compact)
+            -> MindMapRunScreen(
+                modifier = Modifier.fillMaxSize(),
+                selectedTaskId = selectedTaskId,
+                onTaskSelected = onTaskSelected,
+                compact = compact,
+                liveWorkflow = liveWorkflow,
+            )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(Modifier.fillMaxSize())
