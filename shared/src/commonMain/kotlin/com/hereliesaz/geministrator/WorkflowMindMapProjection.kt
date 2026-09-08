@@ -13,6 +13,12 @@ import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 
+internal data class LiveWorkflowPresentation(
+    val definition: WorkflowDefinition,
+    val run: WorkflowRun,
+    val roles: Collection<RoleDefinition>,
+)
+
 internal data class WorkflowMindMapProjection(
     val bands: List<H2g2WorkflowBand>,
     val edges: List<H2g2WorkflowEdge>,
@@ -117,9 +123,10 @@ private fun TaskRunStatus?.toH2g2State(): H2g2WorkflowState = when (this) {
 }
 
 /**
- * Exact provider progress wins. Otherwise this is deliberately a lifecycle plateau, not a claimed
- * percentage of provider work. It gives the node a truthful sense of governed progress even when a
- * provider such as Jules exposes qualitative updates but no numeric fraction.
+ * Exact executor progress wins. Otherwise this is deliberately a lifecycle plateau, not a claimed
+ * percentage of provider work. It gives the node a truthful sense of governed progress even when an
+ * executor such as Jules exposes qualitative updates but no numeric fraction. Executors with exact
+ * progress, such as step-based automation, can populate [TaskRun.progress] directly.
  */
 private fun TaskRun.displayProgress(): Float? = progress ?: when (status) {
     TaskRunStatus.Planning -> .14f
