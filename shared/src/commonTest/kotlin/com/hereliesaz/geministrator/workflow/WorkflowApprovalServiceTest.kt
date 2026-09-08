@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.ProjectId
@@ -60,7 +61,7 @@ class WorkflowApprovalServiceTest {
             gateId = gate.id,
             handle = ManagedSessionHandle(
                 taskRunId = TaskRunId("task-run"),
-                providerId = com.hereliesaz.geministrator.domain.AgentProviderId("jules"),
+                providerId = AgentProviderId("jules"),
                 providerRunId = ProviderRunId("session"),
             ),
             decidedByRoleId = BuiltInRoles.Architect.id,
@@ -84,6 +85,7 @@ private class ApprovalMemoryRepository : ApprovalGateRepository {
 
 private class ApprovalGateway : ManagedSessionGateway {
     var approved: Boolean = false
+    override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId = AgentProviderId("jules")
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle = error("not used")
     override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus = ManagedSessionStatus.AwaitingApproval
     override suspend fun message(handle: ManagedSessionHandle, message: String): ProviderActionResult = ProviderActionResult.Accepted
