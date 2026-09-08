@@ -88,9 +88,9 @@ internal fun projectWorkflowMindMap(
     val nodeById = nodes.associateBy { it.id }
     val bands = definition.tasks
         .groupBy(::depth)
-        .toSortedMap()
-        .values
-        .map { tasks -> H2g2WorkflowBand(tasks.mapNotNull { nodeById[it.id.value] }) }
+        .entries
+        .sortedBy { it.key }
+        .map { (_, tasks) -> H2g2WorkflowBand(tasks.mapNotNull { nodeById[it.id.value] }) }
 
     val edges = definition.tasks.flatMap { task ->
         task.dependsOn.map { dependency -> H2g2WorkflowEdge(from = dependency.value, to = task.id.value) }
