@@ -50,9 +50,28 @@ Credentials belong in platform-secure storage or, where a browser cannot safely 
 
 A task with an existing executor/provider run identifier must reconnect to that existing run when possible. Restarting The Haive must not create duplicate external work merely because the local process restarted.
 
+`TaskRun` persists executor identity separately from responsibility and provider state:
+
+- `executor` — resolved `TaskExecutor`
+- `assignedRoleId` — optional responsibility/authority role
+- `assignedProviderId` and `providerRunId` — provider-backed agent execution
+- `externalRunId` — system/external executor run identity
+
+This separation lets an external build, deployment, repository operation, approval, or nested workflow resume without pretending to be an agent session.
+
 ## Schema versioning
 
-Snapshots include a schema version. Readers reject newer unsupported schemas. Any incompatible schema change requires an explicit migration path rather than silent reinterpretation.
+The current persistence schema is **2**.
+
+Schema `2` introduces executor-neutral task/run state. The migration from schema `1` is explicit:
+
+- a stored `TaskDefinition` with a role but no executor becomes `TaskExecutor.RoleAgent(roleId)`
+- a stored `TaskRun` with an assigned role but no executor becomes `TaskExecutor.RoleAgent(assignedRoleId)`
+- existing workflow IDs, task-run IDs, statuses, attempts, provider IDs, provider run IDs, artifacts, blocking reasons, and progress are preserved
+
+Readers reject snapshots created by a newer unsupported schema. Any future incompatible schema change likewise requires an explicit migration path rather than silent reinterpretation.
+
+The storage key remains `geministrator.workflow.persistence.v1` intentionally. Renaming that key would strand existing data before the schema migrator can read it. Product branding and storage compatibility are separate concerns.
 
 ## Scale boundary
 
