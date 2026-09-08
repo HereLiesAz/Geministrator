@@ -1,11 +1,13 @@
 package com.hereliesaz.geministrator.persistence
 
+import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRun
@@ -13,7 +15,6 @@ import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.events.WorkflowEvent
 import com.hereliesaz.geministrator.workflow.ApprovalGate
 import com.hereliesaz.geministrator.workflow.ApprovalGateRepository
-import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -114,7 +115,7 @@ class SettingsWorkflowPersistence(
 
     private suspend fun update(transform: (PersistenceSnapshot) -> PersistenceSnapshot) {
         mutex.withLock {
-            val next = transform(readUnlocked())
+            val next = transform(readUnlocked()).copy(version = CURRENT_SCHEMA_VERSION)
             settings.putString(storageKey, json.encodeToString(PersistenceSnapshot.serializer(), next))
         }
     }
@@ -125,11 +126,37 @@ class SettingsWorkflowPersistence(
         require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
             "Persistence schema ${snapshot.version} is newer than supported schema $CURRENT_SCHEMA_VERSION"
         }
-        return snapshot
+        return migrate(snapshot)
+    }
+
+    private fun migrate(snapshot: PersistenceSnapshot): PersistenceSnapshot {
+        var migrated = snapshot
+        if (migrated.version < 2) {
+            migrated = migrated.copy(
+                version = 2,
+                definitions = migrated.definitions.map { definition ->
+                    definition.copy(
+                        tasks = definition.tasks.map { task ->
+                            if (task.executor != null || task.roleId == null) task
+                            else task.copy(executor = TaskExecutor.RoleAgent(task.roleId))
+                        },
+                    )
+                },
+                runs = migrated.runs.map { run ->
+                    run.copy(
+                        taskRuns = run.taskRuns.mapValues { (_, taskRun) ->
+                            if (taskRun.executor != null || taskRun.assignedRoleId == null) taskRun
+                            else taskRun.copy(executor = TaskExecutor.RoleAgent(taskRun.assignedRoleId))
+                        },
+                    )
+                },
+            )
+        }
+        return migrated
     }
 
     companion object {
-        const val CURRENT_SCHEMA_VERSION: Int = 1
+        const val CURRENT_SCHEMA_VERSION: Int = 2
         const val DEFAULT_STORAGE_KEY: String = "geministrator.workflow.persistence.v1"
 
         val defaultJson: Json = Json {
