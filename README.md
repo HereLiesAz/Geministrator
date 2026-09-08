@@ -4,11 +4,11 @@
 
 > The Haive is not an agent. It is the company that hires agents.
 
-The Haive turns an objective into an explicit workflow, staffs or assigns its work, watches the run, enforces gates and verification, and keeps the execution observable and resumable.
+The Haive turns an objective into an explicit workflow, staffs or assigns its work, watches the run, enforces gates and verification, and keeps execution observable and resumable.
 
 ## What it is
 
-The Haive is an orchestration product, not an IDE. It does not own source editing, terminals, or a generic file explorer. Its primary interface is the live workflow itself: a H2G2-inspired animated mindmap whose nodes represent real work and whose state comes from the runtime.
+The Haive is an orchestration product, not an IDE. It does not own source editing, terminals, or a generic file explorer. Its primary interface is the live workflow itself: an H2G2-inspired animated mindmap whose nodes represent real work and whose state comes from the runtime.
 
 Workflow nodes may be performed by AI providers such as Jules, by people, or by systems such as GitHub Actions, test runners, and deployment jobs. Progress belongs to the task run, not to a particular kind of worker.
 
@@ -26,7 +26,7 @@ Workflow nodes may be performed by AI providers such as Jules, by people, or by 
 - `desktopApp/` — Desktop launcher
 - `webApp/` — browser launcher
 - `docs/` — current product documentation and privacy policy
-- `branding/` — source brand and icon assets
+- `branding/` — locked source brand and icon assets
 
 ## Documentation
 
@@ -35,6 +35,7 @@ Start with [`docs/README.md`](docs/README.md).
 - [Architecture](docs/architecture/ARCHITECTURE.md)
 - [Persistence](docs/architecture/PERSISTENCE.md)
 - [Prompt caching](docs/architecture/PROMPT_CACHING.md)
+- [Branding](docs/BRANDING.md)
 - [Privacy policy](docs/PRIVACY.md)
 
 ## Build
@@ -48,6 +49,8 @@ Start with [`docs/README.md`](docs/README.md).
 ```
 
 Pushes to `main` build Android, Desktop, JavaScript, and WebAssembly. Successful main-branch builds publish the JavaScript production bundle to GitHub Pages.
+
+Android release signing reconstructs a PKCS#12 keystore from the split signing secrets (`KEYSTORE_PRIVATE`/`KEYSTORE_RSA`, `KEYSTORE_PUBLIC`/`KEYSTORE_CHAIN`, password, alias, and certificate fingerprints). `KEYSTORE_RAW` is not used.
 
 ## License
 
