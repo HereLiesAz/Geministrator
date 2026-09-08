@@ -97,10 +97,10 @@ jobs:
         run: ./gradlew :desktopApp:packageDistributionForCurrentOS
 
       - name: Build Web JS
-        run: ./gradlew :webApp:jsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false :webApp:jsBrowserProductionWebpack
 
       - name: Build Web Wasm
-        run: ./gradlew :webApp:wasmJsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false :webApp:wasmJsBrowserProductionWebpack
 
       - name: Upload Android build
         if: github.event_name != 'pull_request'
