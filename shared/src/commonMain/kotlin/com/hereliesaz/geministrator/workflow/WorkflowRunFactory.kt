@@ -10,6 +10,7 @@ import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 
 object WorkflowRunFactory {
     fun create(
@@ -29,6 +30,7 @@ object WorkflowRunFactory {
                 taskDefinitionId = task.id,
                 status = status,
                 assignedRoleId = task.roleId,
+                executor = task.effectiveExecutor(),
                 blockingReason = if (status == TaskRunStatus.Blocked) {
                     BlockingReason(
                         code = "WAITING_FOR_DEPENDENCIES",
