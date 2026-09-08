@@ -20,11 +20,11 @@ Web is a first-class runtime target.
 ## Active modules
 
 ```text
-shared/        domain, orchestration, persistence, policies, shared Compose UI
-providers/     provider adapters, beginning with Jules
-androidApp/    Android application
- desktopApp/   Desktop application
-webApp/        Browser application
+shared/       domain, orchestration, persistence, policies, shared Compose UI
+providers/    provider adapters, beginning with Jules
+androidApp/   Android application
+desktopApp/   Desktop application
+webApp/       Browser application
 ```
 
 The repository root Gradle settings define the complete active build graph. Source that is not in that graph is not part of the product.
