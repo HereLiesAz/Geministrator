@@ -3,7 +3,6 @@ package com.hereliesaz.geministrator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.displayName
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 
 @Composable
 internal fun TechnicalInspector(
@@ -33,7 +34,9 @@ internal fun TechnicalInspector(
         return
     }
 
-    val role = liveWorkflow.roles.firstOrNull { it.id == taskRun.assignedRoleId }
+    val role = taskRun.assignedRoleId?.let { roleId -> liveWorkflow.roles.firstOrNull { it.id == roleId } }
+    val executor = taskRun.executor ?: task.effectiveExecutor()
+    val identity = role?.name ?: executor.displayName()
     Column(
         modifier = modifier
             .background(Azphalt.Ink)
@@ -42,12 +45,14 @@ internal fun TechnicalInspector(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("INSPECTOR", style = AzphaltType.eyebrow, color = Azphalt.Yellow)
-        Text((role?.name ?: taskRun.assignedRoleId.value).uppercase(), style = AzphaltType.section, color = Azphalt.White)
+        Text(identity.uppercase(), style = AzphaltType.section, color = Azphalt.White)
         Text(task.objective, style = AzphaltType.body, color = Azphalt.White)
         LiveInspectorLine("STATE", taskRun.status.name)
-        LiveInspectorLine("STAFFING", taskRun.assignedProviderId?.value ?: "Unstaffed")
+        LiveInspectorLine("EXECUTOR", executor.displayName())
+        LiveInspectorLine("PROVIDER", taskRun.assignedProviderId?.value ?: "—")
         LiveInspectorLine("ATTEMPT", taskRun.attempt.toString())
         LiveInspectorLine("PROVIDER RUN", taskRun.providerRunId?.value ?: "—")
+        LiveInspectorLine("EXTERNAL RUN", taskRun.externalRunId ?: "—")
         taskRun.progress?.let { progress ->
             LiveInspectorLine("PROGRESS", "${(progress * 100f).toInt()}%")
         }
@@ -58,7 +63,9 @@ internal fun TechnicalInspector(
             LiveInspectorLine("BLOCKED", it.message)
         }
         LiveInspectorLine("ARTIFACTS", taskRun.artifacts.size.toString())
-        AzphaltPill("Message agent", "message-$selectedTaskId", onClick = {}, modifier = Modifier.fillMaxWidth())
+        if (taskRun.assignedProviderId != null) {
+            AzphaltPill("Message agent", "message-$selectedTaskId", onClick = {}, modifier = Modifier.fillMaxWidth())
+        }
     }
 }
 
