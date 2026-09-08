@@ -6,8 +6,12 @@ pluginManagement {
     }
 }
 
+val useLocalH2g2 = providers.gradleProperty("haive.useLocalH2g2")
+    .orNull
+    ?.toBooleanStrictOrNull()
+    ?: true
 val localH2g2 = file("vendor/conveyance-h2g2")
-if (localH2g2.exists()) {
+if (useLocalH2g2 && localH2g2.exists()) {
     includeBuild(localH2g2) {
         dependencySubstitution {
             substitute(module("com.github.HereLiesAz:conveyance-h2g2"))
@@ -24,7 +28,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Geministrator"
+rootProject.name = "haive"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
