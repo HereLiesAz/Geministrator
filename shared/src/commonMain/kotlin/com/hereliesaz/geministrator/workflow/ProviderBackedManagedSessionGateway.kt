@@ -18,6 +18,7 @@ class ProviderBackedManagedSessionGateway(
     private data class SessionSnapshot(
         val status: ManagedSessionStatus,
         val artifacts: List<ProviderArtifact> = emptyList(),
+        val progress: ManagedSessionProgress? = null,
     )
 
     private val mutex = Mutex()
@@ -56,6 +57,9 @@ class ProviderBackedManagedSessionGateway(
 
     override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus =
         mutex.withLock { snapshots[handle]?.status ?: ManagedSessionStatus.Unknown }
+
+    override suspend fun progress(handle: ManagedSessionHandle): ManagedSessionProgress? =
+        mutex.withLock { snapshots[handle]?.progress }
 
     override suspend fun message(
         handle: ManagedSessionHandle,
@@ -112,12 +116,21 @@ class ProviderBackedManagedSessionGateway(
             val next = when (event) {
                 is AgentEvent.PlanGenerated -> current.copy(status = ManagedSessionStatus.AwaitingApproval)
                 is AgentEvent.PlanApproved -> current.copy(status = ManagedSessionStatus.Running)
-                is AgentEvent.Progress -> current.copy(status = ManagedSessionStatus.Running)
+                is AgentEvent.Progress -> current.copy(
+                    status = ManagedSessionStatus.Running,
+                    progress = ManagedSessionProgress(
+                        fraction = event.fraction,
+                        message = event.message.takeIf { it.isNotBlank() },
+                    ),
+                )
                 is AgentEvent.Message -> current
                 is AgentEvent.ArtifactProduced -> current.copy(
                     artifacts = current.artifacts + event.artifact,
                 )
-                is AgentEvent.Completed -> current.copy(status = ManagedSessionStatus.Completed)
+                is AgentEvent.Completed -> current.copy(
+                    status = ManagedSessionStatus.Completed,
+                    progress = ManagedSessionProgress(fraction = 1f, message = current.progress?.message),
+                )
                 is AgentEvent.Failed -> current.copy(status = ManagedSessionStatus.Failed)
             }
             snapshots[handle] = next
