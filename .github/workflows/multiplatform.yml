@@ -49,13 +49,19 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Publish pinned h2g2 for isolated web resolution
+      - name: Publish pinned renderer stack for isolated web resolution
         run: |
-          mv vendor/conveyance-h2g2/vendor/Conveyance "$RUNNER_TEMP/haive-conveyance"
+          CONVEYANCE_DIR="vendor/conveyance-h2g2/vendor/Conveyance"
+          sed -i 's/group = "com.hereliesaz.conveyance"/group = "com.github.HereLiesAz.Conveyance"/' "$CONVEYANCE_DIR/build.gradle.kts"
+          sed -i 's/version = "0.1.0"/version = "468371de06a903b1a6bdcf812197eef4a81afd3e"/' "$CONVEYANCE_DIR/build.gradle.kts"
+          "$CONVEYANCE_DIR/gradlew" -p "$CONVEYANCE_DIR" :conveyance-core:publishToMavenLocal :conveyance-compose:publishToMavenLocal
+
+          mv "$CONVEYANCE_DIR" "$RUNNER_TEMP/haive-conveyance"
           sed -i 's/group = "com.hereliesaz.conveyance"/group = "com.github.HereLiesAz"/' vendor/conveyance-h2g2/build.gradle.kts
           sed -i 's/version = "0.1.0"/version = "faa80ed5aa063f6bdab42163d7b021123b248254"/' vendor/conveyance-h2g2/build.gradle.kts
+          sed -i '/repositories {/a\        mavenLocal()' vendor/conveyance-h2g2/settings.gradle.kts
           ./vendor/conveyance-h2g2/gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
-          mv "$RUNNER_TEMP/haive-conveyance" vendor/conveyance-h2g2/vendor/Conveyance
+          mv "$RUNNER_TEMP/haive-conveyance" "$CONVEYANCE_DIR"
 
       - name: Reconstruct and verify Android signing keystore
         id: signing
