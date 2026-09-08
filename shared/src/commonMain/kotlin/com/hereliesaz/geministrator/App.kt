@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.hereliesaz.geministrator.providers.AgentProvider
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun App(
@@ -67,6 +68,22 @@ fun App(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = { taskId ->
                         selectedTaskId = if (selectedTaskId == taskId) null else taskId
+                    },
+                    onLaunchWorkflow = { projectName, objective ->
+                        val existingProject = (runtimeState as? ApplicationRuntimeState.NoRun)?.project
+                        scope.launch {
+                            try {
+                                runtime?.launchStarterWorkflow(
+                                    projectName = projectName,
+                                    objective = objective,
+                                    existingProject = existingProject,
+                                )
+                            } catch (failure: Throwable) {
+                                val message = failure.message?.takeIf(String::isNotBlank)
+                                    ?: failure::class.simpleName.orEmpty().ifBlank { "Workflow launch failed" }
+                                runtimeState = ApplicationRuntimeState.ResumeFailed(message)
+                            }
+                        }
                     },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
