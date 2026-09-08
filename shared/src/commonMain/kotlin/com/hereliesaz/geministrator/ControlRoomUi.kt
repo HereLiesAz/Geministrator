@@ -157,7 +157,7 @@ private fun PillNavigation(
         modifier = modifier.padding(start = 14.dp, top = 22.dp, bottom = 18.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text("GEMINISTRATOR", style = AzphaltType.section, color = Azphalt.currentGround.onPage)
+        Text("THE HAIVE", style = AzphaltType.section, color = Azphalt.currentGround.onPage)
         Text("COMPANY OS", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
         Spacer(Modifier.height(12.dp))
         ControlRoomDestination.entries.forEachIndexed { index, item ->
@@ -196,7 +196,7 @@ private fun CompactHeader() {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column {
-            Text("GEMINISTRATOR", style = AzphaltType.lead, color = Azphalt.currentGround.onPage)
+            Text("THE HAIVE", style = AzphaltType.lead, color = Azphalt.currentGround.onPage)
             Text("COMPANY OS", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
         }
         AzphaltPill("Ground", "compact-ground", endCap = Azphalt.currentGround.name, onClick = { Azphalt.rerollGround() })
