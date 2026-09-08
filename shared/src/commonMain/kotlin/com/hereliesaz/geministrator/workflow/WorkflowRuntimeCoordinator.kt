@@ -1,8 +1,11 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.ArtifactId
+import com.hereliesaz.geministrator.domain.BlockingReason
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.RetryReason
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
@@ -64,6 +67,10 @@ class WorkflowRuntimeCoordinator(
         nowEpochMillis: Long,
         artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId,
     ): WorkflowRuntimeState {
+        if (state.run.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty()) {
+            return state
+        }
+
         var nextRun = engine.reconcile(
             definition = definition,
             run = state.run,
@@ -71,15 +78,45 @@ class WorkflowRuntimeCoordinator(
             nowEpochMillis = nowEpochMillis,
             artifactIdFactory = artifactIdFactory,
         )
+        nextRun = preserveArtifactTimestamps(previous = state.run, reconciled = nextRun)
+
+        val newlyFailedTaskIds = nextRun.taskRuns
+            .filter { (taskId, taskRun) ->
+                taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed
+            }
+            .keys
+
+        for (taskId in newlyFailedTaskIds) {
+            nextRun = engine.handleFailure(
+                definition = definition,
+                run = nextRun,
+                taskDefinitionId = taskId,
+                retryReason = RetryReason.ProviderFailure,
+                reason = "Provider session failed",
+                nowEpochMillis = nowEpochMillis,
+            )
+        }
+
+        if (
+            state.run.status == WorkflowRunStatus.AwaitingHuman ||
+            nextRun.taskRuns.values.any { it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated }
+        ) {
+            nextRun = nextRun.copy(status = WorkflowRunStatus.AwaitingHuman)
+        }
+
         var nextHandles = state.handles.filterKeys { taskId ->
             val status = nextRun.taskRuns[taskId]?.status
-            status != TaskRunStatus.Completed && status != TaskRunStatus.Failed && status != TaskRunStatus.Cancelled
+            status != TaskRunStatus.Completed &&
+                status != TaskRunStatus.Failed &&
+                status != TaskRunStatus.Cancelled &&
+                status != TaskRunStatus.Retrying &&
+                status != TaskRunStatus.Escalated
         }
 
         var nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
 
-        if (nextRun.status.isTerminal()) return nextState
+        if (nextRun.status.isTerminal() || nextRun.status == WorkflowRunStatus.AwaitingHuman) return nextState
 
         val dispatched = engine.dispatchReadyTasks(
             project = project,
@@ -88,11 +125,91 @@ class WorkflowRuntimeCoordinator(
             existingHandles = nextHandles,
             nowEpochMillis = nowEpochMillis,
         )
-        nextRun = dispatched.run
-        nextHandles = dispatched.handles
+        nextRun = markUndrivenSystemExecutorsBlocked(definition, dispatched.run)
+        nextHandles = dispatched.handles.filterKeys { taskId ->
+            nextRun.taskRuns[taskId]?.status?.isActiveProviderStatus() == true
+        }
         nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
         return nextState
+    }
+
+    private fun preserveArtifactTimestamps(
+        previous: WorkflowRun,
+        reconciled: WorkflowRun,
+    ): WorkflowRun {
+        val previousArtifacts = previous.taskRuns.values
+            .flatMap(TaskRun::artifacts)
+            .associateBy { it.id }
+        if (previousArtifacts.isEmpty()) return reconciled
+
+        return reconciled.copy(
+            taskRuns = reconciled.taskRuns.mapValues { (_, taskRun) ->
+                taskRun.copy(
+                    artifacts = taskRun.artifacts.map { artifact ->
+                        previousArtifacts[artifact.id]?.let { old ->
+                            artifact.copy(createdAtEpochMillis = old.createdAtEpochMillis)
+                        } ?: artifact
+                    },
+                )
+            },
+        )
+    }
+
+    private fun markUndrivenSystemExecutorsBlocked(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+    ): WorkflowRun {
+        val definitions = definition.tasks.associateBy { it.id }
+        var changed = false
+        val taskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
+            val executor = taskRun.executor ?: definitions[taskId]?.executor
+            if (taskRun.status == TaskRunStatus.Running && executor.isUndrivenSystemExecutor()) {
+                changed = true
+                taskRun.copy(
+                    status = TaskRunStatus.Blocked,
+                    blockingReason = BlockingReason(
+                        code = "executor_integration_unavailable",
+                        message = "${executor.displayLabel()} is not wired into the live runtime yet.",
+                    ),
+                    progress = null,
+                    progressMessage = null,
+                )
+            } else {
+                taskRun
+            }
+        }
+        return if (changed) run.copy(taskRuns = taskRuns) else run
+    }
+
+    private fun TaskExecutor?.isUndrivenSystemExecutor(): Boolean = when (this) {
+        is TaskExecutor.GitHubAction,
+        is TaskExecutor.TestRunner,
+        is TaskExecutor.Deployment,
+        is TaskExecutor.RepositoryOperation,
+        is TaskExecutor.ExternalService,
+        is TaskExecutor.NestedWorkflow,
+        -> true
+        else -> false
+    }
+
+    private fun TaskExecutor?.displayLabel(): String = when (this) {
+        is TaskExecutor.GitHubAction -> "GitHub Action executor"
+        is TaskExecutor.TestRunner -> "Test runner executor"
+        is TaskExecutor.Deployment -> "Deployment executor"
+        is TaskExecutor.RepositoryOperation -> "Repository operation executor"
+        is TaskExecutor.ExternalService -> "External service executor"
+        is TaskExecutor.NestedWorkflow -> "Nested workflow executor"
+        else -> "System executor"
+    }
+
+    private fun TaskRunStatus.isActiveProviderStatus(): Boolean = when (this) {
+        TaskRunStatus.Planning,
+        TaskRunStatus.AwaitingApproval,
+        TaskRunStatus.Running,
+        TaskRunStatus.Verifying,
+        -> true
+        else -> false
     }
 
     private fun TaskRunStatus.canReconnect(): Boolean = when (this) {
