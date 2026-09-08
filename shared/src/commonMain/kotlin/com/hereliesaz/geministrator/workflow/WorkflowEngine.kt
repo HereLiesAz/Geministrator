@@ -136,6 +136,8 @@ class WorkflowEngine(
                         assignedProviderId = handle.providerId,
                         providerRunId = handle.providerRunId,
                         blockingReason = null,
+                        progress = null,
+                        progressMessage = null,
                     )
                 ),
                 updatedAtEpochMillis = nowEpochMillis,
@@ -177,6 +179,7 @@ class WorkflowEngine(
             val taskRun = nextRun.taskRuns[taskId] ?: continue
             val previousStatus = taskRun.status
             val status = sessionGateway.status(handle)
+            val providerProgress = sessionGateway.progress(handle)
             val providerArtifacts = sessionGateway.artifacts(handle)
             val durableArtifacts = providerArtifacts.mapIndexed { index, artifact ->
                 ArtifactRef(
@@ -230,6 +233,12 @@ class WorkflowEngine(
                     taskId to taskRun.copy(
                         status = mappedStatus,
                         artifacts = durableArtifacts,
+                        progress = when {
+                            mappedStatus == TaskRunStatus.Completed -> 1f
+                            providerProgress?.fraction != null -> providerProgress.fraction
+                            else -> taskRun.progress
+                        },
+                        progressMessage = providerProgress?.message ?: taskRun.progressMessage,
                     )
                 ),
                 updatedAtEpochMillis = nowEpochMillis,
@@ -298,6 +307,8 @@ class WorkflowEngine(
                             providerRunId = null,
                             artifacts = emptyList(),
                             blockingReason = null,
+                            progress = null,
+                            progressMessage = null,
                         )
                     ),
                     updatedAtEpochMillis = nowEpochMillis,
@@ -348,6 +359,8 @@ class WorkflowEngine(
                             providerRunId = null,
                             artifacts = emptyList(),
                             blockingReason = null,
+                            progress = null,
+                            progressMessage = null,
                         )
                     ),
                     updatedAtEpochMillis = nowEpochMillis,
