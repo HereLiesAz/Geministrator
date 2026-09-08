@@ -26,29 +26,14 @@ data class AcceptanceCriterion(
 
 @Serializable
 sealed interface TaskExecutor {
-    @Serializable
-    data class RoleAgent(val roleId: RoleDefinitionId) : TaskExecutor
-
-    @Serializable
-    data class GitHubAction(val workflow: String, val ref: String? = null) : TaskExecutor
-
-    @Serializable
-    data class TestRunner(val command: String? = null) : TaskExecutor
-
-    @Serializable
-    data class Deployment(val environment: String) : TaskExecutor
-
-    @Serializable
-    data class RepositoryOperation(val operation: String) : TaskExecutor
-
-    @Serializable
-    data class HumanApproval(val label: String = "Human approval") : TaskExecutor
-
-    @Serializable
-    data class ExternalService(val service: String, val operation: String? = null) : TaskExecutor
-
-    @Serializable
-    data class NestedWorkflow(val workflowDefinitionId: WorkflowDefinitionId) : TaskExecutor
+    @Serializable data class RoleAgent(val roleId: RoleDefinitionId) : TaskExecutor
+    @Serializable data class GitHubAction(val workflow: String, val ref: String? = null) : TaskExecutor
+    @Serializable data class TestRunner(val command: String? = null) : TaskExecutor
+    @Serializable data class Deployment(val environment: String) : TaskExecutor
+    @Serializable data class RepositoryOperation(val operation: String) : TaskExecutor
+    @Serializable data class HumanApproval(val label: String = "Human approval") : TaskExecutor
+    @Serializable data class ExternalService(val service: String, val operation: String? = null) : TaskExecutor
+    @Serializable data class NestedWorkflow(val workflowDefinitionId: WorkflowDefinitionId) : TaskExecutor
 }
 
 fun TaskDefinition.effectiveExecutor(): TaskExecutor = executor
@@ -72,7 +57,6 @@ data class TaskDefinition(
     val name: String,
     val objective: String,
     val roleId: RoleDefinitionId?,
-    val executor: TaskExecutor? = null,
     val dependsOn: Set<TaskDefinitionId> = emptySet(),
     val acceptanceCriteria: List<AcceptanceCriterion> = emptyList(),
     val requiredArtifacts: Set<ArtifactKind> = emptySet(),
@@ -82,6 +66,7 @@ data class TaskDefinition(
     val escalationPolicy: EscalationPolicy = EscalationPolicy.FailWorkflow,
     val providerConstraints: ProviderConstraints = ProviderConstraints.None,
     val environmentPlanningPolicy: EnvironmentPlanningPolicy = EnvironmentPlanningPolicy.WhenProviderRequires,
+    val executor: TaskExecutor? = null,
 )
 
 @Serializable
@@ -97,29 +82,11 @@ data class WorkflowDefinition(
 )
 
 @Serializable
-enum class WorkflowRunStatus {
-    Created,
-    Running,
-    AwaitingHuman,
-    Completed,
-    Failed,
-    Cancelled,
-}
+enum class WorkflowRunStatus { Created, Running, AwaitingHuman, Completed, Failed, Cancelled }
 
 @Serializable
 enum class TaskRunStatus {
-    Created,
-    Blocked,
-    Ready,
-    Planning,
-    AwaitingApproval,
-    Running,
-    Verifying,
-    Retrying,
-    Completed,
-    Failed,
-    Escalated,
-    Cancelled,
+    Created, Blocked, Ready, Planning, AwaitingApproval, Running, Verifying, Retrying, Completed, Failed, Escalated, Cancelled,
 }
 
 @Serializable
@@ -135,19 +102,17 @@ data class TaskRun(
     val status: TaskRunStatus,
     val attempt: Int = 1,
     val assignedRoleId: RoleDefinitionId?,
-    val executor: TaskExecutor? = null,
     val assignedProviderId: AgentProviderId? = null,
     val providerRunId: ProviderRunId? = null,
-    val externalRunId: String? = null,
     val artifacts: List<ArtifactRef> = emptyList(),
     val blockingReason: BlockingReason? = null,
     val progress: Float? = null,
     val progressMessage: String? = null,
+    val executor: TaskExecutor? = null,
+    val externalRunId: String? = null,
 ) {
     init {
-        require(progress == null || progress in 0f..1f) {
-            "Task progress must be normalized 0f..1f"
-        }
+        require(progress == null || progress in 0f..1f) { "Task progress must be normalized 0f..1f" }
     }
 }
 
