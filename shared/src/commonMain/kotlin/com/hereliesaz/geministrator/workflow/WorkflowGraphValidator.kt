@@ -9,6 +9,7 @@ sealed interface WorkflowValidationError {
         val taskId: TaskDefinitionId,
         val missingDependencyId: TaskDefinitionId,
     ) : WorkflowValidationError
+    data class MissingExecutor(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class SelfDependency(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class Cycle(val taskIds: Set<TaskDefinitionId>) : WorkflowValidationError
 }
@@ -23,6 +24,9 @@ object WorkflowGraphValidator {
 
         val knownIds = grouped.keys
         definition.tasks.forEach { task ->
+            if (task.executor == null && task.roleId == null) {
+                errors += WorkflowValidationError.MissingExecutor(task.id)
+            }
             task.dependsOn.forEach { dependency ->
                 when {
                     dependency == task.id -> errors += WorkflowValidationError.SelfDependency(task.id)
