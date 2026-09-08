@@ -1,13 +1,22 @@
-name: Multiplatform Build
+name: Build and Deploy
 
 on:
   push:
     branches:
-      - architecture/geministrator-2
+      - main
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: geministrator-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -40,6 +49,21 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Prepare Android signing key
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_RAW: ${{ secrets.KEYSTORE_RAW }}
+        run: |
+          test -n "$KEYSTORE_RAW"
+          KEYSTORE_PATH="$RUNNER_TEMP/geministrator-release.keystore"
+          if printf '%s' "$KEYSTORE_RAW" | base64 --decode > "$KEYSTORE_PATH" 2>/dev/null; then
+            echo "Decoded KEYSTORE_RAW as base64."
+          else
+            printf '%s' "$KEYSTORE_RAW" > "$KEYSTORE_PATH"
+            echo "Used KEYSTORE_RAW as literal keystore content."
+          fi
+          echo "GEMINISTRATOR_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+
       - name: Test shared domain
         run: ./gradlew :shared:desktopTest
 
@@ -55,14 +79,62 @@ jobs:
       - name: Compile Jules provider Wasm
         run: ./gradlew :providers:jules:compileKotlinWasmJs
 
-      - name: Build Android
+      - name: Build Android debug
+        if: github.event_name == 'pull_request'
         run: ./gradlew :androidApp:assembleDebug
 
-      - name: Build Desktop
-        run: ./gradlew :desktopApp:compileKotlin
+      - name: Build signed Android release
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease
+
+      - name: Build Desktop distribution
+        run: ./gradlew :desktopApp:packageDistributionForCurrentOS
 
       - name: Build Web JS
         run: ./gradlew :webApp:jsBrowserProductionWebpack
 
       - name: Build Web Wasm
         run: ./gradlew :webApp:wasmJsBrowserProductionWebpack
+
+      - name: Upload Android release artifacts
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: geministrator-android-release
+          path: |
+            androidApp/build/outputs/apk/release/*.apk
+            androidApp/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Upload Desktop build
+        uses: actions/upload-artifact@v4
+        with:
+          name: geministrator-desktop-linux
+          path: desktopApp/build/compose/binaries/main/**
+          if-no-files-found: error
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: webApp/build/dist/js/productionExecutable
+
+  deploy-pages:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
