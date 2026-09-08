@@ -49,6 +49,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Publish pinned h2g2 for isolated web resolution
+        run: |
+          mv vendor/conveyance-h2g2/vendor/Conveyance "$RUNNER_TEMP/haive-conveyance"
+          sed -i 's/group = "com.hereliesaz.conveyance"/group = "com.github.HereLiesAz"/' vendor/conveyance-h2g2/build.gradle.kts
+          sed -i 's/version = "0.1.0"/version = "faa80ed5aa063f6bdab42163d7b021123b248254"/' vendor/conveyance-h2g2/build.gradle.kts
+          ./vendor/conveyance-h2g2/gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
+          mv "$RUNNER_TEMP/haive-conveyance" vendor/conveyance-h2g2/vendor/Conveyance
+
       - name: Reconstruct and verify Android signing keystore
         id: signing
         if: github.event_name != 'pull_request'
@@ -97,10 +105,10 @@ jobs:
         run: ./gradlew :desktopApp:packageDistributionForCurrentOS
 
       - name: Build Web JS
-        run: ./gradlew :webApp:jsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
 
       - name: Build Web Wasm
-        run: ./gradlew :webApp:wasmJsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
       - name: Upload Android build
         if: github.event_name != 'pull_request'
