@@ -1,6 +1,6 @@
 # Geministrator
 
-Geministrator is a Compose Multiplatform control room for governed software-development workflows across interchangeable agentic providers.
+Geministrator is a Compose Multiplatform control room for governed software-development workflows across interchangeable executors and agentic providers.
 
 > Geministrator is not an agent. It is the company that hires agents.
 
@@ -10,35 +10,29 @@ Geministrator is a Compose Multiplatform control room for governed software-deve
 - Desktop
 - Web (JavaScript and WebAssembly)
 
-## Current status
-
-Geministrator 2 is being rebuilt from the project's original orchestration concepts. The active application foundation lives in:
-
-- `shared/`
-- `androidApp/`
-- `desktopApp/`
-- `webApp/`
-
-The older IDE-era implementation remains in the repository for historical reference but is no longer part of the active Gradle build.
-
 ## Architecture
 
-See:
+The active product lives in:
 
-- `docs/architecture/GEMINISTRATOR_2.md`
-- `docs/architecture/MILESTONE_1.md`
-- `SALVAGE_MANIFEST.md`
+- `shared/` — domain, workflow engine, shared UI, persistence, policies, and runtime projection
+- `providers/` — provider integrations, beginning with Jules
+- `androidApp/` — Android launcher
+- `desktopApp/` — desktop launcher
+- `webApp/` — browser launcher
 
-Historical snapshots are preserved under `salvage/` and should remain immutable.
+See `docs/architecture/ARCHITECTURE.md` for the current architecture.
 
 ## Build
 
 ```bash
+./gradlew :shared:desktopTest
 ./gradlew :androidApp:assembleDebug
-./gradlew :desktopApp:compileKotlin
+./gradlew :desktopApp:packageDistributionForCurrentOS
 ./gradlew :webApp:jsBrowserProductionWebpack
 ./gradlew :webApp:wasmJsBrowserProductionWebpack
 ```
+
+Pushes to `main` build Android, Desktop, JavaScript, and WebAssembly targets. The JavaScript production bundle is deployed to GitHub Pages after a successful build.
 
 ## License
 
