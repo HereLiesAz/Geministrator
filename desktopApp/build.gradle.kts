@@ -18,7 +18,7 @@ compose.desktop {
         mainClass = "com.hereliesaz.geministrator.MainKt"
 
         nativeDistributions {
-            packageName = "Geministrator"
+            packageName = "TheHaive"
             packageVersion = "0.1.0"
         }
     }
