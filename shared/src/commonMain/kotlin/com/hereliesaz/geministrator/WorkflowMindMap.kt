@@ -47,6 +47,7 @@ private val WorkflowNodes = ActiveWorkflow.associate { work ->
         motionSeed = work.position,
         motion = roleMotion(work.position),
         state = work.state.toH2g2State(),
+        progress = work.progress,
         injected = work.injectedReason != null,
         detail = buildString {
             work.staffing?.let { append("Staffed by $it") }
