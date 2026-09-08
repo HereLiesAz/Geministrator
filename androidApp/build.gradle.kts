@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.hereliesaz.geministrator"
+    namespace = "com.hereliesaz.haive"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.hereliesaz.geministrator"
+        applicationId = "com.hereliesaz.haive"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 3
@@ -18,7 +18,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keyStorePath = System.getenv("GEMINISTRATOR_KEYSTORE_PATH")
+            val keyStorePath = System.getenv("HAIVE_KEYSTORE_PATH")
             if (!keyStorePath.isNullOrBlank()) {
                 storeFile = file(keyStorePath)
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
@@ -30,7 +30,7 @@ android {
 
     buildTypes {
         release {
-            val keyStorePath = System.getenv("GEMINISTRATOR_KEYSTORE_PATH")
+            val keyStorePath = System.getenv("HAIVE_KEYSTORE_PATH")
             if (!keyStorePath.isNullOrBlank()) {
                 signingConfig = signingConfigs.getByName("release")
             }
