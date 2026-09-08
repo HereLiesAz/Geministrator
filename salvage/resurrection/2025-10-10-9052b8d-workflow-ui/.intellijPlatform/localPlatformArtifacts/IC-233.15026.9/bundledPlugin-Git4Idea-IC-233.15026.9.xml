@@ -1,0 +1,11 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="Git4Idea" revision="IC-233.15026.9"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="git4idea-rt" ext="jar" conf="default" url="plugins/vcs-git/lib"/>
+    <artifact name="vcs-git" ext="jar" conf="default" url="plugins/vcs-git/lib"/>
+  </publications>
+  <dependencies/>
+</ivy-module>

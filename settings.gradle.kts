@@ -1,34 +1,35 @@
-﻿pluginManagement {
+pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
-        maven { url = uri("https://chaquo.com/maven") }
-    }
-    plugins {
-        id("com.chaquo.python")
-        id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version "2.0.1" apply false
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+val localH2g2 = file("vendor/conveyance-h2g2")
+if (localH2g2.exists()) {
+    includeBuild(localH2g2) {
+        dependencySubstitution {
+            substitute(module("com.github.HereLiesAz:conveyance-h2g2"))
+                .using(project(":"))
+        }
+    }
 }
 
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        gradlePluginPortal()
-        mavenLocal()
         maven("https://jitpack.io")
-        maven { url = uri("https://chaquo.com/maven") }
-        maven { url = uri("https://maven.google.com") } 
     }
 }
 
 rootProject.name = "Geministrator"
 
-include(":app")
-include(":github-api-client")
-include(":jules-cli-client")
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+include(":shared")
+include(":providers:jules")
+include(":androidApp")
+include(":desktopApp")
+include(":webApp")

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Default to backing up all content -->
+    <include
+        domain="file"
+        path="." />
+    <!-- You can add exclude rules here if you don't want to back up certain files -->
+</full-backup-content>

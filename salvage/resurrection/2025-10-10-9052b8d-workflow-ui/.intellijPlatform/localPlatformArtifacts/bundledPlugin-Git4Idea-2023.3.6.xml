@@ -1,0 +1,10 @@
+<ivy-module version="2.0">
+  <info organisation="bundledPlugin" module="Git4Idea" revision="2023.3.6" publication="20250807152151"/>
+  <configurations>
+    <conf name="default" visibility="public"/>
+  </configurations>
+  <publications>
+    <artifact name="/Users/azrie/.gradle/caches/8.14.3/transforms/4922569c57518c271f0972e5b5f229fc/transformed/ideaIC-2023.3.6-win/plugins/vcs-git" type="directory" conf="default"/>
+  </publications>
+  <dependencies/>
+</ivy-module>
