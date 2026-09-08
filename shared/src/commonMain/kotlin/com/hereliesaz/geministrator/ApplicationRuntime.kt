@@ -21,6 +21,8 @@ import com.hereliesaz.geministrator.workflow.WorkflowRuntimeCoordinator
 import com.hereliesaz.geministrator.workflow.WorkflowRuntimeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +57,7 @@ class ApplicationRuntime private constructor(
     val engine: WorkflowEngine,
     val coordinator: WorkflowRuntimeCoordinator,
     val publisher: WorkflowRuntimePublisher,
-    private val scope: CoroutineScope,
+    private val runtimeScope: CoroutineScope,
     private val roles: List<RoleDefinition>,
 ) {
     private data class Current(
@@ -72,20 +74,28 @@ class ApplicationRuntime private constructor(
     suspend fun loadLatest() {
         publisher.publish(ApplicationRuntimeState.Loading)
         try {
-            val project = persistence.projects.all().maxByOrNull(Project::updatedAtEpochMillis)
-            if (project == null) {
+            val projects = persistence.projects.all()
+            if (projects.isEmpty()) {
                 current = null
                 publisher.publish(ApplicationRuntimeState.NoProject)
                 return
             }
 
-            val run = persistence.runs.byProject(project.id).maxByOrNull { it.updatedAtEpochMillis }
-            if (run == null) {
+            val latestProjectRun = projects
+                .flatMap { project -> persistence.runs.byProject(project.id).map { run -> project to run } }
+                .maxByOrNull { (_, run) -> run.updatedAtEpochMillis }
+
+            if (latestProjectRun == null) {
                 current = null
-                publisher.publish(ApplicationRuntimeState.NoRun(project))
+                publisher.publish(
+                    ApplicationRuntimeState.NoRun(
+                        projects.maxByOrNull(Project::updatedAtEpochMillis) ?: projects.first(),
+                    ),
+                )
                 return
             }
 
+            val (project, run) = latestProjectRun
             val definition = persistence.definitions.get(run.workflowDefinitionId)
                 ?: error("Workflow definition ${run.workflowDefinitionId.value} was not found")
             val runtimeState = coordinator.resume(run.id)
@@ -100,9 +110,15 @@ class ApplicationRuntime private constructor(
 
     suspend fun refresh() = loadLatest()
 
+    fun close() {
+        cycleJob?.cancel()
+        cycleJob = null
+        runtimeScope.cancel()
+    }
+
     private fun startCycling() {
         if (cycleJob?.isActive == true) return
-        cycleJob = scope.launch {
+        cycleJob = runtimeScope.launch {
             while (isActive) {
                 delay(CYCLE_INTERVAL_MILLIS)
                 val snapshot = current ?: continue
@@ -119,7 +135,7 @@ class ApplicationRuntime private constructor(
                     publishCurrent()
                 } catch (failure: Throwable) {
                     publishFailure(failure)
-                    return@launch
+                    delay(RETRY_BACKOFF_MILLIS)
                 }
             }
         }
@@ -139,9 +155,15 @@ class ApplicationRuntime private constructor(
     }
 
     private fun publishFailure(failure: Throwable) {
-        val message = failure.message?.takeIf(String::isNotBlank) ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime failure" }
+        val message = failure.message?.takeIf(String::isNotBlank)
+            ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime failure" }
         val disconnected = message.contains("provider", ignoreCase = true) &&
-            (message.contains("registered", ignoreCase = true) || message.contains("connect", ignoreCase = true))
+            (
+                message.contains("registered", ignoreCase = true) ||
+                    message.contains("connect", ignoreCase = true) ||
+                    message.contains("network", ignoreCase = true) ||
+                    message.contains("timeout", ignoreCase = true)
+                )
         publisher.publish(
             if (disconnected) ApplicationRuntimeState.Disconnected(message)
             else ApplicationRuntimeState.ResumeFailed(message),
@@ -161,37 +183,57 @@ class ApplicationRuntime private constructor(
 
     companion object {
         private const val CYCLE_INTERVAL_MILLIS = 1_000L
+        private const val RETRY_BACKOFF_MILLIS = 2_000L
 
         suspend fun create(
             providers: Collection<AgentProvider>,
             scope: CoroutineScope,
             persistence: WorkflowPersistence = SettingsWorkflowPersistence.createDefault(),
         ): ApplicationRuntime {
-            val storedRoles = persistence.roles.all()
-            val roles = (BuiltInRoles.all + storedRoles).associateBy(RoleDefinition::id).values.toList()
+            val runtimeJob = SupervisorJob(scope.coroutineContext[Job])
+            val runtimeScope = CoroutineScope(scope.coroutineContext + runtimeJob)
             val registry = AgentProviderRegistry(providers)
-            val gateway = ProviderBackedManagedSessionGateway(registry, scope)
+            val gateway = ProviderBackedManagedSessionGateway(registry, runtimeScope)
             val publisher = WorkflowRuntimePublisher()
-            val engine = WorkflowEngine(
-                sessionGateway = gateway,
-                roles = roles,
-                eventSink = RepositoryWorkflowEventSink(persistence.events),
-            )
-            val coordinator = WorkflowRuntimeCoordinator(
-                persistence = persistence,
-                engine = engine,
-                sessionGateway = gateway,
-            )
-            return ApplicationRuntime(
-                persistence = persistence,
-                providerRegistry = registry,
-                sessionGateway = gateway,
-                engine = engine,
-                coordinator = coordinator,
-                publisher = publisher,
-                scope = scope,
-                roles = roles,
-            ).also { it.loadLatest() }
+
+            fun build(roles: List<RoleDefinition>): ApplicationRuntime {
+                val engine = WorkflowEngine(
+                    sessionGateway = gateway,
+                    roles = roles,
+                    eventSink = RepositoryWorkflowEventSink(persistence.events),
+                )
+                val coordinator = WorkflowRuntimeCoordinator(
+                    persistence = persistence,
+                    engine = engine,
+                    sessionGateway = gateway,
+                )
+                return ApplicationRuntime(
+                    persistence = persistence,
+                    providerRegistry = registry,
+                    sessionGateway = gateway,
+                    engine = engine,
+                    coordinator = coordinator,
+                    publisher = publisher,
+                    runtimeScope = runtimeScope,
+                    roles = roles,
+                )
+            }
+
+            val runtime = try {
+                val storedRoles = persistence.roles.all()
+                val roles = (BuiltInRoles.all + storedRoles)
+                    .associateBy(RoleDefinition::id)
+                    .values
+                    .toList()
+                build(roles)
+            } catch (failure: Throwable) {
+                build(BuiltInRoles.all).also { it.publishFailure(failure) }
+            }
+
+            if (runtime.state.value == ApplicationRuntimeState.Loading) {
+                runtime.loadLatest()
+            }
+            return runtime
         }
     }
 }
