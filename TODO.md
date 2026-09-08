@@ -1,0 +1,153 @@
+# The Haive — TODO
+
+This is the canonical near-term roadmap for The Haive. It is ordered by product dependency: make the execution model correct first, then make it genuinely usable, then broaden providers and delivery.
+
+Tracking issue: #35
+
+## P0 — Make the runtime model correct
+
+- [ ] Separate **task responsibility** from **executor identity**.
+  - `TaskDefinition` must stop assuming every task is backed by a `RoleDefinitionId`.
+  - Introduce an executor-neutral contract that can represent role-backed agent work, GitHub Actions, test runners, deployments, repository operations, human approvals, external services, and nested Haive workflows.
+  - Preserve role semantics for responsibility/authority without forcing non-agent work to masquerade as an employee.
+- [ ] Refactor dispatch around executor capabilities rather than role-only provider assignment.
+- [ ] Update workflow validation for the new executor model.
+- [ ] Update persistence/schema for executor-neutral task definitions and runs, with an explicit migration from the current schema.
+- [ ] Update workflow events so executor assignment/progress/completion are neutral across agent and non-agent execution.
+- [ ] Extend `WorkflowMindMapProjection` so node identity can come from role, executor type, or system operation without inventing fake roles.
+- [ ] Add tests for mixed workflows: agent + GitHub Action + approval + deployment in the same DAG.
+
+## P0 — Wire the live runtime into the app
+
+- [ ] Remove the sample `ActiveWorkflow` as the normal startup path; keep it only as preview/demo data if still useful.
+- [ ] Create the real application bootstrap that builds persistence, provider registry, workflow engine, and runtime publisher.
+- [ ] Feed live `WorkflowDefinition` + `WorkflowRun` state into `LiveWorkflowPresentation` continuously.
+- [ ] Make selection/technical inspector survive live state updates.
+- [ ] Show real task artifacts, attempts, blocking reasons, provider/executor IDs, and progress in the inspector.
+- [ ] Add explicit empty, loading, disconnected, failed-to-resume, and no-project states.
+
+## P0 — Make one complete workflow actually work end-to-end
+
+- [ ] Create/import a project.
+- [ ] Define an objective.
+- [ ] Materialize a workflow definition.
+- [ ] Approve any required plan/specification gates.
+- [ ] Dispatch Jules-backed work.
+- [ ] Reconcile Jules progress without fabricating percentages.
+- [ ] Persist and resume the run after process/browser restart.
+- [ ] Collect artifacts.
+- [ ] Run verification/review stages.
+- [ ] Reach a terminal run state with a clear outcome.
+- [ ] Verify this flow on Android, Desktop, JS, and Wasm where provider/browser constraints permit.
+
+## P1 — GitHub as a first-class executor/integration
+
+- [ ] Add a repository integration boundary separate from agent providers.
+- [ ] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
+- [ ] Read workflow run/job/step status and project it into task progress.
+- [ ] Capture build/test artifacts and attach them to Haive task/run artifacts.
+- [ ] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
+- [ ] Add explicit approval/policy boundaries before destructive or publishing operations.
+- [ ] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
+
+## P1 — Workflow authoring and governance
+
+- [ ] Build the workflow template editor around the DAG rather than a generic form.
+- [ ] Add/create/edit role definitions and standing instructions.
+- [ ] Add executor selection/policy per task or task class.
+- [ ] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
+- [ ] Add human approval UI with clear evidence, decision scope, and consequences.
+- [ ] Add retry/escalation policy UI.
+- [ ] Add bounded concurrency controls.
+- [ ] Validate workflows before execution and explain invalid dependency/policy states in human language.
+
+## P1 — Provider system
+
+- [ ] Finish Jules as the reference provider implementation.
+- [ ] Define provider configuration UI and secure credential handling per platform.
+- [ ] Add provider health/capability reporting.
+- [ ] Add provider-neutral token/cost/latency telemetry where providers expose it.
+- [ ] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
+- [ ] Add a second provider to prove interchangeability; choose based on the best supported API at implementation time rather than hard-coding the architecture to Gemini/OpenAI/Claude.
+- [ ] Test provider substitution for the same role/task contract.
+
+## P1 — Persistence and recovery
+
+- [ ] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
+- [ ] Add corruption/recovery handling and a user-visible recovery path.
+- [ ] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
+- [ ] Add run export/import for debugging and portability.
+- [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
+- [ ] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
+
+## P1 — H2G2 execution surface
+
+- [ ] Keep the mindmap as a projection of runtime truth; do not put execution state into renderer state.
+- [ ] Add distinct visual identities for non-agent executor nodes without losing the shared H2G2 language.
+- [ ] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
+- [ ] Define equivalent motion/behavior rules for system executors.
+- [ ] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
+- [ ] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
+- [ ] Improve tiny-screen/mobile behavior without turning the product into a conventional dashboard.
+- [ ] Accessibility pass: reduced motion, contrast, semantics, keyboard/focus, screen-reader labels.
+
+## P1 — Product shell
+
+- [ ] Replace placeholder screens for Workflows, Company, Artifacts, Inbox, and Settings with real data-backed surfaces.
+- [ ] Project chooser / recent projects.
+- [ ] Run history and resumable active runs.
+- [ ] Artifact browser with provenance.
+- [ ] Inbox for approvals, failures, escalations, and requests for human attention.
+- [ ] Settings for providers, execution policy, appearance, privacy/data controls, and diagnostics.
+- [ ] Surface The Haive icon/brand consistently across Android, Desktop, and Web.
+
+## P1 — Delivery
+
+- [ ] Keep `main` CI green across shared tests, Jules provider, Android, Desktop, JS, and Wasm.
+- [ ] Confirm Android release signing from reconstructed keystore material on CI.
+- [ ] Add Google Play publishing using `PLAY_SERVICE_ACCOUNT_JSON` as a separate publishing job.
+- [ ] Automatically publish the desired Google Play internal-testing track after a successful release build.
+- [ ] Ensure versionCode/versionName have one clear source of truth and cannot regress.
+- [ ] Verify GitHub Pages deployment after the rename to `haive` and `haive.js`.
+- [ ] Package Desktop icon/metadata correctly for each supported OS.
+- [ ] Add release notes/changelog generation from actual shipped changes.
+
+## P2 — Security and privacy hardening
+
+- [ ] Implement platform-secure credential storage; credentials must never enter workflow persistence.
+- [ ] Audit provider payloads so users can see what context leaves the device before execution.
+- [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
+- [ ] Add clear data deletion controls for local workflow state.
+- [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
+- [ ] Add dependency/security scanning without blocking development on noisy non-actionable findings.
+- [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
+
+## P2 — Cost and observability
+
+- [ ] Per-run/provider/executor timing.
+- [ ] Token and cost accounting where available.
+- [ ] Cache-hit/cache-write observability where supported.
+- [ ] Retry and failure-rate metrics.
+- [ ] Run timeline/event viewer.
+- [ ] Exportable diagnostic bundle with secrets stripped.
+
+## P2 — Workflow composition
+
+- [ ] Nested Haive workflows as executors.
+- [ ] Reusable workflow fragments/subgraphs.
+- [ ] Conditional branches grounded in explicit outputs/evidence.
+- [ ] Fan-out/fan-in helpers without hiding the underlying DAG.
+- [ ] Cross-project workflows where permissions allow them.
+
+## P2 — Brand and release polish
+
+- [ ] Final Android adaptive-icon safe-zone check at launcher sizes.
+- [ ] Validate monochrome/themed Android icon on supported launchers.
+- [ ] Final Play Store icon/screenshots/feature graphic.
+- [ ] Splash/loading treatment using the approved Haive mark.
+- [ ] Make the privacy-policy URL stable for Play Store listing.
+- [ ] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
+
+## Definition of a useful alpha
+
+The Haive is ready to call an alpha when a user can open a project, give it an objective, approve the generated plan where required, watch a real mixed workflow execute in the H2G2 mindmap, leave/restart the app without losing the run, inspect evidence and failures, intervene at explicit gates, and reach a verified terminal outcome — without any non-agent executor pretending to be an AI employee.
