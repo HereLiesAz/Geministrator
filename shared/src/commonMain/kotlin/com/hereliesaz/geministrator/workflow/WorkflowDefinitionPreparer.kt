@@ -9,7 +9,9 @@ import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 
 class WorkflowDefinitionPreparer(
     private val providerRegistry: AgentProviderRegistry,
@@ -22,15 +24,17 @@ class WorkflowDefinitionPreparer(
         val originalIds = withTestDesign.tasks.mapTo(mutableSetOf()) { it.id }
         val prepared = buildList {
             for (task in withTestDesign.tasks) {
-                if (task.roleId == BuiltInRoles.EpaRepresentative.id ||
+                val executor = task.effectiveExecutor()
+                if (executor !is TaskExecutor.RoleAgent ||
+                    executor.roleId == BuiltInRoles.EpaRepresentative.id ||
                     task.environmentPlanningPolicy == EnvironmentPlanningPolicy.NotRequired
                 ) {
                     add(task)
                     continue
                 }
 
-                val role = requireNotNull(rolesById[task.roleId]) {
-                    "Role ${task.roleId.value} is not registered"
+                val role = requireNotNull(rolesById[executor.roleId]) {
+                    "Role ${executor.roleId.value} is not registered"
                 }
                 val selectedProvider = providerRegistry.select(
                     ProviderSelectionRequest(
@@ -60,6 +64,7 @@ class WorkflowDefinitionPreparer(
                         name = "Environment plan: ${task.name}",
                         objective = "Determine the smallest safe reproducible execution environment for '${task.name}' using provider '${selectedProvider.id.value}', repository constraints, required tools, services, secrets, network access, isolation, and resource needs.",
                         roleId = BuiltInRoles.EpaRepresentative.id,
+                        executor = TaskExecutor.RoleAgent(BuiltInRoles.EpaRepresentative.id),
                         dependsOn = task.dependsOn,
                         acceptanceCriteria = task.acceptanceCriteria,
                         requiredArtifacts = setOf(ArtifactKind.EnvironmentSpecification),
