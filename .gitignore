@@ -1,56 +1,42 @@
-# Android Studio
-.gradle
-/build
-/captures
-.DS_Store
-local.properties
-.idea/
-.idea/caches/
-.idea/libraries/
-.idea/modules.xml
-.idea/workspace.xml
-.idea/navEditor.xml
-.idea/assetWizardSettings.xml
-*.iws
-*.iml
-*.ipr
-
-# Gradle
-build/
+# Gradle / Kotlin
 .gradle/
+build/
+**/build/
+.kotlin/
 !gradle/wrapper/gradle-wrapper.jar
 !**/gradle/wrapper/gradle-wrapper.jar
 
-# Geministrator
-.orchestrator/
-google-services.json
-app/libnode/
+# IDEs
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
 
-# Node (for VSCode plugin)
+# Platform/local files
+local.properties
+.DS_Store
+captures/
+
+# Credentials and signing
+google-services.json
+*.keystore
+*.jks
+
+# Node/Web
 node_modules/
 npm-debug.log
 yarn-error.log
 yarn.lock
 package-lock.json
 
-# VSCode
-.vscode/
-*.vsix
-
-# Generated files
+# Generated binaries
 *.apk
 *.aab
 *.ap_
 *.dex
 *.class
 *.jar
-*.keystore
-*.jks
 
-# Log files
+# Logs
 *.log
-/.kotlin/sessions/kotlin-compiler-17060980992664704555.salive
-kotlin-compiler-*
-/app/google-services.json
-/backup_for_ai.ps1
-/project_backup_full_2025-10-15_14-06-43.txt
