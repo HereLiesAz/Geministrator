@@ -6,16 +6,16 @@ Tracking issue: #35
 
 ## P0 — Make the runtime model correct
 
-- [ ] Separate **task responsibility** from **executor identity**.
+- [x] Separate **task responsibility** from **executor identity**.
   - `TaskDefinition` must stop assuming every task is backed by a `RoleDefinitionId`.
   - Introduce an executor-neutral contract that can represent role-backed agent work, GitHub Actions, test runners, deployments, repository operations, human approvals, external services, and nested Haive workflows.
   - Preserve role semantics for responsibility/authority without forcing non-agent work to masquerade as an employee.
-- [ ] Refactor dispatch around executor capabilities rather than role-only provider assignment.
-- [ ] Update workflow validation for the new executor model.
-- [ ] Update persistence/schema for executor-neutral task definitions and runs, with an explicit migration from the current schema.
-- [ ] Update workflow events so executor assignment/progress/completion are neutral across agent and non-agent execution.
-- [ ] Extend `WorkflowMindMapProjection` so node identity can come from role, executor type, or system operation without inventing fake roles.
-- [ ] Add tests for mixed workflows: agent + GitHub Action + approval + deployment in the same DAG.
+- [x] Refactor dispatch around executor capabilities rather than role-only provider assignment.
+- [x] Update workflow validation for the new executor model.
+- [x] Update persistence/schema for executor-neutral task definitions and runs, with an explicit migration from the current schema.
+- [x] Update workflow events so executor assignment/progress/completion are neutral across agent and non-agent execution.
+- [x] Extend `WorkflowMindMapProjection` so node identity can come from role, executor type, or system operation without inventing fake roles.
+- [x] Add tests for mixed workflows: agent + GitHub Action + approval + deployment in the same DAG.
 
 ## P0 — Wire the live runtime into the app
 
