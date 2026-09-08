@@ -10,7 +10,7 @@ kotlin {
     js {
         browser {
             commonWebpackConfig {
-                outputFileName = "geministrator.js"
+                outputFileName = "haive.js"
             }
         }
         binaries.executable()
@@ -20,7 +20,7 @@ kotlin {
     wasmJs {
         browser {
             commonWebpackConfig {
-                outputFileName = "geministrator.js"
+                outputFileName = "haive.js"
             }
         }
         binaries.executable()
