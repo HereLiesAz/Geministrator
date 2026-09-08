@@ -13,6 +13,8 @@ import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
 
 object WorkflowRunFactory {
+    const val EXECUTOR_INTEGRATION_UNAVAILABLE = "EXECUTOR_INTEGRATION_UNAVAILABLE"
+
     fun create(
         definition: WorkflowDefinition,
         workflowRunId: WorkflowRunId,
@@ -62,6 +64,7 @@ object WorkflowRunFactory {
         val definitionsById = definition.tasks.associateBy { it.id }
         val refreshed = run.taskRuns.mapValues { (taskId, taskRun) ->
             if (taskRun.status != TaskRunStatus.Blocked) return@mapValues taskRun
+            if (taskRun.blockingReason?.code == EXECUTOR_INTEGRATION_UNAVAILABLE) return@mapValues taskRun
 
             val task = definitionsById[taskId] ?: return@mapValues taskRun
             val dependencyRuns = task.dependsOn.mapNotNull(run.taskRuns::get)
