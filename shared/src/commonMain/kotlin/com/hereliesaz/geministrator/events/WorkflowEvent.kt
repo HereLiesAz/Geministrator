@@ -4,6 +4,7 @@ import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import kotlinx.serialization.Serializable
 
@@ -15,6 +16,7 @@ sealed interface WorkflowEvent {
 
 @Serializable data class WorkflowCreated(override val workflowRunId: WorkflowRunId, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class TaskBecameReady(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, override val occurredAtEpochMillis: Long) : WorkflowEvent
+@Serializable data class ExecutorAssigned(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val executor: TaskExecutor, val responsibilityRoleId: RoleDefinitionId? = null, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class AgentAssigned(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val roleId: RoleDefinitionId, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class TaskStarted(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val attempt: Int, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class ApprovalRequired(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val gateId: ApprovalGateId? = null, val reason: String, override val occurredAtEpochMillis: Long) : WorkflowEvent
