@@ -10,9 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.TaskRunStatus
@@ -23,11 +28,16 @@ internal fun MindMapRunScreen(
     modifier: Modifier,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
+    onLaunchWorkflow: (String, String) -> Unit,
     compact: Boolean,
     runtimeState: ApplicationRuntimeState,
 ) {
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     val activityEntrance = remember { AzphaltEntrance.childBand() }
+    var projectName by remember(runtimeState) {
+        mutableStateOf((runtimeState as? ApplicationRuntimeState.NoRun)?.project?.name.orEmpty())
+    }
+    var objective by remember(runtimeState) { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -38,6 +48,28 @@ internal fun MindMapRunScreen(
     ) {
         if (liveWorkflow == null) {
             RuntimeStateRecord(runtimeState, compact)
+            if (runtimeState == ApplicationRuntimeState.NoProject || runtimeState is ApplicationRuntimeState.NoRun) {
+                OutlinedTextField(
+                    value = projectName,
+                    onValueChange = { projectName = it },
+                    label = { Text("Project name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = objective,
+                    onValueChange = { objective = it },
+                    label = { Text("Objective") },
+                    minLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Button(
+                    onClick = { onLaunchWorkflow(projectName.trim(), objective.trim()) },
+                    enabled = projectName.isNotBlank() && objective.isNotBlank(),
+                ) {
+                    Text(if (runtimeState is ApplicationRuntimeState.NoRun) "START RUN" else "CREATE PROJECT + START RUN")
+                }
+            }
             Spacer(Modifier.height(24.dp))
             return@Column
         }
@@ -120,8 +152,8 @@ internal fun MindMapRunScreen(
 private fun RuntimeStateRecord(state: ApplicationRuntimeState, compact: Boolean) {
     val (title, body) = when (state) {
         ApplicationRuntimeState.Loading -> "LOADING RUNTIME" to "Reading persisted workflow state."
-        ApplicationRuntimeState.NoProject -> "NO PROJECT" to "There is no persisted project to run."
-        is ApplicationRuntimeState.NoRun -> "NO ACTIVE RUN" to "${state.project.name} has no persisted workflow run."
+        ApplicationRuntimeState.NoProject -> "NO PROJECT" to "Create a project and define its first objective below."
+        is ApplicationRuntimeState.NoRun -> "NO ACTIVE RUN" to "${state.project.name} has no persisted workflow run. Define an objective below to start one."
         is ApplicationRuntimeState.Disconnected -> "RUNTIME DISCONNECTED" to state.message
         is ApplicationRuntimeState.ResumeFailed -> "RESUME FAILED" to state.message
         is ApplicationRuntimeState.Live -> return
