@@ -1,108 +1,70 @@
-# Prompt Caching Strategy
+# Prompt reuse and caching
 
-Geministrator must treat prompt caching as a provider optimization, not as workflow semantics.
+Prompt caching is a provider optimization. It is not workflow semantics and a cache hit must never be required for correctness.
 
-## Core rule
+## Neutral prompt structure
 
-The workflow engine owns prompt structure. Providers own cache mechanics.
+A task request is divided into two ordered regions:
 
-A task request is split into two ordered prompt regions:
+1. `stablePrefix` — standing instructions, role instructions, repository conventions, approved specifications, architecture, approved verification contracts, and other context expected to repeat.
+2. `dynamicContext` — the current task objective, current artifacts, retry-specific failure context, recent events, and other volatile information.
 
-1. `stablePrefix` — standing instructions, role instructions, project conventions, approved specifications, architecture, reusable tool guidance, and other context expected to repeat across related agent runs.
-2. `dynamicContext` — the current task objective, current artifacts, attempt-specific failure context, recent events, and other volatile information.
-
-Stable context must come first whenever provider behavior permits it. Dynamic context belongs at the end. This maximizes prefix reuse for providers that cache matching prefixes while keeping the domain independent of any provider API.
+Stable context should remain deterministic and come first when provider behavior permits it. Dynamic material belongs after it.
 
 ## Provider-neutral contract
 
-`PromptContext` carries:
+`PromptContext` carries stable blocks, dynamic blocks, a `PromptReusePolicy`, and an optional logical cache namespace.
 
-- stable prompt blocks
-- dynamic prompt blocks
-- `PromptReusePolicy`
-- an optional cache namespace
+Provider capability reporting may describe mechanisms such as:
 
-`AgentCapabilities.promptCaching` reports the mechanisms a provider can actually support:
+- unsupported
+- implicit prefix reuse
+- explicit reusable context
+- explicit breakpoints
+- session-scoped reuse
 
-- `Unsupported`
-- `ImplicitPrefix`
-- `ExplicitReusableContext`
-- `ExplicitBreakpoints`
-- `SessionScoped`
+The workflow engine may prefer reuse but must behave identically when no cache exists.
 
-The workflow engine may prefer reuse but must never require a cache hit for correctness.
+## Jules
 
-## Provider mapping
+The currently exposed Jules REST activity/session model provides session continuity but does not document a first-class prompt-cache resource or exact cache-hit controls. The Jules adapter should therefore use only behavior that the API actually exposes and must not fabricate cache telemetry.
 
-### Jules
+For separate sessions, The Haive should still keep stable prompt structure deterministic so provider-side reuse remains possible without becoming a dependency.
 
-The public Jules REST API currently exposes sessions as contiguous units of work and supports follow-up messages within a session. It does not currently document explicit prompt-cache resources or cache-control request fields. `JulesProvider` should therefore advertise `SessionScoped` reuse only when it can preserve context through the same Jules session. It must not fabricate cache-hit telemetry.
+## Other providers
 
-For separate Jules sessions, Geministrator should still keep the stable prefix structurally identical so that any provider-side optimization remains possible without depending on undocumented behavior.
+A future provider may map the same neutral structure onto implicit prefix caching, explicit cached-content resources, cache keys, or cache-control breakpoints.
 
-### Gemini API
+Those mappings belong inside provider adapters. Provider cache IDs never become domain identity.
 
-Gemini 2.5 and newer models support implicit context caching, and the `generateContent` API can also use explicit cached-content resources. Stable common content should be placed first. A future direct `GeminiProvider` may map `stablePrefix` to explicit cached content when economical and otherwise rely on implicit caching.
-
-### OpenAI
-
-OpenAI supports prompt caching for eligible models, including stable-prefix reuse and explicit cache controls on current Responses APIs. A future `OpenAIProvider` should preserve deterministic stable-prefix ordering, use an appropriate cache namespace/key, and expose usage telemetry when returned by the API.
-
-### Anthropic
-
-Anthropic supports prompt caching and explicit cache breakpoints on supported APIs. A future `ClaudeProvider` may map stable prompt boundaries to provider cache-control breakpoints while retaining the same provider-neutral `PromptContext` contract.
-
-## What belongs in the stable prefix
-
-Good candidates:
+## Good stable-prefix candidates
 
 - company-wide operating rules
-- role definition and standing instructions
+- role definitions and standing instructions
 - repository conventions
 - architecture constraints
-- approved product specification
-- approved pre-code verification contract
+- approved product specifications
+- approved pre-code verification contracts
 - tool-use rules
-- unchanged environment specification
+- unchanged environment specifications
 
-Poor candidates:
+## Poor stable-prefix candidates
 
-- current retry error
+- current retry errors
 - latest test output
-- current task-specific request
 - timestamps
-- volatile branch or PR state
-- recent agent messages
+- volatile branch/PR state
+- current task-specific requests
+- recent provider messages
 
-## Pre-code testing interaction
+## Approved verification artifacts
 
-Pre-code verification artifacts are especially valuable cache candidates because they become immutable after approval. The same approved specification, architecture, and verification contract may be consumed by the implementation engineer, Crash Test Dummy implementation pass, QA engineer, code reviewer, and recovery engineer.
+Approved pre-code verification artifacts are particularly useful reusable context because the same specification and verification contract may be consumed by implementation, Crash Test Dummy, QA, review, and recovery work.
 
-The implementation agent must not be allowed to edit approved pre-code verification artifacts. Any requested revision creates a new approval event and therefore a new stable-context version/cache namespace.
-
-## Cache identity
-
-Do not use provider cache IDs as domain identity.
-
-A cache namespace should be derived from stable logical inputs such as:
-
-- project
-- workflow definition/version
-- role definition/version
-- approved specification version
-- approved verification-contract version
-
-Provider adapters may translate that namespace into their own cache key/resource/breakpoint mechanism.
+If an approved artifact changes, that is a new logical version and therefore a new cache identity.
 
 ## Observability
 
-When a provider reports cache metrics, Geministrator should eventually record:
+When a provider exposes cache metrics, The Haive may record operational values such as reusable input tokens, cache-hit tokens, cache writes, estimated cost difference, and latency impact.
 
-- reusable input tokens
-- cache-hit tokens
-- cache-write tokens if applicable
-- estimated uncached cost
-- estimated cached cost
-- latency impact
-
-These are operational metrics only. They must never change task correctness or approval state.
+These metrics are diagnostic only. They must never change task correctness, approval state, or verification requirements.
