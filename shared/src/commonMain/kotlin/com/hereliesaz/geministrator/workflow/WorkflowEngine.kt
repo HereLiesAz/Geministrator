@@ -9,13 +9,16 @@ import com.hereliesaz.geministrator.domain.RetryReason
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 import com.hereliesaz.geministrator.events.AgentAssigned
 import com.hereliesaz.geministrator.events.ArtifactCreated
+import com.hereliesaz.geministrator.events.ExecutorAssigned
 import com.hereliesaz.geministrator.events.HumanDecisionRequired
 import com.hereliesaz.geministrator.events.NoOpWorkflowEventSink
 import com.hereliesaz.geministrator.events.RetryScheduled
@@ -75,81 +78,141 @@ class WorkflowEngine(
             if (remainingSlots == 0) break
 
             val task = requireNotNull(definitionsById[taskRun.taskDefinitionId])
-            val role = requireNotNull(rolesById[taskRun.assignedRoleId]) {
-                "Role ${taskRun.assignedRoleId.value} is not registered"
-            }
-            require(role.enabled) { "Role ${role.name} is disabled" }
+            val executor = taskRun.executor ?: task.effectiveExecutor()
 
-            val selection = ProviderSelectionRequest(
-                preferredProviderId = role.preferredProviderId,
-                requiredCapabilities = role.capabilitiesRequired,
-                constraints = task.providerConstraints,
-            )
-            val providerId = sessionGateway.resolveProvider(selection)
-            val providerLimit = definition.concurrencyPolicy.perProviderLimits[providerId] ?: Int.MAX_VALUE
-            val providerActive = activeByProvider[providerId] ?: 0
-            if (providerActive >= providerLimit) continue
+            when (executor) {
+                is TaskExecutor.RoleAgent -> {
+                    val role = requireNotNull(rolesById[executor.roleId]) {
+                        "Role ${executor.roleId.value} is not registered"
+                    }
+                    require(role.enabled) { "Role ${role.name} is disabled" }
 
-            val dependencyArtifacts = task.dependsOn
-                .mapNotNull(nextRun.taskRuns::get)
-                .flatMap(TaskRun::artifacts)
-
-            val request = AgentTaskRequest(
-                taskRunId = taskRun.id,
-                objective = task.objective,
-                roleInstructions = role.instructions,
-                acceptanceCriteria = task.acceptanceCriteria,
-                contextArtifacts = dependencyArtifacts,
-                repository = project.repository,
-                requirePlanApproval = task.approvalPolicy != ApprovalPolicy.None,
-                promptContext = PromptContext(
-                    stablePrefix = listOf(
-                        PromptContextBlock("Workflow objective", nextRun.objective),
-                        PromptContextBlock("Role", role.instructions),
-                    ),
-                    dynamicContext = listOf(
-                        PromptContextBlock("Task", task.objective),
-                        PromptContextBlock("Attempt", taskRun.attempt.toString()),
-                    ),
-                    reusePolicy = definition.promptReusePolicy,
-                    cacheNamespace = "${nextRun.id.value}:${role.id.value}",
-                ),
-            )
-
-            val handle = sessionGateway.createSession(
-                ManagedSessionRequest(
-                    providerSelection = selection.copy(
-                        preferredProviderId = providerId,
-                        constraints = ProviderConstraints.RequireProvider(providerId),
-                    ),
-                    taskRequest = request,
-                ),
-            )
-
-            handles[task.id] = handle
-            val startedStatus = if (request.requirePlanApproval) TaskRunStatus.Planning else TaskRunStatus.Running
-            nextRun = nextRun.copy(
-                taskRuns = nextRun.taskRuns + (
-                    task.id to taskRun.copy(
-                        status = startedStatus,
-                        assignedRoleId = role.id,
-                        assignedProviderId = handle.providerId,
-                        providerRunId = handle.providerRunId,
-                        blockingReason = null,
-                        progress = null,
-                        progressMessage = null,
+                    val selection = ProviderSelectionRequest(
+                        preferredProviderId = role.preferredProviderId,
+                        requiredCapabilities = role.capabilitiesRequired,
+                        constraints = task.providerConstraints,
                     )
-                ),
-                updatedAtEpochMillis = nowEpochMillis,
-            )
-            activeByProvider[providerId] = providerActive + 1
-            remainingSlots -= 1
+                    val providerId = sessionGateway.resolveProvider(selection)
+                    val providerLimit = definition.concurrencyPolicy.perProviderLimits[providerId] ?: Int.MAX_VALUE
+                    val providerActive = activeByProvider[providerId] ?: 0
+                    if (providerActive >= providerLimit) continue
+
+                    val dependencyArtifacts = task.dependsOn
+                        .mapNotNull(nextRun.taskRuns::get)
+                        .flatMap(TaskRun::artifacts)
+
+                    val request = AgentTaskRequest(
+                        taskRunId = taskRun.id,
+                        objective = task.objective,
+                        roleInstructions = role.instructions,
+                        acceptanceCriteria = task.acceptanceCriteria,
+                        contextArtifacts = dependencyArtifacts,
+                        repository = project.repository,
+                        requirePlanApproval = task.approvalPolicy != ApprovalPolicy.None,
+                        promptContext = PromptContext(
+                            stablePrefix = listOf(
+                                PromptContextBlock("Workflow objective", nextRun.objective),
+                                PromptContextBlock("Role", role.instructions),
+                            ),
+                            dynamicContext = listOf(
+                                PromptContextBlock("Task", task.objective),
+                                PromptContextBlock("Attempt", taskRun.attempt.toString()),
+                            ),
+                            reusePolicy = definition.promptReusePolicy,
+                            cacheNamespace = "${nextRun.id.value}:${role.id.value}",
+                        ),
+                    )
+
+                    val handle = sessionGateway.createSession(
+                        ManagedSessionRequest(
+                            providerSelection = selection.copy(
+                                preferredProviderId = providerId,
+                                constraints = ProviderConstraints.RequireProvider(providerId),
+                            ),
+                            taskRequest = request,
+                        ),
+                    )
+
+                    handles[task.id] = handle
+                    val startedStatus = if (request.requirePlanApproval) TaskRunStatus.Planning else TaskRunStatus.Running
+                    nextRun = nextRun.copy(
+                        taskRuns = nextRun.taskRuns + (
+                            task.id to taskRun.copy(
+                                status = startedStatus,
+                                assignedRoleId = task.roleId ?: role.id,
+                                executor = executor,
+                                assignedProviderId = handle.providerId,
+                                providerRunId = handle.providerRunId,
+                                externalRunId = null,
+                                blockingReason = null,
+                                progress = null,
+                                progressMessage = null,
+                            )
+                        ),
+                        updatedAtEpochMillis = nowEpochMillis,
+                    )
+                    activeByProvider[providerId] = providerActive + 1
+
+                    eventSink.append(
+                        AgentAssigned(
+                            workflowRunId = nextRun.id,
+                            taskDefinitionId = task.id,
+                            roleId = role.id,
+                            occurredAtEpochMillis = nowEpochMillis,
+                        ),
+                    )
+                }
+
+                is TaskExecutor.HumanApproval -> {
+                    nextRun = nextRun.copy(
+                        status = WorkflowRunStatus.AwaitingHuman,
+                        taskRuns = nextRun.taskRuns + (
+                            task.id to taskRun.copy(
+                                status = TaskRunStatus.AwaitingApproval,
+                                assignedRoleId = task.roleId,
+                                executor = executor,
+                                blockingReason = null,
+                                progress = null,
+                                progressMessage = executor.label,
+                            )
+                        ),
+                        updatedAtEpochMillis = nowEpochMillis,
+                    )
+                    eventSink.append(
+                        HumanDecisionRequired(
+                            workflowRunId = nextRun.id,
+                            taskDefinitionId = task.id,
+                            reason = executor.label,
+                            occurredAtEpochMillis = nowEpochMillis,
+                        ),
+                    )
+                }
+
+                else -> {
+                    nextRun = nextRun.copy(
+                        taskRuns = nextRun.taskRuns + (
+                            task.id to taskRun.copy(
+                                status = TaskRunStatus.Running,
+                                assignedRoleId = task.roleId,
+                                executor = executor,
+                                assignedProviderId = null,
+                                providerRunId = null,
+                                blockingReason = null,
+                                progress = null,
+                                progressMessage = null,
+                            )
+                        ),
+                        updatedAtEpochMillis = nowEpochMillis,
+                    )
+                }
+            }
 
             eventSink.append(
-                AgentAssigned(
+                ExecutorAssigned(
                     workflowRunId = nextRun.id,
                     taskDefinitionId = task.id,
-                    roleId = role.id,
+                    executor = executor,
+                    responsibilityRoleId = task.roleId,
                     occurredAtEpochMillis = nowEpochMillis,
                 ),
             )
@@ -161,9 +224,53 @@ class WorkflowEngine(
                     occurredAtEpochMillis = nowEpochMillis,
                 ),
             )
+            remainingSlots -= 1
         }
 
         return DispatchResult(nextRun, handles)
+    }
+
+    suspend fun completeTask(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        taskDefinitionId: TaskDefinitionId,
+        nowEpochMillis: Long,
+        artifacts: List<ArtifactRef> = emptyList(),
+        externalRunId: String? = null,
+    ): WorkflowRun {
+        val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) {
+            "Task run ${taskDefinitionId.value} is missing"
+        }
+        require(taskRun.status.isActive() || taskRun.status == TaskRunStatus.Ready) {
+            "Task ${taskDefinitionId.value} cannot complete from ${taskRun.status}"
+        }
+        eventSink.append(
+            TaskCompleted(
+                workflowRunId = run.id,
+                taskDefinitionId = taskDefinitionId,
+                occurredAtEpochMillis = nowEpochMillis,
+            ),
+        )
+        var nextRun = run.copy(
+            taskRuns = run.taskRuns + (
+                taskDefinitionId to taskRun.copy(
+                    status = TaskRunStatus.Completed,
+                    artifacts = artifacts,
+                    externalRunId = externalRunId ?: taskRun.externalRunId,
+                    progress = 1f,
+                    blockingReason = null,
+                )
+            ),
+            updatedAtEpochMillis = nowEpochMillis,
+        )
+        nextRun = WorkflowRunFactory.refreshReadiness(definition, nextRun, nowEpochMillis)
+        if (nextRun.taskRuns.values.all { it.status == TaskRunStatus.Completed }) {
+            eventSink.append(WorkflowCompleted(nextRun.id, nowEpochMillis))
+            nextRun = nextRun.copy(status = WorkflowRunStatus.Completed)
+        } else if (nextRun.status == WorkflowRunStatus.AwaitingHuman) {
+            nextRun = nextRun.copy(status = WorkflowRunStatus.Running)
+        }
+        return nextRun
     }
 
     suspend fun reconcile(
@@ -219,13 +326,7 @@ class WorkflowEngine(
                 }
 
             if (mappedStatus == TaskRunStatus.Completed && previousStatus != TaskRunStatus.Completed) {
-                eventSink.append(
-                    TaskCompleted(
-                        workflowRunId = nextRun.id,
-                        taskDefinitionId = taskId,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
+                eventSink.append(TaskCompleted(nextRun.id, taskId, nowEpochMillis))
             }
 
             nextRun = nextRun.copy(
@@ -254,12 +355,7 @@ class WorkflowEngine(
         }
 
         if (workflowStatus == WorkflowRunStatus.Completed && run.status != WorkflowRunStatus.Completed) {
-            eventSink.append(
-                WorkflowCompleted(
-                    workflowRunId = nextRun.id,
-                    occurredAtEpochMillis = nowEpochMillis,
-                ),
-            )
+            eventSink.append(WorkflowCompleted(nextRun.id, nowEpochMillis))
         }
 
         return nextRun.copy(status = workflowStatus, updatedAtEpochMillis = nowEpochMillis)
@@ -288,15 +384,7 @@ class WorkflowEngine(
 
         return when (decision) {
             is FailureDecision.Retry -> {
-                eventSink.append(
-                    RetryScheduled(
-                        workflowRunId = run.id,
-                        taskDefinitionId = taskDefinitionId,
-                        nextAttempt = decision.nextAttempt,
-                        reason = reason,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
+                eventSink.append(RetryScheduled(run.id, taskDefinitionId, decision.nextAttempt, reason, nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.Running,
                     taskRuns = run.taskRuns + (
@@ -305,6 +393,7 @@ class WorkflowEngine(
                             attempt = decision.nextAttempt,
                             assignedProviderId = null,
                             providerRunId = null,
+                            externalRunId = null,
                             artifacts = emptyList(),
                             blockingReason = null,
                             progress = null,
@@ -316,22 +405,8 @@ class WorkflowEngine(
             }
 
             FailureDecision.RequireHumanDecision -> {
-                eventSink.append(
-                    HumanDecisionRequired(
-                        workflowRunId = run.id,
-                        taskDefinitionId = taskDefinitionId,
-                        reason = reason,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
-                eventSink.append(
-                    TaskEscalated(
-                        workflowRunId = run.id,
-                        taskDefinitionId = taskDefinitionId,
-                        reason = reason,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
+                eventSink.append(HumanDecisionRequired(run.id, taskDefinitionId, reason, nowEpochMillis))
+                eventSink.append(TaskEscalated(run.id, taskDefinitionId, reason, occurredAtEpochMillis = nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.AwaitingHuman,
                     taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Escalated)),
@@ -340,23 +415,17 @@ class WorkflowEngine(
             }
 
             is FailureDecision.Reassign -> {
-                eventSink.append(
-                    TaskEscalated(
-                        workflowRunId = run.id,
-                        taskDefinitionId = taskDefinitionId,
-                        reason = reason,
-                        reassignedRoleId = decision.roleId,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
+                eventSink.append(TaskEscalated(run.id, taskDefinitionId, reason, decision.roleId, nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.Running,
                     taskRuns = run.taskRuns + (
                         taskDefinitionId to taskRun.copy(
                             status = TaskRunStatus.Retrying,
                             assignedRoleId = decision.roleId,
+                            executor = TaskExecutor.RoleAgent(decision.roleId),
                             assignedProviderId = null,
                             providerRunId = null,
+                            externalRunId = null,
                             artifacts = emptyList(),
                             blockingReason = null,
                             progress = null,
@@ -368,21 +437,8 @@ class WorkflowEngine(
             }
 
             FailureDecision.FailWorkflow -> {
-                eventSink.append(
-                    TaskFailed(
-                        workflowRunId = run.id,
-                        taskDefinitionId = taskDefinitionId,
-                        reason = reason,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
-                eventSink.append(
-                    WorkflowFailed(
-                        workflowRunId = run.id,
-                        reason = reason,
-                        occurredAtEpochMillis = nowEpochMillis,
-                    ),
-                )
+                eventSink.append(TaskFailed(run.id, taskDefinitionId, reason, nowEpochMillis))
+                eventSink.append(WorkflowFailed(run.id, reason, nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.Failed,
                     taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Failed)),
