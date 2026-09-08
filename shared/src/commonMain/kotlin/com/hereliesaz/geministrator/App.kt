@@ -12,7 +12,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 @Composable
-fun App() {
+fun App(
+    liveWorkflow: LiveWorkflowPresentation? = null,
+) {
     GeministratorTheme {
         var destination by remember { mutableStateOf(ControlRoomDestination.Overview) }
         var selectedTaskId by remember { mutableStateOf<String?>(null) }
@@ -28,6 +30,7 @@ fun App() {
                     },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
+                    liveWorkflow = liveWorkflow,
                 )
             }
         }
