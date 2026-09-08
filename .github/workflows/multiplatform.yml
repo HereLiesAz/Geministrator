@@ -49,23 +49,27 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Prepare Android signing key when available
+      - name: Reconstruct and verify Android signing keystore
+        id: signing
         if: github.event_name != 'pull_request'
-        env:
-          KEYSTORE_RAW: ${{ secrets.KEYSTORE_RAW }}
+        uses: ./.github/actions/android-keystore
+        with:
+          keystore-private: ${{ secrets.KEYSTORE_PRIVATE }}
+          keystore-rsa: ${{ secrets.KEYSTORE_RSA }}
+          keystore-public: ${{ secrets.KEYSTORE_PUBLIC }}
+          keystore-chain: ${{ secrets.KEYSTORE_CHAIN }}
+          keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.KEY_ALIAS }}
+          key-password: ${{ secrets.KEY_PASSWORD }}
+          expected-sha256: ${{ secrets.KEYSTORE_SHA256 }}
+          expected-sha1: ${{ secrets.KEYSTORE_SHA1 }}
+          expected-owner: ${{ secrets.KEYSTORE_OWNER }}
+
+      - name: Export Android signing path
+        if: github.event_name != 'pull_request'
         run: |
-          if [ -z "$KEYSTORE_RAW" ]; then
-            echo "KEYSTORE_RAW is not exposed to this workflow run; release will be built unsigned."
-            exit 0
-          fi
-          KEYSTORE_PATH="$RUNNER_TEMP/haive-release.keystore"
-          if printf '%s' "$KEYSTORE_RAW" | base64 --decode > "$KEYSTORE_PATH" 2>/dev/null; then
-            echo "Decoded KEYSTORE_RAW as base64."
-          else
-            printf '%s' "$KEYSTORE_RAW" > "$KEYSTORE_PATH"
-            echo "Used KEYSTORE_RAW as literal keystore content."
-          fi
-          echo "HAIVE_KEYSTORE_PATH=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "HAIVE_KEYSTORE_PATH=${{ steps.signing.outputs.keystore-path }}" >> "$GITHUB_ENV"
+          echo "HAIVE_KEYSTORE_TYPE=${{ steps.signing.outputs.store-type }}" >> "$GITHUB_ENV"
 
       - name: Test shared domain
         run: ./gradlew :shared:desktopTest
