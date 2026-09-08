@@ -8,10 +8,13 @@ import com.hereliesaz.conveyance.h2g2.H2g2WorkflowState
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.domain.displayName
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 
 data class LiveWorkflowPresentation(
     val definition: WorkflowDefinition,
@@ -34,34 +37,37 @@ internal fun projectWorkflowMindMap(
     val depthByTask = mutableMapOf<TaskDefinitionId, Int>()
 
     fun depth(task: TaskDefinition): Int = depthByTask.getOrPut(task.id) {
-        if (task.dependsOn.isEmpty()) {
-            0
-        } else {
-            1 + task.dependsOn.maxOf { dependencyId ->
-                tasksById[dependencyId]?.let(::depth) ?: 0
-            }
+        if (task.dependsOn.isEmpty()) 0 else 1 + task.dependsOn.maxOf { dependencyId ->
+            tasksById[dependencyId]?.let(::depth) ?: 0
         }
     }
 
     val nodes = definition.tasks.map { task ->
         val taskRun = run.taskRuns[task.id]
-        val role = taskRun?.assignedRoleId?.let(rolesById::get) ?: rolesById[task.roleId]
-        val roleName = role?.name ?: task.roleId.value
-        val state = taskRun?.status.toH2g2State()
+        val executor = taskRun?.executor ?: task.effectiveExecutor()
+        val role = taskRun?.assignedRoleId?.let(rolesById::get) ?: task.roleId?.let(rolesById::get)
+        val identity = role?.name ?: executor.displayName()
+        val motion = if (role != null) roleMotion(role.name) else executorMotion(executor)
         H2g2WorkflowNode(
             id = task.id.value,
-            label = roleName,
+            label = identity,
             subtitle = task.name,
-            hueSeed = roleName,
-            motionSeed = roleName,
-            motion = roleMotion(roleName),
-            state = state,
+            hueSeed = identity,
+            motionSeed = "${executor.displayName()}:${identity}",
+            motion = motion,
+            state = taskRun?.status.toH2g2State(),
             progress = taskRun?.displayProgress(),
             detail = buildString {
                 append(task.objective)
+                append(" · Executor: ")
+                append(executor.displayName())
                 taskRun?.assignedProviderId?.let {
-                    append(" · Staffed by ")
+                    append(" · Provider: ")
                     append(it.value)
+                }
+                taskRun?.externalRunId?.takeIf(String::isNotBlank)?.let {
+                    append(" · Run: ")
+                    append(it)
                 }
                 taskRun?.progressMessage?.takeIf(String::isNotBlank)?.let {
                     append(" · ")
@@ -84,62 +90,45 @@ internal fun projectWorkflowMindMap(
         .groupBy(::depth)
         .toSortedMap()
         .values
-        .map { tasks ->
-            H2g2WorkflowBand(
-                tasks.mapNotNull { nodeById[it.id.value] },
-            )
-        }
+        .map { tasks -> H2g2WorkflowBand(tasks.mapNotNull { nodeById[it.id.value] }) }
 
     val edges = definition.tasks.flatMap { task ->
-        task.dependsOn.map { dependency ->
-            H2g2WorkflowEdge(
-                from = dependency.value,
-                to = task.id.value,
-            )
-        }
+        task.dependsOn.map { dependency -> H2g2WorkflowEdge(from = dependency.value, to = task.id.value) }
     }
 
     return WorkflowMindMapProjection(bands = bands, edges = edges)
 }
 
 private fun TaskRunStatus?.toH2g2State(): H2g2WorkflowState = when (this) {
-    null,
-    TaskRunStatus.Created,
-    -> H2g2WorkflowState.Pending
+    null, TaskRunStatus.Created -> H2g2WorkflowState.Pending
     TaskRunStatus.Blocked -> H2g2WorkflowState.Blocked
     TaskRunStatus.Ready -> H2g2WorkflowState.Ready
-    TaskRunStatus.AwaitingApproval,
-    TaskRunStatus.Escalated,
-    -> H2g2WorkflowState.Gate
-    TaskRunStatus.Planning,
-    TaskRunStatus.Running,
-    TaskRunStatus.Verifying,
-    TaskRunStatus.Retrying,
-    -> H2g2WorkflowState.Active
+    TaskRunStatus.AwaitingApproval, TaskRunStatus.Escalated -> H2g2WorkflowState.Gate
+    TaskRunStatus.Planning, TaskRunStatus.Running, TaskRunStatus.Verifying, TaskRunStatus.Retrying -> H2g2WorkflowState.Active
     TaskRunStatus.Completed -> H2g2WorkflowState.Complete
-    TaskRunStatus.Failed,
-    TaskRunStatus.Cancelled,
-    -> H2g2WorkflowState.Failed
+    TaskRunStatus.Failed, TaskRunStatus.Cancelled -> H2g2WorkflowState.Failed
 }
 
-/**
- * Exact executor progress wins. Otherwise this is deliberately a lifecycle plateau, not a claimed
- * percentage of provider work. It gives the node a truthful sense of governed progress even when an
- * executor such as Jules exposes qualitative updates but no numeric fraction. Executors with exact
- * progress, such as step-based automation, can populate [TaskRun.progress] directly.
- */
 private fun TaskRun.displayProgress(): Float? = progress ?: when (status) {
     TaskRunStatus.Planning -> .14f
     TaskRunStatus.AwaitingApproval -> .24f
-    TaskRunStatus.Running,
-    TaskRunStatus.Retrying,
-    -> .52f
+    TaskRunStatus.Running, TaskRunStatus.Retrying -> .52f
     TaskRunStatus.Verifying -> .82f
     TaskRunStatus.Completed -> 1f
     else -> null
 }
 
-/** Motion belongs to the company position, not whichever provider happens to staff it. */
+internal fun executorMotion(executor: TaskExecutor): H2g2WorkflowMotion = when (executor) {
+    is TaskExecutor.GitHubAction -> H2g2WorkflowMotion.Pulse
+    is TaskExecutor.TestRunner -> H2g2WorkflowMotion.Skitter
+    is TaskExecutor.Deployment -> H2g2WorkflowMotion.Float
+    is TaskExecutor.RepositoryOperation -> H2g2WorkflowMotion.Tilt
+    is TaskExecutor.HumanApproval -> H2g2WorkflowMotion.Nod
+    is TaskExecutor.ExternalService -> H2g2WorkflowMotion.Hover
+    is TaskExecutor.NestedWorkflow -> H2g2WorkflowMotion.Orbit
+    is TaskExecutor.RoleAgent -> H2g2WorkflowMotion.Breathe
+}
+
 internal fun roleMotion(role: String): H2g2WorkflowMotion = when (role) {
     "Orchestrator" -> H2g2WorkflowMotion.Orbit
     "Product Manager" -> H2g2WorkflowMotion.Nod
