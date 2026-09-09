@@ -67,19 +67,27 @@ class GitHubRestActionsClient(
     override suspend fun dispatch(request: GitHubWorkflowDispatchRequest): GitHubWorkflowRun {
         val repository = request.repository
         val token = requireToken()
-        val response = httpClient.post(
+        // GitHub returns 204 No Content — no body to decode
+        httpClient.post(
             "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${request.workflow.encodeURLPathPart()}/dispatches",
         ) {
             githubHeaders(token)
             contentType(ContentType.Application.Json)
             setBody(json.encodeToString(DispatchBody(ref = request.ref)))
+        }.requireSuccess("dispatch GitHub Actions workflow ${request.workflow}")
+        // Poll for the newly queued run
+        val runsResponse = httpClient.get(
+            "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${request.workflow.encodeURLPathPart()}/runs?event=workflow_dispatch&per_page=1&branch=${request.ref}",
+        ) {
+            githubHeaders(token)
         }
-        response.requireSuccess("dispatch GitHub Actions workflow ${request.workflow}")
-        val body = json.decodeFromString<DispatchResponse>(response.bodyAsText())
+        runsResponse.requireSuccess("list runs after dispatching ${request.workflow}")
+        val run = json.decodeFromString<WorkflowRunsResponse>(runsResponse.bodyAsText()).workflowRuns.firstOrNull()
+            ?: return GitHubWorkflowRun(id = "", status = GitHubWorkflowRunStatus.Queued)
         return GitHubWorkflowRun(
-            id = body.workflowRunId.toString(),
-            status = GitHubWorkflowRunStatus.Queued,
-            progressMessage = body.htmlUrl ?: body.runUrl,
+            id = run.id.toString(),
+            status = run.toStatus(),
+            progressMessage = run.htmlUrl,
         )
     }
 
@@ -141,17 +149,16 @@ class GitHubRestActionsClient(
     private data class DispatchBody(val ref: String)
 
     @Serializable
-    private data class DispatchResponse(
-        @SerialName("workflow_run_id") val workflowRunId: Long,
-        @SerialName("run_url") val runUrl: String? = null,
-        @SerialName("html_url") val htmlUrl: String? = null,
-    )
-
-    @Serializable
     private data class RunResponse(
         val id: Long,
         val status: String,
         val conclusion: String? = null,
+        @SerialName("html_url") val htmlUrl: String? = null,
+    )
+
+    @Serializable
+    private data class WorkflowRunsResponse(
+        @SerialName("workflow_runs") val workflowRuns: List<RunResponse> = emptyList(),
     )
 
     @Serializable

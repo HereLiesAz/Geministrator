@@ -58,6 +58,7 @@ class WorkflowRuntimeCoordinator(
         nowEpochMillis: Long,
         artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId,
     ): WorkflowRuntimeState {
+        if (state.run.status.isTerminal()) return state
         if (state.run.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty()) return state
 
         var nextRun = engine.reconcile(definition, state.run, state.handles, nowEpochMillis, artifactIdFactory)

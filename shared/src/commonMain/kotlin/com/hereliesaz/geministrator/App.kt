@@ -40,6 +40,8 @@ fun App(
             )
             runtime = created
             created.state.collectLatest { runtimeState = it }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (failure: Throwable) {
             val message = failure.message?.takeIf(String::isNotBlank)
                 ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime bootstrap failed" }

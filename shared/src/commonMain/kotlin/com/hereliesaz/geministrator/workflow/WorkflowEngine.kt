@@ -63,7 +63,8 @@ class WorkflowEngine(
         if (remainingSlots == 0) return DispatchResult(refreshed, existingHandles)
 
         val definitionsById = definition.tasks.associateBy { it.id }
-        var nextRun = refreshed.copy(status = WorkflowRunStatus.Running)
+        var nextRun = refreshed
+        var humanApprovalPending = false
         val handles = existingHandles.toMutableMap()
         val activeByProvider = refreshed.taskRuns.values
             .filter { it.status.isActive() && it.assignedProviderId != null }
@@ -164,8 +165,8 @@ class WorkflowEngine(
                 }
 
                 is TaskExecutor.HumanApproval -> {
+                    humanApprovalPending = true
                     nextRun = nextRun.copy(
-                        status = WorkflowRunStatus.AwaitingHuman,
                         taskRuns = nextRun.taskRuns + (
                             task.id to taskRun.copy(
                                 status = TaskRunStatus.AwaitingApproval,
@@ -217,7 +218,12 @@ class WorkflowEngine(
             remainingSlots -= 1
         }
 
-        return DispatchResult(nextRun, handles)
+        val finalStatus = when {
+            humanApprovalPending -> WorkflowRunStatus.AwaitingHuman
+            handles.size > existingHandles.size -> WorkflowRunStatus.Running
+            else -> refreshed.status
+        }
+        return DispatchResult(nextRun.copy(status = finalStatus), handles)
     }
 
     suspend fun completeTask(
@@ -257,7 +263,9 @@ class WorkflowEngine(
         if (nextRun.taskRuns.values.all { it.status == TaskRunStatus.Completed }) {
             eventSink.append(WorkflowCompleted(nextRun.id, nowEpochMillis))
             nextRun = nextRun.copy(status = WorkflowRunStatus.Completed)
-        } else if (nextRun.status == WorkflowRunStatus.AwaitingHuman) {
+        } else if (nextRun.status == WorkflowRunStatus.AwaitingHuman &&
+            nextRun.taskRuns.values.none { it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated }
+        ) {
             nextRun = nextRun.copy(status = WorkflowRunStatus.Running)
         }
         return nextRun

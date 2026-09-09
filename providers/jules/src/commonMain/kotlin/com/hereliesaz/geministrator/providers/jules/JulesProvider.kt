@@ -314,6 +314,8 @@ class JulesProvider(
         try {
             block()
             ProviderActionResult.Accepted
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (error: Throwable) {
             ProviderActionResult.Rejected(error.message ?: error::class.simpleName ?: "Jules request failed")
         }
