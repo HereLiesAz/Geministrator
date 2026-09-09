@@ -15,6 +15,7 @@ import com.hereliesaz.geministrator.providers.PromptCacheCapabilities
 import com.hereliesaz.geministrator.providers.PromptCacheMode
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -75,11 +76,7 @@ class JulesProvider(
                 title = request.objective.take(120),
                 sourceContext = if (repoless) null else sourceContext,
                 requirePlanApproval = request.requirePlanApproval,
-                automationMode = if (!repoless && config.autoCreatePullRequests) {
-                    "AUTO_CREATE_PR"
-                } else {
-                    null
-                },
+                automationMode = if (!repoless && config.autoCreatePullRequests) "AUTO_CREATE_PR" else null,
             ),
         )
         return AgentRunHandle(providerRunId = ProviderRunId(session.name))
@@ -102,31 +99,22 @@ class JulesProvider(
                     emit(
                         AgentEvent.PlanGenerated(
                             runId = runId,
-                            summary = generated.plan.steps
-                                .sortedBy { it.index }
-                                .joinToString("\n") { step ->
-                                    buildString {
-                                        append(step.index + 1)
-                                        append(". ")
-                                        append(step.title)
-                                        step.description?.takeIf { it.isNotBlank() }?.let {
-                                            append(" — ")
-                                            append(it)
-                                        }
+                            summary = generated.plan.steps.sortedBy { it.index }.joinToString("\n") { step ->
+                                buildString {
+                                    append(step.index + 1)
+                                    append(". ")
+                                    append(step.title)
+                                    step.description?.takeIf { it.isNotBlank() }?.let {
+                                        append(" — ")
+                                        append(it)
                                     }
-                                },
+                                }
+                            },
                         ),
                     )
                 }
-
-                if (activity.planApproved != null) {
-                    emit(AgentEvent.PlanApproved(runId))
-                }
-
-                activity.agentMessaged?.let { message ->
-                    emit(AgentEvent.Message(runId, message.agentMessage))
-                }
-
+                if (activity.planApproved != null) emit(AgentEvent.PlanApproved(runId))
+                activity.agentMessaged?.let { emit(AgentEvent.Message(runId, it.agentMessage)) }
                 activity.progressUpdated?.let { progress ->
                     emit(
                         AgentEvent.Progress(
@@ -137,18 +125,13 @@ class JulesProvider(
                         ),
                     )
                 }
-
                 activity.artifacts.forEach { artifact ->
-                    mapArtifact(artifact)?.let { mapped ->
-                        emit(AgentEvent.ArtifactProduced(runId, mapped))
-                    }
+                    mapArtifact(artifact)?.let { emit(AgentEvent.ArtifactProduced(runId, it)) }
                 }
-
                 activity.sessionFailed?.let { failed ->
                     emit(AgentEvent.Failed(runId, failed.reason))
                     terminal = true
                 }
-
                 if (activity.sessionCompleted != null) {
                     emitPullRequests(runId, api.getSession(sessionName), seenPullRequests)
                     emit(AgentEvent.Completed(runId))
@@ -163,27 +146,19 @@ class JulesProvider(
                         emit(AgentEvent.Failed(runId, "Jules session failed without a failure activity."))
                         terminal = true
                     }
-
                     "COMPLETED" -> {
                         emitPullRequests(runId, session, seenPullRequests)
                         emit(AgentEvent.Completed(runId))
                         terminal = true
                     }
-
-                    "AWAITING_USER_FEEDBACK" -> emit(
-                        AgentEvent.Progress(runId, "Jules is awaiting user feedback."),
-                    )
+                    "AWAITING_USER_FEEDBACK" -> emit(AgentEvent.Progress(runId, "Jules is awaiting user feedback."))
                 }
             }
-
             if (!terminal) delay(config.pollIntervalMillis)
         }
     }
 
-    override suspend fun sendMessage(
-        runId: ProviderRunId,
-        message: String,
-    ): ProviderActionResult = action {
+    override suspend fun sendMessage(runId: ProviderRunId, message: String): ProviderActionResult = action {
         api.sendMessage(runId.value, message)
     }
 
@@ -213,18 +188,15 @@ class JulesProvider(
         append("ROLE INSTRUCTIONS\n")
         append(request.roleInstructions.trim())
         append("\n\n")
-
         request.promptContext.stablePrefix.forEach { block ->
             append(block.label.uppercase())
             append("\n")
             append(block.content.trim())
             append("\n\n")
         }
-
         append("TASK\n")
         append(request.objective.trim())
         append("\n\n")
-
         if (request.acceptanceCriteria.isNotEmpty()) {
             append("ACCEPTANCE CRITERIA\n")
             request.acceptanceCriteria.forEachIndexed { index, criterion ->
@@ -235,7 +207,6 @@ class JulesProvider(
             }
             append("\n")
         }
-
         request.promptContext.dynamicContext.forEach { block ->
             append(block.label.uppercase())
             append("\n")
@@ -254,26 +225,19 @@ class JulesProvider(
                 metadata = buildMap {
                     put("source", changeSet.source)
                     put("baseCommitId", changeSet.gitPatch.baseCommitId)
-                    changeSet.gitPatch.suggestedCommitMessage?.let {
-                        put("suggestedCommitMessage", it)
-                    }
+                    changeSet.gitPatch.suggestedCommitMessage?.let { put("suggestedCommitMessage", it) }
                 },
             )
         }
-
         artifact.bashOutput?.let { output ->
             return ProviderArtifact(
                 kind = ArtifactKind.CommandOutput,
                 label = output.command,
                 textContent = output.output,
                 mediaType = "text/plain",
-                metadata = mapOf(
-                    "command" to output.command,
-                    "exitCode" to output.exitCode.toString(),
-                ),
+                metadata = mapOf("command" to output.command, "exitCode" to output.exitCode.toString()),
             )
         }
-
         artifact.media?.let { media ->
             return ProviderArtifact(
                 kind = ArtifactKind.Media,
@@ -283,7 +247,6 @@ class JulesProvider(
                 metadata = mapOf("encoding" to "base64"),
             )
         }
-
         return null
     }
 
@@ -310,11 +273,12 @@ class JulesProvider(
         }
     }
 
-    private suspend fun action(block: suspend () -> Unit): ProviderActionResult =
-        try {
-            block()
-            ProviderActionResult.Accepted
-        } catch (error: Throwable) {
-            ProviderActionResult.Rejected(error.message ?: error::class.simpleName ?: "Jules request failed")
-        }
+    private suspend fun action(block: suspend () -> Unit): ProviderActionResult = try {
+        block()
+        ProviderActionResult.Accepted
+    } catch (error: CancellationException) {
+        throw error
+    } catch (error: Exception) {
+        ProviderActionResult.Rejected(error.message ?: error::class.simpleName ?: "Jules request failed")
+    }
 }

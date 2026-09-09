@@ -20,7 +20,6 @@ import io.ktor.http.contentType
 import io.ktor.http.encodeURLPathPart
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 data class GitHubWorkflowDispatchRequest(
@@ -75,12 +74,10 @@ class GitHubRestActionsClient(
             setBody(json.encodeToString(DispatchBody(ref = request.ref)))
         }
         response.requireSuccess("dispatch GitHub Actions workflow ${request.workflow}")
-        val body = json.decodeFromString<DispatchResponse>(response.bodyAsText())
-        return GitHubWorkflowRun(
-            id = body.workflowRunId.toString(),
-            status = GitHubWorkflowRunStatus.Queued,
-            progressMessage = body.htmlUrl ?: body.runUrl,
-        )
+
+        // GitHub's workflow-dispatch endpoint succeeds with 204 No Content and does not
+        // return a workflow-run ID. Resolve the newly-created run from the workflow runs API.
+        return findDispatchedRun(repository, request.workflow, request.ref, token)
     }
 
     override suspend fun getRun(repository: RepositoryRef, runId: String): GitHubWorkflowRun {
@@ -115,6 +112,31 @@ class GitHubRestActionsClient(
         )
     }
 
+    private suspend fun findDispatchedRun(
+        repository: RepositoryRef,
+        workflow: String,
+        ref: String,
+        token: String,
+    ): GitHubWorkflowRun {
+        val url = "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${workflow.encodeURLPathPart()}/runs"
+        val response = httpClient.get(url) {
+            githubHeaders(token)
+            url {
+                parameters.append("event", "workflow_dispatch")
+                parameters.append("branch", ref)
+                parameters.append("per_page", "1")
+            }
+        }
+        response.requireSuccess("locate dispatched GitHub Actions workflow $workflow")
+        val run = json.decodeFromString<RunsResponse>(response.bodyAsText()).workflowRuns.firstOrNull()
+            ?: error("GitHub accepted workflow dispatch $workflow but no workflow_dispatch run was found for ref $ref")
+        return GitHubWorkflowRun(
+            id = run.id.toString(),
+            status = run.toStatus(),
+            progressMessage = run.conclusion ?: run.status,
+        )
+    }
+
     private suspend fun requireToken(): String = tokenProvider.getToken().trim().also { token ->
         require(token.isNotEmpty()) { "GitHub Actions token is not configured" }
     }
@@ -141,10 +163,8 @@ class GitHubRestActionsClient(
     private data class DispatchBody(val ref: String)
 
     @Serializable
-    private data class DispatchResponse(
-        @SerialName("workflow_run_id") val workflowRunId: Long,
-        @SerialName("run_url") val runUrl: String? = null,
-        @SerialName("html_url") val htmlUrl: String? = null,
+    private data class RunsResponse(
+        @SerialName("workflow_runs") val workflowRuns: List<RunResponse> = emptyList(),
     )
 
     @Serializable
