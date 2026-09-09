@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
+import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.displayName
 import com.hereliesaz.geministrator.domain.effectiveExecutor
 
@@ -20,6 +21,7 @@ import com.hereliesaz.geministrator.domain.effectiveExecutor
 internal fun TechnicalInspector(
     selectedTaskId: String,
     liveWorkflow: LiveWorkflowPresentation?,
+    onApproveTask: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (liveWorkflow == null) {
@@ -73,6 +75,16 @@ internal fun TechnicalInspector(
             LiveInspectorLine(
                 "ARTIFACT ${index + 1} · ${artifact.kind.name}",
                 "${artifact.label} · $reference",
+            )
+        }
+        if (taskRun.status == TaskRunStatus.AwaitingApproval) {
+            val label = if (taskRun.assignedProviderId != null) "Approve plan" else "Approve task"
+            AzphaltPill(
+                label = label,
+                seed = "approve-$selectedTaskId",
+                endCap = "Proceed",
+                onClick = { onApproveTask(selectedTaskId) },
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         if (taskRun.assignedProviderId != null) {
