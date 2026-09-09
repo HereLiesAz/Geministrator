@@ -104,7 +104,7 @@ private class CompletingGovernedProvider : AgentProvider {
     )
 
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
-        startedTaskIds += request.taskRunId.value.substringAfter(":", request.taskRunId.value)
+        startedTaskIds += request.taskRunId.value.substringAfter("run-").substringAfter("-")
         runCount += 1
         return AgentRunHandle(ProviderRunId("governed-run-$runCount"))
     }
