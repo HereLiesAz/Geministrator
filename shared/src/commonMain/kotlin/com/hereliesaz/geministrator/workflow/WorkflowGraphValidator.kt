@@ -1,6 +1,8 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 
 sealed interface WorkflowValidationError {
@@ -10,6 +12,11 @@ sealed interface WorkflowValidationError {
         val missingDependencyId: TaskDefinitionId,
     ) : WorkflowValidationError
     data class MissingExecutor(val taskId: TaskDefinitionId) : WorkflowValidationError
+    data class ConflictingRoleIdentity(
+        val taskId: TaskDefinitionId,
+        val responsibleRoleId: RoleDefinitionId,
+        val executorRoleId: RoleDefinitionId,
+    ) : WorkflowValidationError
     data class SelfDependency(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class Cycle(val taskIds: Set<TaskDefinitionId>) : WorkflowValidationError
 }
@@ -26,6 +33,14 @@ object WorkflowGraphValidator {
         definition.tasks.forEach { task ->
             if (task.executor == null && task.roleId == null) {
                 errors += WorkflowValidationError.MissingExecutor(task.id)
+            }
+            val roleExecutor = task.executor as? TaskExecutor.RoleAgent
+            if (task.roleId != null && roleExecutor != null && task.roleId != roleExecutor.roleId) {
+                errors += WorkflowValidationError.ConflictingRoleIdentity(
+                    taskId = task.id,
+                    responsibleRoleId = task.roleId,
+                    executorRoleId = roleExecutor.roleId,
+                )
             }
             task.dependsOn.forEach { dependency ->
                 when {
