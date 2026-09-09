@@ -43,27 +43,41 @@ class WorkflowApprovalService(
         note: String?,
         nowEpochMillis: Long,
     ): ApprovalGate {
-        val gate = requireNotNull(gateRepository.get(gateId)) { "Approval gate ${gateId.value} does not exist" }
-        require(gate.kind == ApprovalGateKind.PlanApproval) { "Approval gate ${gateId.value} is not a plan gate" }
+        val gate = requireNotNull(gateRepository.get(gateId)) {
+            "Approval gate ${gateId.value} does not exist"
+        }
+        require(gate.kind == ApprovalGateKind.PlanApproval) {
+            "Approval gate ${gateId.value} is not a plan gate"
+        }
+        require(gate.status == ApprovalGateStatus.Pending) {
+            "Approval gate ${gateId.value} is already resolved"
+        }
         require(gate.requiredRoleId == null || gate.requiredRoleId == decidedByRoleId) {
             "Role ${decidedByRoleId.value} is not authorized for gate ${gateId.value}"
         }
 
+        // Persist the local approval decision before invoking the irreversible provider side effect.
+        // If the provider call fails or rejects, compensate the local decision to Rejected below.
+        val approvedGate = gateCoordinator.decide(
+            id = gateId,
+            approved = true,
+            decidedByRoleId = decidedByRoleId,
+            note = note,
+            nowEpochMillis = nowEpochMillis,
+        )
+
         return when (val providerResult = sessionGateway.approvePlan(handle)) {
-            ProviderActionResult.Accepted -> gateCoordinator.decide(
-                id = gateId,
-                approved = true,
-                decidedByRoleId = decidedByRoleId,
-                note = note,
-                nowEpochMillis = nowEpochMillis,
-            )
-            is ProviderActionResult.Rejected -> gateCoordinator.decide(
-                id = gateId,
-                approved = false,
-                decidedByRoleId = decidedByRoleId,
-                note = providerResult.reason,
-                nowEpochMillis = nowEpochMillis,
-            )
+            ProviderActionResult.Accepted -> approvedGate
+            is ProviderActionResult.Rejected -> {
+                val rejected = approvedGate.copy(
+                    status = ApprovalGateStatus.Rejected,
+                    decidedByRoleId = decidedByRoleId,
+                    decisionNote = providerResult.reason,
+                    decidedAtEpochMillis = nowEpochMillis,
+                )
+                gateRepository.put(rejected)
+                rejected
+            }
         }
     }
 
