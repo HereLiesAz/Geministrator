@@ -1,0 +1,281 @@
+package com.hereliesaz.geministrator.workflow
+
+import com.hereliesaz.geministrator.domain.AgentProviderId
+import com.hereliesaz.geministrator.domain.ArtifactId
+import com.hereliesaz.geministrator.domain.ArtifactKind
+import com.hereliesaz.geministrator.domain.ArtifactRef
+import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.ProjectId
+import com.hereliesaz.geministrator.domain.ProviderRunId
+import com.hereliesaz.geministrator.domain.TaskDefinition
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
+import com.hereliesaz.geministrator.domain.TaskRun
+import com.hereliesaz.geministrator.domain.TaskRunId
+import com.hereliesaz.geministrator.domain.TaskRunStatus
+import com.hereliesaz.geministrator.domain.TestDesignPolicy
+import com.hereliesaz.geministrator.domain.WorkflowDefinition
+import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.domain.WorkflowRunId
+import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.persistence.InMemoryWorkflowPersistence
+import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.providers.ProviderArtifact
+import kotlinx.coroutines.runBlocking
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
+class WorkflowRuntimeCoordinatorTest {
+    @Test
+    fun awaitingHumanWithoutProviderHandlesIsPreserved() = runBlocking {
+        val taskId = TaskDefinitionId("approval")
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "Approve",
+                objective = "Approve release",
+                roleId = null,
+                executor = TaskExecutor.HumanApproval(),
+            ),
+        )
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.AwaitingHuman,
+            taskRuns = mapOf(
+                taskId to taskRun(taskId, TaskRunStatus.AwaitingApproval, TaskExecutor.HumanApproval()),
+            ),
+        )
+        val fixture = fixture()
+
+        val result = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run),
+            nowEpochMillis = 20L,
+            artifactIdFactory = ::artifactId,
+        )
+
+        assertEquals(run, result.run)
+        assertEquals(WorkflowRunStatus.AwaitingHuman, result.run.status)
+        assertEquals(TaskRunStatus.AwaitingApproval, result.run.taskRuns.getValue(taskId).status)
+    }
+
+    @Test
+    fun providerFailureUsesFailurePolicyAndSchedulesRetry() = runBlocking {
+        val taskId = TaskDefinitionId("agent")
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "Agent",
+                objective = "Do work",
+                roleId = com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+            ),
+        )
+        val handle = handle(taskId)
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                taskId to taskRun(
+                    taskId,
+                    TaskRunStatus.Running,
+                    TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+                    provider = true,
+                ),
+            ),
+        )
+        val gateway = FakeManagedSessionGateway(status = ManagedSessionStatus.Failed)
+        val fixture = fixture(gateway)
+
+        val result = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run, mapOf(taskId to handle)),
+            nowEpochMillis = 20L,
+            artifactIdFactory = ::artifactId,
+        )
+
+        val retried = result.run.taskRuns.getValue(taskId)
+        assertEquals(TaskRunStatus.Retrying, retried.status)
+        assertEquals(2, retried.attempt)
+        assertEquals(null, retried.assignedProviderId)
+        assertEquals(null, retried.providerRunId)
+    }
+
+    @Test
+    fun repeatedArtifactPollingPreservesOriginalCreationTimestamp() = runBlocking {
+        val taskId = TaskDefinitionId("agent")
+        val artifact = ArtifactRef(
+            id = ArtifactId("artifact"),
+            kind = ArtifactKind.Other,
+            taskRunId = TaskRunId("task-run-agent"),
+            label = "result",
+            uri = "file://result",
+            createdAtEpochMillis = 5L,
+        )
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "Agent",
+                objective = "Do work",
+                roleId = com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+            ),
+        )
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                taskId to taskRun(
+                    taskId,
+                    TaskRunStatus.Running,
+                    TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+                    provider = true,
+                ).copy(artifacts = listOf(artifact)),
+            ),
+        )
+        val gateway = FakeManagedSessionGateway(
+            status = ManagedSessionStatus.Running,
+            artifacts = listOf(ProviderArtifact(ArtifactKind.Other, "result", "file://result")),
+        )
+        val fixture = fixture(gateway)
+
+        val result = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run, mapOf(taskId to handle(taskId))),
+            nowEpochMillis = 99L,
+            artifactIdFactory = ::artifactId,
+        )
+
+        assertEquals(5L, result.run.taskRuns.getValue(taskId).artifacts.single().createdAtEpochMillis)
+        assertEquals(5L, fixture.persistence.artifacts.get(ArtifactId("artifact"))?.createdAtEpochMillis)
+    }
+
+    @Test
+    fun unsupportedSystemExecutorIsExplicitlyBlockedAndPersisted() = runBlocking {
+        val taskId = TaskDefinitionId("ci")
+        val executor = TaskExecutor.GitHubAction("ci.yml")
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "CI",
+                objective = "Run CI",
+                roleId = null,
+                executor = executor,
+            ),
+        )
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Ready, executor)),
+        )
+        val fixture = fixture()
+
+        val result = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run),
+            nowEpochMillis = 20L,
+            artifactIdFactory = ::artifactId,
+        )
+
+        val blocked = result.run.taskRuns.getValue(taskId)
+        assertEquals(TaskRunStatus.Blocked, blocked.status)
+        assertEquals(WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE, blocked.blockingReason?.code)
+        assertEquals(TaskRunStatus.Blocked, fixture.persistence.runs.get(run.id)?.taskRuns?.get(taskId)?.status)
+    }
+
+    private fun fixture(gateway: FakeManagedSessionGateway = FakeManagedSessionGateway()): Fixture {
+        val persistence = InMemoryWorkflowPersistence()
+        val engine = WorkflowEngine(
+            sessionGateway = gateway,
+            roles = com.hereliesaz.geministrator.domain.BuiltInRoles.all,
+        )
+        return Fixture(
+            persistence,
+            WorkflowRuntimeCoordinator(persistence, engine, gateway),
+        )
+    }
+
+    private fun project() = Project(
+        id = ProjectId("project"),
+        name = "Project",
+        createdAtEpochMillis = 1L,
+        updatedAtEpochMillis = 1L,
+    )
+
+    private fun definition(task: TaskDefinition) = WorkflowDefinition(
+        id = WorkflowDefinitionId("definition-${task.id.value}"),
+        name = "Workflow",
+        tasks = listOf(task),
+        testDesignPolicy = TestDesignPolicy.None,
+    )
+
+    private fun run(
+        definition: WorkflowDefinition,
+        status: WorkflowRunStatus,
+        taskRuns: Map<TaskDefinitionId, TaskRun>,
+    ) = WorkflowRun(
+        id = WorkflowRunId("run-${definition.id.value}"),
+        projectId = ProjectId("project"),
+        workflowDefinitionId = definition.id,
+        objective = "Ship",
+        status = status,
+        taskRuns = taskRuns,
+        createdAtEpochMillis = 1L,
+        updatedAtEpochMillis = 1L,
+    )
+
+    private fun taskRun(
+        taskId: TaskDefinitionId,
+        status: TaskRunStatus,
+        executor: TaskExecutor,
+        provider: Boolean = false,
+    ) = TaskRun(
+        id = TaskRunId("task-run-${taskId.value}"),
+        taskDefinitionId = taskId,
+        status = status,
+        assignedRoleId = (executor as? TaskExecutor.RoleAgent)?.roleId,
+        assignedProviderId = if (provider) AgentProviderId("provider") else null,
+        providerRunId = if (provider) ProviderRunId("provider-run") else null,
+        executor = executor,
+    )
+
+    private fun handle(taskId: TaskDefinitionId) = ManagedSessionHandle(
+        taskRunId = TaskRunId("task-run-${taskId.value}"),
+        providerId = AgentProviderId("provider"),
+        providerRunId = ProviderRunId("provider-run"),
+    )
+
+    private fun artifactId(taskRun: TaskRun, artifact: ProviderArtifact, index: Int): ArtifactId = ArtifactId("artifact")
+
+    private data class Fixture(
+        val persistence: InMemoryWorkflowPersistence,
+        val coordinator: WorkflowRuntimeCoordinator,
+    )
+}
+
+private class FakeManagedSessionGateway(
+    private val status: ManagedSessionStatus = ManagedSessionStatus.Unknown,
+    private val artifacts: List<ProviderArtifact> = emptyList(),
+) : ManagedSessionGateway {
+    override suspend fun resolveProvider(selection: ProviderSelectionRequest) = AgentProviderId("provider")
+
+    override suspend fun createSession(request: ManagedSessionRequest) = ManagedSessionHandle(
+        taskRunId = request.taskRequest.taskRunId,
+        providerId = AgentProviderId("provider"),
+        providerRunId = ProviderRunId("provider-run-new"),
+    )
+
+    override suspend fun status(handle: ManagedSessionHandle) = status
+
+    override suspend fun message(handle: ManagedSessionHandle, message: String) = ProviderActionResult.Accepted
+
+    override suspend fun approvePlan(handle: ManagedSessionHandle) = ProviderActionResult.Accepted
+
+    override suspend fun artifacts(handle: ManagedSessionHandle) = artifacts
+}
