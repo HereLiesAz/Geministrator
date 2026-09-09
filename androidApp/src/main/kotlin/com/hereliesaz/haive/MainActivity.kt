@@ -11,17 +11,17 @@ import com.hereliesaz.geministrator.providers.jules.JulesRestApi
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val providers = listOf(
-            JulesProvider(
-                JulesRestApi(
-                    JulesApiKeyProvider {
-                        System.getenv("JULES_API_KEY")
-                            ?.takeIf(String::isNotBlank)
-                            ?: error("Jules provider is registered but JULES_API_KEY is not configured")
-                    },
+        val julesKey = System.getenv("JULES_API_KEY")?.takeIf(String::isNotBlank)
+        val providers = julesKey?.let { key ->
+            listOf(
+                JulesProvider(
+                    JulesRestApi(
+                        JulesApiKeyProvider { key },
+                    ),
                 ),
-            ),
-        )
+            )
+        }.orEmpty()
+
         setContent {
             App(providers = providers)
         }
