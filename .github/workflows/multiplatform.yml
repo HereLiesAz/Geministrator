@@ -98,9 +98,34 @@ jobs:
 
       - name: Publish pinned h2g2 for isolated web builds
         run: |
-          ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal \
-            -Pgroup=com.github.HereLiesAz \
-            -Pversion=faa80ed5aa063f6bdab42163d7b021123b248254
+          ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
+          source_dir="$HOME/.m2/repository/com/hereliesaz/conveyance/conveyance-h2g2/0.1.0"
+          target_dir="$HOME/.m2/repository/com/github/HereLiesAz/conveyance-h2g2/faa80ed5aa063f6bdab42163d7b021123b248254"
+          mkdir -p "$target_dir"
+          cp "$source_dir/conveyance-h2g2-0.1.0.module" \
+            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.module"
+          cp "$source_dir/conveyance-h2g2-0.1.0.pom" \
+            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.pom"
+          cp "$source_dir/conveyance-h2g2-0.1.0-sources.jar" \
+            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254-sources.jar"
+          sed -i \
+            -e 's/com.hereliesaz.conveyance/com.github.HereLiesAz/g' \
+            -e 's/0.1.0/faa80ed5aa063f6bdab42163d7b021123b248254/g' \
+            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.module" \
+            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.pom"
+          for artifact in android desktop js wasm-js; do
+            cp "$source_dir/conveyance-h2g2-0.1.0-$artifact.klib" \
+              "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254-$artifact.klib" 2>/dev/null || true
+          done
+          find "$source_dir" -maxdepth 1 -type f -name 'conveyance-h2g2-0.1.0-*.jar' -exec sh -c '
+            for file do
+              name=$(basename "$file")
+              suffix=${name#conveyance-h2g2-0.1.0}
+              cp "$file" "$1/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254$suffix"
+            done
+          ' sh "$target_dir" {} +
+          test -f "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.pom"
+          test -f "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.module"
 
       - name: Build Web JS
         run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
