@@ -7,7 +7,9 @@ import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -104,24 +106,34 @@ class ProviderBackedManagedSessionGateway(
 
         val provider = providerFor(handle)
         scope.launch {
-            try {
-                provider.observe(handle.providerRunId).collect { event -> applyEvent(handle, event) }
-            } catch (failure: CancellationException) {
-                throw failure
-            } catch (_: Throwable) {
-                mutex.withLock {
-                    val current = snapshots[handle] ?: SessionSnapshot(ManagedSessionStatus.Unknown)
-                    snapshots[handle] = current.copy(status = ManagedSessionStatus.Failed)
+            while (isActive && !handle.isTerminal()) {
+                try {
+                    provider.observe(handle.providerRunId).collect { event -> applyEvent(handle, event) }
+                    if (!handle.isTerminal()) delay(OBSERVER_RETRY_MILLIS)
+                } catch (failure: CancellationException) {
+                    throw failure
+                } catch (_: Throwable) {
+                    // Observation transport failures do not mean the remote run failed. Keep the
+                    // last durable status and reattach to the same provider run instead of
+                    // triggering workflow retry/re-dispatch.
+                    delay(OBSERVER_RETRY_MILLIS)
                 }
             }
         }
     }
 
-    private fun selectProvider(
+    private suspend fun ManagedSessionHandle.isTerminal(): Boolean = mutex.withLock {
+        snapshots[this]?.status == ManagedSessionStatus.Completed ||
+            snapshots[this]?.status == ManagedSessionStatus.Failed
+    }
+
+    private suspend fun selectProvider(
         selection: ProviderSelectionRequest,
         fallbackMessage: String,
     ): AgentProvider = try {
         providerRegistry.select(selection)
+    } catch (failure: CancellationException) {
+        throw failure
     } catch (failure: ManagedSessionFailure.ProviderUnavailable) {
         throw failure
     } catch (failure: Throwable) {
@@ -186,5 +198,9 @@ class ProviderBackedManagedSessionGateway(
             }
             snapshots[handle] = next
         }
+    }
+
+    private companion object {
+        const val OBSERVER_RETRY_MILLIS = 1_000L
     }
 }
