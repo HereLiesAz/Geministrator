@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
+    implementation(projects.providers.jules)
     implementation(compose.desktop.currentOs)
 }
 

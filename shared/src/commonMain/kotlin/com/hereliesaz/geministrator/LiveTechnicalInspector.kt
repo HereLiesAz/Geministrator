@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.displayName
 import com.hereliesaz.geministrator.domain.effectiveExecutor
 
@@ -49,6 +50,8 @@ internal fun TechnicalInspector(
         Text(task.objective, style = AzphaltType.body, color = Azphalt.White)
         LiveInspectorLine("STATE", taskRun.status.name)
         LiveInspectorLine("EXECUTOR", executor.displayName())
+        LiveInspectorLine("EXECUTOR REF", executor.reference())
+        LiveInspectorLine("RESPONSIBLE ROLE", taskRun.assignedRoleId?.value ?: task.roleId?.value ?: "—")
         LiveInspectorLine("PROVIDER", taskRun.assignedProviderId?.value ?: "—")
         LiveInspectorLine("ATTEMPT", taskRun.attempt.toString())
         LiveInspectorLine("PROVIDER RUN", taskRun.providerRunId?.value ?: "—")
@@ -60,13 +63,33 @@ internal fun TechnicalInspector(
             LiveInspectorLine("NOW", it)
         }
         taskRun.blockingReason?.let {
-            LiveInspectorLine("BLOCKED", it.message)
+            LiveInspectorLine("BLOCKED", "${it.code} · ${it.message}")
         }
         LiveInspectorLine("ARTIFACTS", taskRun.artifacts.size.toString())
+        taskRun.artifacts.forEachIndexed { index, artifact ->
+            val reference = artifact.uri
+                ?: artifact.textContent?.takeIf(String::isNotBlank)?.let { "inline evidence" }
+                ?: "stored evidence"
+            LiveInspectorLine(
+                "ARTIFACT ${index + 1} · ${artifact.kind.name}",
+                "${artifact.label} · $reference",
+            )
+        }
         if (taskRun.assignedProviderId != null) {
             AzphaltPill("Message agent", "message-$selectedTaskId", onClick = {}, modifier = Modifier.fillMaxWidth())
         }
     }
+}
+
+private fun TaskExecutor.reference(): String = when (this) {
+    is TaskExecutor.RoleAgent -> roleId.value
+    is TaskExecutor.GitHubAction -> listOfNotNull(workflow, ref).joinToString(" @ ")
+    is TaskExecutor.TestRunner -> command ?: "default runner"
+    is TaskExecutor.Deployment -> environment
+    is TaskExecutor.RepositoryOperation -> operation
+    is TaskExecutor.HumanApproval -> label
+    is TaskExecutor.ExternalService -> listOfNotNull(service, operation).joinToString(" · ")
+    is TaskExecutor.NestedWorkflow -> workflowDefinitionId.value
 }
 
 @Composable

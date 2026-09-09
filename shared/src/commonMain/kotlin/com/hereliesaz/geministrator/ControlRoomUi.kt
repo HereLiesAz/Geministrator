@@ -1,12 +1,12 @@
 package com.hereliesaz.geministrator
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -83,11 +83,13 @@ fun ControlRoom(
     onDestinationSelected: (ControlRoomDestination) -> Unit,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
+    onLaunchWorkflow: (String, String) -> Unit,
     compact: Boolean,
     contentPadding: PaddingValues,
-    liveWorkflow: LiveWorkflowPresentation? = null,
+    runtimeState: ApplicationRuntimeState,
 ) {
     val ground = Azphalt.currentGround
+    val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,9 +104,10 @@ fun ControlRoom(
                     destination = destination,
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
+                    onLaunchWorkflow = onLaunchWorkflow,
                     modifier = Modifier.weight(1f),
                     compact = true,
-                    liveWorkflow = liveWorkflow,
+                    runtimeState = runtimeState,
                 )
             }
         } else {
@@ -112,17 +115,20 @@ fun ControlRoom(
                 PillNavigation(
                     destination = destination,
                     onDestinationSelected = onDestinationSelected,
+                    runtimeState = runtimeState,
                     modifier = Modifier.width(220.dp).fillMaxHeight(),
                 )
                 MainDestination(
                     destination = destination,
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
+                    onLaunchWorkflow = onLaunchWorkflow,
                     modifier = Modifier.weight(1f),
-                    liveWorkflow = liveWorkflow,
+                    runtimeState = runtimeState,
                 )
                 AnimatedVisibility(
                     visible = selectedTaskId != null &&
+                        liveWorkflow != null &&
                         (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs),
                     enter = expandHorizontally(
                         animationSpec = tween(360, easing = InspectorEase),
@@ -150,6 +156,7 @@ fun ControlRoom(
 private fun PillNavigation(
     destination: ControlRoomDestination,
     onDestinationSelected: (ControlRoomDestination) -> Unit,
+    runtimeState: ApplicationRuntimeState,
     modifier: Modifier = Modifier,
 ) {
     val entrance = remember { AzphaltEntrance.roll() }
@@ -165,11 +172,7 @@ private fun PillNavigation(
                 label = item.label,
                 seed = "nav-$index-${item.name}",
                 selected = item == destination,
-                endCap = when (item) {
-                    ControlRoomDestination.Inbox -> "2"
-                    ControlRoomDestination.Runs -> "1"
-                    else -> null
-                },
+                endCap = null,
                 onClick = { onDestinationSelected(item) },
                 modifier = Modifier
                     .fillMaxWidth(if (item == destination) 0.96f else 0.84f - (index % 3) * 0.03f)
@@ -184,7 +187,7 @@ private fun PillNavigation(
             onClick = { Azphalt.rerollGround() },
             modifier = Modifier.fillMaxWidth(0.9f),
         )
-        Text("JULES · CONNECTED", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+        Text(runtimeStatusLabel(runtimeState), style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
     }
 }
 
@@ -218,7 +221,6 @@ private fun CompactNavigation(
                 label = item.label,
                 seed = "compact-$index-${item.name}",
                 selected = item == destination,
-                endCap = if (item == ControlRoomDestination.Inbox) "2" else null,
                 onClick = { onDestinationSelected(item) },
                 modifier = Modifier.azphaltEntrance(entrance, index, ControlRoomDestination.entries.size),
             )
@@ -231,9 +233,10 @@ private fun MainDestination(
     destination: ControlRoomDestination,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
+    onLaunchWorkflow: (String, String) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
-    liveWorkflow: LiveWorkflowPresentation? = null,
+    runtimeState: ApplicationRuntimeState,
 ) {
     AzphaltPlaceTransition(target = destination, modifier = modifier.fillMaxSize()) { place ->
         when (place) {
@@ -243,8 +246,9 @@ private fun MainDestination(
                 modifier = Modifier.fillMaxSize(),
                 selectedTaskId = selectedTaskId,
                 onTaskSelected = onTaskSelected,
+                onLaunchWorkflow = onLaunchWorkflow,
                 compact = compact,
-                liveWorkflow = liveWorkflow,
+                runtimeState = runtimeState,
             )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
@@ -253,4 +257,13 @@ private fun MainDestination(
             ControlRoomDestination.Settings -> SettingsScreen(Modifier.fillMaxSize())
         }
     }
+}
+
+private fun runtimeStatusLabel(state: ApplicationRuntimeState): String = when (state) {
+    ApplicationRuntimeState.Loading -> "RUNTIME · LOADING"
+    ApplicationRuntimeState.NoProject -> "RUNTIME · NO PROJECT"
+    is ApplicationRuntimeState.NoRun -> "RUNTIME · NO RUN"
+    is ApplicationRuntimeState.Live -> "RUNTIME · ${state.presentation.run.status.name.uppercase()}"
+    is ApplicationRuntimeState.Disconnected -> "RUNTIME · DISCONNECTED"
+    is ApplicationRuntimeState.ResumeFailed -> "RUNTIME · RESUME FAILED"
 }
