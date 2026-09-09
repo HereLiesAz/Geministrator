@@ -225,7 +225,7 @@ class ApplicationRuntime private constructor(
                     "Task ${taskDefinitionId.value} is not a human approval gate"
                 }
                 WorkflowRuntimeState(
-                    run = engine.completeTask(
+                    run = engine.completeHumanApprovalTask(
                         definition = snapshot.definition,
                         run = snapshot.state.run,
                         taskDefinitionId = taskDefinitionId,
