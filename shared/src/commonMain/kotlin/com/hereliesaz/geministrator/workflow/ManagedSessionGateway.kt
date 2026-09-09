@@ -40,6 +40,7 @@ enum class ManagedSessionStatus {
 
 sealed class ManagedSessionFailure(message: String, cause: Throwable? = null) : RuntimeException(message, cause) {
     class ProviderUnavailable(message: String, cause: Throwable? = null) : ManagedSessionFailure(message, cause)
+    class ProviderOperationFailed(message: String, cause: Throwable? = null) : ManagedSessionFailure(message, cause)
 }
 
 interface ManagedSessionGateway {
