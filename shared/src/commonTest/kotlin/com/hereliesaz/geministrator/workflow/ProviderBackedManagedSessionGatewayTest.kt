@@ -28,19 +28,21 @@ import kotlin.test.assertTrue
 
 class ProviderBackedManagedSessionGatewayTest {
     @Test
-    fun providerSelectionPreservesCancellation() = runBlocking {
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        try {
-            val gateway = ProviderBackedManagedSessionGateway(
-                AgentProviderRegistry(listOf(CancellingCapabilitiesProvider())),
-                scope,
-            )
+    fun providerSelectionPreservesCancellation() {
+        runBlocking {
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+            try {
+                val gateway = ProviderBackedManagedSessionGateway(
+                    AgentProviderRegistry(listOf(CancellingCapabilitiesProvider())),
+                    scope,
+                )
 
-            assertFailsWith<CancellationException> {
-                gateway.resolveProvider(ProviderSelectionRequest())
+                assertFailsWith<CancellationException> {
+                    gateway.resolveProvider(ProviderSelectionRequest())
+                }
+            } finally {
+                scope.cancel()
             }
-        } finally {
-            scope.cancel()
         }
     }
 

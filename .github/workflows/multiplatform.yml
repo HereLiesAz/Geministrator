@@ -97,7 +97,10 @@ jobs:
         run: ./gradlew :desktopApp:packageDistributionForCurrentOS
 
       - name: Publish pinned h2g2 for isolated web builds
-        run: ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
+        run: |
+          ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal \
+            -Pgroup=com.github.HereLiesAz \
+            -Pversion=faa80ed5aa063f6bdab42163d7b021123b248254
 
       - name: Build Web JS
         run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
