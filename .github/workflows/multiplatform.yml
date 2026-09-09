@@ -96,11 +96,14 @@ jobs:
       - name: Build Desktop distribution
         run: ./gradlew :desktopApp:packageDistributionForCurrentOS
 
+      - name: Publish pinned h2g2 for isolated web builds
+        run: ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
+
       - name: Build Web JS
-        run: ./gradlew :webApp:jsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
 
       - name: Build Web Wasm
-        run: ./gradlew :webApp:wasmJsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
       - name: Upload Android build
         if: github.event_name != 'pull_request'
