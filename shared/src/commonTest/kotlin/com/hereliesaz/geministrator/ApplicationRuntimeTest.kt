@@ -26,6 +26,7 @@ import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.AgentRunHandle
 import com.hereliesaz.geministrator.providers.AgentTaskRequest
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -211,6 +212,26 @@ class ApplicationRuntimeTest {
         } finally {
             scope.cancel()
         }
+    }
+
+    @Test
+    fun providerUnavailableClassifiesAsDisconnected() {
+        val failure = ApplicationRuntime.classifyRuntimeFailure(
+            ManagedSessionFailure.ProviderUnavailable("offline"),
+        )
+
+        assertIs<ApplicationRuntimeFailure.Disconnected>(failure)
+        assertEquals("offline", failure.message)
+    }
+
+    @Test
+    fun providerOperationFailureClassifiesAsResumeFailure() {
+        val failure = ApplicationRuntime.classifyRuntimeFailure(
+            ManagedSessionFailure.ProviderOperationFailed("provider rejected operation"),
+        )
+
+        assertIs<ApplicationRuntimeFailure.Resume>(failure)
+        assertEquals("provider rejected operation", failure.message)
     }
 
     private fun project(id: String, updatedAt: Long) = Project(
