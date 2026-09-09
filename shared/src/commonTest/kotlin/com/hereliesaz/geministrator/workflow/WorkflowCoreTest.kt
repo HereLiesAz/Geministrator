@@ -40,11 +40,10 @@ class WorkflowGraphValidatorTest {
     }
 
     @Test
-    fun rejectsConflictingRoleIdentity() {
-        val taskId = TaskDefinitionId("implementation")
+    fun acceptsDelegatedRoleAgentExecution() {
         val definition = workflow(
             TaskDefinition(
-                id = taskId,
+                id = TaskDefinitionId("implementation"),
                 name = "implementation",
                 objective = "Do implementation",
                 roleId = BuiltInRoles.ImplementationEngineer.id,
@@ -52,13 +51,7 @@ class WorkflowGraphValidatorTest {
             ),
         )
 
-        val error = assertIs<WorkflowValidationError.ConflictingRoleIdentity>(
-            WorkflowGraphValidator.validate(definition).single(),
-        )
-
-        assertEquals(taskId, error.taskId)
-        assertEquals(BuiltInRoles.ImplementationEngineer.id, error.responsibleRoleId)
-        assertEquals(BuiltInRoles.QaEngineer.id, error.executorRoleId)
+        assertTrue(WorkflowGraphValidator.validate(definition).isEmpty())
     }
 
     @Test
@@ -153,12 +146,27 @@ class WorkflowRunFactoryTest {
 
 class TaskRunTransitionsTest {
     @Test
-    fun terminalCompletionCannotRestart() {
-        assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Completed, TaskRunStatus.Running))
+    fun completedAndCancelledAreTerminal() {
+        TaskRunStatus.entries.forEach { status ->
+            assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Completed, status))
+            assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Cancelled, status))
+        }
     }
 
     @Test
     fun failedTaskCanRetry() {
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Failed, TaskRunStatus.Retrying))
+    }
+
+    @Test
+    fun awaitingApprovalCanObserveProviderFailure() {
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.AwaitingApproval, TaskRunStatus.Failed))
+    }
+
+    @Test
+    fun systemDispatchCanReturnTerminalResult() {
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Completed))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Failed))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Retrying, TaskRunStatus.Completed))
     }
 }
