@@ -84,6 +84,7 @@ fun ControlRoom(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String) -> Unit,
+    onApproveTask: (String) -> Unit,
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -143,6 +144,7 @@ fun ControlRoom(
                         TechnicalInspector(
                             selectedTaskId = taskId,
                             liveWorkflow = liveWorkflow,
+                            onApproveTask = onApproveTask,
                             modifier = Modifier.width(310.dp).fillMaxHeight(),
                         )
                     }
