@@ -5,6 +5,7 @@ import com.hereliesaz.geministrator.providers.AgentEvent
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -122,6 +123,8 @@ class ProviderBackedManagedSessionGateway(
         block: suspend () -> T,
     ): T = try {
         block()
+    } catch (failure: CancellationException) {
+        throw failure
     } catch (failure: ManagedSessionFailure.ProviderUnavailable) {
         throw failure
     } catch (failure: Throwable) {
