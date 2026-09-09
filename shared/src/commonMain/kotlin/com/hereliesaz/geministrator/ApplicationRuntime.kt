@@ -83,6 +83,7 @@ class ApplicationRuntime private constructor(
     )
 
     private var current: Current? = null
+    private var currentGeneration: Long = 0L
     private var cycleJob: Job? = null
     val state: StateFlow<ApplicationRuntimeState> = publisher.state
 
@@ -91,7 +92,7 @@ class ApplicationRuntime private constructor(
         try {
             val projects = persistence.projects.all()
             if (projects.isEmpty()) {
-                current = null
+                replaceCurrent(null)
                 publisher.publish(ApplicationRuntimeState.NoProject)
                 return
             }
@@ -103,7 +104,7 @@ class ApplicationRuntime private constructor(
                 .maxByOrNull { (_, run) -> run.updatedAtEpochMillis }
 
             if (latestProjectRun == null) {
-                current = null
+                replaceCurrent(null)
                 publisher.publish(
                     ApplicationRuntimeState.NoRun(
                         projects.maxByOrNull(Project::updatedAtEpochMillis) ?: projects.first(),
@@ -121,11 +122,11 @@ class ApplicationRuntime private constructor(
                 throw classifyResumeFailure(failure)
             }
 
-            current = Current(project, definition, runtimeState)
+            replaceCurrent(Current(project, definition, runtimeState))
             publishCurrent()
             startCycling()
         } catch (failure: Throwable) {
-            current = null
+            replaceCurrent(null)
             publishFailure(failure)
         }
     }
@@ -185,7 +186,7 @@ class ApplicationRuntime private constructor(
             taskRunIdFactory = { id -> TaskRunId("run-$now-${id.value}") },
         )
 
-        current = Current(project, prepared, runtimeState)
+        replaceCurrent(Current(project, prepared, runtimeState))
         publishCurrent()
         startCycling()
     }
@@ -193,7 +194,13 @@ class ApplicationRuntime private constructor(
     fun close() {
         cycleJob?.cancel()
         cycleJob = null
+        replaceCurrent(null)
         runtimeScope.cancel()
+    }
+
+    private fun replaceCurrent(next: Current?) {
+        currentGeneration += 1L
+        current = next
     }
 
     private fun startCycling() {
@@ -202,6 +209,7 @@ class ApplicationRuntime private constructor(
             while (isActive) {
                 delay(CYCLE_INTERVAL_MILLIS)
                 val snapshot = current ?: continue
+                val snapshotGeneration = currentGeneration
                 if (snapshot.state.run.status.isTerminal()) continue
 
                 try {
@@ -212,10 +220,13 @@ class ApplicationRuntime private constructor(
                         nowEpochMillis = nowEpochMillis(),
                         artifactIdFactory = ::artifactId,
                     )
-                    current = snapshot.copy(state = nextState)
+                    if (currentGeneration != snapshotGeneration || current !== snapshot) continue
+                    replaceCurrent(snapshot.copy(state = nextState))
                     publishCurrent()
                 } catch (failure: Throwable) {
-                    publishFailure(classifyRuntimeFailure(failure))
+                    if (currentGeneration == snapshotGeneration && current === snapshot) {
+                        publishFailure(classifyRuntimeFailure(failure))
+                    }
                     delay(RETRY_BACKOFF_MILLIS)
                 }
             }
