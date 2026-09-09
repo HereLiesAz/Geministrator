@@ -97,7 +97,7 @@ class ApplicationRuntimeRecoveryTest {
             )
 
             withTimeout(4_000L) {
-                while (provider.startCount < 1) delay(25L)
+                while (runtime.state.value !is ApplicationRuntimeState.ResumeFailed) delay(25L)
             }
             assertIs<ApplicationRuntimeState.ResumeFailed>(runtime.state.value)
 
