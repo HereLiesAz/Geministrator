@@ -59,8 +59,8 @@ interface GitHubActionsClient {
 }
 
 class GitHubRestActionsClient(
-    private val httpClient: HttpClient,
     private val tokenProvider: GitHubTokenProvider,
+    private val httpClient: HttpClient = HttpClient(),
     private val baseUrl: String = "https://api.github.com",
     private val json: Json = Json { ignoreUnknownKeys = true },
 ) : GitHubActionsClient {
