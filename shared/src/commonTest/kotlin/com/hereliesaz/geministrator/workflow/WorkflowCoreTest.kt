@@ -159,8 +159,9 @@ class TaskRunTransitionsTest {
     }
 
     @Test
-    fun awaitingApprovalCanObserveProviderFailure() {
+    fun awaitingApprovalCanObserveProviderFailureButNotCompletion() {
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.AwaitingApproval, TaskRunStatus.Failed))
+        assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.AwaitingApproval, TaskRunStatus.Completed))
     }
 
     @Test
