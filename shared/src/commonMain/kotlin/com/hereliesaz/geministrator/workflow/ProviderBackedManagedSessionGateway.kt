@@ -27,20 +27,17 @@ class ProviderBackedManagedSessionGateway(
     private val snapshots = mutableMapOf<ManagedSessionHandle, SessionSnapshot>()
 
     override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId =
-        providerCall("No registered provider can satisfy this task") {
-            providerRegistry.select(selection).id
-        }
+        selectProvider(selection, "No registered provider can satisfy this task").id
 
-    override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle =
-        providerCall("Unable to start provider session") {
-            val provider = providerRegistry.select(request.providerSelection)
+    override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle {
+        val provider = selectProvider(request.providerSelection, "No registered provider can satisfy this task")
+        return providerOperation("Unable to start provider session") {
             val run = provider.start(request.taskRequest)
             val handle = ManagedSessionHandle(
                 taskRunId = request.taskRequest.taskRunId,
                 providerId = provider.id,
                 providerRunId = run.providerRunId,
             )
-
             registerAndObserve(
                 handle = handle,
                 initialStatus = if (request.taskRequest.requirePlanApproval) {
@@ -49,15 +46,16 @@ class ProviderBackedManagedSessionGateway(
                     ManagedSessionStatus.Running
                 },
             )
-
             handle
         }
+    }
 
     override suspend fun reconnect(
         handle: ManagedSessionHandle,
         initialStatus: ManagedSessionStatus,
     ) {
-        providerCall("Unable to reconnect provider session ${handle.providerRunId.value}") {
+        providerFor(handle)
+        providerOperation("Unable to reconnect provider session ${handle.providerRunId.value}") {
             registerAndObserve(handle, initialStatus)
         }
     }
@@ -71,12 +69,12 @@ class ProviderBackedManagedSessionGateway(
     override suspend fun message(
         handle: ManagedSessionHandle,
         message: String,
-    ): ProviderActionResult = providerCall("Unable to message provider session ${handle.providerRunId.value}") {
+    ): ProviderActionResult = providerOperation("Unable to message provider session ${handle.providerRunId.value}") {
         providerFor(handle).sendMessage(handle.providerRunId, message)
     }
 
     override suspend fun approvePlan(handle: ManagedSessionHandle): ProviderActionResult =
-        providerCall("Unable to approve provider session ${handle.providerRunId.value}") {
+        providerOperation("Unable to approve provider session ${handle.providerRunId.value}") {
             val result = providerFor(handle).approvePlan(handle.providerRunId)
             if (result is ProviderActionResult.Accepted) {
                 mutex.withLock {
@@ -106,10 +104,31 @@ class ProviderBackedManagedSessionGateway(
 
         val provider = providerFor(handle)
         scope.launch {
-            provider.observe(handle.providerRunId).collect { event ->
-                applyEvent(handle, event)
+            try {
+                provider.observe(handle.providerRunId).collect { event -> applyEvent(handle, event) }
+            } catch (failure: CancellationException) {
+                throw failure
+            } catch (_: Throwable) {
+                mutex.withLock {
+                    val current = snapshots[handle] ?: SessionSnapshot(ManagedSessionStatus.Unknown)
+                    snapshots[handle] = current.copy(status = ManagedSessionStatus.Failed)
+                }
             }
         }
+    }
+
+    private fun selectProvider(
+        selection: ProviderSelectionRequest,
+        fallbackMessage: String,
+    ): AgentProvider = try {
+        providerRegistry.select(selection)
+    } catch (failure: ManagedSessionFailure.ProviderUnavailable) {
+        throw failure
+    } catch (failure: Throwable) {
+        throw ManagedSessionFailure.ProviderUnavailable(
+            failure.message?.takeIf(String::isNotBlank) ?: fallbackMessage,
+            failure,
+        )
     }
 
     private fun providerFor(handle: ManagedSessionHandle): AgentProvider =
@@ -118,7 +137,7 @@ class ProviderBackedManagedSessionGateway(
                 "Provider ${handle.providerId.value} is no longer registered",
             )
 
-    private suspend fun <T> providerCall(
+    private suspend fun <T> providerOperation(
         fallbackMessage: String,
         block: suspend () -> T,
     ): T = try {
@@ -127,8 +146,10 @@ class ProviderBackedManagedSessionGateway(
         throw failure
     } catch (failure: ManagedSessionFailure.ProviderUnavailable) {
         throw failure
+    } catch (failure: ManagedSessionFailure.ProviderOperationFailed) {
+        throw failure
     } catch (failure: Throwable) {
-        throw ManagedSessionFailure.ProviderUnavailable(
+        throw ManagedSessionFailure.ProviderOperationFailed(
             failure.message?.takeIf(String::isNotBlank) ?: fallbackMessage,
             failure,
         )
