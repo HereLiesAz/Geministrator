@@ -25,6 +25,7 @@ import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
 import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
 import com.hereliesaz.geministrator.workflow.ManagedSessionGateway
 import com.hereliesaz.geministrator.workflow.ProviderBackedManagedSessionGateway
+import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
 import com.hereliesaz.geministrator.workflow.WorkflowLaunchService
@@ -293,6 +294,7 @@ class ApplicationRuntime private constructor(
             providers: Collection<AgentProvider>,
             scope: CoroutineScope,
             persistence: WorkflowPersistence = SettingsWorkflowPersistence.createDefault(),
+            executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
         ): ApplicationRuntime {
             val runtimeJob = SupervisorJob(scope.coroutineContext[Job])
             val runtimeScope = CoroutineScope(scope.coroutineContext + runtimeJob)
@@ -310,6 +312,7 @@ class ApplicationRuntime private constructor(
                     persistence = persistence,
                     engine = engine,
                     sessionGateway = gateway,
+                    executorIntegrations = executorIntegrations,
                 )
                 return ApplicationRuntime(
                     persistence,
