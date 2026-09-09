@@ -32,6 +32,7 @@ class JulesRestApi(
     private val apiKeyProvider: JulesApiKeyProvider,
     private val baseUrl: String = "https://jules.googleapis.com/v1alpha",
     private val client: HttpClient = HttpClient {
+        expectSuccess = true
         install(ContentNegotiation) {
             json(
                 Json {

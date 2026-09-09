@@ -66,15 +66,21 @@ class WorkflowRuntimeCoordinator(
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
         nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
 
-        val newlyFailedTaskIds = nextRun.taskRuns.filter { (taskId, taskRun) ->
+        val newlyFailedTasks = nextRun.taskRuns.filter { (taskId, taskRun) ->
             taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed
-        }.keys
-        for (taskId in newlyFailedTaskIds) {
+        }
+        for ((taskId, _) in newlyFailedTasks) {
+            val previousStatus = state.run.taskRuns[taskId]?.status
+            val retryReason = when (previousStatus) {
+                TaskRunStatus.Verifying -> RetryReason.VerificationFailed
+                TaskRunStatus.Planning -> RetryReason.PlanRejected
+                else -> RetryReason.ProviderFailure
+            }
             nextRun = engine.handleFailure(
                 definition,
                 nextRun,
                 taskId,
-                RetryReason.ProviderFailure,
+                retryReason,
                 "Executor failed",
                 nowEpochMillis,
             )
@@ -210,18 +216,27 @@ class WorkflowRuntimeCoordinator(
         val taskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
             val executor = taskRun.executor ?: definitions[taskId]?.executor
             val dispatchable = taskRun.status == TaskRunStatus.Ready || taskRun.status == TaskRunStatus.Retrying || taskRun.status == TaskRunStatus.Running
-            if (dispatchable && executor != null && executor.isSystemExecutor() && !executorIntegrations.isAvailable(executor)) {
-                changed = true
-                taskRun.copy(
-                    status = TaskRunStatus.Blocked,
-                    blockingReason = BlockingReason(
-                        WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
-                        "${executor.displayLabel()} is not available in this runtime.",
-                    ),
-                    progress = null,
-                    progressMessage = null,
-                )
-            } else taskRun
+            val blockedByUnavailableExecutor = taskRun.status == TaskRunStatus.Blocked &&
+                taskRun.blockingReason?.code == WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE
+            when {
+                dispatchable && executor != null && executor.isSystemExecutor() && !executorIntegrations.isAvailable(executor) -> {
+                    changed = true
+                    taskRun.copy(
+                        status = TaskRunStatus.Blocked,
+                        blockingReason = BlockingReason(
+                            WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
+                            "${executor.displayLabel()} is not available in this runtime.",
+                        ),
+                        progress = null,
+                        progressMessage = null,
+                    )
+                }
+                blockedByUnavailableExecutor && executor != null && executorIntegrations.isAvailable(executor) -> {
+                    changed = true
+                    taskRun.copy(status = TaskRunStatus.Ready, blockingReason = null)
+                }
+                else -> taskRun
+            }
         }
         return if (changed) run.copy(taskRuns = taskRuns) else run
     }

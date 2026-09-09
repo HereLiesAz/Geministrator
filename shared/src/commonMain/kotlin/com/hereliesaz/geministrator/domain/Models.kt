@@ -67,7 +67,13 @@ data class TaskDefinition(
     val providerConstraints: ProviderConstraints = ProviderConstraints.None,
     val environmentPlanningPolicy: EnvironmentPlanningPolicy = EnvironmentPlanningPolicy.WhenProviderRequires,
     val executor: TaskExecutor? = null,
-)
+) {
+    init {
+        require(roleId != null || executor != null) {
+            "Task ${id.value} must specify at least one of roleId or executor"
+        }
+    }
+}
 
 @Serializable
 data class WorkflowDefinition(

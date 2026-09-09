@@ -123,8 +123,9 @@ class SettingsWorkflowPersistence(
     private fun readUnlocked(): PersistenceSnapshot {
         val encoded = settings.getStringOrNull(storageKey) ?: return PersistenceSnapshot()
         val snapshot = json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
-        require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
-            "Persistence schema ${snapshot.version} is newer than supported schema $CURRENT_SCHEMA_VERSION"
+        if (snapshot.version > CURRENT_SCHEMA_VERSION) {
+            // Data was written by a newer app version; discard rather than crash
+            return PersistenceSnapshot()
         }
         return migrate(snapshot)
     }

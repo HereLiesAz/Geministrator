@@ -187,6 +187,8 @@ class WorkflowEngine(
                             occurredAtEpochMillis = nowEpochMillis,
                         ),
                     )
+                    // Human approval tasks don't consume provider concurrency slots
+                    continue
                 }
 
                 is TaskExecutor.GitHubAction,
@@ -331,7 +333,7 @@ class WorkflowEngine(
                 taskRuns = nextRun.taskRuns + (
                     taskId to taskRun.copy(
                         status = mappedStatus,
-                        artifacts = durableArtifacts,
+                        artifacts = if (durableArtifacts.isEmpty()) taskRun.artifacts else durableArtifacts,
                         progress = when {
                             mappedStatus == TaskRunStatus.Completed -> 1f
                             providerProgress?.fraction != null -> providerProgress.fraction
@@ -448,7 +450,6 @@ class WorkflowEngine(
 
     private fun TaskRunStatus.isActive(): Boolean = when (this) {
         TaskRunStatus.Planning,
-        TaskRunStatus.AwaitingApproval,
         TaskRunStatus.Running,
         TaskRunStatus.Verifying,
         -> true

@@ -58,13 +58,12 @@ class JulesProvider(
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
         val sourceContext = request.repository?.let { repository ->
             val source = findSource(repository)
+            val branch = repository.defaultBranch
+                ?: source.githubRepo?.defaultBranch?.displayName
+                ?: error("Repository ${repository.owner}/${repository.name} has no default branch configured in project or Jules source")
             JulesSourceContext(
                 source = source.name,
-                githubRepoContext = JulesGithubRepoContext(
-                    startingBranch = repository.defaultBranch
-                        ?: source.githubRepo?.defaultBranch?.displayName
-                        ?: "main",
-                ),
+                githubRepoContext = JulesGithubRepoContext(startingBranch = branch),
             )
         }
 
@@ -93,7 +92,7 @@ class JulesProvider(
 
         while (!terminal) {
             val activities = api.listActivities(sessionName)
-                .sortedWith(compareBy<JulesActivity> { it.createTime.orEmpty() }.thenBy { it.id })
+                .sortedWith(compareBy<JulesActivity> { it.createTime ?: "￿" }.thenBy { it.id })
 
             for (activity in activities) {
                 if (!seenActivityIds.add(activity.id)) continue
