@@ -7,6 +7,7 @@ import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -65,10 +66,11 @@ class GitHubRestActionsClient(
 ) : GitHubActionsClient {
     override suspend fun dispatch(request: GitHubWorkflowDispatchRequest): GitHubWorkflowRun {
         val repository = request.repository
+        val token = requireToken()
         val response = httpClient.post(
             "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${request.workflow.encodeURLPathPart()}/dispatches",
         ) {
-            githubHeaders()
+            githubHeaders(token)
             contentType(ContentType.Application.Json)
             setBody(json.encodeToString(DispatchBody(ref = request.ref)))
         }
@@ -82,15 +84,16 @@ class GitHubRestActionsClient(
     }
 
     override suspend fun getRun(repository: RepositoryRef, runId: String): GitHubWorkflowRun {
+        val token = requireToken()
         val baseRepositoryUrl = "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}"
         val runResponse = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}") {
-            githubHeaders()
+            githubHeaders(token)
         }
         runResponse.requireSuccess("read GitHub Actions run $runId")
         val run = json.decodeFromString<RunResponse>(runResponse.bodyAsText())
 
         val artifactsResponse = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}/artifacts") {
-            githubHeaders()
+            githubHeaders(token)
         }
         artifactsResponse.requireSuccess("read artifacts for GitHub Actions run $runId")
         val artifacts = json.decodeFromString<ArtifactsResponse>(artifactsResponse.bodyAsText())
@@ -112,9 +115,11 @@ class GitHubRestActionsClient(
         )
     }
 
-    private suspend fun io.ktor.client.request.HttpRequestBuilder.githubHeaders() {
-        val token = tokenProvider.getToken().trim()
+    private suspend fun requireToken(): String = tokenProvider.getToken().trim().also { token ->
         require(token.isNotEmpty()) { "GitHub Actions token is not configured" }
+    }
+
+    private fun HttpRequestBuilder.githubHeaders(token: String) {
         header(HttpHeaders.Accept, "application/vnd.github+json")
         header(HttpHeaders.Authorization, "Bearer $token")
         header("X-GitHub-Api-Version", API_VERSION)
