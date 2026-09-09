@@ -91,6 +91,9 @@ fun ControlRoom(
 ) {
     val ground = Azphalt.currentGround
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
+    val inspectorVisible = selectedTaskId != null &&
+        liveWorkflow != null &&
+        (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs)
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,6 +113,20 @@ fun ControlRoom(
                     compact = true,
                     runtimeState = runtimeState,
                 )
+                AnimatedVisibility(
+                    visible = inspectorVisible,
+                    enter = fadeIn(tween(150)),
+                    exit = fadeOut(tween(120)),
+                ) {
+                    selectedTaskId?.let { taskId ->
+                        TechnicalInspector(
+                            selectedTaskId = taskId,
+                            liveWorkflow = liveWorkflow,
+                            onApproveTask = onApproveTask,
+                            modifier = Modifier.fillMaxWidth().height(280.dp),
+                        )
+                    }
+                }
             }
         } else {
             Row(Modifier.fillMaxSize()) {
@@ -128,9 +145,7 @@ fun ControlRoom(
                     runtimeState = runtimeState,
                 )
                 AnimatedVisibility(
-                    visible = selectedTaskId != null &&
-                        liveWorkflow != null &&
-                        (destination == ControlRoomDestination.Overview || destination == ControlRoomDestination.Runs),
+                    visible = inspectorVisible,
                     enter = expandHorizontally(
                         animationSpec = tween(360, easing = InspectorEase),
                         expandFrom = Alignment.Start,
