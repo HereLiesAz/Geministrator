@@ -14,23 +14,29 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.hereliesaz.geministrator.providers.AgentProvider
+import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun App(
     providers: Collection<AgentProvider>,
+    executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
 ) {
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
     var runtime by remember { mutableStateOf<ApplicationRuntime?>(null) }
 
-    LaunchedEffect(providers) {
+    LaunchedEffect(providers, executorIntegrations) {
         runtime?.close()
         runtime = null
         runtimeState = ApplicationRuntimeState.Loading
         try {
-            val created = ApplicationRuntime.create(providers = providers, scope = scope)
+            val created = ApplicationRuntime.create(
+                providers = providers,
+                scope = scope,
+                executorIntegrations = executorIntegrations,
+            )
             runtime = created
             created.state.collectLatest { runtimeState = it }
         } catch (failure: Throwable) {
