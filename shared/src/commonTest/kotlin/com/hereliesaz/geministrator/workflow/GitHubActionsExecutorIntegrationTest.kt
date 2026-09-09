@@ -87,7 +87,7 @@ class GitHubActionsExecutorIntegrationTest {
         assertEquals(TaskRunStatus.Completed, execution.status)
         assertEquals(1f, execution.progress)
         val artifact = execution.artifacts.single()
-        assertEquals(ArtifactId("task-run:github-action:artifact-7"), artifact.id)
+        assertEquals(ArtifactId("task-run:github-action:0:artifact-7"), artifact.id)
         assertEquals(ArtifactKind.CommandOutput, artifact.kind)
         assertEquals(base.taskRun.id, artifact.taskRunId)
         assertEquals("test-results", artifact.label)
