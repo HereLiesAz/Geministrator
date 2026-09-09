@@ -48,6 +48,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.ktor.client.core)
         }
 
         commonTest.dependencies {
