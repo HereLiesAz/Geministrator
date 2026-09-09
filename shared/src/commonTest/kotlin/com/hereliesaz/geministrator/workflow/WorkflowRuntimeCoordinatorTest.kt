@@ -4,6 +4,7 @@ import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.ArtifactKind
 import com.hereliesaz.geministrator.domain.ArtifactRef
+import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.ProviderRunId
@@ -25,7 +26,6 @@ import com.hereliesaz.geministrator.providers.ProviderArtifact
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class WorkflowRuntimeCoordinatorTest {
     @Test
@@ -65,27 +65,21 @@ class WorkflowRuntimeCoordinatorTest {
     @Test
     fun providerFailureUsesFailurePolicyAndSchedulesRetry() = runBlocking {
         val taskId = TaskDefinitionId("agent")
+        val executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id)
         val definition = definition(
             TaskDefinition(
                 id = taskId,
                 name = "Agent",
                 objective = "Do work",
-                roleId = com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id,
-                executor = TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+                roleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = executor,
             ),
         )
         val handle = handle(taskId)
         val run = run(
             definition = definition,
             status = WorkflowRunStatus.Running,
-            taskRuns = mapOf(
-                taskId to taskRun(
-                    taskId,
-                    TaskRunStatus.Running,
-                    TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
-                    provider = true,
-                ),
-            ),
+            taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Running, executor, provider = true)),
         )
         val gateway = FakeManagedSessionGateway(status = ManagedSessionStatus.Failed)
         val fixture = fixture(gateway)
@@ -110,36 +104,33 @@ class WorkflowRuntimeCoordinatorTest {
         val taskId = TaskDefinitionId("agent")
         val artifact = ArtifactRef(
             id = ArtifactId("artifact"),
-            kind = ArtifactKind.Other,
+            kind = ArtifactKind.CommandOutput,
             taskRunId = TaskRunId("task-run-agent"),
             label = "result",
             uri = "file://result",
             createdAtEpochMillis = 5L,
         )
+        val executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id)
         val definition = definition(
             TaskDefinition(
                 id = taskId,
                 name = "Agent",
                 objective = "Do work",
-                roleId = com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id,
-                executor = TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
+                roleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = executor,
             ),
         )
         val run = run(
             definition = definition,
             status = WorkflowRunStatus.Running,
             taskRuns = mapOf(
-                taskId to taskRun(
-                    taskId,
-                    TaskRunStatus.Running,
-                    TaskExecutor.RoleAgent(com.hereliesaz.geministrator.domain.BuiltInRoles.ImplementationEngineer.id),
-                    provider = true,
-                ).copy(artifacts = listOf(artifact)),
+                taskId to taskRun(taskId, TaskRunStatus.Running, executor, provider = true)
+                    .copy(artifacts = listOf(artifact)),
             ),
         )
         val gateway = FakeManagedSessionGateway(
             status = ManagedSessionStatus.Running,
-            artifacts = listOf(ProviderArtifact(ArtifactKind.Other, "result", "file://result")),
+            artifacts = listOf(ProviderArtifact(ArtifactKind.CommandOutput, "result", "file://result")),
         )
         val fixture = fixture(gateway)
 
@@ -193,7 +184,7 @@ class WorkflowRuntimeCoordinatorTest {
         val persistence = InMemoryWorkflowPersistence()
         val engine = WorkflowEngine(
             sessionGateway = gateway,
-            roles = com.hereliesaz.geministrator.domain.BuiltInRoles.all,
+            roles = BuiltInRoles.all,
         )
         return Fixture(
             persistence,
@@ -251,6 +242,7 @@ class WorkflowRuntimeCoordinatorTest {
         providerRunId = ProviderRunId("provider-run"),
     )
 
+    @Suppress("UNUSED_PARAMETER")
     private fun artifactId(taskRun: TaskRun, artifact: ProviderArtifact, index: Int): ArtifactId = ArtifactId("artifact")
 
     private data class Fixture(
