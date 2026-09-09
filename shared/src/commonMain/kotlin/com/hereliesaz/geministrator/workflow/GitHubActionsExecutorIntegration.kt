@@ -7,6 +7,7 @@ import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -60,7 +61,12 @@ interface GitHubActionsClient {
 
 class GitHubRestActionsClient(
     private val tokenProvider: GitHubTokenProvider,
-    private val httpClient: HttpClient = HttpClient(),
+    private val httpClient: HttpClient = HttpClient {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000L
+            connectTimeoutMillis = 10_000L
+        }
+    },
     private val baseUrl: String = "https://api.github.com",
     private val json: Json = Json { ignoreUnknownKeys = true },
 ) : GitHubActionsClient {

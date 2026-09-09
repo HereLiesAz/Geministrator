@@ -26,6 +26,8 @@ import com.hereliesaz.geministrator.events.TaskCompleted
 import com.hereliesaz.geministrator.events.TaskEscalated
 import com.hereliesaz.geministrator.events.TaskFailed
 import com.hereliesaz.geministrator.events.TaskStarted
+import com.hereliesaz.geministrator.events.TaskCancelled
+import com.hereliesaz.geministrator.events.WorkflowCancelled
 import com.hereliesaz.geministrator.events.WorkflowCompleted
 import com.hereliesaz.geministrator.events.WorkflowEventSink
 import com.hereliesaz.geministrator.events.WorkflowFailed
@@ -446,6 +448,28 @@ class WorkflowEngine(
                 )
             }
         }
+    }
+
+    suspend fun cancelWorkflow(run: WorkflowRun, nowEpochMillis: Long): WorkflowRun {
+        if (run.status == WorkflowRunStatus.Completed ||
+            run.status == WorkflowRunStatus.Failed ||
+            run.status == WorkflowRunStatus.Cancelled
+        ) return run
+
+        val cancelledTaskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
+            if (taskRun.status == TaskRunStatus.Completed || taskRun.status == TaskRunStatus.Failed) {
+                taskRun
+            } else {
+                eventSink.append(TaskCancelled(run.id, taskId, nowEpochMillis))
+                taskRun.copy(status = TaskRunStatus.Cancelled)
+            }
+        }
+        eventSink.append(WorkflowCancelled(run.id, nowEpochMillis))
+        return run.copy(
+            status = WorkflowRunStatus.Cancelled,
+            taskRuns = cancelledTaskRuns,
+            updatedAtEpochMillis = nowEpochMillis,
+        )
     }
 
     private fun TaskRunStatus.isActive(): Boolean = when (this) {

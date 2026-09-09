@@ -2,6 +2,7 @@ package com.hereliesaz.geministrator.providers.jules
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -33,6 +34,10 @@ class JulesRestApi(
     private val baseUrl: String = "https://jules.googleapis.com/v1alpha",
     private val client: HttpClient = HttpClient {
         expectSuccess = true
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000L
+            connectTimeoutMillis = 10_000L
+        }
         install(ContentNegotiation) {
             json(
                 Json {

@@ -1,6 +1,8 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 
 sealed interface WorkflowValidationError {
@@ -12,6 +14,11 @@ sealed interface WorkflowValidationError {
     data class MissingExecutor(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class SelfDependency(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class Cycle(val taskIds: Set<TaskDefinitionId>) : WorkflowValidationError
+    data class ExecutorRoleMismatch(
+        val taskId: TaskDefinitionId,
+        val roleId: RoleDefinitionId,
+        val executorRoleId: RoleDefinitionId,
+    ) : WorkflowValidationError
 }
 
 object WorkflowGraphValidator {
@@ -26,6 +33,10 @@ object WorkflowGraphValidator {
         definition.tasks.forEach { task ->
             if (task.executor == null && task.roleId == null) {
                 errors += WorkflowValidationError.MissingExecutor(task.id)
+            }
+            val roleAgent = task.executor as? TaskExecutor.RoleAgent
+            if (roleAgent != null && task.roleId != null && roleAgent.roleId != task.roleId) {
+                errors += WorkflowValidationError.ExecutorRoleMismatch(task.id, task.roleId, roleAgent.roleId)
             }
             task.dependsOn.forEach { dependency ->
                 when {

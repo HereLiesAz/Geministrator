@@ -125,7 +125,9 @@ class ProviderBackedManagedSessionGateway(
                         }
                         return@launch
                     }
-                    delay(OBSERVER_RETRY_MILLIS)
+                    val backoffBase = OBSERVER_RETRY_MILLIS * (1L shl minOf(consecutiveFailures - 1, 5))
+                    val jitter = (backoffBase * 0.25 * Math.random()).toLong()
+                    delay(backoffBase + jitter)
                 }
             }
         }
@@ -194,7 +196,7 @@ class ProviderBackedManagedSessionGateway(
                 )
                 is AgentEvent.Message -> current
                 is AgentEvent.ArtifactProduced -> current.copy(
-                    artifacts = current.artifacts + event.artifact,
+                    artifacts = (current.artifacts + event.artifact).distinct(),
                 )
                 is AgentEvent.Completed -> current.copy(
                     status = ManagedSessionStatus.Completed,
