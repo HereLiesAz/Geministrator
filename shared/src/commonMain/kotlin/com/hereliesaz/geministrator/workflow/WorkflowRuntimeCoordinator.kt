@@ -97,10 +97,10 @@ class WorkflowRuntimeCoordinator(
         persist(project, definition, nextState)
         if (nextRun.status.isTerminal() || nextRun.status == WorkflowRunStatus.AwaitingHuman) return nextState
 
+        nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis)
         val dispatched = engine.dispatchReadyTasks(project, definition, nextRun, nextHandles, nowEpochMillis)
         nextRun = dispatched.run
         nextHandles = dispatched.handles.filterKeys { nextRun.taskRuns[it]?.status?.isActiveProviderStatus() == true }
-        nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis)
         nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
         return nextState
