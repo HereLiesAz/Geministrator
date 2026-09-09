@@ -99,23 +99,30 @@ jobs:
       - name: Publish pinned h2g2 for isolated web builds
         run: |
           ./gradlew -p vendor/conveyance-h2g2 publishToMavenLocal
-          source_dir="$HOME/.m2/repository/com/hereliesaz/conveyance/conveyance-h2g2/0.1.0"
-          target_dir="$HOME/.m2/repository/com/github/HereLiesAz/conveyance-h2g2/faa80ed5aa063f6bdab42163d7b021123b248254"
-          rm -rf "$target_dir"
-          mkdir -p "$target_dir"
-          for file in "$source_dir"/conveyance-h2g2-0.1.0*; do
-            [ -f "$file" ] || continue
-            name=$(basename "$file")
-            suffix=${name#conveyance-h2g2-0.1.0}
-            cp "$file" "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254$suffix"
+          source_group="$HOME/.m2/repository/com/hereliesaz/conveyance"
+          target_group="$HOME/.m2/repository/com/github/HereLiesAz"
+          pinned_version="faa80ed5aa063f6bdab42163d7b021123b248254"
+          for source_artifact_dir in "$source_group"/conveyance-h2g2*; do
+            [ -d "$source_artifact_dir/0.1.0" ] || continue
+            artifact=$(basename "$source_artifact_dir")
+            source_dir="$source_artifact_dir/0.1.0"
+            target_dir="$target_group/$artifact/$pinned_version"
+            rm -rf "$target_dir"
+            mkdir -p "$target_dir"
+            for file in "$source_dir"/$artifact-0.1.0*; do
+              [ -f "$file" ] || continue
+              name=$(basename "$file")
+              suffix=${name#$artifact-0.1.0}
+              cp "$file" "$target_dir/$artifact-$pinned_version$suffix"
+            done
+            find "$target_dir" -maxdepth 1 -type f \( -name '*.module' -o -name '*.pom' \) -exec sed -i \
+              -e 's/com.hereliesaz.conveyance/com.github.HereLiesAz/g' \
+              -e "s/0.1.0/$pinned_version/g" {} +
           done
-          sed -i \
-            -e 's/com.hereliesaz.conveyance/com.github.HereLiesAz/g' \
-            -e 's/0.1.0/faa80ed5aa063f6bdab42163d7b021123b248254/g' \
-            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.module" \
-            "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.pom"
-          test -f "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.pom"
-          test -f "$target_dir/conveyance-h2g2-faa80ed5aa063f6bdab42163d7b021123b248254.module"
+          test -f "$target_group/conveyance-h2g2/$pinned_version/conveyance-h2g2-$pinned_version.pom"
+          test -f "$target_group/conveyance-h2g2/$pinned_version/conveyance-h2g2-$pinned_version.module"
+          test -f "$target_group/conveyance-h2g2-js/$pinned_version/conveyance-h2g2-js-$pinned_version.pom"
+          test -f "$target_group/conveyance-h2g2-wasm-js/$pinned_version/conveyance-h2g2-wasm-js-$pinned_version.pom"
 
       - name: Build Web JS
         run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
