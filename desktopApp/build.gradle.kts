@@ -8,6 +8,7 @@ dependencies {
     implementation(projects.shared)
     implementation(projects.providers.jules)
     implementation(compose.desktop.currentOs)
+    implementation(libs.ktor.client.cio)
 }
 
 kotlin {

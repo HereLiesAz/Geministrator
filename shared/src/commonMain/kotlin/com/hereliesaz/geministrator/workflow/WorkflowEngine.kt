@@ -188,23 +188,13 @@ class WorkflowEngine(
                     )
                 }
 
-                else -> {
-                    nextRun = nextRun.copy(
-                        taskRuns = nextRun.taskRuns + (
-                            task.id to taskRun.copy(
-                                status = TaskRunStatus.Running,
-                                assignedRoleId = task.roleId,
-                                executor = executor,
-                                assignedProviderId = null,
-                                providerRunId = null,
-                                blockingReason = null,
-                                progress = null,
-                                progressMessage = null,
-                            )
-                        ),
-                        updatedAtEpochMillis = nowEpochMillis,
-                    )
-                }
+                is TaskExecutor.GitHubAction,
+                is TaskExecutor.TestRunner,
+                is TaskExecutor.Deployment,
+                is TaskExecutor.RepositoryOperation,
+                is TaskExecutor.ExternalService,
+                is TaskExecutor.NestedWorkflow,
+                -> continue
             }
 
             eventSink.append(

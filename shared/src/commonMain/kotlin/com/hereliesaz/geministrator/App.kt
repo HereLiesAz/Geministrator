@@ -13,24 +13,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.providers.AgentProvider
+import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun App(
     providers: Collection<AgentProvider>,
+    executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
 ) {
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
     var runtime by remember { mutableStateOf<ApplicationRuntime?>(null) }
 
-    LaunchedEffect(providers) {
+    LaunchedEffect(providers, executorIntegrations) {
         runtime?.close()
         runtime = null
         runtimeState = ApplicationRuntimeState.Loading
         try {
-            val created = ApplicationRuntime.create(providers = providers, scope = scope)
+            val created = ApplicationRuntime.create(
+                providers = providers,
+                scope = scope,
+                executorIntegrations = executorIntegrations,
+            )
             runtime = created
             created.state.collectLatest { runtimeState = it }
         } catch (failure: Throwable) {
@@ -79,9 +86,16 @@ fun App(
                                     existingProject = existingProject,
                                 )
                             } catch (failure: Throwable) {
-                                val message = failure.message?.takeIf(String::isNotBlank)
-                                    ?: failure::class.simpleName.orEmpty().ifBlank { "Workflow launch failed" }
-                                runtimeState = ApplicationRuntimeState.ResumeFailed(message)
+                                runtimeState = failure.toRuntimeFailureState("Workflow launch failed")
+                            }
+                        }
+                    },
+                    onApproveTask = { taskId ->
+                        scope.launch {
+                            try {
+                                runtime?.approveTask(TaskDefinitionId(taskId))
+                            } catch (failure: Throwable) {
+                                runtimeState = failure.toRuntimeFailureState("Approval failed")
                             }
                         }
                     },
@@ -92,6 +106,12 @@ fun App(
             }
         }
     }
+}
+
+private fun Throwable.toRuntimeFailureState(fallback: String): ApplicationRuntimeState.ResumeFailed {
+    val message = message?.takeIf(String::isNotBlank)
+        ?: this::class.simpleName.orEmpty().ifBlank { fallback }
+    return ApplicationRuntimeState.ResumeFailed(message)
 }
 
 @Composable

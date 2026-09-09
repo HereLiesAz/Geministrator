@@ -26,6 +26,8 @@ import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.AgentRunHandle
 import com.hereliesaz.geministrator.providers.AgentTaskRequest
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,10 +35,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 
 class ApplicationRuntimeTest {
@@ -151,39 +155,8 @@ class ApplicationRuntimeTest {
         val persistence = InMemoryWorkflowPersistence()
         val project = project("project", updatedAt = 1L)
         val taskId = TaskDefinitionId("implement")
-        val definition = WorkflowDefinition(
-            id = WorkflowDefinitionId("definition"),
-            name = "Live provider workflow",
-            tasks = listOf(
-                TaskDefinition(
-                    id = taskId,
-                    name = "Implement",
-                    objective = "Implement the change",
-                    roleId = BuiltInRoles.ImplementationEngineer.id,
-                    executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id),
-                    environmentPlanningPolicy = EnvironmentPlanningPolicy.NotRequired,
-                ),
-            ),
-            testDesignPolicy = TestDesignPolicy.None,
-        )
-        val run = WorkflowRun(
-            id = WorkflowRunId("run"),
-            projectId = project.id,
-            workflowDefinitionId = definition.id,
-            objective = "Ship",
-            status = WorkflowRunStatus.Created,
-            taskRuns = mapOf(
-                taskId to TaskRun(
-                    id = TaskRunId("task-run"),
-                    taskDefinitionId = taskId,
-                    status = TaskRunStatus.Ready,
-                    assignedRoleId = BuiltInRoles.ImplementationEngineer.id,
-                    executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id),
-                ),
-            ),
-            createdAtEpochMillis = 1L,
-            updatedAtEpochMillis = 1L,
-        )
+        val definition = providerDefinition(taskId)
+        val run = providerRun(project, definition, taskId)
         persistence.projects.put(project)
         persistence.definitions.put(definition)
         persistence.runs.put(run)
@@ -213,11 +186,106 @@ class ApplicationRuntimeTest {
         }
     }
 
+    @Test
+    fun refreshWaitsForInFlightDispatchAndDoesNotDuplicateProviderRun() = runBlocking {
+        val persistence = InMemoryWorkflowPersistence()
+        val project = project("project", updatedAt = 1L)
+        val taskId = TaskDefinitionId("implement")
+        val definition = providerDefinition(taskId)
+        val run = providerRun(project, definition, taskId)
+        persistence.projects.put(project)
+        persistence.definitions.put(definition)
+        persistence.runs.put(run)
+        val provider = BlockingStartProvider()
+
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        try {
+            val runtime = ApplicationRuntime.create(
+                providers = listOf(provider),
+                scope = scope,
+                persistence = persistence,
+            )
+
+            withTimeout(4_000L) { provider.startEntered.await() }
+            val refreshJob = launch { runtime.refresh() }
+            delay(100L)
+            assertFalse(refreshJob.isCompleted)
+
+            provider.releaseStart.complete(Unit)
+            withTimeout(4_000L) { refreshJob.join() }
+
+            assertEquals(1, provider.startCount)
+            val persistedTask = persistence.runs.get(run.id)?.taskRuns?.get(taskId)
+            assertEquals(ProviderRunId("blocking-run-1"), persistedTask?.providerRunId)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun providerUnavailableClassifiesAsDisconnected() {
+        val failure = ApplicationRuntime.classifyRuntimeFailure(
+            ManagedSessionFailure.ProviderUnavailable("offline"),
+        )
+
+        assertIs<ApplicationRuntimeFailure.Disconnected>(failure)
+        assertEquals("offline", failure.message)
+    }
+
+    @Test
+    fun providerOperationFailureClassifiesAsResumeFailure() {
+        val failure = ApplicationRuntime.classifyRuntimeFailure(
+            ManagedSessionFailure.ProviderOperationFailed("provider rejected operation"),
+        )
+
+        assertIs<ApplicationRuntimeFailure.Resume>(failure)
+        assertEquals("provider rejected operation", failure.message)
+    }
+
     private fun project(id: String, updatedAt: Long) = Project(
         id = ProjectId(id),
         name = id,
         createdAtEpochMillis = 1L,
         updatedAtEpochMillis = updatedAt,
+    )
+
+    private fun providerDefinition(taskId: TaskDefinitionId) = WorkflowDefinition(
+        id = WorkflowDefinitionId("definition"),
+        name = "Live provider workflow",
+        tasks = listOf(
+            TaskDefinition(
+                id = taskId,
+                name = "Implement",
+                objective = "Implement the change",
+                roleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id),
+                environmentPlanningPolicy = EnvironmentPlanningPolicy.NotRequired,
+            ),
+        ),
+        testDesignPolicy = TestDesignPolicy.None,
+    )
+
+    private fun providerRun(
+        project: Project,
+        definition: WorkflowDefinition,
+        taskId: TaskDefinitionId,
+    ) = WorkflowRun(
+        id = WorkflowRunId("run"),
+        projectId = project.id,
+        workflowDefinitionId = definition.id,
+        objective = "Ship",
+        status = WorkflowRunStatus.Created,
+        taskRuns = mapOf(
+            taskId to TaskRun(
+                id = TaskRunId("task-run"),
+                taskDefinitionId = taskId,
+                status = TaskRunStatus.Ready,
+                assignedRoleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id),
+            ),
+        ),
+        createdAtEpochMillis = 1L,
+        updatedAtEpochMillis = 1L,
     )
 
     private fun completedDefinition(id: String): WorkflowDefinition {
@@ -278,6 +346,32 @@ private class CompletingProvider : AgentProvider {
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
         startCount += 1
         return AgentRunHandle(ProviderRunId("provider-run-$startCount"))
+    }
+
+    override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flowOf(AgentEvent.Completed(runId))
+
+    override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
+
+    override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
+
+    override suspend fun cancel(runId: ProviderRunId) = ProviderActionResult.Accepted
+}
+
+private class BlockingStartProvider : AgentProvider {
+    override val id = AgentProviderId("blocking")
+    val startEntered = CompletableDeferred<Unit>()
+    val releaseStart = CompletableDeferred<Unit>()
+    var startCount: Int = 0
+
+    override suspend fun capabilities() = AgentCapabilities(
+        supported = setOf(AgentCapability.RepositoryRead, AgentCapability.RepositoryWrite),
+    )
+
+    override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
+        startCount += 1
+        startEntered.complete(Unit)
+        releaseStart.await()
+        return AgentRunHandle(ProviderRunId("blocking-run-$startCount"))
     }
 
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flowOf(AgentEvent.Completed(runId))

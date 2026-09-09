@@ -19,12 +19,12 @@ Tracking issue: #35
 
 ## P0 — Wire the live runtime into the app
 
-- [ ] Remove the sample `ActiveWorkflow` as the normal startup path; keep it only as preview/demo data if still useful.
-- [ ] Create the real application bootstrap that builds persistence, provider registry, workflow engine, and runtime publisher.
-- [ ] Feed live `WorkflowDefinition` + `WorkflowRun` state into `LiveWorkflowPresentation` continuously.
-- [ ] Make selection/technical inspector survive live state updates.
-- [ ] Show real task artifacts, attempts, blocking reasons, provider/executor IDs, and progress in the inspector.
-- [ ] Add explicit empty, loading, disconnected, failed-to-resume, and no-project states.
+- [x] Remove the sample `ActiveWorkflow` as the normal startup path; keep it only as preview/demo data if still useful.
+- [x] Create the real application bootstrap that builds persistence, provider registry, workflow engine, and runtime publisher.
+- [x] Feed live `WorkflowDefinition` + `WorkflowRun` state into `LiveWorkflowPresentation` continuously.
+- [x] Make selection/technical inspector survive live state updates.
+- [x] Show real task artifacts, attempts, blocking reasons, provider/executor IDs, and progress in the inspector.
+- [x] Add explicit empty, loading, disconnected, failed-to-resume, and no-project states.
 
 ## P0 — Make one complete workflow actually work end-to-end
 

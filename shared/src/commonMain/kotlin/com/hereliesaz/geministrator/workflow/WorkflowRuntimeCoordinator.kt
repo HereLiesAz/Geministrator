@@ -63,6 +63,7 @@ class WorkflowRuntimeCoordinator(
         var nextRun = engine.reconcile(definition, state.run, state.handles, nowEpochMillis, artifactIdFactory)
         nextRun = preserveArtifactTimestamps(state.run, nextRun)
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
+        nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
 
         val newlyFailedTaskIds = nextRun.taskRuns.filter { (taskId, taskRun) ->
             taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed
@@ -98,6 +99,13 @@ class WorkflowRuntimeCoordinator(
         if (nextRun.status.isTerminal() || nextRun.status == WorkflowRunStatus.AwaitingHuman) return nextState
 
         nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis)
+        nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
+        if (nextRun.status.isTerminal()) {
+            nextState = WorkflowRuntimeState(nextRun, nextHandles)
+            persist(project, definition, nextState)
+            return nextState
+        }
+
         val dispatched = engine.dispatchReadyTasks(project, definition, nextRun, nextHandles, nowEpochMillis)
         nextRun = dispatched.run
         nextHandles = dispatched.handles.filterKeys { nextRun.taskRuns[it]?.status?.isActiveProviderStatus() == true }
@@ -148,6 +156,19 @@ class WorkflowRuntimeCoordinator(
             nextRun = applyExecution(nextRun, taskId, taskRun, executor, execution, nowEpochMillis)
         }
         return nextRun
+    }
+
+    private fun refreshAfterSystemExecution(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        nowEpochMillis: Long,
+    ): WorkflowRun {
+        val refreshed = WorkflowRunFactory.refreshReadiness(definition, run, nowEpochMillis)
+        return if (refreshed.taskRuns.isNotEmpty() && refreshed.taskRuns.values.all { it.status == TaskRunStatus.Completed }) {
+            refreshed.copy(status = WorkflowRunStatus.Completed, updatedAtEpochMillis = nowEpochMillis)
+        } else {
+            refreshed
+        }
     }
 
     private fun applyExecution(
