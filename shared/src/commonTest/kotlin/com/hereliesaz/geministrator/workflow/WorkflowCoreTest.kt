@@ -5,6 +5,7 @@ import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
@@ -36,6 +37,28 @@ class WorkflowGraphValidatorTest {
 
         assertEquals(1, errors.size)
         assertIs<WorkflowValidationError.MissingDependency>(errors.single())
+    }
+
+    @Test
+    fun rejectsConflictingRoleIdentity() {
+        val taskId = TaskDefinitionId("implementation")
+        val definition = workflow(
+            TaskDefinition(
+                id = taskId,
+                name = "implementation",
+                objective = "Do implementation",
+                roleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(BuiltInRoles.QaEngineer.id),
+            ),
+        )
+
+        val error = assertIs<WorkflowValidationError.ConflictingRoleIdentity>(
+            WorkflowGraphValidator.validate(definition).single(),
+        )
+
+        assertEquals(taskId, error.taskId)
+        assertEquals(BuiltInRoles.ImplementationEngineer.id, error.responsibleRoleId)
+        assertEquals(BuiltInRoles.QaEngineer.id, error.executorRoleId)
     }
 
     @Test
