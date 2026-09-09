@@ -206,12 +206,54 @@ class WorkflowEngine(
         nowEpochMillis: Long,
         artifacts: List<ArtifactRef> = emptyList(),
         externalRunId: String? = null,
+    ): WorkflowRun = completeTaskInternal(
+        definition = definition,
+        run = run,
+        taskDefinitionId = taskDefinitionId,
+        nowEpochMillis = nowEpochMillis,
+        artifacts = artifacts,
+        externalRunId = externalRunId,
+        allowHumanApprovalCompletion = false,
+    )
+
+    suspend fun completeHumanApprovalTask(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        taskDefinitionId: TaskDefinitionId,
+        nowEpochMillis: Long,
+    ): WorkflowRun {
+        val task = requireNotNull(definition.tasks.firstOrNull { it.id == taskDefinitionId }) {
+            "Task ${taskDefinitionId.value} is not defined"
+        }
+        require(task.effectiveExecutor() is TaskExecutor.HumanApproval) {
+            "Task ${taskDefinitionId.value} is not a human approval gate"
+        }
+        return completeTaskInternal(
+            definition = definition,
+            run = run,
+            taskDefinitionId = taskDefinitionId,
+            nowEpochMillis = nowEpochMillis,
+            allowHumanApprovalCompletion = true,
+        )
+    }
+
+    private suspend fun completeTaskInternal(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        taskDefinitionId: TaskDefinitionId,
+        nowEpochMillis: Long,
+        artifacts: List<ArtifactRef> = emptyList(),
+        externalRunId: String? = null,
+        allowHumanApprovalCompletion: Boolean,
     ): WorkflowRun {
         require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
         val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) {
             "Task run ${taskDefinitionId.value} is missing"
         }
-        TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Completed)
+        val humanApprovalCompletion = allowHumanApprovalCompletion && taskRun.status == TaskRunStatus.AwaitingApproval
+        if (!humanApprovalCompletion) {
+            TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Completed)
+        }
         eventSink.append(TaskCompleted(run.id, taskDefinitionId, nowEpochMillis))
 
         var nextRun = run.copy(
@@ -414,30 +456,35 @@ class WorkflowEngine(
         }
     }
 
-    private fun mergeArtifacts(existing: List<ArtifactRef>, incoming: List<ArtifactRef>): List<ArtifactRef> {
-        val byId = LinkedHashMap<ArtifactId, ArtifactRef>()
-        existing.forEach { byId[it.id] = it }
-        incoming.forEach { byId[it.id] = it }
-        return byId.values.toList()
-    }
-
     private fun deriveWorkflowStatus(run: WorkflowRun): WorkflowRunStatus {
         if (run.status.isTerminal()) return run.status
         val statuses = run.taskRuns.values.map { it.status }
         return when {
             statuses.isNotEmpty() && statuses.all { it == TaskRunStatus.Completed } -> WorkflowRunStatus.Completed
             statuses.any { it == TaskRunStatus.AwaitingApproval || it == TaskRunStatus.Escalated } -> WorkflowRunStatus.AwaitingHuman
+            statuses.any { it == TaskRunStatus.Failed } -> WorkflowRunStatus.Failed
             else -> WorkflowRunStatus.Running
         }
     }
 
-    private fun WorkflowRunStatus.isTerminal(): Boolean =
-        this == WorkflowRunStatus.Completed || this == WorkflowRunStatus.Failed || this == WorkflowRunStatus.Cancelled
+    private fun mergeArtifacts(existing: List<ArtifactRef>, incoming: List<ArtifactRef>): List<ArtifactRef> {
+        if (incoming.isEmpty()) return existing
+        val merged = LinkedHashMap<ArtifactId, ArtifactRef>(existing.size + incoming.size)
+        existing.forEach { merged[it.id] = it }
+        incoming.forEach { merged[it.id] = it }
+        return merged.values.toList()
+    }
 
-    private fun TaskRunStatus.isActive(): Boolean =
-        this == TaskRunStatus.Planning ||
-            this == TaskRunStatus.AwaitingApproval ||
-            this == TaskRunStatus.Running ||
-            this == TaskRunStatus.Verifying ||
-            this == TaskRunStatus.Retrying
+    private fun WorkflowRunStatus.isTerminal() = this in setOf(
+        WorkflowRunStatus.Completed,
+        WorkflowRunStatus.Failed,
+        WorkflowRunStatus.Cancelled,
+    )
+
+    private fun TaskRunStatus.isActive() = this in setOf(
+        TaskRunStatus.Planning,
+        TaskRunStatus.AwaitingApproval,
+        TaskRunStatus.Running,
+        TaskRunStatus.Verifying,
+    )
 }

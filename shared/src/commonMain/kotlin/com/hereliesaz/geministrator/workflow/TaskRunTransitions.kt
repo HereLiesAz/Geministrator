@@ -30,7 +30,6 @@ object TaskRunTransitions {
         ),
         TaskRunStatus.AwaitingApproval to setOf(
             TaskRunStatus.Running,
-            TaskRunStatus.Completed,
             TaskRunStatus.Failed,
             TaskRunStatus.Retrying,
             TaskRunStatus.Escalated,

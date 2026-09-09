@@ -81,7 +81,9 @@ class ProviderBackedManagedSessionGateway(
             if (result is ProviderActionResult.Accepted) {
                 mutex.withLock {
                     val current = snapshots[handle] ?: return@withLock
-                    snapshots[handle] = current.copy(status = ManagedSessionStatus.Running)
+                    if (current.status != ManagedSessionStatus.Completed && current.status != ManagedSessionStatus.Failed) {
+                        snapshots[handle] = current.copy(status = ManagedSessionStatus.Running)
+                    }
                 }
             }
             result

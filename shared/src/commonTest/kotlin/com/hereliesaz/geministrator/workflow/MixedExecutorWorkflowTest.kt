@@ -92,7 +92,7 @@ class MixedExecutorWorkflowTest {
         assertEquals(TaskRunStatus.AwaitingApproval, state.run.taskRuns.getValue(fixture.approve).status)
         assertEquals(WorkflowRunStatus.AwaitingHuman, state.run.status)
 
-        val approvedRun = engine.completeTask(
+        val approvedRun = engine.completeHumanApprovalTask(
             definition = fixture.definition,
             run = state.run,
             taskDefinitionId = fixture.approve,

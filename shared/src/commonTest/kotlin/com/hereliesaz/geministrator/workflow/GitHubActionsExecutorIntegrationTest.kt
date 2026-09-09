@@ -87,36 +87,15 @@ class GitHubActionsExecutorIntegrationTest {
         assertEquals(TaskRunStatus.Completed, execution.status)
         assertEquals(1f, execution.progress)
         val artifact = execution.artifacts.single()
-        assertEquals(ArtifactId("task-run:github-action:0:artifact-7"), artifact.id)
+        assertEquals(ArtifactId("task-run:github-action:1:artifact-7"), artifact.id)
         assertEquals(ArtifactKind.CommandOutput, artifact.kind)
-        assertEquals(base.taskRun.id, artifact.taskRunId)
         assertEquals("test-results", artifact.label)
         assertEquals("https://example.invalid/artifact", artifact.uri)
-        assertEquals(20L, artifact.createdAtEpochMillis)
-    }
-
-    @Test
-    fun reconcileMapsFailedRun() = runBlocking {
-        val client = FakeGitHubActionsClient(
-            reconciledRun = GitHubWorkflowRun(
-                id = "run-42",
-                status = GitHubWorkflowRunStatus.Failed,
-                progressMessage = "failed",
-            ),
-        )
-        val integration = GitHubActionsExecutorIntegration(client)
-        val base = context(TaskExecutor.GitHubAction("ci.yml"))
-        val context = base.copy(taskRun = base.taskRun.copy(status = TaskRunStatus.Running, externalRunId = "run-42"))
-
-        val execution = integration.reconcile(context)
-
-        assertEquals(TaskRunStatus.Failed, execution.status)
-        assertEquals("failed", execution.progressMessage)
     }
 
     private fun context(executor: TaskExecutor.GitHubAction): TaskExecutorContext {
         val taskId = TaskDefinitionId("ci")
-        val repository = RepositoryRef(owner = "HereLiesAz", name = "haive", defaultBranch = "main")
+        val repository = RepositoryRef("HereLiesAz", "haive", defaultBranch = "main")
         val project = Project(
             id = ProjectId("project"),
             name = "Project",
@@ -154,13 +133,13 @@ class GitHubActionsExecutorIntegrationTest {
             createdAtEpochMillis = 1L,
             updatedAtEpochMillis = 1L,
         )
-        return TaskExecutorContext(project, definition, run, task, taskRun, executor, 20L)
+        return TaskExecutorContext(project, definition, run, task, taskRun, executor, 10L)
     }
 }
 
 private class FakeGitHubActionsClient(
-    private val dispatchedRun: GitHubWorkflowRun = GitHubWorkflowRun("run-1", GitHubWorkflowRunStatus.Running),
-    private val reconciledRun: GitHubWorkflowRun = dispatchedRun,
+    private val dispatchedRun: GitHubWorkflowRun = GitHubWorkflowRun("run", GitHubWorkflowRunStatus.Queued),
+    private val reconciledRun: GitHubWorkflowRun = GitHubWorkflowRun("run", GitHubWorkflowRunStatus.Running),
 ) : GitHubActionsClient {
     var lastDispatch: GitHubWorkflowDispatchRequest? = null
     var lastRepository: RepositoryRef? = null

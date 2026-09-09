@@ -24,6 +24,7 @@ import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
 import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
 import com.hereliesaz.geministrator.workflow.ManagedSessionGateway
+import com.hereliesaz.geministrator.workflow.ManagedSessionStatus
 import com.hereliesaz.geministrator.workflow.ProviderBackedManagedSessionGateway
 import com.hereliesaz.geministrator.workflow.StarterWorkflowFactory
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
@@ -206,17 +207,30 @@ class ApplicationRuntime private constructor(
                 }
                 when (val result = sessionGateway.approvePlan(handle)) {
                     ProviderActionResult.Accepted -> {
-                        val nextRun = snapshot.state.run.copy(
-                            status = WorkflowRunStatus.Running,
-                            taskRuns = snapshot.state.run.taskRuns + (
-                                taskDefinitionId to taskRun.copy(
-                                    status = TaskRunStatus.Running,
-                                    progressMessage = "Plan approved",
-                                )
-                            ),
-                            updatedAtEpochMillis = now,
-                        )
-                        WorkflowRuntimeState(nextRun, snapshot.state.handles)
+                        if (sessionGateway.status(handle) == ManagedSessionStatus.Completed) {
+                            WorkflowRuntimeState(
+                                run = engine.completeTask(
+                                    definition = snapshot.definition,
+                                    run = snapshot.state.run,
+                                    taskDefinitionId = taskDefinitionId,
+                                    nowEpochMillis = now,
+                                    artifacts = snapshot.state.run.taskRuns.getValue(taskDefinitionId).artifacts,
+                                ),
+                                handles = snapshot.state.handles,
+                            )
+                        } else {
+                            val nextRun = snapshot.state.run.copy(
+                                status = WorkflowRunStatus.Running,
+                                taskRuns = snapshot.state.run.taskRuns + (
+                                    taskDefinitionId to taskRun.copy(
+                                        status = TaskRunStatus.Running,
+                                        progressMessage = "Plan approved",
+                                    )
+                                ),
+                                updatedAtEpochMillis = now,
+                            )
+                            WorkflowRuntimeState(nextRun, snapshot.state.handles)
+                        }
                     }
                     is ProviderActionResult.Rejected -> error(result.reason)
                 }
@@ -225,7 +239,7 @@ class ApplicationRuntime private constructor(
                     "Task ${taskDefinitionId.value} is not a human approval gate"
                 }
                 WorkflowRuntimeState(
-                    run = engine.completeTask(
+                    run = engine.completeHumanApprovalTask(
                         definition = snapshot.definition,
                         run = snapshot.state.run,
                         taskDefinitionId = taskDefinitionId,
