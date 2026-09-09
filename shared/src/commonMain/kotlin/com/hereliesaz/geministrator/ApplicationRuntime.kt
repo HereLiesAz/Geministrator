@@ -2,17 +2,14 @@ package com.hereliesaz.geministrator
 
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
-import com.hereliesaz.geministrator.domain.EnvironmentPlanningPolicy
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.RoleDefinition
-import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
-import com.hereliesaz.geministrator.domain.TestDesignPolicy
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRunId
@@ -28,6 +25,7 @@ import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
 import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
 import com.hereliesaz.geministrator.workflow.ManagedSessionGateway
 import com.hereliesaz.geministrator.workflow.ProviderBackedManagedSessionGateway
+import com.hereliesaz.geministrator.workflow.StarterWorkflowFactory
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
@@ -163,23 +161,9 @@ class ApplicationRuntime private constructor(
                 createdAtEpochMillis = now,
                 updatedAtEpochMillis = now,
             )
-            val implementationRole = BuiltInRoles.ImplementationEngineer
-            val taskId = TaskDefinitionId("implementation")
-            val definition = WorkflowDefinition(
+            val definition = StarterWorkflowFactory.create(
                 id = WorkflowDefinitionId("workflow-$now"),
-                name = cleanObjective.take(80),
-                description = "Starter workflow created from the live runtime empty state.",
-                tasks = listOf(
-                    TaskDefinition(
-                        id = taskId,
-                        name = "Implement objective",
-                        objective = cleanObjective,
-                        roleId = implementationRole.id,
-                        executor = TaskExecutor.RoleAgent(implementationRole.id),
-                        environmentPlanningPolicy = EnvironmentPlanningPolicy.NotRequired,
-                    ),
-                ),
-                testDesignPolicy = TestDesignPolicy.None,
+                objective = cleanObjective,
             )
             val launchService = WorkflowLaunchService(
                 preparer = WorkflowDefinitionPreparer(providerRegistry, roles),
