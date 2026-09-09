@@ -8,6 +8,8 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
@@ -53,24 +55,30 @@ class JulesRestApi(
                     parameters.append("pageSize", "100")
                     pageToken?.let { parameters.append("pageToken", it) }
                 }
-            }.body<JulesListSourcesResponse>()
-            result += response.sources
-            pageToken = response.nextPageToken
+            }
+            response.requireSuccess("list Jules sources")
+            val page = response.body<JulesListSourcesResponse>()
+            result += page.sources
+            pageToken = page.nextPageToken
         } while (!pageToken.isNullOrBlank())
         return result
     }
 
-    override suspend fun getSession(sessionName: String): JulesSession =
-        client.get("$baseUrl/$sessionName") {
-            authenticate()
-        }.body()
+    override suspend fun getSession(sessionName: String): JulesSession {
+        val response = client.get("$baseUrl/$sessionName") { authenticate() }
+        response.requireSuccess("read Jules session $sessionName")
+        return response.body()
+    }
 
-    override suspend fun createSession(request: JulesCreateSessionRequest): JulesSession =
-        client.post("$baseUrl/sessions") {
+    override suspend fun createSession(request: JulesCreateSessionRequest): JulesSession {
+        val response = client.post("$baseUrl/sessions") {
             authenticate()
             contentType(ContentType.Application.Json)
             setBody(request)
-        }.body()
+        }
+        response.requireSuccess("create Jules session")
+        return response.body()
+    }
 
     override suspend fun listActivities(sessionName: String): List<JulesActivity> {
         val result = mutableListOf<JulesActivity>()
@@ -82,36 +90,50 @@ class JulesRestApi(
                     parameters.append("pageSize", "100")
                     pageToken?.let { parameters.append("pageToken", it) }
                 }
-            }.body<JulesListActivitiesResponse>()
-            result += response.activities
-            pageToken = response.nextPageToken
+            }
+            response.requireSuccess("list Jules activities for $sessionName")
+            val page = response.body<JulesListActivitiesResponse>()
+            result += page.activities
+            pageToken = page.nextPageToken
         } while (!pageToken.isNullOrBlank())
         return result
     }
 
     override suspend fun sendMessage(sessionName: String, message: String) {
-        client.post("$baseUrl/$sessionName:sendMessage") {
+        val response = client.post("$baseUrl/$sessionName:sendMessage") {
             authenticate()
             contentType(ContentType.Application.Json)
             setBody(JulesSendMessageRequest(prompt = message))
         }
+        response.requireSuccess("send Jules message to $sessionName")
     }
 
     override suspend fun approvePlan(sessionName: String) {
-        client.post("$baseUrl/$sessionName:approvePlan") {
+        val response = client.post("$baseUrl/$sessionName:approvePlan") {
             authenticate()
             contentType(ContentType.Application.Json)
             setBody(buildJsonObject {})
         }
+        response.requireSuccess("approve Jules plan for $sessionName")
     }
 
     override suspend fun deleteSession(sessionName: String) {
-        client.delete("$baseUrl/$sessionName") {
-            authenticate()
-        }
+        val response = client.delete("$baseUrl/$sessionName") { authenticate() }
+        response.requireSuccess("delete Jules session $sessionName")
     }
 
     private suspend fun io.ktor.client.request.HttpRequestBuilder.authenticate() {
-        header("x-goog-api-key", apiKeyProvider.getApiKey())
+        val apiKey = apiKeyProvider.getApiKey().trim()
+        require(apiKey.isNotEmpty()) { "Jules API key is not configured" }
+        header("x-goog-api-key", apiKey)
+    }
+
+    private suspend fun HttpResponse.requireSuccess(operation: String) {
+        if (status.value in 200..299) return
+        val responseBody = bodyAsText().take(500)
+        error(
+            "Unable to $operation: HTTP ${status.value}" +
+                responseBody.takeIf(String::isNotBlank)?.let { ": $it" }.orEmpty(),
+        )
     }
 }
