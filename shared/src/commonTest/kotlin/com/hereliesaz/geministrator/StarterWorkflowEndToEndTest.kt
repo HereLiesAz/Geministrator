@@ -65,15 +65,17 @@ class StarterWorkflowEndToEndTest {
             assertEquals(TaskRunStatus.Completed, taskRuns.getValue(TaskDefinitionId("verification")).status)
             assertEquals(TaskRunStatus.Completed, taskRuns.getValue(TaskDefinitionId("review")).status)
             assertEquals(TaskRunStatus.AwaitingApproval, taskRuns.getValue(TaskDefinitionId("release-approval")).status)
-            assertTrue(provider.startedTaskIds.containsAll(
-                setOf(
-                    "implementation--pre-code-tests",
-                    "implementation",
-                    "implementation--post-code-tests",
-                    "verification",
-                    "review",
+            assertTrue(
+                provider.startedTaskIds.containsAll(
+                    setOf(
+                        "implementation--pre-code-tests",
+                        "implementation",
+                        "implementation--post-code-tests",
+                        "verification",
+                        "review",
+                    ),
                 ),
-            ))
+            )
 
             runtime.approveTask(TaskDefinitionId("release-approval"))
 
@@ -102,7 +104,7 @@ private class CompletingGovernedProvider : AgentProvider {
     )
 
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
-        startedTaskIds += request.taskRunId.value.substringAfterLast(":", request.taskRunId.value)
+        startedTaskIds += request.taskRunId.value.substringAfter(":", request.taskRunId.value)
         runCount += 1
         return AgentRunHandle(ProviderRunId("governed-run-$runCount"))
     }
