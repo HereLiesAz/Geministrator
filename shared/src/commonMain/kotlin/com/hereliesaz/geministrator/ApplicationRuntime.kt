@@ -11,15 +11,18 @@ import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunId
+import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.TestDesignPolicy
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.AgentProvider
+import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
 import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
@@ -196,6 +199,61 @@ class ApplicationRuntime private constructor(
             replaceCurrent(Current(project, prepared, runtimeState))
             publishCurrent()
             startCycling()
+        }
+    }
+
+    suspend fun approveTask(taskDefinitionId: TaskDefinitionId) {
+        runtimeMutex.withLock {
+            val snapshot = requireNotNull(current) { "No active workflow is loaded" }
+            val task = requireNotNull(snapshot.definition.tasks.firstOrNull { it.id == taskDefinitionId }) {
+                "Task ${taskDefinitionId.value} is not defined"
+            }
+            val taskRun = requireNotNull(snapshot.state.run.taskRuns[taskDefinitionId]) {
+                "Task ${taskDefinitionId.value} has no runtime state"
+            }
+            require(taskRun.status == TaskRunStatus.AwaitingApproval) {
+                "Task ${taskDefinitionId.value} is not awaiting approval"
+            }
+
+            val now = nowEpochMillis()
+            val nextState = if (taskRun.assignedProviderId != null) {
+                val handle = requireNotNull(snapshot.state.handles[taskDefinitionId]) {
+                    "Task ${taskDefinitionId.value} has no provider session to approve"
+                }
+                when (val result = sessionGateway.approvePlan(handle)) {
+                    ProviderActionResult.Accepted -> {
+                        val nextRun = snapshot.state.run.copy(
+                            status = WorkflowRunStatus.Running,
+                            taskRuns = snapshot.state.run.taskRuns + (
+                                taskDefinitionId to taskRun.copy(
+                                    status = TaskRunStatus.Running,
+                                    progressMessage = "Plan approved",
+                                )
+                            ),
+                            updatedAtEpochMillis = now,
+                        )
+                        WorkflowRuntimeState(nextRun, snapshot.state.handles)
+                    }
+                    is ProviderActionResult.Rejected -> error(result.reason)
+                }
+            } else {
+                require(task.effectiveExecutor() is TaskExecutor.HumanApproval) {
+                    "Task ${taskDefinitionId.value} is not a human approval gate"
+                }
+                WorkflowRuntimeState(
+                    run = engine.completeTask(
+                        definition = snapshot.definition,
+                        run = snapshot.state.run,
+                        taskDefinitionId = taskDefinitionId,
+                        nowEpochMillis = now,
+                    ),
+                    handles = snapshot.state.handles,
+                )
+            }
+
+            coordinator.persist(snapshot.project, snapshot.definition, nextState)
+            replaceCurrent(snapshot.copy(state = nextState))
+            publishCurrent()
         }
     }
 
