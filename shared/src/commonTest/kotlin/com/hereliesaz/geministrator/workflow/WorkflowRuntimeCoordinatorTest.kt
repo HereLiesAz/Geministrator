@@ -63,7 +63,7 @@ class WorkflowRuntimeCoordinatorTest {
     }
 
     @Test
-    fun providerFailureUsesFailurePolicyAndSchedulesRetry() = runBlocking {
+    fun providerFailureUsesFailurePolicyAndRedispatchesRetry() = runBlocking {
         val taskId = TaskDefinitionId("agent")
         val executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id)
         val definition = definition(
@@ -93,10 +93,10 @@ class WorkflowRuntimeCoordinatorTest {
         )
 
         val retried = result.run.taskRuns.getValue(taskId)
-        assertEquals(TaskRunStatus.Retrying, retried.status)
+        assertEquals(TaskRunStatus.Running, retried.status)
         assertEquals(2, retried.attempt)
-        assertEquals(null, retried.assignedProviderId)
-        assertEquals(null, retried.providerRunId)
+        assertEquals(AgentProviderId("provider"), retried.assignedProviderId)
+        assertEquals(ProviderRunId("provider-run-new"), retried.providerRunId)
     }
 
     @Test
@@ -180,7 +180,56 @@ class WorkflowRuntimeCoordinatorTest {
         assertEquals(TaskRunStatus.Blocked, fixture.persistence.runs.get(run.id)?.taskRuns?.get(taskId)?.status)
     }
 
-    private fun fixture(gateway: FakeManagedSessionGateway = FakeManagedSessionGateway()): Fixture {
+    @Test
+    fun configuredSystemExecutorDispatchesThenReconcilesToCompletion() = runBlocking {
+        val taskId = TaskDefinitionId("ci")
+        val executor = TaskExecutor.GitHubAction("ci.yml")
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "CI",
+                objective = "Run CI",
+                roleId = null,
+                executor = executor,
+            ),
+        )
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Ready, executor)),
+        )
+        val integration = FakeSystemExecutorIntegration()
+        val fixture = fixture(integrations = TaskExecutorIntegrationRegistry(listOf(integration)))
+
+        val dispatched = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run),
+            nowEpochMillis = 20L,
+            artifactIdFactory = ::artifactId,
+        )
+        val running = dispatched.run.taskRuns.getValue(taskId)
+        assertEquals(TaskRunStatus.Running, running.status)
+        assertEquals("external-ci-1", running.externalRunId)
+        assertEquals(1, integration.dispatchCount)
+
+        val completed = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = dispatched,
+            nowEpochMillis = 30L,
+            artifactIdFactory = ::artifactId,
+        )
+        val finished = completed.run.taskRuns.getValue(taskId)
+        assertEquals(TaskRunStatus.Completed, finished.status)
+        assertEquals(1f, finished.progress)
+        assertEquals(1, integration.reconcileCount)
+    }
+
+    private fun fixture(
+        gateway: FakeManagedSessionGateway = FakeManagedSessionGateway(),
+        integrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
+    ): Fixture {
         val persistence = InMemoryWorkflowPersistence()
         val engine = WorkflowEngine(
             sessionGateway = gateway,
@@ -188,7 +237,7 @@ class WorkflowRuntimeCoordinatorTest {
         )
         return Fixture(
             persistence,
-            WorkflowRuntimeCoordinator(persistence, engine, gateway),
+            WorkflowRuntimeCoordinator(persistence, engine, gateway, integrations),
         )
     }
 
@@ -270,4 +319,31 @@ private class FakeManagedSessionGateway(
     override suspend fun approvePlan(handle: ManagedSessionHandle) = ProviderActionResult.Accepted
 
     override suspend fun artifacts(handle: ManagedSessionHandle) = artifacts
+}
+
+private class FakeSystemExecutorIntegration : TaskExecutorIntegration {
+    var dispatchCount = 0
+    var reconcileCount = 0
+
+    override fun supports(executor: TaskExecutor): Boolean = executor is TaskExecutor.GitHubAction
+
+    override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
+        dispatchCount += 1
+        return TaskExecutorExecution(
+            status = TaskRunStatus.Running,
+            externalRunId = "external-ci-1",
+            progress = 0.25f,
+            progressMessage = "queued",
+        )
+    }
+
+    override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
+        reconcileCount += 1
+        return TaskExecutorExecution(
+            status = TaskRunStatus.Completed,
+            externalRunId = context.taskRun.externalRunId,
+            progress = 1f,
+            progressMessage = "complete",
+        )
+    }
 }
