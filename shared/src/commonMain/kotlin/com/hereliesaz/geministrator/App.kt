@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.flow.collectLatest
@@ -85,9 +86,16 @@ fun App(
                                     existingProject = existingProject,
                                 )
                             } catch (failure: Throwable) {
-                                val message = failure.message?.takeIf(String::isNotBlank)
-                                    ?: failure::class.simpleName.orEmpty().ifBlank { "Workflow launch failed" }
-                                runtimeState = ApplicationRuntimeState.ResumeFailed(message)
+                                runtimeState = failure.toRuntimeFailureState("Workflow launch failed")
+                            }
+                        }
+                    },
+                    onApproveTask = { taskId ->
+                        scope.launch {
+                            try {
+                                runtime?.approveTask(TaskDefinitionId(taskId))
+                            } catch (failure: Throwable) {
+                                runtimeState = failure.toRuntimeFailureState("Approval failed")
                             }
                         }
                     },
@@ -98,6 +106,12 @@ fun App(
             }
         }
     }
+}
+
+private fun Throwable.toRuntimeFailureState(fallback: String): ApplicationRuntimeState.ResumeFailed {
+    val message = message?.takeIf(String::isNotBlank)
+        ?: this::class.simpleName.orEmpty().ifBlank { fallback }
+    return ApplicationRuntimeState.ResumeFailed(message)
 }
 
 @Composable
