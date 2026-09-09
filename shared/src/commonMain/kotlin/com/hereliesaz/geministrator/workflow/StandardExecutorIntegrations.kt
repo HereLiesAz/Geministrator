@@ -4,6 +4,7 @@ import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunStatus
+import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 
 data class ExternalExecutionRun(
     val id: String,
@@ -41,9 +42,7 @@ class TestRunnerExecutorIntegration(
     }
 
     override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
-        val runId = requireNotNull(context.taskRun.externalRunId) {
-            "Test runner task ${context.task.id.value} is missing its external run ID"
-        }
+        val runId = requireExternalRunId(context, "Test runner")
         return client.getRun(context.project, runId).toTaskExecution()
     }
 }
@@ -64,12 +63,88 @@ class DeploymentExecutorIntegration(
     }
 
     override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
-        val runId = requireNotNull(context.taskRun.externalRunId) {
-            "Deployment task ${context.task.id.value} is missing its external run ID"
-        }
+        val runId = requireExternalRunId(context, "Deployment")
         return client.getRun(context.project, runId).toTaskExecution()
     }
 }
+
+interface RepositoryOperationClient {
+    suspend fun start(project: Project, operation: String): ExternalExecutionRun
+    suspend fun getRun(project: Project, runId: String): ExternalExecutionRun
+}
+
+class RepositoryOperationExecutorIntegration(
+    private val client: RepositoryOperationClient,
+) : TaskExecutorIntegration {
+    override fun supports(executor: TaskExecutor): Boolean = executor is TaskExecutor.RepositoryOperation
+
+    override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
+        val executor = context.executor as TaskExecutor.RepositoryOperation
+        return client.start(context.project, executor.operation).toTaskExecution()
+    }
+
+    override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
+        val runId = requireExternalRunId(context, "Repository operation")
+        return client.getRun(context.project, runId).toTaskExecution()
+    }
+}
+
+interface ExternalServiceClient {
+    suspend fun start(project: Project, service: String, operation: String?): ExternalExecutionRun
+    suspend fun getRun(project: Project, service: String, runId: String): ExternalExecutionRun
+}
+
+class ExternalServiceExecutorIntegration(
+    private val client: ExternalServiceClient,
+) : TaskExecutorIntegration {
+    override fun supports(executor: TaskExecutor): Boolean = executor is TaskExecutor.ExternalService
+
+    override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
+        val executor = context.executor as TaskExecutor.ExternalService
+        return client.start(context.project, executor.service, executor.operation).toTaskExecution()
+    }
+
+    override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
+        val executor = context.executor as TaskExecutor.ExternalService
+        val runId = requireExternalRunId(context, "External service")
+        return client.getRun(context.project, executor.service, runId).toTaskExecution()
+    }
+}
+
+interface NestedWorkflowClient {
+    suspend fun start(
+        project: Project,
+        workflowDefinitionId: WorkflowDefinitionId,
+        objective: String,
+    ): ExternalExecutionRun
+
+    suspend fun getRun(project: Project, runId: String): ExternalExecutionRun
+}
+
+class NestedWorkflowExecutorIntegration(
+    private val client: NestedWorkflowClient,
+) : TaskExecutorIntegration {
+    override fun supports(executor: TaskExecutor): Boolean = executor is TaskExecutor.NestedWorkflow
+
+    override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
+        val executor = context.executor as TaskExecutor.NestedWorkflow
+        return client.start(
+            project = context.project,
+            workflowDefinitionId = executor.workflowDefinitionId,
+            objective = context.task.objective,
+        ).toTaskExecution()
+    }
+
+    override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
+        val runId = requireExternalRunId(context, "Nested workflow")
+        return client.getRun(context.project, runId).toTaskExecution()
+    }
+}
+
+private fun requireExternalRunId(context: TaskExecutorContext, label: String): String =
+    requireNotNull(context.taskRun.externalRunId) {
+        "$label task ${context.task.id.value} is missing its external run ID"
+    }
 
 internal fun ExternalExecutionRun.toTaskExecution(): TaskExecutorExecution = TaskExecutorExecution(
     status = when (status) {
