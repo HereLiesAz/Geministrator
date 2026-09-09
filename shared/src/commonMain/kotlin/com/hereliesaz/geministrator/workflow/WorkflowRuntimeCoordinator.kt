@@ -12,6 +12,7 @@ import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 
@@ -24,18 +25,13 @@ class WorkflowRuntimeCoordinator(
     private val persistence: WorkflowPersistence,
     private val engine: WorkflowEngine,
     private val sessionGateway: ManagedSessionGateway,
+    private val executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
 ) {
-    suspend fun persist(
-        project: Project,
-        definition: WorkflowDefinition,
-        state: WorkflowRuntimeState,
-    ) {
+    suspend fun persist(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState) {
         persistence.projects.put(project)
         persistence.definitions.put(definition)
         persistence.runs.put(state.run)
-        state.run.taskRuns.values
-            .flatMap(TaskRun::artifacts)
-            .forEach { persistence.artifacts.put(it) }
+        state.run.taskRuns.values.flatMap(TaskRun::artifacts).forEach { persistence.artifacts.put(it) }
     }
 
     suspend fun resume(workflowRunId: WorkflowRunId): WorkflowRuntimeState {
@@ -47,17 +43,12 @@ class WorkflowRuntimeCoordinator(
                 val providerId = taskRun.assignedProviderId ?: return@forEach
                 val providerRunId = taskRun.providerRunId ?: return@forEach
                 if (!taskRun.status.canReconnect()) return@forEach
-
-                val handle = ManagedSessionHandle(
-                    taskRunId = taskRun.id,
-                    providerId = providerId,
-                    providerRunId = providerRunId,
-                )
+                val handle = ManagedSessionHandle(taskRun.id, providerId, providerRunId)
                 sessionGateway.reconnect(handle, taskRun.status.toManagedStatus())
                 put(taskDefinitionId, handle)
             }
         }
-        return WorkflowRuntimeState(run = run, handles = handles)
+        return WorkflowRuntimeState(run, handles)
     }
 
     suspend fun cycle(
@@ -67,137 +58,153 @@ class WorkflowRuntimeCoordinator(
         nowEpochMillis: Long,
         artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId,
     ): WorkflowRuntimeState {
-        if (state.run.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty()) {
-            return state
-        }
+        if (state.run.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty()) return state
 
-        var nextRun = engine.reconcile(
-            definition = definition,
-            run = state.run,
-            handles = state.handles,
-            nowEpochMillis = nowEpochMillis,
-            artifactIdFactory = artifactIdFactory,
-        )
-        nextRun = preserveArtifactTimestamps(previous = state.run, reconciled = nextRun)
+        var nextRun = engine.reconcile(definition, state.run, state.handles, nowEpochMillis, artifactIdFactory)
+        nextRun = preserveArtifactTimestamps(state.run, nextRun)
+        nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
 
-        val newlyFailedTaskIds = nextRun.taskRuns
-            .filter { (taskId, taskRun) ->
-                taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed
-            }
-            .keys
-
+        val newlyFailedTaskIds = nextRun.taskRuns.filter { (taskId, taskRun) ->
+            taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed
+        }.keys
         for (taskId in newlyFailedTaskIds) {
             nextRun = engine.handleFailure(
-                definition = definition,
-                run = nextRun,
-                taskDefinitionId = taskId,
-                retryReason = RetryReason.ProviderFailure,
-                reason = "Provider session failed",
-                nowEpochMillis = nowEpochMillis,
+                definition,
+                nextRun,
+                taskId,
+                RetryReason.ProviderFailure,
+                "Executor failed",
+                nowEpochMillis,
             )
         }
 
-        if (
-            state.run.status == WorkflowRunStatus.AwaitingHuman ||
+        if (state.run.status == WorkflowRunStatus.AwaitingHuman ||
             nextRun.taskRuns.values.any { it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated }
-        ) {
-            nextRun = nextRun.copy(status = WorkflowRunStatus.AwaitingHuman)
-        }
+        ) nextRun = nextRun.copy(status = WorkflowRunStatus.AwaitingHuman)
 
         var nextHandles = state.handles.filterKeys { taskId ->
-            val status = nextRun.taskRuns[taskId]?.status
-            status != TaskRunStatus.Completed &&
-                status != TaskRunStatus.Failed &&
-                status != TaskRunStatus.Cancelled &&
-                status != TaskRunStatus.Retrying &&
-                status != TaskRunStatus.Escalated
+            nextRun.taskRuns[taskId]?.status !in setOf(
+                TaskRunStatus.Completed,
+                TaskRunStatus.Failed,
+                TaskRunStatus.Cancelled,
+                TaskRunStatus.Retrying,
+                TaskRunStatus.Escalated,
+            )
         }
 
-        nextRun = blockUndrivenSystemExecutors(definition, nextRun)
+        nextRun = blockUnavailableSystemExecutors(definition, nextRun)
         var nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
-
         if (nextRun.status.isTerminal() || nextRun.status == WorkflowRunStatus.AwaitingHuman) return nextState
 
-        val dispatched = engine.dispatchReadyTasks(
-            project = project,
-            definition = definition,
-            run = nextRun,
-            existingHandles = nextHandles,
-            nowEpochMillis = nowEpochMillis,
-        )
+        val dispatched = engine.dispatchReadyTasks(project, definition, nextRun, nextHandles, nowEpochMillis)
         nextRun = dispatched.run
-        nextHandles = dispatched.handles.filterKeys { taskId ->
-            nextRun.taskRuns[taskId]?.status?.isActiveProviderStatus() == true
-        }
+        nextHandles = dispatched.handles.filterKeys { nextRun.taskRuns[it]?.status?.isActiveProviderStatus() == true }
+        nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis)
         nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
         return nextState
     }
 
-    private fun preserveArtifactTimestamps(
-        previous: WorkflowRun,
-        reconciled: WorkflowRun,
-    ): WorkflowRun {
-        val previousArtifacts = previous.taskRuns.values
-            .flatMap(TaskRun::artifacts)
-            .associateBy { it.id }
-        if (previousArtifacts.isEmpty()) return reconciled
-
-        return reconciled.copy(
-            taskRuns = reconciled.taskRuns.mapValues { (_, taskRun) ->
-                taskRun.copy(
-                    artifacts = taskRun.artifacts.map { artifact ->
-                        previousArtifacts[artifact.id]?.let { old ->
-                            artifact.copy(createdAtEpochMillis = old.createdAtEpochMillis)
-                        } ?: artifact
-                    },
-                )
-            },
-        )
-    }
-
-    private fun blockUndrivenSystemExecutors(
+    private suspend fun dispatchSystemExecutors(
+        project: Project,
         definition: WorkflowDefinition,
         run: WorkflowRun,
+        nowEpochMillis: Long,
     ): WorkflowRun {
+        var nextRun = run
+        val tasks = definition.tasks.associateBy { it.id }
+        for ((taskId, taskRun) in run.taskRuns) {
+            val task = tasks[taskId] ?: continue
+            val executor = taskRun.executor ?: task.effectiveExecutor()
+            if (!executor.isSystemExecutor()) continue
+            if (taskRun.status != TaskRunStatus.Ready && taskRun.status != TaskRunStatus.Retrying) continue
+            val integration = executorIntegrations.integrationFor(executor) ?: continue
+            val execution = integration.dispatch(
+                TaskExecutorContext(project, definition, nextRun, task, taskRun, executor, nowEpochMillis),
+            )
+            nextRun = applyExecution(nextRun, taskId, taskRun, executor, execution, nowEpochMillis)
+        }
+        return nextRun
+    }
+
+    private suspend fun reconcileSystemExecutors(
+        project: Project,
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        nowEpochMillis: Long,
+    ): WorkflowRun {
+        var nextRun = run
+        val tasks = definition.tasks.associateBy { it.id }
+        for ((taskId, taskRun) in run.taskRuns) {
+            if (taskRun.status != TaskRunStatus.Running && taskRun.status != TaskRunStatus.Verifying) continue
+            val task = tasks[taskId] ?: continue
+            val executor = taskRun.executor ?: task.effectiveExecutor()
+            if (!executor.isSystemExecutor()) continue
+            val integration = executorIntegrations.integrationFor(executor) ?: continue
+            val execution = integration.reconcile(
+                TaskExecutorContext(project, definition, nextRun, task, taskRun, executor, nowEpochMillis),
+            )
+            nextRun = applyExecution(nextRun, taskId, taskRun, executor, execution, nowEpochMillis)
+        }
+        return nextRun
+    }
+
+    private fun applyExecution(
+        run: WorkflowRun,
+        taskId: TaskDefinitionId,
+        previous: TaskRun,
+        executor: TaskExecutor,
+        execution: TaskExecutorExecution,
+        nowEpochMillis: Long,
+    ): WorkflowRun = run.copy(
+        taskRuns = run.taskRuns + (taskId to previous.copy(
+            status = execution.status,
+            executor = executor,
+            assignedProviderId = null,
+            providerRunId = null,
+            externalRunId = execution.externalRunId ?: previous.externalRunId,
+            artifacts = if (execution.artifacts.isEmpty()) previous.artifacts else execution.artifacts,
+            blockingReason = null,
+            progress = execution.progress ?: if (execution.status == TaskRunStatus.Completed) 1f else previous.progress,
+            progressMessage = execution.progressMessage ?: previous.progressMessage,
+        )),
+        updatedAtEpochMillis = nowEpochMillis,
+    )
+
+    private fun preserveArtifactTimestamps(previous: WorkflowRun, reconciled: WorkflowRun): WorkflowRun {
+        val previousArtifacts = previous.taskRuns.values.flatMap(TaskRun::artifacts).associateBy { it.id }
+        if (previousArtifacts.isEmpty()) return reconciled
+        return reconciled.copy(taskRuns = reconciled.taskRuns.mapValues { (_, taskRun) ->
+            taskRun.copy(artifacts = taskRun.artifacts.map { artifact ->
+                previousArtifacts[artifact.id]?.let { artifact.copy(createdAtEpochMillis = it.createdAtEpochMillis) } ?: artifact
+            })
+        })
+    }
+
+    private fun blockUnavailableSystemExecutors(definition: WorkflowDefinition, run: WorkflowRun): WorkflowRun {
         val definitions = definition.tasks.associateBy { it.id }
         var changed = false
         val taskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
             val executor = taskRun.executor ?: definitions[taskId]?.executor
-            val dispatchable = taskRun.status == TaskRunStatus.Ready ||
-                taskRun.status == TaskRunStatus.Retrying ||
-                taskRun.status == TaskRunStatus.Running
-            if (dispatchable && executor.isUndrivenSystemExecutor()) {
+            val dispatchable = taskRun.status == TaskRunStatus.Ready || taskRun.status == TaskRunStatus.Retrying || taskRun.status == TaskRunStatus.Running
+            if (dispatchable && executor != null && executor.isSystemExecutor() && !executorIntegrations.isAvailable(executor)) {
                 changed = true
                 taskRun.copy(
                     status = TaskRunStatus.Blocked,
                     blockingReason = BlockingReason(
-                        code = WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
-                        message = "${executor.displayLabel()} is not wired into the live runtime yet.",
+                        WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
+                        "${executor.displayLabel()} is not available in this runtime.",
                     ),
                     progress = null,
                     progressMessage = null,
                 )
-            } else {
-                taskRun
-            }
+            } else taskRun
         }
         return if (changed) run.copy(taskRuns = taskRuns) else run
     }
 
-    private fun TaskExecutor?.isUndrivenSystemExecutor(): Boolean = when (this) {
-        is TaskExecutor.GitHubAction,
-        is TaskExecutor.TestRunner,
-        is TaskExecutor.Deployment,
-        is TaskExecutor.RepositoryOperation,
-        is TaskExecutor.ExternalService,
-        is TaskExecutor.NestedWorkflow,
-        -> true
-        else -> false
-    }
-
-    private fun TaskExecutor?.displayLabel(): String = when (this) {
+    private fun TaskExecutor.displayLabel(): String = when (this) {
         is TaskExecutor.GitHubAction -> "GitHub Action executor"
         is TaskExecutor.TestRunner -> "Test runner executor"
         is TaskExecutor.Deployment -> "Deployment executor"
@@ -207,40 +214,15 @@ class WorkflowRuntimeCoordinator(
         else -> "System executor"
     }
 
-    private fun TaskRunStatus.isActiveProviderStatus(): Boolean = when (this) {
-        TaskRunStatus.Planning,
-        TaskRunStatus.AwaitingApproval,
-        TaskRunStatus.Running,
-        TaskRunStatus.Verifying,
-        -> true
-        else -> false
-    }
-
-    private fun TaskRunStatus.canReconnect(): Boolean = when (this) {
-        TaskRunStatus.Planning,
-        TaskRunStatus.AwaitingApproval,
-        TaskRunStatus.Running,
-        TaskRunStatus.Verifying,
-        -> true
-        else -> false
-    }
-
-    private fun TaskRunStatus.toManagedStatus(): ManagedSessionStatus = when (this) {
+    private fun TaskRunStatus.isActiveProviderStatus() = this in setOf(TaskRunStatus.Planning, TaskRunStatus.AwaitingApproval, TaskRunStatus.Running, TaskRunStatus.Verifying)
+    private fun TaskRunStatus.canReconnect() = isActiveProviderStatus()
+    private fun TaskRunStatus.toManagedStatus() = when (this) {
         TaskRunStatus.Planning -> ManagedSessionStatus.Planning
         TaskRunStatus.AwaitingApproval -> ManagedSessionStatus.AwaitingApproval
-        TaskRunStatus.Running,
-        TaskRunStatus.Verifying,
-        -> ManagedSessionStatus.Running
+        TaskRunStatus.Running, TaskRunStatus.Verifying -> ManagedSessionStatus.Running
         TaskRunStatus.Completed -> ManagedSessionStatus.Completed
         TaskRunStatus.Failed -> ManagedSessionStatus.Failed
         else -> ManagedSessionStatus.Unknown
     }
-
-    private fun WorkflowRunStatus.isTerminal(): Boolean = when (this) {
-        WorkflowRunStatus.Completed,
-        WorkflowRunStatus.Failed,
-        WorkflowRunStatus.Cancelled,
-        -> true
-        else -> false
-    }
+    private fun WorkflowRunStatus.isTerminal() = this in setOf(WorkflowRunStatus.Completed, WorkflowRunStatus.Failed, WorkflowRunStatus.Cancelled)
 }
