@@ -17,6 +17,8 @@ import com.hereliesaz.geministrator.domain.effectiveExecutor
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderArtifact
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 data class WorkflowRuntimeState(val run: WorkflowRun, val handles: Map<TaskDefinitionId, ManagedSessionHandle> = emptyMap())
 
@@ -27,6 +29,7 @@ class WorkflowRuntimeCoordinator(
     private val executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
 ) {
     private val gateCoordinator = ApprovalGateCoordinator(persistence.approvalGates, RepositoryWorkflowEventSink(persistence.events))
+    private val cycleMutex = Mutex()
 
     suspend fun persist(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState) { persistence.projects.put(project); persistence.definitions.put(definition); persistence.runs.put(state.run); state.run.taskRuns.values.flatMap(TaskRun::artifacts).forEach { persistence.artifacts.put(it) } }
 
@@ -36,7 +39,17 @@ class WorkflowRuntimeCoordinator(
         return WorkflowRuntimeState(run, handles)
     }
 
-    suspend fun cycle(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState, nowEpochMillis: Long, artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId): WorkflowRuntimeState {
+    suspend fun cycle(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState, nowEpochMillis: Long, artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId): WorkflowRuntimeState = cycleMutex.withLock {
+        val persistedRun = persistence.runs.get(state.run.id)
+        val authoritativeState = if (persistedRun != null && persistedRun.updatedAtEpochMillis > state.run.updatedAtEpochMillis) {
+            WorkflowRuntimeState(persistedRun, mergeHandles(state.handles, persistedRun))
+        } else {
+            state
+        }
+        cycleLocked(project, definition, authoritativeState, nowEpochMillis, artifactIdFactory)
+    }
+
+    private suspend fun cycleLocked(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState, nowEpochMillis: Long, artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId): WorkflowRuntimeState {
         if (state.run.status.isTerminal()) return state
         var nextRun = recoverAvailableSystemExecutors(definition, state.run, nowEpochMillis)
         nextRun = engine.reconcile(definition, nextRun, state.handles, nowEpochMillis, artifactIdFactory)
@@ -57,6 +70,18 @@ class WorkflowRuntimeCoordinator(
         nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis); nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
         if (nextRun.status.isTerminal()) { nextState = WorkflowRuntimeState(nextRun, nextHandles); persist(project, definition, nextState); return nextState }
         val dispatched = engine.dispatchReadyTasks(project, definition, nextRun, nextHandles, nowEpochMillis); nextRun = dispatched.run; nextHandles = dispatched.handles.filterKeys { nextRun.taskRuns[it]?.status?.isActiveProviderStatus() == true }; nextState = WorkflowRuntimeState(nextRun, nextHandles); persist(project, definition, nextState); return nextState
+    }
+
+    private suspend fun mergeHandles(existing: Map<TaskDefinitionId, ManagedSessionHandle>, run: WorkflowRun): Map<TaskDefinitionId, ManagedSessionHandle> = buildMap {
+        putAll(existing.filterKeys { taskId -> run.taskRuns[taskId]?.status?.canReconnect() == true })
+        run.taskRuns.forEach { (taskDefinitionId, taskRun) ->
+            if (containsKey(taskDefinitionId) || !taskRun.status.canReconnect()) return@forEach
+            val providerId = taskRun.assignedProviderId ?: return@forEach
+            val providerRunId = taskRun.providerRunId ?: return@forEach
+            val handle = ManagedSessionHandle(taskRun.id, providerId, providerRunId)
+            sessionGateway.reconnect(handle, taskRun.status.toManagedStatus())
+            put(taskDefinitionId, handle)
+        }
     }
 
     private suspend fun ensureMissingFailureEscalationGates(run: WorkflowRun, now: Long) { for ((taskId, taskRun) in run.taskRuns) if (taskRun.status == TaskRunStatus.Escalated) ensureFailureEscalationGate(run, taskId, taskRun.progressMessage ?: "Task failure requires a human decision.", now) }
