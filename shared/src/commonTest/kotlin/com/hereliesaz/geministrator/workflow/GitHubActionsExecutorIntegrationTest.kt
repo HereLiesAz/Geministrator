@@ -2,7 +2,6 @@ package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.ArtifactKind
-import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.RepositoryRef
@@ -64,19 +63,17 @@ class GitHubActionsExecutorIntegrationTest {
     @Test
     fun reconcileMapsCompletedRunAndArtifacts() = runBlocking {
         val base = context(TaskExecutor.GitHubAction("ci.yml"))
-        val artifact = ArtifactRef(
-            id = ArtifactId("artifact"),
-            kind = ArtifactKind.TestResult,
-            taskRunId = base.taskRun.id,
-            label = "test-results",
-            uri = "https://example.invalid/artifact",
-            createdAtEpochMillis = 10L,
-        )
         val client = FakeGitHubActionsClient(
             reconciledRun = GitHubWorkflowRun(
                 id = "run-42",
                 status = GitHubWorkflowRunStatus.Completed,
-                artifacts = listOf(artifact),
+                artifacts = listOf(
+                    GitHubWorkflowArtifact(
+                        id = "artifact-7",
+                        name = "test-results",
+                        archiveDownloadUrl = "https://example.invalid/artifact",
+                    ),
+                ),
                 progressMessage = "complete",
             ),
         )
@@ -89,7 +86,13 @@ class GitHubActionsExecutorIntegrationTest {
         assertEquals("run-42", client.lastRunId)
         assertEquals(TaskRunStatus.Completed, execution.status)
         assertEquals(1f, execution.progress)
-        assertEquals(listOf(artifact), execution.artifacts)
+        val artifact = execution.artifacts.single()
+        assertEquals(ArtifactId("task-run:github-action:artifact-7"), artifact.id)
+        assertEquals(ArtifactKind.CommandOutput, artifact.kind)
+        assertEquals(base.taskRun.id, artifact.taskRunId)
+        assertEquals("test-results", artifact.label)
+        assertEquals("https://example.invalid/artifact", artifact.uri)
+        assertEquals(20L, artifact.createdAtEpochMillis)
     }
 
     @Test
