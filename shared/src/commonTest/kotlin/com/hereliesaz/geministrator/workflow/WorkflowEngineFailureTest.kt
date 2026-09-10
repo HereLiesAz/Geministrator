@@ -1,6 +1,9 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.AgentProviderId
+import com.hereliesaz.geministrator.domain.ArtifactId
+import com.hereliesaz.geministrator.domain.ArtifactKind
+import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.EscalationPolicy
 import com.hereliesaz.geministrator.domain.ProjectId
@@ -42,6 +45,14 @@ class WorkflowEngineFailureTest {
                 ),
             ),
         )
+        val priorAttemptArtifact = ArtifactRef(
+            id = ArtifactId("task-run:command-output:1:0"),
+            kind = ArtifactKind.CommandOutput,
+            taskRunId = TaskRunId("task-run"),
+            label = "attempt 1 output",
+            textContent = "failed attempt evidence",
+            createdAtEpochMillis = 5L,
+        )
         val initial = WorkflowRunFactory.create(
             definition = definition,
             workflowRunId = WorkflowRunId("run"),
@@ -58,7 +69,10 @@ class WorkflowEngineFailureTest {
                     "Objective",
                     0L,
                     { TaskRunId("task-run") },
-                ).taskRuns.getValue(taskId).copy(status = TaskRunStatus.Failed),
+                ).taskRuns.getValue(taskId).copy(
+                    status = TaskRunStatus.Failed,
+                    artifacts = listOf(priorAttemptArtifact),
+                ),
             ),
         )
         val events = InMemoryWorkflowEventSink()
@@ -78,6 +92,7 @@ class WorkflowEngineFailureTest {
         )
         assertEquals(TaskRunStatus.Retrying, retry.taskRuns.getValue(taskId).status)
         assertEquals(2, retry.taskRuns.getValue(taskId).attempt)
+        assertTrue(retry.taskRuns.getValue(taskId).artifacts.isEmpty())
         assertTrue(events.snapshot().any { it is RetryScheduled })
 
         val exhausted = retry.copy(
