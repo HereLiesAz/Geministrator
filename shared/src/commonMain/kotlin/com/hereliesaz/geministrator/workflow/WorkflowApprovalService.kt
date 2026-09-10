@@ -12,14 +12,14 @@ import com.hereliesaz.geministrator.providers.ProviderActionResult
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-private val planApprovalMutex = Mutex()
-
 class WorkflowApprovalService(
     private val gateRepository: ApprovalGateRepository,
     private val gateCoordinator: ApprovalGateCoordinator,
     private val sessionGateway: ManagedSessionGateway,
     private val failureEscalationDecisionStore: FailureEscalationDecisionStore? = null,
 ) {
+    private val planApprovalMutex = Mutex()
+
     suspend fun ensurePlanGate(
         run: WorkflowRun,
         taskDefinitionId: TaskDefinitionId,
