@@ -128,7 +128,7 @@ class ProviderBackedManagedSessionGateway(
                         return@launch
                     }
                     val backoffBase = OBSERVER_RETRY_MILLIS * (1L shl minOf(consecutiveFailures - 1, 5))
-                    val jitter = (backoffBase * 0.25 * Math.random()).toLong()
+                    val jitter = (backoffBase * 0.25 * kotlin.random.Random.nextDouble()).toLong()
                     delay(backoffBase + jitter)
                 }
             }
