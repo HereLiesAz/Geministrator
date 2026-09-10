@@ -8,6 +8,10 @@ import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+private val planApprovalMutex = Mutex()
 
 class WorkflowApprovalService(
     private val gateRepository: ApprovalGateRepository,
@@ -42,24 +46,35 @@ class WorkflowApprovalService(
         decidedByRoleId: RoleDefinitionId,
         note: String?,
         nowEpochMillis: Long,
-    ): ApprovalGate {
+    ): ApprovalGate = planApprovalMutex.withLock {
         val gate = requireNotNull(gateRepository.get(gateId)) {
             "Approval gate ${gateId.value} does not exist"
         }
         require(gate.kind == ApprovalGateKind.PlanApproval) {
             "Approval gate ${gateId.value} is not a plan gate"
         }
-        require(gate.status == ApprovalGateStatus.Pending) {
-            "Approval gate ${gateId.value} is already resolved"
-        }
         require(gate.requiredRoleId == null || gate.requiredRoleId == decidedByRoleId) {
             "Role ${decidedByRoleId.value} is not authorized for gate ${gateId.value}"
         }
 
-        // The provider side effect is the authority on whether the plan was actually accepted.
-        // Keep the local gate Pending until that call returns, then persist exactly one matching
-        // decision/event. If the call throws, no contradictory local approval is recorded.
-        return when (val providerResult = sessionGateway.approvePlan(handle)) {
+        if (gate.status == ApprovalGateStatus.Applying) {
+            return@withLock recoverApplyingPlanGate(
+                gate = gate,
+                handle = handle,
+                nowEpochMillis = nowEpochMillis,
+            )
+        }
+        require(gate.status == ApprovalGateStatus.Pending) {
+            "Approval gate ${gateId.value} is already resolved"
+        }
+
+        gateCoordinator.claimPlanApproval(
+            id = gateId,
+            decidedByRoleId = decidedByRoleId,
+            note = note,
+        )
+
+        when (val providerResult = sessionGateway.approvePlan(handle)) {
             ProviderActionResult.Accepted -> gateCoordinator.decide(
                 id = gateId,
                 approved = true,
@@ -75,6 +90,33 @@ class WorkflowApprovalService(
                 nowEpochMillis = nowEpochMillis,
             )
         }
+    }
+
+    private suspend fun recoverApplyingPlanGate(
+        gate: ApprovalGate,
+        handle: ManagedSessionHandle,
+        nowEpochMillis: Long,
+    ): ApprovalGate = when (sessionGateway.status(handle)) {
+        ManagedSessionStatus.Running,
+        ManagedSessionStatus.Completed,
+        -> gateCoordinator.decide(
+            id = gate.id,
+            approved = true,
+            decidedByRoleId = gate.decidedByRoleId,
+            note = gate.decisionNote,
+            nowEpochMillis = nowEpochMillis,
+        )
+        ManagedSessionStatus.Failed -> gateCoordinator.decide(
+            id = gate.id,
+            approved = false,
+            decidedByRoleId = gate.decidedByRoleId,
+            note = "Provider failed while applying plan approval",
+            nowEpochMillis = nowEpochMillis,
+        )
+        ManagedSessionStatus.Planning,
+        ManagedSessionStatus.AwaitingApproval,
+        ManagedSessionStatus.Unknown,
+        -> error("Approval gate ${gate.id.value} has an in-flight provider decision that cannot yet be reconciled")
     }
 
     suspend fun decideFailureEscalation(
