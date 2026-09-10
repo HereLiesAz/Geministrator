@@ -31,12 +31,14 @@ class WorkflowApprovalServiceTest {
     }
 
     @Test
-    fun providerRejectionPersistsRejectedGateAndMatchingAuditEvent() = runBlocking {
+    fun providerRejectionCancelsSessionBeforePersistingRejectedGate() = runBlocking {
         val fixture = fixture(ProviderActionResult.Rejected("provider refused plan"))
         val decided = fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 20L)
         assertEquals(ApprovalGateStatus.Rejected, decided.status)
         assertEquals("provider refused plan", decided.decisionNote)
         assertEquals(ApprovalGateStatus.Rejected, fixture.repository.get(fixture.gate.id)?.status)
+        assertEquals(1, fixture.gateway.cancelCalls)
+        assertEquals(ManagedSessionStatus.Failed, fixture.gateway.sessionStatus)
         val decisions = fixture.events.snapshot().filterIsInstance<ApprovalDecisionReceived>()
         assertEquals(1, decisions.size)
         assertEquals(false, decisions.single().approved)
@@ -66,7 +68,29 @@ class WorkflowApprovalServiceTest {
 
         assertEquals(ApprovalGateStatus.Approved, recovered.status)
         assertEquals(1, fixture.gateway.approvalCalls)
+        assertEquals(0, fixture.gateway.cancelCalls)
         assertEquals(1, fixture.events.snapshot().filterIsInstance<ApprovalDecisionReceived>().size)
+    }
+
+    @Test
+    fun applyingGateStillAwaitingApprovalCancelsAndRejectsWithoutRepeatingApproval() = runBlocking {
+        val fixture = fixture(failure = IllegalStateException("response lost"))
+        assertFailsWith<IllegalStateException> {
+            fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 20L)
+        }
+        assertEquals(1, fixture.gateway.approvalCalls)
+        fixture.gateway.failure = null
+        fixture.gateway.sessionStatus = ManagedSessionStatus.AwaitingApproval
+
+        val recovered = fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 21L)
+
+        assertEquals(ApprovalGateStatus.Rejected, recovered.status)
+        assertEquals(1, fixture.gateway.approvalCalls)
+        assertEquals(1, fixture.gateway.cancelCalls)
+        assertEquals(ManagedSessionStatus.Failed, fixture.gateway.sessionStatus)
+        val decisions = fixture.events.snapshot().filterIsInstance<ApprovalDecisionReceived>()
+        assertEquals(1, decisions.size)
+        assertEquals(false, decisions.single().approved)
     }
 
     private suspend fun fixture(
@@ -118,6 +142,7 @@ private class ApprovalGateway(
     var failure: Throwable? = null,
 ) : ManagedSessionGateway {
     var approvalCalls: Int = 0
+    var cancelCalls: Int = 0
     var sessionStatus: ManagedSessionStatus = ManagedSessionStatus.AwaitingApproval
     override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId = AgentProviderId("jules")
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle = error("not used")
@@ -128,6 +153,11 @@ private class ApprovalGateway(
         failure?.let { throw it }
         if (result == ProviderActionResult.Accepted) sessionStatus = ManagedSessionStatus.Running
         return result
+    }
+    override suspend fun cancel(handle: ManagedSessionHandle): ProviderActionResult {
+        cancelCalls += 1
+        sessionStatus = ManagedSessionStatus.Failed
+        return ProviderActionResult.Accepted
     }
     override suspend fun artifacts(handle: ManagedSessionHandle) = emptyList<com.hereliesaz.geministrator.providers.ProviderArtifact>()
 }
