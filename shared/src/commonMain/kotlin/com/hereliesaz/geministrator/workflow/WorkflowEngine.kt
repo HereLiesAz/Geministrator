@@ -476,7 +476,7 @@ class WorkflowEngine(
         )
     }
 
-    fun resolveEscalation(run: WorkflowRun, taskDefinitionId: TaskDefinitionId, approved: Boolean, nowEpochMillis: Long): WorkflowRun {
+    suspend fun resolveEscalation(run: WorkflowRun, taskDefinitionId: TaskDefinitionId, approved: Boolean, nowEpochMillis: Long): WorkflowRun {
         require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
         val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) { "Task run ${taskDefinitionId.value} is missing" }
         return if (approved) {
