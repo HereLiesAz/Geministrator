@@ -7,6 +7,7 @@ import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -17,6 +18,7 @@ class WorkflowApprovalService(
     private val gateRepository: ApprovalGateRepository,
     private val gateCoordinator: ApprovalGateCoordinator,
     private val sessionGateway: ManagedSessionGateway,
+    private val failureEscalationDecisionStore: FailureEscalationDecisionStore? = null,
 ) {
     suspend fun ensurePlanGate(
         run: WorkflowRun,
@@ -82,6 +84,7 @@ class WorkflowApprovalService(
                 note = note,
                 nowEpochMillis = nowEpochMillis,
             )
+
             is ProviderActionResult.Rejected -> gateCoordinator.decide(
                 id = gateId,
                 approved = false,
@@ -106,6 +109,7 @@ class WorkflowApprovalService(
             note = gate.decisionNote,
             nowEpochMillis = nowEpochMillis,
         )
+
         ManagedSessionStatus.Failed -> gateCoordinator.decide(
             id = gate.id,
             approved = false,
@@ -113,10 +117,13 @@ class WorkflowApprovalService(
             note = "Provider failed while applying plan approval",
             nowEpochMillis = nowEpochMillis,
         )
+
         ManagedSessionStatus.Planning,
         ManagedSessionStatus.AwaitingApproval,
         ManagedSessionStatus.Unknown,
-        -> error("Approval gate ${gate.id.value} has an in-flight provider decision that cannot yet be reconciled")
+        -> error(
+            "Approval gate ${gate.id.value} has an in-flight provider decision that cannot yet be reconciled",
+        )
     }
 
     suspend fun decideFailureEscalation(
@@ -127,31 +134,36 @@ class WorkflowApprovalService(
         note: String?,
         nowEpochMillis: Long,
     ): WorkflowRun {
-        require(run.status != WorkflowRunStatus.Completed && run.status != WorkflowRunStatus.Failed && run.status != WorkflowRunStatus.Cancelled) {
+        require(!run.status.isTerminal()) {
             "Workflow ${run.id.value} is already ${run.status}"
         }
-        val gate = requireNotNull(gateRepository.get(gateId)) { "Approval gate ${gateId.value} does not exist" }
-        require(gate.workflowRunId == run.id) { "Approval gate ${gateId.value} belongs to another workflow" }
-        require(gate.kind == ApprovalGateKind.FailureEscalation) { "Approval gate ${gateId.value} is not a failure escalation gate" }
-        require(gate.status == ApprovalGateStatus.Pending) { "Approval gate ${gateId.value} is already resolved" }
+        val gate = requireNotNull(gateRepository.get(gateId)) {
+            "Approval gate ${gateId.value} does not exist"
+        }
+        require(gate.workflowRunId == run.id) {
+            "Approval gate ${gateId.value} belongs to another workflow"
+        }
+        require(gate.kind == ApprovalGateKind.FailureEscalation) {
+            "Approval gate ${gateId.value} is not a failure escalation gate"
+        }
+        require(gate.status == ApprovalGateStatus.Pending) {
+            "Approval gate ${gateId.value} is already resolved"
+        }
         require(gate.requiredRoleId == null || gate.requiredRoleId == decidedByRoleId) {
             "Role ${decidedByRoleId?.value ?: "<human>"} is not authorized for gate ${gateId.value}"
         }
-        val taskDefinitionId = requireNotNull(gate.taskDefinitionId) { "Failure escalation gate ${gateId.value} has no task" }
-        val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) { "Task run ${taskDefinitionId.value} is missing" }
+
+        val taskDefinitionId = requireNotNull(gate.taskDefinitionId) {
+            "Failure escalation gate ${gateId.value} has no task"
+        }
+        val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) {
+            "Task run ${taskDefinitionId.value} is missing"
+        }
         require(taskRun.status == TaskRunStatus.Escalated) {
             "Task ${taskDefinitionId.value} is ${taskRun.status}, not Escalated"
         }
 
-        gateCoordinator.decide(
-            id = gateId,
-            approved = approved,
-            decidedByRoleId = decidedByRoleId,
-            note = note,
-            nowEpochMillis = nowEpochMillis,
-        )
-
-        return if (approved) {
+        val nextRun = if (approved) {
             TaskRunTransitions.requireAllowed(TaskRunStatus.Escalated, TaskRunStatus.Retrying)
             run.copy(
                 status = WorkflowRunStatus.Running,
@@ -183,5 +195,50 @@ class WorkflowApprovalService(
                 updatedAtEpochMillis = nowEpochMillis,
             )
         }
+
+        val decidedGate = if (approved) {
+            gate.approve(decidedByRoleId, note, nowEpochMillis)
+        } else {
+            gate.reject(decidedByRoleId, note, nowEpochMillis)
+        }
+        val decisionEvent = ApprovalDecisionReceived(
+            workflowRunId = run.id,
+            taskDefinitionId = taskDefinitionId,
+            gateId = gateId,
+            approved = approved,
+            decidedByRoleId = decidedByRoleId,
+            occurredAtEpochMillis = nowEpochMillis,
+        )
+
+        val decisionStore = failureEscalationDecisionStore
+        if (decisionStore != null) {
+            val committed = decisionStore.commitFailureEscalationDecision(
+                FailureEscalationDecisionCommit(
+                    expectedGateId = gateId,
+                    decidedGate = decidedGate,
+                    nextRun = nextRun,
+                    decisionEvent = decisionEvent,
+                ),
+            )
+            require(committed) {
+                "Approval gate ${gateId.value} was resolved concurrently"
+            }
+        } else {
+            gateCoordinator.decide(
+                id = gateId,
+                approved = approved,
+                decidedByRoleId = decidedByRoleId,
+                note = note,
+                nowEpochMillis = nowEpochMillis,
+            )
+        }
+
+        return nextRun
     }
+
+    private fun WorkflowRunStatus.isTerminal(): Boolean = this in setOf(
+        WorkflowRunStatus.Completed,
+        WorkflowRunStatus.Failed,
+        WorkflowRunStatus.Cancelled,
+    )
 }
