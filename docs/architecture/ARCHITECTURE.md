@@ -192,4 +192,13 @@ Pushes to `main`:
 
 The composite build currently runs on JDK 21 because the pinned H2G2 renderer is compiled with a Java 21 toolchain. Android-facing Haive bytecode may still target JVM 17. Haive and the pinned renderer also use the same Android Gradle Plugin version because Gradle does not permit incompatible AGP versions inside one composite Android build.
 
+Web packaging uses isolated Maven publications because Kotlin/JS package generation cannot
+resolve the nested H2G2 composite build from within itself. CI publishes the pinned source
+checkouts with their native coordinates and enables `haive.useMavenLocalH2g2` to substitute
+the exact pinned dependencies with those local publications. Publication files are not
+renamed or rewritten: Maven and embedded JS package versions must stay consistent, or
+Yarn can try to download a local library from the npm registry. Rebuild the pinned
+publications before using this option locally; their native version alone does not identify
+the source revision.
+
 Android signing is used when signing secrets are available. Play publishing is a separate delivery step and will use the repository Play service-account secret when enabled.
