@@ -108,17 +108,28 @@ class ProviderBackedManagedSessionGateway(
 
         val provider = providerFor(handle)
         scope.launch {
+            var consecutiveFailures = 0
             while (isActive && !handle.isTerminal()) {
                 try {
                     provider.observe(handle.providerRunId).collect { event -> applyEvent(handle, event) }
+                    consecutiveFailures = 0
                     if (!handle.isTerminal()) delay(OBSERVER_RETRY_MILLIS)
                 } catch (failure: CancellationException) {
                     throw failure
                 } catch (_: Throwable) {
-                    // Observation transport failures do not mean the remote run failed. Keep the
-                    // last durable status and reattach to the same provider run instead of
-                    // triggering workflow retry/re-dispatch.
-                    delay(OBSERVER_RETRY_MILLIS)
+                    consecutiveFailures++
+                    if (consecutiveFailures >= MAX_OBSERVER_FAILURES) {
+                        mutex.withLock {
+                            val current = snapshots[handle] ?: return@withLock
+                            if (current.status != ManagedSessionStatus.Completed) {
+                                snapshots[handle] = current.copy(status = ManagedSessionStatus.Failed)
+                            }
+                        }
+                        return@launch
+                    }
+                    val backoffBase = OBSERVER_RETRY_MILLIS * (1L shl minOf(consecutiveFailures - 1, 5))
+                    val jitter = (backoffBase * 0.25 * kotlin.random.Random.nextDouble()).toLong()
+                    delay(backoffBase + jitter)
                 }
             }
         }
@@ -187,7 +198,7 @@ class ProviderBackedManagedSessionGateway(
                 )
                 is AgentEvent.Message -> current
                 is AgentEvent.ArtifactProduced -> current.copy(
-                    artifacts = current.artifacts + event.artifact,
+                    artifacts = (current.artifacts + event.artifact).distinct(),
                 )
                 is AgentEvent.Completed -> current.copy(
                     status = ManagedSessionStatus.Completed,
@@ -204,5 +215,6 @@ class ProviderBackedManagedSessionGateway(
 
     private companion object {
         const val OBSERVER_RETRY_MILLIS = 1_000L
+        const val MAX_OBSERVER_FAILURES = 10
     }
 }

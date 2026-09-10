@@ -126,4 +126,12 @@ data class WorkflowRun(
     val taskRuns: Map<TaskDefinitionId, TaskRun>,
     val createdAtEpochMillis: Long,
     val updatedAtEpochMillis: Long,
-)
+) {
+    init {
+        taskRuns.forEach { (key, taskRun) ->
+            require(key == taskRun.taskDefinitionId) {
+                "taskRuns map key ${key.value} does not match TaskRun.taskDefinitionId ${taskRun.taskDefinitionId.value}"
+            }
+        }
+    }
+}

@@ -66,13 +66,9 @@ internal object Azphalt {
     var currentGround: Ground by mutableStateOf(grounds.first())
         private set
 
-    private var rerolls = 0
-
     fun rerollGround() {
-        if (rerolls >= 2) return
         val currentIndex = grounds.indexOf(currentGround)
         currentGround = grounds[(currentIndex + 1) % grounds.size]
-        rerolls++
     }
 
     fun hueIndex(seed: String): Int = seed.hashCode().mod(hues.size)

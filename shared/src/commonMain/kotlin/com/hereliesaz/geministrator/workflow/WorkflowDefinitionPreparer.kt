@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.AgentCapability
+import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.ArtifactKind
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.EnvironmentPlanningPolicy
@@ -66,9 +67,9 @@ class WorkflowDefinitionPreparer(
                         roleId = BuiltInRoles.EpaRepresentative.id,
                         executor = TaskExecutor.RoleAgent(BuiltInRoles.EpaRepresentative.id),
                         dependsOn = task.dependsOn,
-                        acceptanceCriteria = task.acceptanceCriteria,
+                        acceptanceCriteria = emptyList(),
                         requiredArtifacts = setOf(ArtifactKind.EnvironmentSpecification),
-                        approvalPolicy = task.approvalPolicy,
+                        approvalPolicy = ApprovalPolicy.None,
                         retryPolicy = task.retryPolicy,
                         escalationPolicy = task.escalationPolicy,
                         providerConstraints = ProviderConstraints.RequireCapabilities(

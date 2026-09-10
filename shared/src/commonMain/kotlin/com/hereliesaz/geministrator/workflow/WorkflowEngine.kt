@@ -26,6 +26,8 @@ import com.hereliesaz.geministrator.events.TaskCompleted
 import com.hereliesaz.geministrator.events.TaskEscalated
 import com.hereliesaz.geministrator.events.TaskFailed
 import com.hereliesaz.geministrator.events.TaskStarted
+import com.hereliesaz.geministrator.events.TaskCancelled
+import com.hereliesaz.geministrator.events.WorkflowCancelled
 import com.hereliesaz.geministrator.events.WorkflowCompleted
 import com.hereliesaz.geministrator.events.WorkflowEventSink
 import com.hereliesaz.geministrator.events.WorkflowFailed
@@ -66,6 +68,7 @@ class WorkflowEngine(
 
         val definitionsById = definition.tasks.associateBy { it.id }
         var nextRun = refreshed
+        var humanApprovalPending = false
         val handles = existingHandles.toMutableMap()
         val activeByProvider = refreshed.taskRuns.values
             .filter { it.status.isActive() && it.assignedProviderId != null }
@@ -165,8 +168,8 @@ class WorkflowEngine(
 
                 is TaskExecutor.HumanApproval -> {
                     TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.AwaitingApproval)
+                    humanApprovalPending = true
                     nextRun = nextRun.copy(
-                        status = WorkflowRunStatus.AwaitingHuman,
                         taskRuns = nextRun.taskRuns + (
                             task.id to taskRun.copy(
                                 status = TaskRunStatus.AwaitingApproval,
@@ -180,6 +183,8 @@ class WorkflowEngine(
                         updatedAtEpochMillis = nowEpochMillis,
                     )
                     eventSink.append(HumanDecisionRequired(nextRun.id, task.id, executor.label, nowEpochMillis))
+                    // Human approval tasks don't consume provider concurrency slots
+                    continue
                 }
 
                 is TaskExecutor.GitHubAction,
@@ -196,7 +201,12 @@ class WorkflowEngine(
             remainingSlots -= 1
         }
 
-        return DispatchResult(nextRun, handles)
+        val finalStatus = when {
+            humanApprovalPending -> WorkflowRunStatus.AwaitingHuman
+            handles.size > existingHandles.size -> WorkflowRunStatus.Running
+            else -> refreshed.status
+        }
+        return DispatchResult(nextRun.copy(status = finalStatus), handles)
     }
 
     suspend fun completeTask(
@@ -456,6 +466,24 @@ class WorkflowEngine(
         }
     }
 
+    suspend fun cancelWorkflow(run: WorkflowRun, nowEpochMillis: Long): WorkflowRun {
+        if (run.status.isTerminal()) return run
+        val cancelledTaskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
+            if (taskRun.status == TaskRunStatus.Completed || taskRun.status == TaskRunStatus.Failed) {
+                taskRun
+            } else {
+                eventSink.append(TaskCancelled(run.id, taskId, nowEpochMillis))
+                taskRun.copy(status = TaskRunStatus.Cancelled)
+            }
+        }
+        eventSink.append(WorkflowCancelled(run.id, nowEpochMillis))
+        return run.copy(
+            status = WorkflowRunStatus.Cancelled,
+            taskRuns = cancelledTaskRuns,
+            updatedAtEpochMillis = nowEpochMillis,
+        )
+    }
+
     private fun deriveWorkflowStatus(run: WorkflowRun): WorkflowRunStatus {
         if (run.status.isTerminal()) return run.status
         val statuses = run.taskRuns.values.map { it.status }
@@ -483,7 +511,6 @@ class WorkflowEngine(
 
     private fun TaskRunStatus.isActive() = this in setOf(
         TaskRunStatus.Planning,
-        TaskRunStatus.AwaitingApproval,
         TaskRunStatus.Running,
         TaskRunStatus.Verifying,
     )

@@ -23,12 +23,6 @@ class AgentProviderRegistry(
     fun provider(id: AgentProviderId): AgentProvider? = providersById[id]
 
     suspend fun select(request: ProviderSelectionRequest): AgentProvider {
-        val constrainedProviderId = when (val constraints = request.constraints) {
-            ProviderConstraints.None -> null
-            is ProviderConstraints.RequireProvider -> constraints.providerId
-            is ProviderConstraints.RequireCapabilities -> null
-        }
-
         val required = buildSet {
             addAll(request.requiredCapabilities)
             val constraints = request.constraints
@@ -37,23 +31,27 @@ class AgentProviderRegistry(
             }
         }
 
-        val ordered = buildList {
-            constrainedProviderId?.let { providersById[it] }?.let(::add)
-            request.preferredProviderId
-                ?.takeIf { it != constrainedProviderId }
-                ?.let { providersById[it] }
-                ?.let(::add)
-            providersById.values.forEach { provider ->
-                if (provider !in this) add(provider)
+        when (val constraints = request.constraints) {
+            is ProviderConstraints.RequireProvider -> {
+                val provider = providersById[constraints.providerId]
+                    ?: error("Required provider ${constraints.providerId.value} is not registered")
+                if (!provider.capabilities().supported.containsAll(required)) {
+                    error("Provider ${constraints.providerId.value} does not satisfy required capabilities $required")
+                }
+                return provider
             }
+            else -> Unit
+        }
+
+        val ordered = buildList {
+            request.preferredProviderId?.let { providersById[it] }?.let(::add)
+            providersById.values.forEach { provider -> if (provider !in this) add(provider) }
         }
 
         for (provider in ordered) {
-            if (constrainedProviderId != null && provider.id != constrainedProviderId) continue
             if (provider.capabilities().supported.containsAll(required)) return provider
         }
 
-        val constrained = constrainedProviderId?.value?.let { " provider=$it" }.orEmpty()
-        error("No agent provider satisfies required capabilities $required$constrained")
+        error("No agent provider satisfies required capabilities $required")
     }
 }

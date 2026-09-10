@@ -40,4 +40,8 @@ data class ArtifactRef(
     val mediaType: String? = null,
     val metadata: Map<String, String> = emptyMap(),
     val createdAtEpochMillis: Long,
-)
+) {
+    init {
+        require(uri != null || textContent != null) { "ArtifactRef must have at least one of uri or textContent" }
+    }
+}

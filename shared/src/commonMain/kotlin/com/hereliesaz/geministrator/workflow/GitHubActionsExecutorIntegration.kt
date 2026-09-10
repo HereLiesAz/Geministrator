@@ -7,6 +7,7 @@ import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -36,7 +37,12 @@ interface GitHubActionsClient {
 
 class GitHubRestActionsClient(
     private val tokenProvider: GitHubTokenProvider,
-    private val httpClient: HttpClient = HttpClient(),
+    private val httpClient: HttpClient = HttpClient {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000L
+            connectTimeoutMillis = 10_000L
+        }
+    },
     private val baseUrl: String = "https://api.github.com",
     private val json: Json = Json { ignoreUnknownKeys = true },
 ) : GitHubActionsClient {
@@ -44,12 +50,11 @@ class GitHubRestActionsClient(
         val token = requireToken()
         val previousRunIds = listWorkflowRuns(request.repository, request.workflow, request.ref, token).map { it.id }.toSet()
         val repository = request.repository
-        val response = httpClient.post("$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${request.workflow.encodeURLPathPart()}/dispatches") {
+        httpClient.post("$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${request.workflow.encodeURLPathPart()}/dispatches") {
             githubHeaders(token)
             contentType(ContentType.Application.Json)
             setBody(json.encodeToString(DispatchBody(ref = request.ref)))
-        }
-        response.requireSuccess("dispatch GitHub Actions workflow ${request.workflow}")
+        }.requireSuccess("dispatch GitHub Actions workflow ${request.workflow}")
 
         repeat(DISPATCH_LOOKUP_ATTEMPTS) { attempt ->
             val run = listWorkflowRuns(repository, request.workflow, request.ref, token).firstOrNull { it.id !in previousRunIds }
