@@ -36,6 +36,7 @@ class SettingsEscalationAtomicityTest {
                     id = TaskRunId("task-run"),
                     taskDefinitionId = taskId,
                     status = TaskRunStatus.Escalated,
+                    assignedRoleId = null,
                 ),
             ),
             createdAtEpochMillis = 1L,
