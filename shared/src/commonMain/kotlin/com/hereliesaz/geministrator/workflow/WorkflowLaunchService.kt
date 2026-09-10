@@ -41,6 +41,9 @@ class WorkflowLaunchService(
         eventSink.append(
             WorkflowCreated(
                 workflowRunId = run.id,
+                projectId = run.projectId,
+                workflowDefinitionId = run.workflowDefinitionId,
+                objective = run.objective,
                 occurredAtEpochMillis = nowEpochMillis,
             ),
         )
