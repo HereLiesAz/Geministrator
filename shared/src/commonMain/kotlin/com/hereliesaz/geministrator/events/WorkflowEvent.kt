@@ -59,13 +59,27 @@ data class TaskStarted(
 ) : WorkflowEvent
 
 @Serializable
-data class ApprovalRequired(
+data class ApprovalRequired private constructor(
     override val workflowRunId: WorkflowRunId,
     val taskDefinitionId: TaskDefinitionId,
-    @SerialName("gateId") private val serializedGateId: ApprovalGateId? = null,
     val reason: String,
     override val occurredAtEpochMillis: Long,
+    @SerialName("gateId") private val serializedGateId: ApprovalGateId? = null,
 ) : WorkflowEvent {
+    constructor(
+        workflowRunId: WorkflowRunId,
+        taskDefinitionId: TaskDefinitionId,
+        gateId: ApprovalGateId,
+        reason: String,
+        occurredAtEpochMillis: Long,
+    ) : this(
+        workflowRunId = workflowRunId,
+        taskDefinitionId = taskDefinitionId,
+        reason = reason,
+        occurredAtEpochMillis = occurredAtEpochMillis,
+        serializedGateId = gateId,
+    )
+
     val gateId: ApprovalGateId
         get() = requireNotNull(serializedGateId) {
             "Legacy ApprovalRequired event for ${workflowRunId.value}/${taskDefinitionId.value} has no gateId"
