@@ -86,12 +86,17 @@ jobs:
       - name: Compile Jules provider Wasm
         run: ./gradlew :providers:jules:compileKotlinWasmJs
 
-      - name: Build Android
+      - name: Build Android (debug on PRs, release on push)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            ./gradlew :androidApp:assembleDebug
+          else
+            ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease
+          fi
 
       - name: Build Desktop distribution
         run: ./gradlew :desktopApp:packageDistributionForCurrentOS

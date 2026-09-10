@@ -30,3 +30,5 @@ sealed interface WorkflowEvent {
 @Serializable data class HumanDecisionRequired(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId?, val reason: String, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class WorkflowCompleted(override val workflowRunId: WorkflowRunId, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class WorkflowFailed(override val workflowRunId: WorkflowRunId, val reason: String, override val occurredAtEpochMillis: Long) : WorkflowEvent
+@Serializable data class WorkflowCancelled(override val workflowRunId: WorkflowRunId, override val occurredAtEpochMillis: Long) : WorkflowEvent
+@Serializable data class TaskCancelled(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, override val occurredAtEpochMillis: Long) : WorkflowEvent

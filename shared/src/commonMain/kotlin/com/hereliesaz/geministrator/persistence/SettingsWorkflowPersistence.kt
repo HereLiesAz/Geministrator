@@ -121,10 +121,13 @@ class SettingsWorkflowPersistence(
     }
 
     private fun readUnlocked(): PersistenceSnapshot {
-        val encoded = settings.getStringOrNull(storageKey) ?: return PersistenceSnapshot()
+        val encoded = settings.getStringOrNull(storageKey)
+            ?: settings.getStringOrNull(LEGACY_STORAGE_KEY_V1)
+            ?: return PersistenceSnapshot()
         val snapshot = json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
-        require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
-            "Persistence schema ${snapshot.version} is newer than supported schema $CURRENT_SCHEMA_VERSION"
+        if (snapshot.version > CURRENT_SCHEMA_VERSION) {
+            // Data was written by a newer app version; discard rather than crash
+            return PersistenceSnapshot()
         }
         return migrate(snapshot)
     }
@@ -157,7 +160,8 @@ class SettingsWorkflowPersistence(
 
     companion object {
         const val CURRENT_SCHEMA_VERSION: Int = 2
-        const val DEFAULT_STORAGE_KEY: String = "geministrator.workflow.persistence.v1"
+        const val DEFAULT_STORAGE_KEY: String = "geministrator.workflow.persistence.v2"
+        private const val LEGACY_STORAGE_KEY_V1: String = "geministrator.workflow.persistence.v1"
 
         val defaultJson: Json = Json {
             encodeDefaults = true

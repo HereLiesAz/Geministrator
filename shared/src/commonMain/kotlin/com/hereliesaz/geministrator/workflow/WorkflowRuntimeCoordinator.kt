@@ -53,13 +53,20 @@ class WorkflowRuntimeCoordinator(
         nextRun = preserveArtifactTimestamps(state.run, nextRun)
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
         nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
+
         val newlyFailedTaskIds = nextRun.taskRuns.filter { (taskId, taskRun) -> taskRun.status == TaskRunStatus.Failed && state.run.taskRuns[taskId]?.status != TaskRunStatus.Failed }.keys
         if (newlyFailedTaskIds.isNotEmpty() && nextRun.status == WorkflowRunStatus.Failed) {
             nextRun = nextRun.copy(status = WorkflowRunStatus.Running)
         }
         for (taskId in newlyFailedTaskIds) {
             if (nextRun.status.isTerminal()) break
-            nextRun = engine.handleFailure(definition, nextRun, taskId, RetryReason.ProviderFailure, "Executor failed", nowEpochMillis)
+            val previousStatus = state.run.taskRuns[taskId]?.status
+            val retryReason = when (previousStatus) {
+                TaskRunStatus.Verifying -> RetryReason.VerificationFailed
+                TaskRunStatus.Planning -> RetryReason.PlanRejected
+                else -> RetryReason.ProviderFailure
+            }
+            nextRun = engine.handleFailure(definition, nextRun, taskId, retryReason, "Executor failed", nowEpochMillis)
             if (nextRun.taskRuns[taskId]?.status == TaskRunStatus.Escalated) ensureFailureEscalationGate(nextRun, taskId, "Executor failed", nowEpochMillis)
         }
         ensureMissingFailureEscalationGates(nextRun, nowEpochMillis)
