@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator
 
+import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.Project
@@ -19,15 +20,17 @@ import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.AgentProvider
-import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
+import com.hereliesaz.geministrator.workflow.ApprovalGateCoordinator
+import com.hereliesaz.geministrator.workflow.ApprovalGateKind
+import com.hereliesaz.geministrator.workflow.ApprovalGateStatus
 import com.hereliesaz.geministrator.workflow.ManagedSessionFailure
 import com.hereliesaz.geministrator.workflow.ManagedSessionGateway
-import com.hereliesaz.geministrator.workflow.ManagedSessionStatus
 import com.hereliesaz.geministrator.workflow.ProviderBackedManagedSessionGateway
 import com.hereliesaz.geministrator.workflow.StarterWorkflowFactory
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
+import com.hereliesaz.geministrator.workflow.WorkflowApprovalService
 import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
 import com.hereliesaz.geministrator.workflow.WorkflowLaunchService
@@ -205,35 +208,51 @@ class ApplicationRuntime private constructor(
                 val handle = requireNotNull(snapshot.state.handles[taskDefinitionId]) {
                     "Task ${taskDefinitionId.value} has no provider session to approve"
                 }
-                when (val result = sessionGateway.approvePlan(handle)) {
-                    ProviderActionResult.Accepted -> {
-                        if (sessionGateway.status(handle) == ManagedSessionStatus.Completed) {
-                            WorkflowRuntimeState(
-                                run = engine.completeTask(
-                                    definition = snapshot.definition,
-                                    run = snapshot.state.run,
-                                    taskDefinitionId = taskDefinitionId,
-                                    nowEpochMillis = now,
-                                    artifacts = snapshot.state.run.taskRuns.getValue(taskDefinitionId).artifacts,
-                                ),
-                                handles = snapshot.state.handles,
-                            )
-                        } else {
-                            val nextRun = snapshot.state.run.copy(
-                                status = WorkflowRunStatus.Running,
-                                taskRuns = snapshot.state.run.taskRuns + (
-                                    taskDefinitionId to taskRun.copy(
-                                        status = TaskRunStatus.Running,
-                                        progressMessage = "Plan approved",
-                                    )
-                                ),
-                                updatedAtEpochMillis = now,
-                            )
-                            WorkflowRuntimeState(nextRun, snapshot.state.handles)
-                        }
-                    }
-                    is ProviderActionResult.Rejected -> error(result.reason)
+                val eventSink = RepositoryWorkflowEventSink(persistence.events)
+                val gateCoordinator = ApprovalGateCoordinator(
+                    repository = persistence.approvalGates,
+                    eventSink = eventSink,
+                )
+                val approvalService = WorkflowApprovalService(
+                    gateRepository = persistence.approvalGates,
+                    gateCoordinator = gateCoordinator,
+                    sessionGateway = sessionGateway,
+                    failureEscalationDecisionStore = persistence,
+                )
+                val gateId = ApprovalGateId(
+                    "plan:${snapshot.state.run.id.value}:${taskDefinitionId.value}:${taskRun.attempt}",
+                )
+                if (persistence.approvalGates.get(gateId) == null) {
+                    gateCoordinator.open(
+                        id = gateId,
+                        workflowRunId = snapshot.state.run.id,
+                        taskDefinitionId = taskDefinitionId,
+                        kind = ApprovalGateKind.PlanApproval,
+                        reason = "Plan approval required for '${task.name}'",
+                        requiresHuman = true,
+                        nowEpochMillis = now,
+                    )
                 }
+
+                val decision = approvalService.approvePlan(
+                    gateId = gateId,
+                    handle = handle,
+                    decidedByRoleId = null,
+                    note = "Approved in application",
+                    nowEpochMillis = now,
+                )
+                val stateForCycle = if (decision.status == ApprovalGateStatus.Rejected) {
+                    snapshot.state.copy(handles = snapshot.state.handles - taskDefinitionId)
+                } else {
+                    snapshot.state
+                }
+                coordinator.cycle(
+                    project = snapshot.project,
+                    definition = snapshot.definition,
+                    state = stateForCycle,
+                    nowEpochMillis = now,
+                    artifactIdFactory = ::artifactId,
+                )
             } else {
                 require(task.effectiveExecutor() is TaskExecutor.HumanApproval) {
                     "Task ${taskDefinitionId.value} is not a human approval gate"
@@ -246,10 +265,11 @@ class ApplicationRuntime private constructor(
                         nowEpochMillis = now,
                     ),
                     handles = snapshot.state.handles,
-                )
+                ).also {
+                    coordinator.persist(snapshot.project, snapshot.definition, it)
+                }
             }
 
-            coordinator.persist(snapshot.project, snapshot.definition, nextState)
             replaceCurrent(snapshot.copy(state = nextState))
             publishCurrent()
         }
