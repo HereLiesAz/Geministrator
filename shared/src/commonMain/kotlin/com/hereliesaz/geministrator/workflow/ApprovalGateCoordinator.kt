@@ -47,7 +47,7 @@ class ApprovalGateCoordinator(
                 ApprovalRequired(
                     workflowRunId = workflowRunId,
                     taskDefinitionId = taskDefinitionId,
-                    gateId = id,
+                    serializedGateId = id,
                     reason = reason,
                     occurredAtEpochMillis = nowEpochMillis,
                 ),
