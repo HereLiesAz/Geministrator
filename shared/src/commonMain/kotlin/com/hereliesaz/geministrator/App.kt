@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
@@ -77,13 +78,14 @@ fun App(
                     onTaskSelected = { taskId ->
                         selectedTaskId = if (selectedTaskId == taskId) null else taskId
                     },
-                    onLaunchWorkflow = { projectName, objective ->
+                    onLaunchWorkflow = { projectName, objective, repository ->
                         val existingProject = (runtimeState as? ApplicationRuntimeState.NoRun)?.project
                         scope.launch {
                             try {
                                 runtime?.launchStarterWorkflow(
                                     projectName = projectName,
                                     objective = objective,
+                                    repository = repository,
                                     existingProject = existingProject,
                                 )
                             } catch (failure: CancellationException) {
