@@ -68,7 +68,7 @@ class ApprovalGateCoordinator(
 
     suspend fun claimPlanApproval(
         id: ApprovalGateId,
-        decidedByRoleId: RoleDefinitionId,
+        decidedByRoleId: RoleDefinitionId?,
         note: String?,
     ): ApprovalGate = mutex.withLock {
         val current = requireNotNull(repository.get(id)) {
