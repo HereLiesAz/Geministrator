@@ -20,6 +20,7 @@ enum class ApprovalGateKind {
 @Serializable
 enum class ApprovalGateStatus {
     Pending,
+    Applying,
     Approved,
     Rejected,
 }
@@ -40,6 +41,13 @@ data class ApprovalGate(
     val createdAtEpochMillis: Long,
     val decidedAtEpochMillis: Long? = null,
 ) {
+    fun applying(decidedByRoleId: RoleDefinitionId?, note: String?): ApprovalGate = copy(
+        status = ApprovalGateStatus.Applying,
+        decidedByRoleId = decidedByRoleId,
+        decisionNote = note,
+        decidedAtEpochMillis = null,
+    )
+
     fun approve(decidedByRoleId: RoleDefinitionId?, note: String?, nowEpochMillis: Long): ApprovalGate = copy(
         status = ApprovalGateStatus.Approved,
         decidedByRoleId = decidedByRoleId,
