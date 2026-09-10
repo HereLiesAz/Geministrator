@@ -67,12 +67,12 @@ class GitHubRestActionsClient(
     override suspend fun getRun(repository: RepositoryRef, runId: String): GitHubWorkflowRun {
         val token = requireToken()
         val baseRepositoryUrl = "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}"
-        val runResponse = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}") { githubHeaders(token) }
-        runResponse.requireSuccess("read GitHub Actions run $runId")
-        val run = json.decodeFromString<RunResponse>(runResponse.bodyAsText())
-        val artifactsResponse = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}/artifacts") { githubHeaders(token) }
-        artifactsResponse.requireSuccess("read artifacts for GitHub Actions run $runId")
-        val artifacts = json.decodeFromString<ArtifactsResponse>(artifactsResponse.bodyAsText()).artifacts.filterNot(ArtifactResponse::expired).map { artifact ->
+        val runBody = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}") { githubHeaders(token) }
+            .requireSuccessBody("read GitHub Actions run $runId")
+        val run = json.decodeFromString<RunResponse>(runBody)
+        val artifactsBody = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}/artifacts") { githubHeaders(token) }
+            .requireSuccessBody("read artifacts for GitHub Actions run $runId")
+        val artifacts = json.decodeFromString<ArtifactsResponse>(artifactsBody).artifacts.filterNot(ArtifactResponse::expired).map { artifact ->
             GitHubWorkflowArtifact(artifact.id.toString(), artifact.name, artifact.archiveDownloadUrl)
         }
         return run.toWorkflowRun(artifacts)
@@ -80,16 +80,15 @@ class GitHubRestActionsClient(
 
     private suspend fun listWorkflowRuns(repository: RepositoryRef, workflow: String, ref: String, token: String): List<RunResponse> {
         val url = "$baseUrl/repos/${repository.owner.encodeURLPathPart()}/${repository.name.encodeURLPathPart()}/actions/workflows/${workflow.encodeURLPathPart()}/runs"
-        val response = httpClient.get(url) {
+        val body = httpClient.get(url) {
             githubHeaders(token)
             url {
                 parameters.append("event", "workflow_dispatch")
                 parameters.append("branch", ref)
                 parameters.append("per_page", "20")
             }
-        }
-        response.requireSuccess("list GitHub Actions workflow runs for $workflow")
-        return json.decodeFromString<RunsResponse>(response.bodyAsText()).workflowRuns
+        }.requireSuccessBody("list GitHub Actions workflow runs for $workflow")
+        return json.decodeFromString<RunsResponse>(body).workflowRuns
     }
 
     private fun RunResponse.toWorkflowRun(artifacts: List<GitHubWorkflowArtifact> = emptyList()) = GitHubWorkflowRun(
@@ -102,6 +101,7 @@ class GitHubRestActionsClient(
     private suspend fun requireToken(): String = tokenProvider.getToken().trim().also { require(it.isNotEmpty()) { "GitHub Actions token is not configured" } }
     private fun HttpRequestBuilder.githubHeaders(token: String) { header(HttpHeaders.Accept, "application/vnd.github+json"); header(HttpHeaders.Authorization, "Bearer $token"); header("X-GitHub-Api-Version", API_VERSION) }
     private suspend fun HttpResponse.requireSuccess(operation: String) { if (status.value in 200..299) return; val responseBody = bodyAsText().take(500); error("Unable to $operation: HTTP ${status.value}${responseBody.takeIf(String::isNotBlank)?.let { ": $it" }.orEmpty()}") }
+    private suspend fun HttpResponse.requireSuccessBody(operation: String): String { val body = bodyAsText(); if (status.value !in 200..299) error("Unable to $operation: HTTP ${status.value}${body.take(500).takeIf(String::isNotBlank)?.let { ": $it" }.orEmpty()}"); return body }
     private fun RunResponse.toStatus(): GitHubWorkflowRunStatus = when (status) { "completed" -> if (conclusion == "success") GitHubWorkflowRunStatus.Completed else GitHubWorkflowRunStatus.Failed; "queued", "waiting", "pending", "requested" -> GitHubWorkflowRunStatus.Queued; else -> GitHubWorkflowRunStatus.Running }
 
     @Serializable private data class DispatchBody(val ref: String)

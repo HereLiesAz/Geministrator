@@ -201,8 +201,11 @@ class WorkflowEngine(
             remainingSlots -= 1
         }
 
+        val hasHumanWaiting = nextRun.taskRuns.values.any {
+            it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated
+        }
         val finalStatus = when {
-            humanApprovalPending -> WorkflowRunStatus.AwaitingHuman
+            humanApprovalPending || hasHumanWaiting -> WorkflowRunStatus.AwaitingHuman
             handles.size > existingHandles.size -> WorkflowRunStatus.Running
             else -> refreshed.status
         }
