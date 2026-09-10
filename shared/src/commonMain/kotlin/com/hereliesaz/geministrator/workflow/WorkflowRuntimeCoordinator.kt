@@ -47,9 +47,7 @@ class WorkflowRuntimeCoordinator(
         persistence.projects.put(project)
         persistence.definitions.put(definition)
         persistence.runs.put(state.run)
-        state.run.taskRuns.values
-            .flatMap(TaskRun::artifacts)
-            .forEach { persistence.artifacts.put(it) }
+        persistArtifacts(state.run)
     }
 
     suspend fun resume(workflowRunId: WorkflowRunId): WorkflowRuntimeState {
@@ -144,6 +142,7 @@ class WorkflowRuntimeCoordinator(
         )
         nextRun = preserveArtifactTimestamps(state.run, nextRun)
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
+        persistArtifacts(nextRun)
         nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
 
         val newlyFailedTaskIds = nextRun.taskRuns
@@ -243,6 +242,12 @@ class WorkflowRuntimeCoordinator(
         nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
         return nextState
+    }
+
+    private suspend fun persistArtifacts(run: WorkflowRun) {
+        run.taskRuns.values
+            .flatMap(TaskRun::artifacts)
+            .forEach { persistence.artifacts.put(it) }
     }
 
     private suspend fun mergeHandles(
