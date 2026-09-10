@@ -2,9 +2,13 @@ package com.hereliesaz.geministrator
 
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.workflow.ApprovalGateCoordinator
 import com.hereliesaz.geministrator.workflow.WorkflowApprovalService
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Resolves a durable failure-escalation gate from the application boundary and refreshes the
@@ -46,4 +50,28 @@ suspend fun ApplicationRuntime.decideFailureEscalation(
         nowEpochMillis = nowEpochMillis,
     )
     refresh()
+}
+
+@OptIn(ExperimentalTime::class)
+suspend fun ApplicationRuntime.decideFailureEscalation(
+    taskDefinitionId: TaskDefinitionId,
+    approved: Boolean,
+    note: String? = null,
+) {
+    val live = state.value as? ApplicationRuntimeState.Live
+        ?: error("No active workflow is loaded")
+    val taskRun = requireNotNull(live.presentation.run.taskRuns[taskDefinitionId]) {
+        "Task ${taskDefinitionId.value} has no runtime state"
+    }
+    require(taskRun.status == TaskRunStatus.Escalated) {
+        "Task ${taskDefinitionId.value} is not awaiting an escalation decision"
+    }
+    decideFailureEscalation(
+        gateId = ApprovalGateId(
+            "failure:${live.presentation.run.id.value}:${taskDefinitionId.value}:${taskRun.attempt}",
+        ),
+        approved = approved,
+        note = note,
+        nowEpochMillis = Clock.System.now().toEpochMilliseconds(),
+    )
 }
