@@ -50,6 +50,33 @@ class ProviderBackedManagedSessionGatewayTest {
     }
 
     @Test
+    fun generatedPlanIsRetainedAsIndeterminateProgressForHumanInspection() = runBlocking {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val provider = PlanPreviewProvider()
+        val handle = ManagedSessionHandle(
+            taskRunId = TaskRunId("plan-task"),
+            providerId = provider.id,
+            providerRunId = ProviderRunId("plan-run"),
+        )
+        try {
+            val gateway = ProviderBackedManagedSessionGateway(
+                AgentProviderRegistry(listOf(provider)),
+                scope,
+            )
+            gateway.reconnect(handle, ManagedSessionStatus.Planning)
+
+            withTimeout(2_000L) {
+                while (gateway.status(handle) != ManagedSessionStatus.AwaitingApproval) delay(25L)
+            }
+
+            assertEquals(null, gateway.progress(handle)?.fraction)
+            assertEquals("1. Inspect repository\n2. Implement approved change", gateway.progress(handle)?.message)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun observerTransportFailurePreservesRemoteRunAndRetriesObservation() = runBlocking {
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         val provider = RetryingObserverProvider()
@@ -140,6 +167,23 @@ private class CancellingCapabilitiesProvider : AgentProvider {
     override suspend fun capabilities(): AgentCapabilities = throw CancellationException("cancel selection")
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle = error("not called")
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flow { error("not called") }
+    override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
+    override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
+    override suspend fun cancel(runId: ProviderRunId) = ProviderActionResult.Accepted
+}
+
+private class PlanPreviewProvider : AgentProvider {
+    override val id = AgentProviderId("plan-preview")
+    override suspend fun capabilities() = AgentCapabilities(supported = setOf(AgentCapability.RepositoryRead))
+    override suspend fun start(request: AgentTaskRequest) = AgentRunHandle(ProviderRunId("plan-run"))
+    override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flow {
+        emit(
+            AgentEvent.PlanGenerated(
+                runId = runId,
+                summary = "1. Inspect repository\n2. Implement approved change",
+            ),
+        )
+    }
     override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
     override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
     override suspend fun cancel(runId: ProviderRunId) = ProviderActionResult.Accepted
