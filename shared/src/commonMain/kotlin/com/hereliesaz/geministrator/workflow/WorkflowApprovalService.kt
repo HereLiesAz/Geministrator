@@ -174,6 +174,7 @@ class WorkflowApprovalService(
                         assignedProviderId = null,
                         providerRunId = null,
                         externalRunId = null,
+                        artifacts = emptyList(),
                         blockingReason = null,
                         progress = null,
                         progressMessage = note ?: "Failure escalation approved; retry scheduled",
