@@ -8,8 +8,13 @@ import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,11 +26,16 @@ class GitHubRestActionsClientTest {
         val engine = MockEngine { request ->
             requests += request
             when (request.method) {
-                HttpMethod.Post -> respond(
-                    content = """{"workflow_run_id":42,"run_url":"https://api.github.test/runs/42","html_url":"https://github.test/runs/42"}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                )
+                HttpMethod.Post -> {
+                    val payload = Json.parseToJsonElement((request.body as TextContent).text).jsonObject
+                    assertEquals("main", payload.getValue("ref").jsonPrimitive.content)
+                    assertTrue(payload.getValue("return_run_details").jsonPrimitive.boolean)
+                    respond(
+                        content = """{"workflow_run_id":42,"run_url":"https://api.github.test/runs/42","html_url":"https://github.test/runs/42"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
                 else -> error("Unexpected request: ${request.method} ${request.url}")
             }
         }
