@@ -16,6 +16,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class SettingsWorkflowPersistenceTest {
     @Test
@@ -70,9 +71,61 @@ class SettingsWorkflowPersistenceTest {
         assertEquals(project, restored.projects.get(project.id))
         assertEquals(definition, restored.definitions.get(definition.id))
         assertEquals(run, restored.runs.get(run.id))
-        assertEquals(BuiltInRoles.ImplementationEngineer, restored.roles.get(BuiltInRoles.ImplementationEngineer.id))
+        assertEquals(
+            BuiltInRoles.ImplementationEngineer,
+            restored.roles.get(BuiltInRoles.ImplementationEngineer.id),
+        )
         assertEquals(1, restored.events.forRun(run.id).size)
-        assertNotNull(restored.approvalGates.get(com.hereliesaz.geministrator.domain.ApprovalGateId("gate")))
+        assertNotNull(
+            restored.approvalGates.get(
+                com.hereliesaz.geministrator.domain.ApprovalGateId("gate"),
+            ),
+        )
         assertEquals(SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION, restored.snapshotVersion())
+    }
+
+    @Test
+    fun eventJournalDoesNotRewriteWholeSnapshotForEveryAppend() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("project-journal"),
+            name = "Journal Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        val runId = WorkflowRunId("run/with:characters")
+        val taskId = TaskDefinitionId("task")
+
+        persistence.projects.put(project)
+        val snapshotBeforeEvents = assertNotNull(
+            settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY),
+        )
+
+        repeat(200) { index ->
+            persistence.events.append(
+                TaskStarted(
+                    workflowRunId = runId,
+                    taskDefinitionId = taskId,
+                    attempt = index + 1,
+                    occurredAtEpochMillis = index.toLong(),
+                ),
+            )
+        }
+
+        assertEquals(
+            snapshotBeforeEvents,
+            settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY),
+        )
+        assertTrue(settings.keys.any { it.startsWith("${SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY}.events.") })
+
+        val restored = SettingsWorkflowPersistence(settings)
+        val events = restored.events.forRun(runId)
+        assertEquals(200, events.size)
+        assertEquals((1..200).toList(), events.map { (it as TaskStarted).attempt })
+
+        restored.clearWorkflowData()
+        assertTrue(restored.events.forRun(runId).isEmpty())
+        assertTrue(settings.keys.none { it.startsWith("${SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY}.events.") })
     }
 }
