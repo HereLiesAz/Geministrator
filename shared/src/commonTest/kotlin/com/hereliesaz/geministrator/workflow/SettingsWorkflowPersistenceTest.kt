@@ -1,5 +1,8 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.ArtifactId
+import com.hereliesaz.geministrator.domain.ArtifactKind
+import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
@@ -16,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SettingsWorkflowPersistenceTest {
@@ -82,6 +86,82 @@ class SettingsWorkflowPersistenceTest {
             ),
         )
         assertEquals(SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION, restored.snapshotVersion())
+    }
+
+    @Test
+    fun legacyV2ArtifactIdsMigrateToAttemptScopedIdentity() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val taskId = TaskDefinitionId("task")
+        val taskRunId = TaskRunId("task-run")
+        val definition = WorkflowDefinition(
+            id = WorkflowDefinitionId("workflow-artifacts"),
+            name = "Artifacts",
+            tasks = listOf(
+                TaskDefinition(
+                    id = taskId,
+                    name = "Task",
+                    objective = "Do work",
+                    roleId = BuiltInRoles.ImplementationEngineer.id,
+                ),
+            ),
+        )
+        val baseRun = WorkflowRunFactory.create(
+            definition = definition,
+            workflowRunId = WorkflowRunId("run-artifacts"),
+            projectId = ProjectId("project"),
+            objective = "Objective",
+            nowEpochMillis = 2L,
+            taskRunIdFactory = { taskRunId },
+        )
+        val legacyProviderArtifact = ArtifactRef(
+            id = ArtifactId("task-run:CodeChange:0"),
+            kind = ArtifactKind.CodeChange,
+            taskRunId = taskRunId,
+            label = "Patch",
+            textContent = "diff",
+            createdAtEpochMillis = 3L,
+        )
+        val legacyGitHubArtifact = ArtifactRef(
+            id = ArtifactId("task-run:github-action:artifact-7"),
+            kind = ArtifactKind.CommandOutput,
+            taskRunId = taskRunId,
+            label = "CI output",
+            uri = "https://example.test/artifact-7",
+            createdAtEpochMillis = 4L,
+        )
+        val legacyRun = baseRun.copy(
+            taskRuns = baseRun.taskRuns + (
+                taskId to baseRun.taskRuns.getValue(taskId).copy(
+                    artifacts = listOf(legacyProviderArtifact, legacyGitHubArtifact),
+                )
+            ),
+        )
+
+        persistence.runs.put(legacyRun)
+        persistence.artifacts.put(legacyProviderArtifact)
+        persistence.artifacts.put(legacyGitHubArtifact)
+        val encoded = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        settings.putString(
+            SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY,
+            encoded.replace(
+                "\"version\":${SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION}",
+                "\"version\":2",
+            ),
+        )
+
+        val restored = SettingsWorkflowPersistence(settings)
+        val migratedRun = assertNotNull(restored.runs.get(legacyRun.id))
+        val migratedIds = migratedRun.taskRuns.getValue(taskId).artifacts.map { it.id }.toSet()
+        val providerId = ArtifactId("task-run:CodeChange:1:0")
+        val githubId = ArtifactId("task-run:github-action:1:artifact-7")
+
+        assertEquals(setOf(providerId, githubId), migratedIds)
+        assertNotNull(restored.artifacts.get(providerId))
+        assertNotNull(restored.artifacts.get(githubId))
+        assertNull(restored.artifacts.get(legacyProviderArtifact.id))
+        assertNull(restored.artifacts.get(legacyGitHubArtifact.id))
+        assertEquals(3, restored.snapshotVersion())
     }
 
     @Test
