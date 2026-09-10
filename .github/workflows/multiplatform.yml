@@ -164,6 +164,15 @@ jobs:
       - name: Build Web Wasm
         run: ./gradlew -Phaive.useLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
+      - name: Stage GitHub Pages
+        run: |
+          rm -rf webApp/build/pages
+          mkdir -p webApp/build/pages/wasm
+          cp -R webApp/build/dist/js/productionExecutable/. webApp/build/pages/
+          cp -R webApp/build/dist/wasmJs/productionExecutable/. webApp/build/pages/wasm/
+          test -f webApp/build/pages/index.html
+          test -f webApp/build/pages/wasm/index.html
+
       - name: Upload Android build
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
@@ -189,7 +198,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
-          path: webApp/build/dist/js/productionExecutable
+          path: webApp/build/pages
 
   deploy-pages:
     if: github.event_name != 'pull_request'
