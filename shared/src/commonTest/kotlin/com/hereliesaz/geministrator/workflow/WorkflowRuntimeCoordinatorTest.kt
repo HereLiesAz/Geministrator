@@ -23,6 +23,10 @@ import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.persistence.InMemoryWorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -44,7 +48,11 @@ class WorkflowRuntimeCoordinatorTest {
             definition = definition,
             status = WorkflowRunStatus.AwaitingHuman,
             taskRuns = mapOf(
-                taskId to taskRun(taskId, TaskRunStatus.AwaitingApproval, TaskExecutor.HumanApproval()),
+                taskId to taskRun(
+                    taskId,
+                    TaskRunStatus.AwaitingApproval,
+                    TaskExecutor.HumanApproval(),
+                ),
             ),
         )
         val fixture = fixture()
@@ -79,7 +87,14 @@ class WorkflowRuntimeCoordinatorTest {
         val run = run(
             definition = definition,
             status = WorkflowRunStatus.Running,
-            taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Running, executor, provider = true)),
+            taskRuns = mapOf(
+                taskId to taskRun(
+                    taskId,
+                    TaskRunStatus.Running,
+                    executor,
+                    provider = true,
+                ),
+            ),
         )
         val gateway = FakeManagedSessionGateway(status = ManagedSessionStatus.Failed)
         val fixture = fixture(gateway)
@@ -124,13 +139,23 @@ class WorkflowRuntimeCoordinatorTest {
             definition = definition,
             status = WorkflowRunStatus.Running,
             taskRuns = mapOf(
-                taskId to taskRun(taskId, TaskRunStatus.Running, executor, provider = true)
-                    .copy(artifacts = listOf(artifact)),
+                taskId to taskRun(
+                    taskId,
+                    TaskRunStatus.Running,
+                    executor,
+                    provider = true,
+                ).copy(artifacts = listOf(artifact)),
             ),
         )
         val gateway = FakeManagedSessionGateway(
             status = ManagedSessionStatus.Running,
-            artifacts = listOf(ProviderArtifact(ArtifactKind.CommandOutput, "result", "file://result")),
+            artifacts = listOf(
+                ProviderArtifact(
+                    ArtifactKind.CommandOutput,
+                    "result",
+                    "file://result",
+                ),
+            ),
         )
         val fixture = fixture(gateway)
 
@@ -142,8 +167,14 @@ class WorkflowRuntimeCoordinatorTest {
             artifactIdFactory = ::artifactId,
         )
 
-        assertEquals(5L, result.run.taskRuns.getValue(taskId).artifacts.single().createdAtEpochMillis)
-        assertEquals(5L, fixture.persistence.artifacts.get(ArtifactId("artifact"))?.createdAtEpochMillis)
+        assertEquals(
+            5L,
+            result.run.taskRuns.getValue(taskId).artifacts.single().createdAtEpochMillis,
+        )
+        assertEquals(
+            5L,
+            fixture.persistence.artifacts.get(ArtifactId("artifact"))?.createdAtEpochMillis,
+        )
     }
 
     @Test
@@ -176,8 +207,15 @@ class WorkflowRuntimeCoordinatorTest {
 
         val blocked = result.run.taskRuns.getValue(taskId)
         assertEquals(TaskRunStatus.Blocked, blocked.status)
-        assertEquals(WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE, blocked.blockingReason?.code)
-        assertEquals(TaskRunStatus.Blocked, fixture.persistence.runs.get(run.id)?.taskRuns?.get(taskId)?.status)
+        assertEquals(
+            WorkflowRunFactory.EXECUTOR_INTEGRATION_UNAVAILABLE,
+            blocked.blockingReason?.code,
+        )
+        assertEquals(
+            TaskRunStatus.Blocked,
+            fixture.persistence.runs.get(run.id)?.taskRuns?.get(taskId)?.status,
+        )
+        assertEquals(20L, fixture.persistence.runs.get(run.id)?.updatedAtEpochMillis)
     }
 
     @Test
@@ -199,7 +237,9 @@ class WorkflowRuntimeCoordinatorTest {
             taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Ready, executor)),
         )
         val integration = FakeSystemExecutorIntegration()
-        val fixture = fixture(integrations = TaskExecutorIntegrationRegistry(listOf(integration)))
+        val fixture = fixture(
+            integrations = TaskExecutorIntegrationRegistry(listOf(integration)),
+        )
 
         val dispatched = fixture.coordinator.cycle(
             project = project(),
@@ -224,6 +264,51 @@ class WorkflowRuntimeCoordinatorTest {
         assertEquals(TaskRunStatus.Completed, finished.status)
         assertEquals(1f, finished.progress)
         assertEquals(1, integration.reconcileCount)
+    }
+
+    @Test
+    fun concurrentCyclesDispatchSystemExecutorOnlyOnce() = runBlocking {
+        val taskId = TaskDefinitionId("concurrent-ci")
+        val executor = TaskExecutor.GitHubAction("ci.yml")
+        val definition = definition(
+            TaskDefinition(
+                id = taskId,
+                name = "Concurrent CI",
+                objective = "Run CI once",
+                roleId = null,
+                executor = executor,
+            ),
+        )
+        val run = run(
+            definition = definition,
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(taskId to taskRun(taskId, TaskRunStatus.Ready, executor)),
+        )
+        val integration = FakeSystemExecutorIntegration(dispatchDelayMillis = 50L)
+        val fixture = fixture(
+            integrations = TaskExecutorIntegrationRegistry(listOf(integration)),
+        )
+
+        coroutineScope {
+            List(8) {
+                async {
+                    fixture.coordinator.cycle(
+                        project = project(),
+                        definition = definition,
+                        state = WorkflowRuntimeState(run),
+                        nowEpochMillis = 20L,
+                        artifactIdFactory = ::artifactId,
+                    )
+                }
+            }.awaitAll()
+        }
+
+        assertEquals(1, integration.dispatchCount)
+        assertEquals(1, integration.reconcileCount)
+        assertEquals(
+            TaskRunStatus.Completed,
+            fixture.persistence.runs.get(run.id)?.taskRuns?.get(taskId)?.status,
+        )
     }
 
     private fun fixture(
@@ -292,7 +377,11 @@ class WorkflowRuntimeCoordinatorTest {
     )
 
     @Suppress("UNUSED_PARAMETER")
-    private fun artifactId(taskRun: TaskRun, artifact: ProviderArtifact, index: Int): ArtifactId = ArtifactId("artifact")
+    private fun artifactId(
+        taskRun: TaskRun,
+        artifact: ProviderArtifact,
+        index: Int,
+    ): ArtifactId = ArtifactId("artifact")
 
     private data class Fixture(
         val persistence: InMemoryWorkflowPersistence,
@@ -304,7 +393,8 @@ private class FakeManagedSessionGateway(
     private val status: ManagedSessionStatus = ManagedSessionStatus.Unknown,
     private val artifacts: List<ProviderArtifact> = emptyList(),
 ) : ManagedSessionGateway {
-    override suspend fun resolveProvider(selection: ProviderSelectionRequest) = AgentProviderId("provider")
+    override suspend fun resolveProvider(selection: ProviderSelectionRequest) =
+        AgentProviderId("provider")
 
     override suspend fun createSession(request: ManagedSessionRequest) = ManagedSessionHandle(
         taskRunId = request.taskRequest.taskRunId,
@@ -314,14 +404,19 @@ private class FakeManagedSessionGateway(
 
     override suspend fun status(handle: ManagedSessionHandle) = status
 
-    override suspend fun message(handle: ManagedSessionHandle, message: String) = ProviderActionResult.Accepted
+    override suspend fun message(
+        handle: ManagedSessionHandle,
+        message: String,
+    ) = ProviderActionResult.Accepted
 
     override suspend fun approvePlan(handle: ManagedSessionHandle) = ProviderActionResult.Accepted
 
     override suspend fun artifacts(handle: ManagedSessionHandle) = artifacts
 }
 
-private class FakeSystemExecutorIntegration : TaskExecutorIntegration {
+private class FakeSystemExecutorIntegration(
+    private val dispatchDelayMillis: Long = 0L,
+) : TaskExecutorIntegration {
     var dispatchCount = 0
     var reconcileCount = 0
 
@@ -329,6 +424,7 @@ private class FakeSystemExecutorIntegration : TaskExecutorIntegration {
 
     override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
         dispatchCount += 1
+        if (dispatchDelayMillis > 0L) delay(dispatchDelayMillis)
         return TaskExecutorExecution(
             status = TaskRunStatus.Running,
             externalRunId = "external-ci-1",
