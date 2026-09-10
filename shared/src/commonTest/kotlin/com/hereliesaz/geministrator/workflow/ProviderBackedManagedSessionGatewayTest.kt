@@ -20,6 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -107,6 +108,31 @@ class ProviderBackedManagedSessionGatewayTest {
             scope.cancel()
         }
     }
+
+    @Test
+    fun cancelMarksSessionTerminalAndDoesNotRepeatRemoteCancellation() = runBlocking {
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val provider = RecordingCancellationProvider()
+        val handle = ManagedSessionHandle(
+            taskRunId = TaskRunId("cancel-task"),
+            providerId = provider.id,
+            providerRunId = ProviderRunId("cancel-run"),
+        )
+        try {
+            val gateway = ProviderBackedManagedSessionGateway(
+                AgentProviderRegistry(listOf(provider)),
+                scope,
+            )
+            gateway.reconnect(handle, ManagedSessionStatus.AwaitingApproval)
+
+            assertEquals(ProviderActionResult.Accepted, gateway.cancel(handle))
+            assertEquals(ManagedSessionStatus.Failed, gateway.status(handle))
+            assertEquals(ProviderActionResult.Accepted, gateway.cancel(handle))
+            assertEquals(1, provider.cancelCalls)
+        } finally {
+            scope.cancel()
+        }
+    }
 }
 
 private class CancellingCapabilitiesProvider : AgentProvider {
@@ -158,4 +184,19 @@ private class ReplayingArtifactProvider : AgentProvider {
     override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
     override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
     override suspend fun cancel(runId: ProviderRunId) = ProviderActionResult.Accepted
+}
+
+private class RecordingCancellationProvider : AgentProvider {
+    override val id = AgentProviderId("recording-cancel")
+    var cancelCalls = 0
+
+    override suspend fun capabilities() = AgentCapabilities(supported = setOf(AgentCapability.RepositoryRead))
+    override suspend fun start(request: AgentTaskRequest) = AgentRunHandle(ProviderRunId("cancel-run"))
+    override fun observe(runId: ProviderRunId): Flow<AgentEvent> = emptyFlow()
+    override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
+    override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
+    override suspend fun cancel(runId: ProviderRunId): ProviderActionResult {
+        cancelCalls += 1
+        return ProviderActionResult.Accepted
+    }
 }
