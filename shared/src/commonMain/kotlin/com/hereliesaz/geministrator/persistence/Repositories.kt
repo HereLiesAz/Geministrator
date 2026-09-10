@@ -13,6 +13,7 @@ import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.events.WorkflowEvent
 import com.hereliesaz.geministrator.workflow.ApprovalGate
 import com.hereliesaz.geministrator.workflow.ApprovalGateRepository
+import com.hereliesaz.geministrator.workflow.FailureEscalationDecisionStore
 
 interface ProjectRepository {
     suspend fun put(project: Project)
@@ -49,7 +50,7 @@ interface ArtifactRepository {
     suspend fun forRun(run: WorkflowRun): List<ArtifactRef>
 }
 
-interface WorkflowPersistence {
+interface WorkflowPersistence : FailureEscalationDecisionStore {
     val projects: ProjectRepository
     val definitions: WorkflowDefinitionRepository
     val runs: WorkflowRunRepository
