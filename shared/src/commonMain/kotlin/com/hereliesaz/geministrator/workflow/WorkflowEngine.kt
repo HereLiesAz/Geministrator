@@ -466,6 +466,47 @@ class WorkflowEngine(
         }
     }
 
+    fun approvePlanGate(run: WorkflowRun, taskDefinitionId: TaskDefinitionId, nowEpochMillis: Long): WorkflowRun {
+        require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
+        val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) { "Task run ${taskDefinitionId.value} is missing" }
+        TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Running)
+        return run.copy(
+            taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Running, blockingReason = null)),
+            updatedAtEpochMillis = nowEpochMillis,
+        )
+    }
+
+    suspend fun resolveEscalation(run: WorkflowRun, taskDefinitionId: TaskDefinitionId, approved: Boolean, nowEpochMillis: Long): WorkflowRun {
+        require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
+        val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) { "Task run ${taskDefinitionId.value} is missing" }
+        return if (approved) {
+            TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Retrying)
+            run.copy(
+                status = WorkflowRunStatus.Running,
+                taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(
+                    status = TaskRunStatus.Retrying,
+                    attempt = taskRun.attempt + 1,
+                    assignedProviderId = null,
+                    providerRunId = null,
+                    externalRunId = null,
+                    blockingReason = null,
+                    progress = null,
+                    progressMessage = null,
+                )),
+                updatedAtEpochMillis = nowEpochMillis,
+            )
+        } else {
+            TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Failed)
+            eventSink.append(TaskFailed(run.id, taskDefinitionId, "Escalation rejected", nowEpochMillis))
+            eventSink.append(WorkflowFailed(run.id, "Escalation rejected", nowEpochMillis))
+            run.copy(
+                status = WorkflowRunStatus.Failed,
+                taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Failed)),
+                updatedAtEpochMillis = nowEpochMillis,
+            )
+        }
+    }
+
     suspend fun cancelWorkflow(run: WorkflowRun, nowEpochMillis: Long): WorkflowRun {
         if (run.status.isTerminal()) return run
         val cancelledTaskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
