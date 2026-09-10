@@ -15,6 +15,7 @@ import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
+import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderArtifact
@@ -46,9 +47,7 @@ class WorkflowRuntimeCoordinator(
         persistence.projects.put(project)
         persistence.definitions.put(definition)
         persistence.runs.put(state.run)
-        state.run.taskRuns.values
-            .flatMap(TaskRun::artifacts)
-            .forEach { persistence.artifacts.put(it) }
+        persistArtifacts(state.run)
     }
 
     suspend fun resume(workflowRunId: WorkflowRunId): WorkflowRuntimeState {
@@ -108,13 +107,18 @@ class WorkflowRuntimeCoordinator(
 
         var nextRun = reconcileResolvedApprovalGates(definition, state.run, nowEpochMillis)
         if (nextRun.status.isTerminal()) {
+            nextRun = closeFailureEscalationsForTerminalRun(nextRun, nowEpochMillis)
             val terminalState = WorkflowRuntimeState(nextRun, emptyMap())
             persist(project, definition, terminalState)
             return terminalState
         }
 
+        nextRun = recoverAvailableSystemExecutors(definition, nextRun, nowEpochMillis)
+        ensureMissingFailureEscalationGates(nextRun, nowEpochMillis)
+        ensurePlanApprovalGates(definition, nextRun, nowEpochMillis)
+
         if (
-            nextRun === state.run &&
+            nextRun == state.run &&
             nextRun.status == WorkflowRunStatus.AwaitingHuman &&
             state.handles.isEmpty() &&
             nextRun.taskRuns.values.none {
@@ -129,7 +133,6 @@ class WorkflowRuntimeCoordinator(
             return state
         }
 
-        nextRun = recoverAvailableSystemExecutors(definition, nextRun, nowEpochMillis)
         nextRun = engine.reconcile(
             definition = definition,
             run = nextRun,
@@ -139,6 +142,7 @@ class WorkflowRuntimeCoordinator(
         )
         nextRun = preserveArtifactTimestamps(state.run, nextRun)
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
+        persistArtifacts(nextRun)
         nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
 
         val newlyFailedTaskIds = nextRun.taskRuns
@@ -178,10 +182,16 @@ class WorkflowRuntimeCoordinator(
             }
         }
 
+        if (nextRun.status.isTerminal()) {
+            nextRun = closeFailureEscalationsForTerminalRun(nextRun, nowEpochMillis)
+            val terminalState = WorkflowRuntimeState(nextRun, emptyMap())
+            persist(project, definition, terminalState)
+            return terminalState
+        }
+
         ensureMissingFailureEscalationGates(nextRun, nowEpochMillis)
 
         if (
-            !nextRun.status.isTerminal() &&
             nextRun.taskRuns.values.any {
                 it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated
             }
@@ -204,12 +214,12 @@ class WorkflowRuntimeCoordinator(
 
         var nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
-        if (nextRun.status.isTerminal()) return nextState
 
         nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis)
         nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
         if (nextRun.status.isTerminal()) {
-            nextState = WorkflowRuntimeState(nextRun, nextHandles)
+            nextRun = closeFailureEscalationsForTerminalRun(nextRun, nowEpochMillis)
+            nextState = WorkflowRuntimeState(nextRun, emptyMap())
             persist(project, definition, nextState)
             return nextState
         }
@@ -225,9 +235,19 @@ class WorkflowRuntimeCoordinator(
         nextHandles = dispatched.handles.filterKeys { taskId ->
             nextRun.taskRuns[taskId]?.status?.isActiveProviderStatus() == true
         }
+        if (nextRun.status.isTerminal()) {
+            nextRun = closeFailureEscalationsForTerminalRun(nextRun, nowEpochMillis)
+            nextHandles = emptyMap()
+        }
         nextState = WorkflowRuntimeState(nextRun, nextHandles)
         persist(project, definition, nextState)
         return nextState
+    }
+
+    private suspend fun persistArtifacts(run: WorkflowRun) {
+        run.taskRuns.values
+            .flatMap(TaskRun::artifacts)
+            .forEach { persistence.artifacts.put(it) }
     }
 
     private suspend fun mergeHandles(
@@ -282,6 +302,62 @@ class WorkflowRuntimeCoordinator(
             requiresHuman = true,
             nowEpochMillis = now,
         )
+    }
+
+    private suspend fun closeFailureEscalationsForTerminalRun(
+        run: WorkflowRun,
+        now: Long,
+    ): WorkflowRun {
+        if (!run.status.isTerminal()) return run
+
+        val unresolved = persistence.approvalGates.unresolved(run.id)
+            .filter { it.kind == ApprovalGateKind.FailureEscalation }
+        if (unresolved.isEmpty()) return run
+
+        var nextRun = run
+        for (gate in unresolved) {
+            val taskId = gate.taskDefinitionId
+            val taskRun = taskId?.let(nextRun.taskRuns::get)
+            val candidateRun = if (taskId != null && taskRun?.status == TaskRunStatus.Escalated) {
+                TaskRunTransitions.requireAllowed(TaskRunStatus.Escalated, TaskRunStatus.Cancelled)
+                nextRun.copy(
+                    taskRuns = nextRun.taskRuns + (
+                        taskId to taskRun.copy(
+                            status = TaskRunStatus.Cancelled,
+                            blockingReason = null,
+                            progressMessage = "Escalation cancelled because workflow is ${nextRun.status}",
+                        )
+                    ),
+                    updatedAtEpochMillis = now,
+                )
+            } else {
+                nextRun.copy(updatedAtEpochMillis = now)
+            }
+            val committed = persistence.commitFailureEscalationDecision(
+                FailureEscalationDecisionCommit(
+                    expectedGateId = gate.id,
+                    decidedGate = gate.reject(
+                        decidedByRoleId = null,
+                        note = "Workflow became ${run.status} before escalation decision",
+                        nowEpochMillis = now,
+                    ),
+                    nextRun = candidateRun,
+                    decisionEvent = ApprovalDecisionReceived(
+                        workflowRunId = run.id,
+                        taskDefinitionId = taskId,
+                        gateId = gate.id,
+                        approved = false,
+                        decidedByRoleId = null,
+                        occurredAtEpochMillis = now,
+                    ),
+                ),
+            )
+            if (!committed) {
+                return persistence.runs.get(run.id) ?: nextRun
+            }
+            nextRun = candidateRun
+        }
+        return nextRun
     }
 
     private suspend fun ensurePlanApprovalGates(
@@ -431,7 +507,7 @@ class WorkflowRuntimeCoordinator(
             }
             val task = tasks[id] ?: continue
             val executor = taskRun.executor ?: task.effectiveExecutor()
-            if (!executor.isSystemExecutor() || taskRun.externalRunId == null) continue
+            if (!executor.isSystemExecutor()) continue
             val integration = executorIntegrations.integrationFor(executor) ?: continue
             next = applyExecution(
                 run = next,

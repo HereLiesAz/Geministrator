@@ -183,7 +183,6 @@ class WorkflowEngine(
                         updatedAtEpochMillis = nowEpochMillis,
                     )
                     eventSink.append(HumanDecisionRequired(nextRun.id, task.id, executor.label, nowEpochMillis))
-                    // Human approval tasks don't consume provider concurrency slots
                     continue
                 }
 
@@ -408,6 +407,7 @@ class WorkflowEngine(
                             assignedProviderId = null,
                             providerRunId = null,
                             externalRunId = null,
+                            artifacts = emptyList(),
                             blockingReason = null,
                             progress = null,
                             progressMessage = null,
@@ -492,6 +492,7 @@ class WorkflowEngine(
                     assignedProviderId = null,
                     providerRunId = null,
                     externalRunId = null,
+                    artifacts = emptyList(),
                     blockingReason = null,
                     progress = null,
                     progressMessage = null,

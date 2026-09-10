@@ -104,6 +104,25 @@ fun App(
                             }
                         }
                     },
+                    onResolveEscalation = { taskId, approved ->
+                        scope.launch {
+                            try {
+                                runtime?.decideFailureEscalation(
+                                    taskDefinitionId = TaskDefinitionId(taskId),
+                                    approved = approved,
+                                    note = if (approved) {
+                                        "Retry approved in application"
+                                    } else {
+                                        "Escalation rejected in application"
+                                    },
+                                )
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Escalation decision failed")
+                            }
+                        }
+                    },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,

@@ -5,9 +5,11 @@ import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.BuiltInRoles
+import com.hereliesaz.geministrator.domain.EscalationPolicy
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.ProviderRunId
+import com.hereliesaz.geministrator.domain.RetryPolicy
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
@@ -27,6 +29,8 @@ import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.AgentRunHandle
 import com.hereliesaz.geministrator.providers.AgentTaskRequest
 import com.hereliesaz.geministrator.providers.ProviderActionResult
+import com.hereliesaz.geministrator.workflow.ApprovalGate
+import com.hereliesaz.geministrator.workflow.ApprovalGateKind
 import com.hereliesaz.geministrator.workflow.ApprovalGateStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -160,6 +164,89 @@ class ApplicationRuntimeApprovalTest {
             )
         } finally {
             fixture.scope.cancel()
+        }
+    }
+
+    @Test
+    fun taskLevelEscalationApprovalCommitsDecisionAndPublishesRetry() = runBlocking {
+        val persistence = InMemoryWorkflowPersistence()
+        val project = project()
+        val taskId = TaskDefinitionId("recover")
+        val executor = TaskExecutor.TestRunner("verify")
+        val definition = WorkflowDefinition(
+            id = WorkflowDefinitionId("escalation-definition"),
+            name = "Recovery",
+            tasks = listOf(
+                TaskDefinition(
+                    id = taskId,
+                    name = "Recover",
+                    objective = "Recover failed work",
+                    roleId = null,
+                    executor = executor,
+                    retryPolicy = RetryPolicy(maxAttempts = 1),
+                    escalationPolicy = EscalationPolicy.RequireHumanDecision,
+                ),
+            ),
+        )
+        val run = WorkflowRun(
+            id = WorkflowRunId("escalation-run"),
+            projectId = project.id,
+            workflowDefinitionId = definition.id,
+            objective = "Recover",
+            status = WorkflowRunStatus.AwaitingHuman,
+            taskRuns = mapOf(
+                taskId to TaskRun(
+                    id = TaskRunId("escalation-task-run"),
+                    taskDefinitionId = taskId,
+                    status = TaskRunStatus.Escalated,
+                    assignedRoleId = null,
+                    executor = executor,
+                ),
+            ),
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        val gateId = ApprovalGateId("failure:${run.id.value}:${taskId.value}:1")
+        persistence.projects.put(project)
+        persistence.definitions.put(definition)
+        persistence.runs.put(run)
+        persistence.approvalGates.put(
+            ApprovalGate(
+                id = gateId,
+                workflowRunId = run.id,
+                taskDefinitionId = taskId,
+                kind = ApprovalGateKind.FailureEscalation,
+                reason = "Needs human decision",
+                requiresHuman = true,
+                createdAtEpochMillis = 1L,
+            ),
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+        try {
+            val runtime = ApplicationRuntime.create(
+                providers = emptyList(),
+                scope = scope,
+                persistence = persistence,
+            )
+
+            runtime.decideFailureEscalation(
+                taskDefinitionId = taskId,
+                approved = true,
+                note = "Retry",
+            )
+
+            val live = assertIs<ApplicationRuntimeState.Live>(runtime.state.value)
+            assertEquals(WorkflowRunStatus.Running, live.presentation.run.status)
+            assertEquals(TaskRunStatus.Retrying, live.presentation.run.taskRuns.getValue(taskId).status)
+            assertEquals(2, live.presentation.run.taskRuns.getValue(taskId).attempt)
+            assertEquals(ApprovalGateStatus.Approved, persistence.approvalGates.get(gateId)?.status)
+            val decisions = persistence.events.forRun(run.id).filterIsInstance<ApprovalDecisionReceived>()
+            assertEquals(1, decisions.size)
+            assertTrue(decisions.single().approved)
+            assertEquals(gateId, decisions.single().gateId)
+        } finally {
+            scope.cancel()
         }
     }
 
