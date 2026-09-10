@@ -336,7 +336,7 @@ class ApplicationRuntime private constructor(
         taskRun: TaskRun,
         artifact: ProviderArtifact,
         index: Int,
-    ) = ArtifactId("${taskRun.id.value}:${artifact.kind}:$index")
+    ) = ArtifactId("${taskRun.id.value}:${artifact.kind}:${taskRun.attempt}:$index")
 
     companion object {
         private const val CYCLE_INTERVAL_MILLIS = 1_000L
