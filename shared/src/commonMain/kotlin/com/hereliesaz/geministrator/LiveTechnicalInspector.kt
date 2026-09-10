@@ -22,6 +22,7 @@ internal fun TechnicalInspector(
     selectedTaskId: String,
     liveWorkflow: LiveWorkflowPresentation?,
     onApproveTask: (String) -> Unit = {},
+    onResolveEscalation: (String, Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     if (liveWorkflow == null) {
@@ -84,6 +85,22 @@ internal fun TechnicalInspector(
                 seed = "approve-$selectedTaskId",
                 endCap = "Proceed",
                 onClick = { onApproveTask(selectedTaskId) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (taskRun.status == TaskRunStatus.Escalated) {
+            AzphaltPill(
+                label = "Retry task",
+                seed = "escalation-approve-$selectedTaskId",
+                endCap = "Approve",
+                onClick = { onResolveEscalation(selectedTaskId, true) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            AzphaltPill(
+                label = "Stop workflow",
+                seed = "escalation-reject-$selectedTaskId",
+                endCap = "Reject",
+                onClick = { onResolveEscalation(selectedTaskId, false) },
                 modifier = Modifier.fillMaxWidth(),
             )
         }
