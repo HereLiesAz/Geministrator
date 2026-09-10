@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.AgentProviderId
+import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.EscalationPolicy
@@ -20,7 +21,9 @@ import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.persistence.InMemoryWorkflowPersistence
+import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import kotlinx.coroutines.runBlocking
@@ -62,9 +65,7 @@ class WorkflowRuntimeCoordinatorReviewRegressionTest {
 
         assertEquals(run, result.run)
         val gate = fixture.persistence.approvalGates.get(
-            com.hereliesaz.geministrator.domain.ApprovalGateId(
-                "failure:${run.id.value}:${taskId.value}:1",
-            ),
+            ApprovalGateId("failure:${run.id.value}:${taskId.value}:1"),
         )
         assertNotNull(gate)
         assertEquals(ApprovalGateStatus.Pending, gate.status)
@@ -205,20 +206,79 @@ class WorkflowRuntimeCoordinatorReviewRegressionTest {
         assertEquals(WorkflowRunStatus.Failed, result.run.status)
         assertEquals(TaskRunStatus.Cancelled, result.run.taskRuns.getValue(escalatedId).status)
         assertEquals(TaskRunStatus.Failed, result.run.taskRuns.getValue(terminalId).status)
-        val gateId = com.hereliesaz.geministrator.domain.ApprovalGateId(
-            "failure:${run.id.value}:${escalatedId.value}:1",
-        )
+        val gateId = ApprovalGateId("failure:${run.id.value}:${escalatedId.value}:1")
         assertEquals(ApprovalGateStatus.Rejected, fixture.persistence.approvalGates.get(gateId)?.status)
         assertTrue(
             fixture.persistence.approvalGates.unresolved(run.id)
                 .none { it.kind == ApprovalGateKind.FailureEscalation },
         )
+        val decisions = fixture.persistence.events.forRun(run.id)
+            .filterIsInstance<ApprovalDecisionReceived>()
+        assertEquals(1, decisions.size)
+        assertEquals(false, decisions.single().approved)
+    }
+
+    @Test
+    fun humanEscalationDecisionWinsAtomicRaceWithTerminalSiblingCleanup() = runBlocking {
+        val escalatedId = TaskDefinitionId("escalate-first")
+        val terminalId = TaskDefinitionId("fail-second")
+        val executor = TaskExecutor.TestRunner("verify")
+        val definition = definition(
+            TaskDefinition(
+                id = escalatedId,
+                name = "Escalate",
+                objective = "Escalate on failure",
+                roleId = null,
+                executor = executor,
+                retryPolicy = RetryPolicy(maxAttempts = 1),
+                escalationPolicy = EscalationPolicy.RequireHumanDecision,
+            ),
+            TaskDefinition(
+                id = terminalId,
+                name = "Fail",
+                objective = "Fail workflow",
+                roleId = null,
+                executor = executor,
+                retryPolicy = RetryPolicy(maxAttempts = 1),
+                escalationPolicy = EscalationPolicy.FailWorkflow,
+            ),
+        )
+        val run = run(
+            definition,
+            WorkflowRunStatus.Running,
+            linkedMapOf(
+                escalatedId to taskRun(escalatedId, TaskRunStatus.Running, executor),
+                terminalId to taskRun(terminalId, TaskRunStatus.Running, executor),
+            ),
+        )
+        val persistence = HumanDecisionWinsPersistence()
+        val integration = IdlessSystemIntegration(reconcileStatus = TaskRunStatus.Failed)
+        val fixture = fixture(
+            integrations = TaskExecutorIntegrationRegistry(listOf(integration)),
+            persistence = persistence,
+        )
+
+        val result = fixture.coordinator.cycle(
+            project = project(),
+            definition = definition,
+            state = WorkflowRuntimeState(run),
+            nowEpochMillis = 20L,
+            artifactIdFactory = ::artifactId,
+        )
+
+        val gateId = ApprovalGateId("failure:${run.id.value}:${escalatedId.value}:1")
+        assertEquals(ApprovalGateStatus.Approved, persistence.approvalGates.get(gateId)?.status)
+        assertEquals(WorkflowRunStatus.Running, result.run.status)
+        assertEquals(TaskRunStatus.Retrying, result.run.taskRuns.getValue(escalatedId).status)
+        val decisions = persistence.events.forRun(run.id).filterIsInstance<ApprovalDecisionReceived>()
+        assertEquals(1, decisions.size)
+        assertTrue(decisions.single().approved)
     }
 
     private fun fixture(
         integrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
+        persistence: WorkflowPersistence = InMemoryWorkflowPersistence(),
     ): Fixture {
-        val persistence = InMemoryWorkflowPersistence()
         val gateway = ReviewNoopGateway()
         val engine = WorkflowEngine(gateway, emptyList())
         return Fixture(
@@ -276,7 +336,7 @@ class WorkflowRuntimeCoordinatorReviewRegressionTest {
     ) = ArtifactId("${taskRun.id.value}:${index}")
 
     private data class Fixture(
-        val persistence: InMemoryWorkflowPersistence,
+        val persistence: WorkflowPersistence,
         val coordinator: WorkflowRuntimeCoordinator,
     )
 }
@@ -327,5 +387,62 @@ private class IdlessSystemIntegration(
             externalRunId = null,
             progressMessage = "reconciled without external ID",
         )
+    }
+}
+
+private class HumanDecisionWinsPersistence(
+    private val delegate: InMemoryWorkflowPersistence = InMemoryWorkflowPersistence(),
+) : WorkflowPersistence {
+    private var injectedDecision = false
+
+    override val projects = delegate.projects
+    override val definitions = delegate.definitions
+    override val runs = delegate.runs
+    override val events = delegate.events
+    override val roles = delegate.roles
+    override val artifacts = delegate.artifacts
+    override val approvalGates = delegate.approvalGates
+
+    override suspend fun commitFailureEscalationDecision(
+        commit: FailureEscalationDecisionCommit,
+    ): Boolean {
+        if (!injectedDecision) {
+            injectedDecision = true
+            val gate = requireNotNull(delegate.approvalGates.get(commit.expectedGateId))
+            val taskId = requireNotNull(gate.taskDefinitionId)
+            val terminalTask = requireNotNull(commit.nextRun.taskRuns[taskId])
+            val humanRun = commit.nextRun.copy(
+                status = WorkflowRunStatus.Running,
+                taskRuns = commit.nextRun.taskRuns + (
+                    taskId to terminalTask.copy(
+                        status = TaskRunStatus.Retrying,
+                        attempt = terminalTask.attempt + 1,
+                        blockingReason = null,
+                        progress = null,
+                        progressMessage = "Human approved retry",
+                    )
+                ),
+                updatedAtEpochMillis = commit.nextRun.updatedAtEpochMillis + 1,
+            )
+            val humanEvent = ApprovalDecisionReceived(
+                workflowRunId = commit.nextRun.id,
+                taskDefinitionId = taskId,
+                gateId = gate.id,
+                approved = true,
+                decidedByRoleId = null,
+                occurredAtEpochMillis = commit.nextRun.updatedAtEpochMillis + 1,
+            )
+            check(
+                delegate.commitFailureEscalationDecision(
+                    FailureEscalationDecisionCommit(
+                        expectedGateId = gate.id,
+                        decidedGate = gate.approve(null, "Human approved retry", humanEvent.occurredAtEpochMillis),
+                        nextRun = humanRun,
+                        decisionEvent = humanEvent,
+                    ),
+                ),
+            )
+        }
+        return delegate.commitFailureEscalationDecision(commit)
     }
 }
