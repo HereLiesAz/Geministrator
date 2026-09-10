@@ -5,6 +5,7 @@ import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.ProjectId
+import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
@@ -147,6 +148,7 @@ class ApplicationRuntime private constructor(
     suspend fun launchStarterWorkflow(
         projectName: String,
         objective: String,
+        repository: RepositoryRef? = null,
         existingProject: Project? = null,
     ) {
         runtimeMutex.withLock {
@@ -155,13 +157,26 @@ class ApplicationRuntime private constructor(
             require(cleanProjectName.isNotEmpty()) { "Project name is required" }
             require(cleanObjective.isNotEmpty()) { "Objective is required" }
 
+            val normalizedRepository = repository?.let {
+                val owner = it.owner.trim()
+                val name = it.name.trim()
+                require(owner.isNotEmpty()) { "Repository owner is required" }
+                require(name.isNotEmpty()) { "Repository name is required" }
+                RepositoryRef(
+                    owner = owner,
+                    name = name,
+                    defaultBranch = it.defaultBranch?.trim()?.takeIf(String::isNotEmpty),
+                )
+            }
             val now = nowEpochMillis()
             val project = existingProject?.copy(
                 name = cleanProjectName,
+                repository = normalizedRepository ?: existingProject.repository,
                 updatedAtEpochMillis = now,
             ) ?: Project(
                 id = ProjectId("project-$now"),
                 name = cleanProjectName,
+                repository = normalizedRepository,
                 createdAtEpochMillis = now,
                 updatedAtEpochMillis = now,
             )
