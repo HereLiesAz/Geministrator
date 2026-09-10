@@ -158,6 +158,7 @@ class FailureEscalationAtomicityTest {
                     taskDefinitionId = taskId,
                     status = TaskRunStatus.Escalated,
                     attempt = 1,
+                    assignedRoleId = null,
                 ),
             ),
             createdAtEpochMillis = 1L,
