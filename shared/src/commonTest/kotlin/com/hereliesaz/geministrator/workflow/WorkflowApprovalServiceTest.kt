@@ -17,11 +17,67 @@ import com.hereliesaz.geministrator.providers.ProviderActionResult
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class WorkflowApprovalServiceTest {
     @Test
     fun architectApprovalDrivesProviderPlanApprovalAndAuditEvent() = runBlocking {
+        val fixture = fixture()
+        val decided = fixture.service.approvePlan(
+            gateId = fixture.gate.id,
+            handle = fixture.handle,
+            decidedByRoleId = BuiltInRoles.Architect.id,
+            note = "Plan is sound",
+            nowEpochMillis = 20L,
+        )
+
+        assertEquals(ApprovalGateStatus.Approved, decided.status)
+        assertTrue(fixture.gateway.approved)
+        assertTrue(fixture.events.snapshot().any { it is ApprovalDecisionReceived && it.approved })
+    }
+
+    @Test
+    fun providerRejectionPersistsRejectedGateAndMatchingAuditEvent() = runBlocking {
+        val fixture = fixture(ProviderActionResult.Rejected("provider refused plan"))
+        val decided = fixture.service.approvePlan(
+            gateId = fixture.gate.id,
+            handle = fixture.handle,
+            decidedByRoleId = BuiltInRoles.Architect.id,
+            note = "Approve",
+            nowEpochMillis = 20L,
+        )
+
+        assertEquals(ApprovalGateStatus.Rejected, decided.status)
+        assertEquals("provider refused plan", decided.decisionNote)
+        assertEquals(ApprovalGateStatus.Rejected, fixture.repository.get(fixture.gate.id)?.status)
+        val decisions = fixture.events.snapshot().filterIsInstance<ApprovalDecisionReceived>()
+        assertEquals(1, decisions.size)
+        assertEquals(false, decisions.single().approved)
+    }
+
+    @Test
+    fun providerExceptionLeavesGatePendingWithoutDecisionEvent() = runBlocking {
+        val fixture = fixture(failure = IllegalStateException("provider unavailable"))
+
+        assertFailsWith<IllegalStateException> {
+            fixture.service.approvePlan(
+                gateId = fixture.gate.id,
+                handle = fixture.handle,
+                decidedByRoleId = BuiltInRoles.Architect.id,
+                note = "Approve",
+                nowEpochMillis = 20L,
+            )
+        }
+
+        assertEquals(ApprovalGateStatus.Pending, fixture.repository.get(fixture.gate.id)?.status)
+        assertTrue(fixture.events.snapshot().none { it is ApprovalDecisionReceived })
+    }
+
+    private suspend fun fixture(
+        result: ProviderActionResult = ProviderActionResult.Accepted,
+        failure: Throwable? = null,
+    ): ApprovalFixture {
         val taskId = TaskDefinitionId("task")
         val definition = WorkflowDefinition(
             id = WorkflowDefinitionId("wf"),
@@ -45,7 +101,7 @@ class WorkflowApprovalServiceTest {
         )
         val repository = ApprovalMemoryRepository()
         val events = InMemoryWorkflowEventSink()
-        val gateway = ApprovalGateway()
+        val gateway = ApprovalGateway(result, failure)
         val service = WorkflowApprovalService(
             gateRepository = repository,
             gateCoordinator = ApprovalGateCoordinator(repository, events),
@@ -57,23 +113,29 @@ class WorkflowApprovalServiceTest {
             gateIdFactory = { ApprovalGateId("gate") },
             nowEpochMillis = 10L,
         )
-        val decided = service.approvePlan(
-            gateId = gate.id,
+        return ApprovalFixture(
+            repository = repository,
+            events = events,
+            gateway = gateway,
+            service = service,
+            gate = gate,
             handle = ManagedSessionHandle(
                 taskRunId = TaskRunId("task-run"),
                 providerId = AgentProviderId("jules"),
                 providerRunId = ProviderRunId("session"),
             ),
-            decidedByRoleId = BuiltInRoles.Architect.id,
-            note = "Plan is sound",
-            nowEpochMillis = 20L,
         )
-
-        assertEquals(ApprovalGateStatus.Approved, decided.status)
-        assertTrue(gateway.approved)
-        assertTrue(events.snapshot().any { it is ApprovalDecisionReceived && it.approved })
     }
 }
+
+private data class ApprovalFixture(
+    val repository: ApprovalMemoryRepository,
+    val events: InMemoryWorkflowEventSink,
+    val gateway: ApprovalGateway,
+    val service: WorkflowApprovalService,
+    val gate: ApprovalGate,
+    val handle: ManagedSessionHandle,
+)
 
 private class ApprovalMemoryRepository : ApprovalGateRepository {
     private val values = mutableMapOf<ApprovalGateId, ApprovalGate>()
@@ -83,15 +145,19 @@ private class ApprovalMemoryRepository : ApprovalGateRepository {
         values.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
 }
 
-private class ApprovalGateway : ManagedSessionGateway {
+private class ApprovalGateway(
+    private val result: ProviderActionResult = ProviderActionResult.Accepted,
+    private val failure: Throwable? = null,
+) : ManagedSessionGateway {
     var approved: Boolean = false
     override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId = AgentProviderId("jules")
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle = error("not used")
     override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus = ManagedSessionStatus.AwaitingApproval
     override suspend fun message(handle: ManagedSessionHandle, message: String): ProviderActionResult = ProviderActionResult.Accepted
     override suspend fun approvePlan(handle: ManagedSessionHandle): ProviderActionResult {
-        approved = true
-        return ProviderActionResult.Accepted
+        failure?.let { throw it }
+        approved = result == ProviderActionResult.Accepted
+        return result
     }
     override suspend fun artifacts(handle: ManagedSessionHandle) = emptyList<com.hereliesaz.geministrator.providers.ProviderArtifact>()
 }
