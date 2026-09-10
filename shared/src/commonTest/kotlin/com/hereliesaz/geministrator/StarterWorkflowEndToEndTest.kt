@@ -104,6 +104,15 @@ private class CompletingGovernedProvider : AgentProvider {
     )
 
     override suspend fun start(request: AgentTaskRequest): AgentRunHandle {
+        // Assert policy delivery at the provider boundary without using the policy as the oracle.
+        assertTrue(request.roleInstructions.contains("Timestamp every response: mm/dd/yyyy hh:mm am/pm"))
+        assertTrue(request.roleInstructions.contains("caller outside its own tests"))
+        assertTrue(request.roleInstructions.contains("versionMinor"))
+        assertTrue(request.roleInstructions.contains("request a Glee Audit from the Antagonist"))
+        if (request.taskRunId.value.endsWith("-review")) {
+            assertTrue(request.roleInstructions.contains("Review correctness, maintainability, side effects"))
+            assertTrue(!request.roleInstructions.contains("# You are the Antagonist."))
+        }
         startedTaskIds += request.taskRunId.value.substringAfter("run-").substringAfter("-")
         runCount += 1
         return AgentRunHandle(ProviderRunId("governed-run-$runCount"))

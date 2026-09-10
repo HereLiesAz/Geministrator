@@ -107,7 +107,7 @@ class WorkflowEngine(
                     val request = AgentTaskRequest(
                         taskRunId = taskRun.id,
                         objective = task.objective,
-                        roleInstructions = role.instructions,
+                        roleInstructions = "$swarmInstructions\n\n${role.instructions}",
                         acceptanceCriteria = task.acceptanceCriteria,
                         contextArtifacts = dependencyArtifacts,
                         repository = project.repository,
