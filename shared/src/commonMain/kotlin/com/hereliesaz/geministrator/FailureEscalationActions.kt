@@ -8,8 +8,8 @@ import com.hereliesaz.geministrator.workflow.WorkflowApprovalService
 
 /**
  * Resolves a durable failure-escalation gate from the application boundary and refreshes the
- * published runtime from persistence afterwards. This makes RequireHumanDecision actionable
- * instead of leaving escalated workflows permanently parked in AwaitingHuman.
+ * published runtime from persistence afterwards. Gate decision, run transition, and audit event
+ * are committed atomically by WorkflowPersistence.
  */
 suspend fun ApplicationRuntime.decideFailureEscalation(
     gateId: ApprovalGateId,
@@ -35,8 +35,9 @@ suspend fun ApplicationRuntime.decideFailureEscalation(
             eventSink = RepositoryWorkflowEventSink(persistence.events),
         ),
         sessionGateway = sessionGateway,
+        failureEscalationDecisionStore = persistence,
     )
-    val nextRun = service.decideFailureEscalation(
+    service.decideFailureEscalation(
         run = presentation.run,
         gateId = gateId,
         approved = approved,
@@ -44,6 +45,5 @@ suspend fun ApplicationRuntime.decideFailureEscalation(
         note = note,
         nowEpochMillis = nowEpochMillis,
     )
-    persistence.runs.put(nextRun)
     refresh()
 }
