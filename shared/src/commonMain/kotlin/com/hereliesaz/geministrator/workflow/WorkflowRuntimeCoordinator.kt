@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.ApprovalGateId
+import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.ArtifactId
 import com.hereliesaz.geministrator.domain.BlockingReason
 import com.hereliesaz.geministrator.domain.Project
@@ -47,8 +48,10 @@ class WorkflowRuntimeCoordinator(
 
     private suspend fun cycleLocked(project: Project, definition: WorkflowDefinition, state: WorkflowRuntimeState, nowEpochMillis: Long, artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId): WorkflowRuntimeState {
         if (state.run.status.isTerminal()) return state
-        if (state.run.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty() && state.run.taskRuns.values.none { it.status in setOf(TaskRunStatus.Ready, TaskRunStatus.Retrying, TaskRunStatus.Running, TaskRunStatus.Verifying) }) return state
-        var nextRun = recoverAvailableSystemExecutors(definition, state.run, nowEpochMillis)
+        var nextRun = reconcileResolvedApprovalGates(definition, state.run, nowEpochMillis)
+        if (nextRun.status.isTerminal()) { val s = WorkflowRuntimeState(nextRun, emptyMap()); persist(project, definition, s); return s }
+        if (nextRun === state.run && nextRun.status == WorkflowRunStatus.AwaitingHuman && state.handles.isEmpty() && nextRun.taskRuns.values.none { it.status in setOf(TaskRunStatus.Ready, TaskRunStatus.Retrying, TaskRunStatus.Running, TaskRunStatus.Verifying) }) return state
+        nextRun = recoverAvailableSystemExecutors(definition, nextRun, nowEpochMillis)
         nextRun = engine.reconcile(definition, nextRun, state.handles, nowEpochMillis, artifactIdFactory)
         nextRun = preserveArtifactTimestamps(state.run, nextRun)
         nextRun = reconcileSystemExecutors(project, definition, nextRun, nowEpochMillis)
@@ -73,6 +76,7 @@ class WorkflowRuntimeCoordinator(
         if (!nextRun.status.isTerminal() && nextRun.taskRuns.values.any { it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated }) nextRun = nextRun.copy(status = WorkflowRunStatus.AwaitingHuman)
         var nextHandles = state.handles.filterKeys { taskId -> nextRun.taskRuns[taskId]?.status !in setOf(TaskRunStatus.Completed, TaskRunStatus.Failed, TaskRunStatus.Cancelled, TaskRunStatus.Retrying, TaskRunStatus.Escalated) }
         nextRun = blockUnavailableSystemExecutors(definition, nextRun)
+        ensurePlanApprovalGates(definition, nextRun, nowEpochMillis)
         var nextState = WorkflowRuntimeState(nextRun, nextHandles); persist(project, definition, nextState)
         if (nextRun.status.isTerminal()) return nextState
         nextRun = dispatchSystemExecutors(project, definition, nextRun, nowEpochMillis); nextRun = refreshAfterSystemExecution(definition, nextRun, nowEpochMillis)
@@ -83,6 +87,57 @@ class WorkflowRuntimeCoordinator(
     private suspend fun mergeHandles(existing: Map<TaskDefinitionId, ManagedSessionHandle>, run: WorkflowRun): Map<TaskDefinitionId, ManagedSessionHandle> = buildMap { putAll(existing.filterKeys { taskId -> run.taskRuns[taskId]?.status?.canReconnect() == true }); run.taskRuns.forEach { (taskDefinitionId, taskRun) -> if (containsKey(taskDefinitionId) || !taskRun.status.canReconnect()) return@forEach; val providerId = taskRun.assignedProviderId ?: return@forEach; val providerRunId = taskRun.providerRunId ?: return@forEach; val handle = ManagedSessionHandle(taskRun.id, providerId, providerRunId); sessionGateway.reconnect(handle, taskRun.status.toManagedStatus()); put(taskDefinitionId, handle) } }
     private suspend fun ensureMissingFailureEscalationGates(run: WorkflowRun, now: Long) { for ((taskId, taskRun) in run.taskRuns) if (taskRun.status == TaskRunStatus.Escalated) ensureFailureEscalationGate(run, taskId, taskRun.progressMessage ?: "Task failure requires a human decision.", now) }
     private suspend fun ensureFailureEscalationGate(run: WorkflowRun, taskId: TaskDefinitionId, reason: String, now: Long) { val existing = persistence.approvalGates.unresolved(run.id).firstOrNull { it.taskDefinitionId == taskId && it.kind == ApprovalGateKind.FailureEscalation }; if (existing != null) return; val taskRun = requireNotNull(run.taskRuns[taskId]); gateCoordinator.open(ApprovalGateId("failure:${run.id.value}:${taskId.value}:${taskRun.attempt}"), run.id, taskId, ApprovalGateKind.FailureEscalation, reason, requiresHuman = true, nowEpochMillis = now) }
+
+    private suspend fun ensurePlanApprovalGates(definition: WorkflowDefinition, run: WorkflowRun, now: Long) {
+        val tasks = definition.tasks.associateBy { it.id }
+        for ((taskId, taskRun) in run.taskRuns) {
+            if (taskRun.status != TaskRunStatus.AwaitingApproval) continue
+            val task = tasks[taskId] ?: continue
+            if (task.approvalPolicy == ApprovalPolicy.None) continue
+            val gateId = ApprovalGateId("plan:${run.id.value}:${taskId.value}:${taskRun.attempt}")
+            if (persistence.approvalGates.get(gateId) != null) continue
+            gateCoordinator.open(
+                id = gateId,
+                workflowRunId = run.id,
+                taskDefinitionId = taskId,
+                kind = ApprovalGateKind.PlanApproval,
+                reason = "Plan approval required for '${task.name}'",
+                requiresHuman = task.approvalPolicy is ApprovalPolicy.HumanApproval,
+                nowEpochMillis = now,
+            )
+        }
+    }
+
+    private suspend fun reconcileResolvedApprovalGates(definition: WorkflowDefinition, run: WorkflowRun, now: Long): WorkflowRun {
+        if (run.status.isTerminal()) return run
+        val tasks = definition.tasks.associateBy { it.id }
+        var nextRun = run
+        for ((taskId, taskRun) in run.taskRuns) {
+            when (taskRun.status) {
+                TaskRunStatus.Escalated -> {
+                    val gateId = ApprovalGateId("failure:${nextRun.id.value}:${taskId.value}:${taskRun.attempt}")
+                    val gate = persistence.approvalGates.get(gateId) ?: continue
+                    if (gate.status == ApprovalGateStatus.Pending || gate.status == ApprovalGateStatus.Applying) continue
+                    nextRun = engine.resolveEscalation(nextRun, taskId, gate.status == ApprovalGateStatus.Approved, now)
+                }
+                TaskRunStatus.AwaitingApproval -> {
+                    val task = tasks[taskId] ?: continue
+                    if (task.approvalPolicy == ApprovalPolicy.None) continue
+                    val gateId = ApprovalGateId("plan:${nextRun.id.value}:${taskId.value}:${taskRun.attempt}")
+                    val gate = persistence.approvalGates.get(gateId) ?: continue
+                    if (gate.status == ApprovalGateStatus.Pending || gate.status == ApprovalGateStatus.Applying) continue
+                    nextRun = if (gate.status == ApprovalGateStatus.Approved) {
+                        engine.approvePlanGate(nextRun, taskId, now)
+                    } else {
+                        engine.handleFailure(definition, nextRun, taskId, RetryReason.PlanRejected, "Plan rejected", now)
+                    }
+                }
+                else -> continue
+            }
+            if (nextRun.status.isTerminal()) break
+        }
+        return nextRun
+    }
 
     private suspend fun dispatchSystemExecutors(project: Project, definition: WorkflowDefinition, run: WorkflowRun, now: Long): WorkflowRun { var next = run; val tasks = definition.tasks.associateBy { it.id }; for ((id, original) in run.taskRuns) { val task = tasks[id] ?: continue; val tr = next.taskRuns[id] ?: original; val ex = tr.executor ?: task.effectiveExecutor(); if (!ex.isSystemExecutor() || tr.externalRunId != null || (tr.status != TaskRunStatus.Ready && tr.status != TaskRunStatus.Retrying)) continue; val integration = executorIntegrations.integrationFor(ex) ?: continue; next = applyExecution(next, id, tr, ex, integration.dispatch(TaskExecutorContext(project, definition, next, task, tr, ex, now)), now) }; return next }
     private suspend fun reconcileSystemExecutors(project: Project, definition: WorkflowDefinition, run: WorkflowRun, now: Long): WorkflowRun { var next = run; val tasks = definition.tasks.associateBy { it.id }; for ((id, original) in run.taskRuns) { val tr = next.taskRuns[id] ?: original; if (tr.status != TaskRunStatus.Running && tr.status != TaskRunStatus.Verifying) continue; val task = tasks[id] ?: continue; val ex = tr.executor ?: task.effectiveExecutor(); if (!ex.isSystemExecutor() || tr.externalRunId == null) continue; val integration = executorIntegrations.integrationFor(ex) ?: continue; next = applyExecution(next, id, tr, ex, integration.reconcile(TaskExecutorContext(project, definition, next, task, tr, ex, now)), now) }; return next }

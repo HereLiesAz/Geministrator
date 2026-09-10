@@ -11,12 +11,12 @@ import com.hereliesaz.geministrator.events.WorkflowEventSink
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-private val approvalGateMutationMutex = Mutex()
-
 class ApprovalGateCoordinator(
     private val repository: ApprovalGateRepository,
     private val eventSink: WorkflowEventSink,
 ) {
+    private val mutex = Mutex()
+
     suspend fun open(
         id: ApprovalGateId,
         workflowRunId: WorkflowRunId,
@@ -26,7 +26,7 @@ class ApprovalGateCoordinator(
         requiredRoleId: RoleDefinitionId? = null,
         requiresHuman: Boolean = false,
         nowEpochMillis: Long,
-    ): ApprovalGate = approvalGateMutationMutex.withLock {
+    ): ApprovalGate = mutex.withLock {
         val existing = repository.get(id)
         if (existing != null) return@withLock existing
 
@@ -70,7 +70,7 @@ class ApprovalGateCoordinator(
         id: ApprovalGateId,
         decidedByRoleId: RoleDefinitionId,
         note: String?,
-    ): ApprovalGate = approvalGateMutationMutex.withLock {
+    ): ApprovalGate = mutex.withLock {
         val current = requireNotNull(repository.get(id)) {
             "Approval gate ${id.value} does not exist"
         }
@@ -91,7 +91,7 @@ class ApprovalGateCoordinator(
         decidedByRoleId: RoleDefinitionId?,
         note: String?,
         nowEpochMillis: Long,
-    ): ApprovalGate = approvalGateMutationMutex.withLock {
+    ): ApprovalGate = mutex.withLock {
         val current = requireNotNull(repository.get(id)) {
             "Approval gate ${id.value} does not exist"
         }

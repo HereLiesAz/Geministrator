@@ -61,7 +61,7 @@ object TaskRunTransitions {
         ),
         TaskRunStatus.Completed to emptySet(),
         TaskRunStatus.Failed to setOf(TaskRunStatus.Retrying, TaskRunStatus.Escalated),
-        TaskRunStatus.Escalated to setOf(TaskRunStatus.Retrying, TaskRunStatus.Cancelled),
+        TaskRunStatus.Escalated to setOf(TaskRunStatus.Retrying, TaskRunStatus.Failed, TaskRunStatus.Cancelled),
         TaskRunStatus.Cancelled to emptySet(),
     )
 
