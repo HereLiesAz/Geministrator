@@ -58,6 +58,7 @@ data class TaskStarted(
     override val occurredAtEpochMillis: Long,
 ) : WorkflowEvent
 
+@ConsistentCopyVisibility
 @Serializable
 data class ApprovalRequired private constructor(
     override val workflowRunId: WorkflowRunId,
