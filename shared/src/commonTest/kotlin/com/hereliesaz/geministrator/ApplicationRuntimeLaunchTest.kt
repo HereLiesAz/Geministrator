@@ -53,4 +53,46 @@ class ApplicationRuntimeLaunchTest {
             scope.cancel()
         }
     }
+
+    @Test
+    fun persistedStarterRunAndRepositoryResumeAfterRuntimeRecreation() = runBlocking {
+        val persistence = InMemoryWorkflowPersistence()
+        val firstScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val repository = RepositoryRef("HereLiesAz", "haive", "main")
+        val firstRuntime = ApplicationRuntime.create(
+            providers = emptyList(),
+            scope = firstScope,
+            persistence = persistence,
+        )
+
+        val runId = try {
+            firstRuntime.launchStarterWorkflow(
+                projectName = "The Haive",
+                objective = "Resume this run",
+                repository = repository,
+            )
+            assertIs<ApplicationRuntimeState.Live>(firstRuntime.state.value).presentation.run.id
+        } finally {
+            firstRuntime.close()
+            firstScope.cancel()
+        }
+
+        val secondScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        try {
+            val resumedRuntime = ApplicationRuntime.create(
+                providers = emptyList(),
+                scope = secondScope,
+                persistence = persistence,
+            )
+
+            val resumed = assertIs<ApplicationRuntimeState.Live>(resumedRuntime.state.value)
+            assertEquals(runId, resumed.presentation.run.id)
+            assertEquals("Resume this run", resumed.presentation.run.objective)
+            val project = persistence.projects.get(resumed.presentation.run.projectId)
+                ?: error("Project was not persisted")
+            assertEquals(repository, project.repository)
+        } finally {
+            secondScope.cancel()
+        }
+    }
 }
