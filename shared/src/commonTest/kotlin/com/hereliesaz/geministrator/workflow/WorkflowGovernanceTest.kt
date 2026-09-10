@@ -40,13 +40,18 @@ class WorkflowGovernanceTest {
         val worker = GovernanceFakeProvider(
             id = AgentProviderId("worker"),
             providerCapabilities = AgentCapabilities(
-                supported = setOf(AgentCapability.RepositoryRead, AgentCapability.RepositoryWrite),
+                supported = setOf(
+                    AgentCapability.RepositoryRead,
+                    AgentCapability.RepositoryWrite,
+                ),
                 requiresEnvironmentPlanning = true,
             ),
         )
         val epa = GovernanceFakeProvider(
             id = AgentProviderId("epa"),
-            providerCapabilities = AgentCapabilities(setOf(AgentCapability.EnvironmentPlanning)),
+            providerCapabilities = AgentCapabilities(
+                setOf(AgentCapability.EnvironmentPlanning),
+            ),
         )
         val preparer = WorkflowDefinitionPreparer(
             providerRegistry = AgentProviderRegistry(listOf(worker, epa)),
@@ -89,7 +94,10 @@ class WorkflowGovernanceTest {
 
         val decision = FailurePolicyEvaluator.decide(
             taskRun = taskRun,
-            retryPolicy = RetryPolicy(maxAttempts = 2, retryOn = setOf(RetryReason.ProviderFailure)),
+            retryPolicy = RetryPolicy(
+                maxAttempts = 2,
+                retryOn = setOf(RetryReason.ProviderFailure),
+            ),
             escalationPolicy = com.hereliesaz.geministrator.domain.EscalationPolicy.Reassign(
                 BuiltInRoles.RecoveryEngineer.id,
             ),
@@ -127,8 +135,14 @@ class WorkflowGovernanceTest {
         )
 
         assertEquals(ApprovalGateStatus.Approved, repository.get(gateId)?.status)
-        assertTrue(events.snapshot().any { it is ApprovalRequired })
-        assertTrue(events.snapshot().any { it is ApprovalDecisionReceived && it.approved })
+        val approvalRequired = events.snapshot().filterIsInstance<ApprovalRequired>().single()
+        assertTrue(approvalRequired.hasGateId)
+        assertEquals(gateId, approvalRequired.gateId)
+        assertTrue(
+            events.snapshot().any {
+                it is ApprovalDecisionReceived && it.approved && it.gateId == gateId
+            },
+        )
     }
 }
 
@@ -142,7 +156,10 @@ private class MemoryGateRepository : ApprovalGateRepository {
     override suspend fun get(id: ApprovalGateId): ApprovalGate? = gates[id]
 
     override suspend fun unresolved(workflowRunId: WorkflowRunId): List<ApprovalGate> =
-        gates.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
+        gates.values.filter {
+            it.workflowRunId == workflowRunId &&
+                (it.status == ApprovalGateStatus.Pending || it.status == ApprovalGateStatus.Applying)
+        }
 }
 
 private class GovernanceFakeProvider(
@@ -150,9 +167,20 @@ private class GovernanceFakeProvider(
     private val providerCapabilities: AgentCapabilities,
 ) : AgentProvider {
     override suspend fun capabilities(): AgentCapabilities = providerCapabilities
-    override suspend fun start(request: AgentTaskRequest): AgentRunHandle = AgentRunHandle(ProviderRunId("run"))
+
+    override suspend fun start(request: AgentTaskRequest): AgentRunHandle =
+        AgentRunHandle(ProviderRunId("run"))
+
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = emptyFlow()
-    override suspend fun sendMessage(runId: ProviderRunId, message: String): ProviderActionResult = ProviderActionResult.Accepted
-    override suspend fun approvePlan(runId: ProviderRunId): ProviderActionResult = ProviderActionResult.Accepted
-    override suspend fun cancel(runId: ProviderRunId): ProviderActionResult = ProviderActionResult.Accepted
+
+    override suspend fun sendMessage(
+        runId: ProviderRunId,
+        message: String,
+    ): ProviderActionResult = ProviderActionResult.Accepted
+
+    override suspend fun approvePlan(runId: ProviderRunId): ProviderActionResult =
+        ProviderActionResult.Accepted
+
+    override suspend fun cancel(runId: ProviderRunId): ProviderActionResult =
+        ProviderActionResult.Accepted
 }
