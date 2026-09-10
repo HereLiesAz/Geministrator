@@ -117,11 +117,24 @@ jobs:
         run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
       - name: Stage GitHub Pages
+        shell: bash
         run: |
+          set -euo pipefail
           rm -rf webApp/build/pages
+
+          JS_INDEX="$(find webApp/build -type f -path '*/js/productionExecutable/index.html' -print -quit)"
+          WASM_INDEX="$(find webApp/build -type f -path '*/wasmJs/productionExecutable/index.html' -print -quit)"
+          test -n "$JS_INDEX"
+          test -n "$WASM_INDEX"
+
+          JS_DIR="$(dirname "$JS_INDEX")"
+          WASM_DIR="$(dirname "$WASM_INDEX")"
+          echo "Staging JS bundle from $JS_DIR"
+          echo "Staging Wasm bundle from $WASM_DIR"
+
           mkdir -p webApp/build/pages/wasm
-          cp -R webApp/build/dist/js/productionExecutable/. webApp/build/pages/
-          cp -R webApp/build/dist/wasmJs/productionExecutable/. webApp/build/pages/wasm/
+          cp -R "$JS_DIR"/. webApp/build/pages/
+          cp -R "$WASM_DIR"/. webApp/build/pages/wasm/
           test -f webApp/build/pages/index.html
           test -f webApp/build/pages/wasm/index.html
 
