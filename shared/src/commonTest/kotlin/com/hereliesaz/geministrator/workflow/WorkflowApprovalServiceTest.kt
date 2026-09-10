@@ -24,30 +24,16 @@ class WorkflowApprovalServiceTest {
     @Test
     fun architectApprovalDrivesProviderPlanApprovalAndAuditEvent() = runBlocking {
         val fixture = fixture()
-        val decided = fixture.service.approvePlan(
-            gateId = fixture.gate.id,
-            handle = fixture.handle,
-            decidedByRoleId = BuiltInRoles.Architect.id,
-            note = "Plan is sound",
-            nowEpochMillis = 20L,
-        )
-
+        val decided = fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Plan is sound", 20L)
         assertEquals(ApprovalGateStatus.Approved, decided.status)
-        assertTrue(fixture.gateway.approved)
+        assertEquals(1, fixture.gateway.approvalCalls)
         assertTrue(fixture.events.snapshot().any { it is ApprovalDecisionReceived && it.approved })
     }
 
     @Test
     fun providerRejectionPersistsRejectedGateAndMatchingAuditEvent() = runBlocking {
         val fixture = fixture(ProviderActionResult.Rejected("provider refused plan"))
-        val decided = fixture.service.approvePlan(
-            gateId = fixture.gate.id,
-            handle = fixture.handle,
-            decidedByRoleId = BuiltInRoles.Architect.id,
-            note = "Approve",
-            nowEpochMillis = 20L,
-        )
-
+        val decided = fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 20L)
         assertEquals(ApprovalGateStatus.Rejected, decided.status)
         assertEquals("provider refused plan", decided.decisionNote)
         assertEquals(ApprovalGateStatus.Rejected, fixture.repository.get(fixture.gate.id)?.status)
@@ -57,21 +43,30 @@ class WorkflowApprovalServiceTest {
     }
 
     @Test
-    fun providerExceptionLeavesGatePendingWithoutDecisionEvent() = runBlocking {
+    fun providerExceptionLeavesDurableApplyingGateWithoutDecisionEvent() = runBlocking {
         val fixture = fixture(failure = IllegalStateException("provider unavailable"))
-
         assertFailsWith<IllegalStateException> {
-            fixture.service.approvePlan(
-                gateId = fixture.gate.id,
-                handle = fixture.handle,
-                decidedByRoleId = BuiltInRoles.Architect.id,
-                note = "Approve",
-                nowEpochMillis = 20L,
-            )
+            fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 20L)
         }
-
-        assertEquals(ApprovalGateStatus.Pending, fixture.repository.get(fixture.gate.id)?.status)
+        assertEquals(ApprovalGateStatus.Applying, fixture.repository.get(fixture.gate.id)?.status)
         assertTrue(fixture.events.snapshot().none { it is ApprovalDecisionReceived })
+    }
+
+    @Test
+    fun applyingGateRecoversAcceptedProviderWithoutRepeatingApproval() = runBlocking {
+        val fixture = fixture(failure = IllegalStateException("response lost"))
+        assertFailsWith<IllegalStateException> {
+            fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 20L)
+        }
+        assertEquals(1, fixture.gateway.approvalCalls)
+        fixture.gateway.failure = null
+        fixture.gateway.sessionStatus = ManagedSessionStatus.Running
+
+        val recovered = fixture.service.approvePlan(fixture.gate.id, fixture.handle, BuiltInRoles.Architect.id, "Approve", 21L)
+
+        assertEquals(ApprovalGateStatus.Approved, recovered.status)
+        assertEquals(1, fixture.gateway.approvalCalls)
+        assertEquals(1, fixture.events.snapshot().filterIsInstance<ApprovalDecisionReceived>().size)
     }
 
     private suspend fun fixture(
@@ -82,48 +77,21 @@ class WorkflowApprovalServiceTest {
         val definition = WorkflowDefinition(
             id = WorkflowDefinitionId("wf"),
             name = "Workflow",
-            tasks = listOf(
-                TaskDefinition(
-                    id = taskId,
-                    name = "Task",
-                    objective = "Do it",
-                    roleId = BuiltInRoles.ImplementationEngineer.id,
-                ),
-            ),
+            tasks = listOf(TaskDefinition(id = taskId, name = "Task", objective = "Do it", roleId = BuiltInRoles.ImplementationEngineer.id)),
         )
-        val run = WorkflowRunFactory.create(
-            definition = definition,
-            workflowRunId = WorkflowRunId("run"),
-            projectId = ProjectId("project"),
-            objective = "Objective",
-            nowEpochMillis = 0L,
-            taskRunIdFactory = { TaskRunId("task-run") },
-        )
+        val run = WorkflowRunFactory.create(definition, WorkflowRunId("run"), ProjectId("project"), "Objective", 0L) { TaskRunId("task-run") }
         val repository = ApprovalMemoryRepository()
         val events = InMemoryWorkflowEventSink()
         val gateway = ApprovalGateway(result, failure)
-        val service = WorkflowApprovalService(
-            gateRepository = repository,
-            gateCoordinator = ApprovalGateCoordinator(repository, events),
-            sessionGateway = gateway,
-        )
-        val gate = service.ensurePlanGate(
-            run = run,
-            taskDefinitionId = taskId,
-            gateIdFactory = { ApprovalGateId("gate") },
-            nowEpochMillis = 10L,
-        )
+        val service = WorkflowApprovalService(repository, ApprovalGateCoordinator(repository, events), gateway)
+        val gate = service.ensurePlanGate(run, taskId, { ApprovalGateId("gate") }, 10L)
         return ApprovalFixture(
-            repository = repository,
-            events = events,
-            gateway = gateway,
-            service = service,
-            gate = gate,
-            handle = ManagedSessionHandle(
-                taskRunId = TaskRunId("task-run"),
-                providerId = AgentProviderId("jules"),
-                providerRunId = ProviderRunId("session"),
-            ),
+            repository,
+            events,
+            gateway,
+            service,
+            gate,
+            ManagedSessionHandle(TaskRunId("task-run"), AgentProviderId("jules"), ProviderRunId("session")),
         )
     }
 }
@@ -142,21 +110,23 @@ private class ApprovalMemoryRepository : ApprovalGateRepository {
     override suspend fun put(gate: ApprovalGate) { values[gate.id] = gate }
     override suspend fun get(id: ApprovalGateId): ApprovalGate? = values[id]
     override suspend fun unresolved(workflowRunId: WorkflowRunId): List<ApprovalGate> =
-        values.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
+        values.values.filter { it.workflowRunId == workflowRunId && (it.status == ApprovalGateStatus.Pending || it.status == ApprovalGateStatus.Applying) }
 }
 
 private class ApprovalGateway(
     private val result: ProviderActionResult = ProviderActionResult.Accepted,
-    private val failure: Throwable? = null,
+    var failure: Throwable? = null,
 ) : ManagedSessionGateway {
-    var approved: Boolean = false
+    var approvalCalls: Int = 0
+    var sessionStatus: ManagedSessionStatus = ManagedSessionStatus.AwaitingApproval
     override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId = AgentProviderId("jules")
     override suspend fun createSession(request: ManagedSessionRequest): ManagedSessionHandle = error("not used")
-    override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus = ManagedSessionStatus.AwaitingApproval
+    override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus = sessionStatus
     override suspend fun message(handle: ManagedSessionHandle, message: String): ProviderActionResult = ProviderActionResult.Accepted
     override suspend fun approvePlan(handle: ManagedSessionHandle): ProviderActionResult {
+        approvalCalls += 1
         failure?.let { throw it }
-        approved = result == ProviderActionResult.Accepted
+        if (result == ProviderActionResult.Accepted) sessionStatus = ManagedSessionStatus.Running
         return result
     }
     override suspend fun artifacts(handle: ManagedSessionHandle) = emptyList<com.hereliesaz.geministrator.providers.ProviderArtifact>()
