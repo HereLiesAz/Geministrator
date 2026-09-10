@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -40,12 +41,10 @@ fun App(
             )
             runtime = created
             created.state.collectLatest { runtimeState = it }
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (failure: Throwable) {
-            val message = failure.message?.takeIf(String::isNotBlank)
-                ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime bootstrap failed" }
-            runtimeState = ApplicationRuntimeState.ResumeFailed(message)
+        } catch (failure: CancellationException) {
+            throw failure
+        } catch (failure: Exception) {
+            runtimeState = failure.toRuntimeFailureState("Runtime bootstrap failed")
         }
     }
 
@@ -87,7 +86,9 @@ fun App(
                                     objective = objective,
                                     existingProject = existingProject,
                                 )
-                            } catch (failure: Throwable) {
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
                                 runtimeState = failure.toRuntimeFailureState("Workflow launch failed")
                             }
                         }
@@ -96,7 +97,9 @@ fun App(
                         scope.launch {
                             try {
                                 runtime?.approveTask(TaskDefinitionId(taskId))
-                            } catch (failure: Throwable) {
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
                                 runtimeState = failure.toRuntimeFailureState("Approval failed")
                             }
                         }

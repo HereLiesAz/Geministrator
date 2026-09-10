@@ -5,6 +5,7 @@ import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.TaskDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
@@ -36,6 +37,21 @@ class WorkflowGraphValidatorTest {
 
         assertEquals(1, errors.size)
         assertIs<WorkflowValidationError.MissingDependency>(errors.single())
+    }
+
+    @Test
+    fun acceptsDelegatedRoleAgentExecution() {
+        val definition = workflow(
+            TaskDefinition(
+                id = TaskDefinitionId("implementation"),
+                name = "implementation",
+                objective = "Do implementation",
+                roleId = BuiltInRoles.ImplementationEngineer.id,
+                executor = TaskExecutor.RoleAgent(BuiltInRoles.QaEngineer.id),
+            ),
+        )
+
+        assertTrue(WorkflowGraphValidator.validate(definition).isEmpty())
     }
 
     @Test
@@ -130,12 +146,28 @@ class WorkflowRunFactoryTest {
 
 class TaskRunTransitionsTest {
     @Test
-    fun terminalCompletionCannotRestart() {
-        assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Completed, TaskRunStatus.Running))
+    fun completedAndCancelledAreTerminal() {
+        TaskRunStatus.entries.forEach { status ->
+            assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Completed, status))
+            assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.Cancelled, status))
+        }
     }
 
     @Test
     fun failedTaskCanRetry() {
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Failed, TaskRunStatus.Retrying))
+    }
+
+    @Test
+    fun awaitingApprovalCanObserveProviderFailureButNotCompletion() {
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.AwaitingApproval, TaskRunStatus.Failed))
+        assertFalse(TaskRunTransitions.canTransition(TaskRunStatus.AwaitingApproval, TaskRunStatus.Completed))
+    }
+
+    @Test
+    fun systemDispatchCanReturnTerminalResult() {
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Completed))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Failed))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Retrying, TaskRunStatus.Completed))
     }
 }

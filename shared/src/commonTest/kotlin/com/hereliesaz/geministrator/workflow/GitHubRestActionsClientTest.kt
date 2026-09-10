@@ -16,15 +16,31 @@ import kotlin.test.assertTrue
 
 class GitHubRestActionsClientTest {
     @Test
-    fun dispatchUsesWorkflowDispatchEndpointAndReturnedRunId() = runBlocking {
+    fun dispatchAcceptsNoContentAndDiscoversNewWorkflowRun() = runBlocking {
         val requests = mutableListOf<HttpRequestData>()
+        var runsReads = 0
         val engine = MockEngine { request ->
             requests += request
-            respond(
-                content = """{"workflow_run_id":42,"run_url":"https://api.github.test/run/42","html_url":"https://github.test/run/42"}""",
-                status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "application/json"),
-            )
+            when {
+                request.method == HttpMethod.Post -> respond(
+                    content = "",
+                    status = HttpStatusCode.NoContent,
+                )
+                request.url.encodedPath.endsWith("/runs") -> {
+                    runsReads += 1
+                    val content = if (runsReads == 1) {
+                        """{"workflow_runs":[{"id":41,"status":"completed","conclusion":"success"}]}"""
+                    } else {
+                        """{"workflow_runs":[{"id":42,"status":"queued","conclusion":null},{"id":41,"status":"completed","conclusion":"success"}]}"""
+                    }
+                    respond(
+                        content = content,
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
+                else -> error("Unexpected request: ${request.method} ${request.url}")
+            }
         }
         val client = GitHubRestActionsClient(
             httpClient = HttpClient(engine),
@@ -42,11 +58,11 @@ class GitHubRestActionsClientTest {
 
         assertEquals("42", run.id)
         assertEquals(GitHubWorkflowRunStatus.Queued, run.status)
-        val request = requests.single()
-        assertEquals(HttpMethod.Post, request.method)
-        assertEquals("/repos/HereLiesAz/haive/actions/workflows/ci.yml/dispatches", request.url.encodedPath)
-        assertEquals("Bearer token-123", request.headers[HttpHeaders.Authorization])
-        assertEquals("2026-03-10", request.headers["X-GitHub-Api-Version"])
+        assertEquals(3, requests.size)
+        val dispatch = requests.single { it.method == HttpMethod.Post }
+        assertEquals("/repos/HereLiesAz/haive/actions/workflows/ci.yml/dispatches", dispatch.url.encodedPath)
+        assertEquals("Bearer token-123", dispatch.headers[HttpHeaders.Authorization])
+        assertEquals("2026-03-10", dispatch.headers["X-GitHub-Api-Version"])
     }
 
     @Test

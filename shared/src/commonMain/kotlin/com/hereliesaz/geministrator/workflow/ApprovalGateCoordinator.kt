@@ -8,6 +8,10 @@ import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.events.ApprovalRequired
 import com.hereliesaz.geministrator.events.HumanDecisionRequired
 import com.hereliesaz.geministrator.events.WorkflowEventSink
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+private val approvalGateMutationMutex = Mutex()
 
 class ApprovalGateCoordinator(
     private val repository: ApprovalGateRepository,
@@ -22,7 +26,10 @@ class ApprovalGateCoordinator(
         requiredRoleId: RoleDefinitionId? = null,
         requiresHuman: Boolean = false,
         nowEpochMillis: Long,
-    ): ApprovalGate {
+    ): ApprovalGate = approvalGateMutationMutex.withLock {
+        val existing = repository.get(id)
+        if (existing != null) return@withLock existing
+
         val gate = ApprovalGate(
             id = id,
             workflowRunId = workflowRunId,
@@ -56,7 +63,7 @@ class ApprovalGateCoordinator(
                 ),
             )
         }
-        return gate
+        gate
     }
 
     suspend fun decide(
@@ -65,9 +72,14 @@ class ApprovalGateCoordinator(
         decidedByRoleId: RoleDefinitionId?,
         note: String?,
         nowEpochMillis: Long,
-    ): ApprovalGate {
-        val current = requireNotNull(repository.get(id)) { "Approval gate ${id.value} does not exist" }
-        require(current.status == ApprovalGateStatus.Pending) { "Approval gate ${id.value} is already resolved" }
+    ): ApprovalGate = approvalGateMutationMutex.withLock {
+        val current = requireNotNull(repository.get(id)) {
+            "Approval gate ${id.value} does not exist"
+        }
+        require(current.status == ApprovalGateStatus.Pending) {
+            "Approval gate ${id.value} is already resolved"
+        }
+
         val decided = if (approved) {
             current.approve(decidedByRoleId, note, nowEpochMillis)
         } else {
@@ -84,6 +96,6 @@ class ApprovalGateCoordinator(
                 occurredAtEpochMillis = nowEpochMillis,
             ),
         )
-        return decided
+        decided
     }
 }

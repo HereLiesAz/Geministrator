@@ -59,6 +59,8 @@ class WorkflowEngine(
         existingHandles: Map<TaskDefinitionId, ManagedSessionHandle> = emptyMap(),
         nowEpochMillis: Long,
     ): DispatchResult {
+        if (run.status.isTerminal()) return DispatchResult(run, existingHandles)
+
         val refreshed = WorkflowRunFactory.refreshReadiness(definition, run, nowEpochMillis)
         val activeCount = refreshed.taskRuns.values.count { it.status.isActive() }
         var remainingSlots = (definition.concurrencyPolicy.maxConcurrentTasks - activeCount).coerceAtLeast(0)
@@ -73,13 +75,12 @@ class WorkflowEngine(
             .groupingBy { requireNotNull(it.assignedProviderId) }
             .eachCount()
             .toMutableMap()
-
-        val dispatchable = refreshed.taskRuns.values
-            .filter { it.status == TaskRunStatus.Ready || it.status == TaskRunStatus.Retrying }
+        val dispatchable = refreshed.taskRuns.values.filter {
+            it.status == TaskRunStatus.Ready || it.status == TaskRunStatus.Retrying
+        }
 
         for (taskRun in dispatchable) {
             if (remainingSlots == 0) break
-
             val task = requireNotNull(definitionsById[taskRun.taskDefinitionId])
             val executor = taskRun.executor ?: task.effectiveExecutor()
 
@@ -103,7 +104,6 @@ class WorkflowEngine(
                     val dependencyArtifacts = task.dependsOn
                         .mapNotNull(nextRun.taskRuns::get)
                         .flatMap(TaskRun::artifacts)
-
                     val request = AgentTaskRequest(
                         taskRunId = taskRun.id,
                         objective = task.objective,
@@ -125,7 +125,6 @@ class WorkflowEngine(
                             cacheNamespace = "${nextRun.id.value}:${role.id.value}",
                         ),
                     )
-
                     val handle = sessionGateway.createSession(
                         ManagedSessionRequest(
                             providerSelection = selection.copy(
@@ -135,10 +134,19 @@ class WorkflowEngine(
                             taskRequest = request,
                         ),
                     )
-
                     handles[task.id] = handle
-                    val startedStatus = if (request.requirePlanApproval) TaskRunStatus.Planning else TaskRunStatus.Running
+                    val startedStatus = if (request.requirePlanApproval) {
+                        TaskRunStatus.Planning
+                    } else {
+                        TaskRunStatus.Running
+                    }
+                    TaskRunTransitions.requireAllowed(taskRun.status, startedStatus)
                     nextRun = nextRun.copy(
+                        status = if (nextRun.status == WorkflowRunStatus.AwaitingHuman) {
+                            nextRun.status
+                        } else {
+                            WorkflowRunStatus.Running
+                        },
                         taskRuns = nextRun.taskRuns + (
                             task.id to taskRun.copy(
                                 status = startedStatus,
@@ -155,18 +163,11 @@ class WorkflowEngine(
                         updatedAtEpochMillis = nowEpochMillis,
                     )
                     activeByProvider[providerId] = providerActive + 1
-
-                    eventSink.append(
-                        AgentAssigned(
-                            workflowRunId = nextRun.id,
-                            taskDefinitionId = task.id,
-                            roleId = role.id,
-                            occurredAtEpochMillis = nowEpochMillis,
-                        ),
-                    )
+                    eventSink.append(AgentAssigned(nextRun.id, task.id, role.id, nowEpochMillis))
                 }
 
                 is TaskExecutor.HumanApproval -> {
+                    TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.AwaitingApproval)
                     humanApprovalPending = true
                     nextRun = nextRun.copy(
                         taskRuns = nextRun.taskRuns + (
@@ -181,14 +182,7 @@ class WorkflowEngine(
                         ),
                         updatedAtEpochMillis = nowEpochMillis,
                     )
-                    eventSink.append(
-                        HumanDecisionRequired(
-                            workflowRunId = nextRun.id,
-                            taskDefinitionId = task.id,
-                            reason = executor.label,
-                            occurredAtEpochMillis = nowEpochMillis,
-                        ),
-                    )
+                    eventSink.append(HumanDecisionRequired(nextRun.id, task.id, executor.label, nowEpochMillis))
                     // Human approval tasks don't consume provider concurrency slots
                     continue
                 }
@@ -202,23 +196,8 @@ class WorkflowEngine(
                 -> continue
             }
 
-            eventSink.append(
-                ExecutorAssigned(
-                    workflowRunId = nextRun.id,
-                    taskDefinitionId = task.id,
-                    executor = executor,
-                    responsibilityRoleId = task.roleId,
-                    occurredAtEpochMillis = nowEpochMillis,
-                ),
-            )
-            eventSink.append(
-                TaskStarted(
-                    workflowRunId = nextRun.id,
-                    taskDefinitionId = task.id,
-                    attempt = taskRun.attempt,
-                    occurredAtEpochMillis = nowEpochMillis,
-                ),
-            )
+            eventSink.append(ExecutorAssigned(nextRun.id, task.id, executor, task.roleId, nowEpochMillis))
+            eventSink.append(TaskStarted(nextRun.id, task.id, taskRun.attempt, nowEpochMillis))
             remainingSlots -= 1
         }
 
@@ -237,25 +216,65 @@ class WorkflowEngine(
         nowEpochMillis: Long,
         artifacts: List<ArtifactRef> = emptyList(),
         externalRunId: String? = null,
+    ): WorkflowRun = completeTaskInternal(
+        definition = definition,
+        run = run,
+        taskDefinitionId = taskDefinitionId,
+        nowEpochMillis = nowEpochMillis,
+        artifacts = artifacts,
+        externalRunId = externalRunId,
+        allowHumanApprovalCompletion = false,
+    )
+
+    suspend fun completeHumanApprovalTask(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        taskDefinitionId: TaskDefinitionId,
+        nowEpochMillis: Long,
     ): WorkflowRun {
+        val task = requireNotNull(definition.tasks.firstOrNull { it.id == taskDefinitionId }) {
+            "Task ${taskDefinitionId.value} is not defined"
+        }
+        require(task.effectiveExecutor() is TaskExecutor.HumanApproval) {
+            "Task ${taskDefinitionId.value} is not a human approval gate"
+        }
+        return completeTaskInternal(
+            definition = definition,
+            run = run,
+            taskDefinitionId = taskDefinitionId,
+            nowEpochMillis = nowEpochMillis,
+            allowHumanApprovalCompletion = true,
+        )
+    }
+
+    private suspend fun completeTaskInternal(
+        definition: WorkflowDefinition,
+        run: WorkflowRun,
+        taskDefinitionId: TaskDefinitionId,
+        nowEpochMillis: Long,
+        artifacts: List<ArtifactRef> = emptyList(),
+        externalRunId: String? = null,
+        allowHumanApprovalCompletion: Boolean,
+    ): WorkflowRun {
+        require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
         val taskRun = requireNotNull(run.taskRuns[taskDefinitionId]) {
             "Task run ${taskDefinitionId.value} is missing"
         }
-        require(taskRun.status.isActive() || taskRun.status == TaskRunStatus.Ready) {
-            "Task ${taskDefinitionId.value} cannot complete from ${taskRun.status}"
+        val humanApprovalCompletion = allowHumanApprovalCompletion && taskRun.status == TaskRunStatus.AwaitingApproval
+        if (!humanApprovalCompletion) {
+            TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Completed)
         }
-        eventSink.append(
-            TaskCompleted(
-                workflowRunId = run.id,
-                taskDefinitionId = taskDefinitionId,
-                occurredAtEpochMillis = nowEpochMillis,
-            ),
-        )
+        eventSink.append(TaskCompleted(run.id, taskDefinitionId, nowEpochMillis))
+
         var nextRun = run.copy(
             taskRuns = run.taskRuns + (
                 taskDefinitionId to taskRun.copy(
                     status = TaskRunStatus.Completed,
-                    artifacts = artifacts,
+                    artifacts = if (artifacts.isEmpty()) {
+                        taskRun.artifacts
+                    } else {
+                        mergeArtifacts(taskRun.artifacts, artifacts)
+                    },
                     externalRunId = externalRunId ?: taskRun.externalRunId,
                     progress = 1f,
                     blockingReason = null,
@@ -264,15 +283,11 @@ class WorkflowEngine(
             updatedAtEpochMillis = nowEpochMillis,
         )
         nextRun = WorkflowRunFactory.refreshReadiness(definition, nextRun, nowEpochMillis)
-        if (nextRun.taskRuns.values.all { it.status == TaskRunStatus.Completed }) {
+        val status = deriveWorkflowStatus(nextRun)
+        if (status == WorkflowRunStatus.Completed) {
             eventSink.append(WorkflowCompleted(nextRun.id, nowEpochMillis))
-            nextRun = nextRun.copy(status = WorkflowRunStatus.Completed)
-        } else if (nextRun.status == WorkflowRunStatus.AwaitingHuman &&
-            nextRun.taskRuns.values.none { it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated }
-        ) {
-            nextRun = nextRun.copy(status = WorkflowRunStatus.Running)
         }
-        return nextRun
+        return nextRun.copy(status = status)
     }
 
     suspend fun reconcile(
@@ -282,15 +297,17 @@ class WorkflowEngine(
         nowEpochMillis: Long,
         artifactIdFactory: (TaskRun, ProviderArtifact, Int) -> ArtifactId,
     ): WorkflowRun {
+        if (run.status.isTerminal()) return run
         var nextRun = run
 
         for ((taskId, handle) in handles) {
             val taskRun = nextRun.taskRuns[taskId] ?: continue
+            if (taskRun.status == TaskRunStatus.Completed || taskRun.status == TaskRunStatus.Cancelled) continue
+
             val previousStatus = taskRun.status
             val status = sessionGateway.status(handle)
             val providerProgress = sessionGateway.progress(handle)
-            val providerArtifacts = sessionGateway.artifacts(handle)
-            val durableArtifacts = providerArtifacts.mapIndexed { index, artifact ->
+            val durableArtifacts = sessionGateway.artifacts(handle).mapIndexed { index, artifact ->
                 ArtifactRef(
                     id = artifactIdFactory(taskRun, artifact, index),
                     kind = artifact.kind,
@@ -303,7 +320,6 @@ class WorkflowEngine(
                     createdAtEpochMillis = nowEpochMillis,
                 )
             }
-
             val mappedStatus = when (status) {
                 ManagedSessionStatus.Planning -> TaskRunStatus.Planning
                 ManagedSessionStatus.AwaitingApproval -> TaskRunStatus.AwaitingApproval
@@ -312,34 +328,30 @@ class WorkflowEngine(
                 ManagedSessionStatus.Failed -> TaskRunStatus.Failed
                 ManagedSessionStatus.Unknown -> taskRun.status
             }
-
+            val safeStatus = if (
+                mappedStatus == taskRun.status || TaskRunTransitions.canTransition(taskRun.status, mappedStatus)
+            ) {
+                mappedStatus
+            } else {
+                taskRun.status
+            }
+            val mergedArtifacts = mergeArtifacts(taskRun.artifacts, durableArtifacts)
             val previousArtifactIds = taskRun.artifacts.mapTo(mutableSetOf()) { it.id }
-            durableArtifacts
+            mergedArtifacts
                 .filter { it.id !in previousArtifactIds }
-                .forEach { artifact ->
-                    eventSink.append(
-                        ArtifactCreated(
-                            workflowRunId = nextRun.id,
-                            taskDefinitionId = taskId,
-                            artifact = artifact,
-                            occurredAtEpochMillis = nowEpochMillis,
-                        ),
-                    )
-                }
-
-            if (mappedStatus == TaskRunStatus.Completed && previousStatus != TaskRunStatus.Completed) {
+                .forEach { eventSink.append(ArtifactCreated(nextRun.id, taskId, it, nowEpochMillis)) }
+            if (safeStatus == TaskRunStatus.Completed && previousStatus != TaskRunStatus.Completed) {
                 eventSink.append(TaskCompleted(nextRun.id, taskId, nowEpochMillis))
             }
-
             nextRun = nextRun.copy(
                 taskRuns = nextRun.taskRuns + (
                     taskId to taskRun.copy(
-                        status = mappedStatus,
-                        artifacts = if (durableArtifacts.isEmpty()) taskRun.artifacts else durableArtifacts,
-                        progress = when {
-                            mappedStatus == TaskRunStatus.Completed -> 1f
-                            providerProgress?.fraction != null -> providerProgress.fraction
-                            else -> taskRun.progress
+                        status = safeStatus,
+                        artifacts = mergedArtifacts,
+                        progress = if (safeStatus == TaskRunStatus.Completed) {
+                            1f
+                        } else {
+                            providerProgress?.fraction ?: taskRun.progress
                         },
                         progressMessage = providerProgress?.message ?: taskRun.progressMessage,
                     )
@@ -349,17 +361,10 @@ class WorkflowEngine(
         }
 
         nextRun = WorkflowRunFactory.refreshReadiness(definition, nextRun, nowEpochMillis)
-        val statuses = nextRun.taskRuns.values.map { it.status }
-        val workflowStatus = if (statuses.isNotEmpty() && statuses.all { it == TaskRunStatus.Completed }) {
-            WorkflowRunStatus.Completed
-        } else {
-            WorkflowRunStatus.Running
-        }
-
+        val workflowStatus = deriveWorkflowStatus(nextRun)
         if (workflowStatus == WorkflowRunStatus.Completed && run.status != WorkflowRunStatus.Completed) {
             eventSink.append(WorkflowCompleted(nextRun.id, nowEpochMillis))
         }
-
         return nextRun.copy(status = workflowStatus, updatedAtEpochMillis = nowEpochMillis)
     }
 
@@ -371,6 +376,7 @@ class WorkflowEngine(
         reason: String,
         nowEpochMillis: Long,
     ): WorkflowRun {
+        require(!run.status.isTerminal()) { "Workflow ${run.id.value} is already ${run.status}" }
         val task = requireNotNull(definition.tasks.firstOrNull { it.id == taskDefinitionId }) {
             "Task ${taskDefinitionId.value} is not defined"
         }
@@ -386,7 +392,10 @@ class WorkflowEngine(
 
         return when (decision) {
             is FailureDecision.Retry -> {
-                eventSink.append(RetryScheduled(run.id, taskDefinitionId, decision.nextAttempt, reason, nowEpochMillis))
+                TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Retrying)
+                eventSink.append(
+                    RetryScheduled(run.id, taskDefinitionId, decision.nextAttempt, reason, nowEpochMillis),
+                )
                 run.copy(
                     status = WorkflowRunStatus.Running,
                     taskRuns = run.taskRuns + (
@@ -396,7 +405,6 @@ class WorkflowEngine(
                             assignedProviderId = null,
                             providerRunId = null,
                             externalRunId = null,
-                            artifacts = emptyList(),
                             blockingReason = null,
                             progress = null,
                             progressMessage = null,
@@ -407,16 +415,20 @@ class WorkflowEngine(
             }
 
             FailureDecision.RequireHumanDecision -> {
+                TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Escalated)
                 eventSink.append(HumanDecisionRequired(run.id, taskDefinitionId, reason, nowEpochMillis))
                 eventSink.append(TaskEscalated(run.id, taskDefinitionId, reason, occurredAtEpochMillis = nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.AwaitingHuman,
-                    taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Escalated)),
+                    taskRuns = run.taskRuns + (
+                        taskDefinitionId to taskRun.copy(status = TaskRunStatus.Escalated)
+                    ),
                     updatedAtEpochMillis = nowEpochMillis,
                 )
             }
 
             is FailureDecision.Reassign -> {
+                TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Retrying)
                 eventSink.append(TaskEscalated(run.id, taskDefinitionId, reason, decision.roleId, nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.Running,
@@ -428,7 +440,6 @@ class WorkflowEngine(
                             assignedProviderId = null,
                             providerRunId = null,
                             externalRunId = null,
-                            artifacts = emptyList(),
                             blockingReason = null,
                             progress = null,
                             progressMessage = null,
@@ -439,11 +450,16 @@ class WorkflowEngine(
             }
 
             FailureDecision.FailWorkflow -> {
+                if (taskRun.status != TaskRunStatus.Failed) {
+                    TaskRunTransitions.requireAllowed(taskRun.status, TaskRunStatus.Failed)
+                }
                 eventSink.append(TaskFailed(run.id, taskDefinitionId, reason, nowEpochMillis))
                 eventSink.append(WorkflowFailed(run.id, reason, nowEpochMillis))
                 run.copy(
                     status = WorkflowRunStatus.Failed,
-                    taskRuns = run.taskRuns + (taskDefinitionId to taskRun.copy(status = TaskRunStatus.Failed)),
+                    taskRuns = run.taskRuns + (
+                        taskDefinitionId to taskRun.copy(status = TaskRunStatus.Failed)
+                    ),
                     updatedAtEpochMillis = nowEpochMillis,
                 )
             }
@@ -451,11 +467,7 @@ class WorkflowEngine(
     }
 
     suspend fun cancelWorkflow(run: WorkflowRun, nowEpochMillis: Long): WorkflowRun {
-        if (run.status == WorkflowRunStatus.Completed ||
-            run.status == WorkflowRunStatus.Failed ||
-            run.status == WorkflowRunStatus.Cancelled
-        ) return run
-
+        if (run.status.isTerminal()) return run
         val cancelledTaskRuns = run.taskRuns.mapValues { (taskId, taskRun) ->
             if (taskRun.status == TaskRunStatus.Completed || taskRun.status == TaskRunStatus.Failed) {
                 taskRun
@@ -472,11 +484,34 @@ class WorkflowEngine(
         )
     }
 
-    private fun TaskRunStatus.isActive(): Boolean = when (this) {
+    private fun deriveWorkflowStatus(run: WorkflowRun): WorkflowRunStatus {
+        if (run.status.isTerminal()) return run.status
+        val statuses = run.taskRuns.values.map { it.status }
+        return when {
+            statuses.isNotEmpty() && statuses.all { it == TaskRunStatus.Completed } -> WorkflowRunStatus.Completed
+            statuses.any { it == TaskRunStatus.AwaitingApproval || it == TaskRunStatus.Escalated } -> WorkflowRunStatus.AwaitingHuman
+            statuses.any { it == TaskRunStatus.Failed } -> WorkflowRunStatus.Failed
+            else -> WorkflowRunStatus.Running
+        }
+    }
+
+    private fun mergeArtifacts(existing: List<ArtifactRef>, incoming: List<ArtifactRef>): List<ArtifactRef> {
+        if (incoming.isEmpty()) return existing
+        val merged = LinkedHashMap<ArtifactId, ArtifactRef>(existing.size + incoming.size)
+        existing.forEach { merged[it.id] = it }
+        incoming.forEach { merged[it.id] = it }
+        return merged.values.toList()
+    }
+
+    private fun WorkflowRunStatus.isTerminal() = this in setOf(
+        WorkflowRunStatus.Completed,
+        WorkflowRunStatus.Failed,
+        WorkflowRunStatus.Cancelled,
+    )
+
+    private fun TaskRunStatus.isActive() = this in setOf(
         TaskRunStatus.Planning,
         TaskRunStatus.Running,
         TaskRunStatus.Verifying,
-        -> true
-        else -> false
-    }
+    )
 }
