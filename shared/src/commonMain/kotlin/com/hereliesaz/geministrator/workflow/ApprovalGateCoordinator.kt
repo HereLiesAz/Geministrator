@@ -66,6 +66,25 @@ class ApprovalGateCoordinator(
         gate
     }
 
+    suspend fun claimPlanApproval(
+        id: ApprovalGateId,
+        decidedByRoleId: RoleDefinitionId,
+        note: String?,
+    ): ApprovalGate = approvalGateMutationMutex.withLock {
+        val current = requireNotNull(repository.get(id)) {
+            "Approval gate ${id.value} does not exist"
+        }
+        require(current.kind == ApprovalGateKind.PlanApproval) {
+            "Approval gate ${id.value} is not a plan gate"
+        }
+        require(current.status == ApprovalGateStatus.Pending) {
+            "Approval gate ${id.value} is already being applied or resolved"
+        }
+        val applying = current.applying(decidedByRoleId, note)
+        repository.put(applying)
+        applying
+    }
+
     suspend fun decide(
         id: ApprovalGateId,
         approved: Boolean,
@@ -76,7 +95,7 @@ class ApprovalGateCoordinator(
         val current = requireNotNull(repository.get(id)) {
             "Approval gate ${id.value} does not exist"
         }
-        require(current.status == ApprovalGateStatus.Pending) {
+        require(current.status == ApprovalGateStatus.Pending || current.status == ApprovalGateStatus.Applying) {
             "Approval gate ${id.value} is already resolved"
         }
 

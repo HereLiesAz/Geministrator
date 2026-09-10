@@ -89,7 +89,7 @@ class JulesProvider(
 
         while (!terminal) {
             val activities = api.listActivities(sessionName)
-                .sortedWith(compareBy<JulesActivity> { it.createTime ?: "￿" }.thenBy { it.id })
+                .sortedWith(compareBy<JulesActivity> { it.createTime == null }.thenBy { it.createTime ?: "" }.thenBy { it.id })
 
             for (activity in activities) {
                 if (!seenActivityIds.add(activity.id)) continue

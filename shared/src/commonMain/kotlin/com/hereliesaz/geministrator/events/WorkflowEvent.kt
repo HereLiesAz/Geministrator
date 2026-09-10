@@ -2,9 +2,11 @@ package com.hereliesaz.geministrator.events
 
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactRef
+import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
+import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import kotlinx.serialization.Serializable
 
@@ -14,7 +16,7 @@ sealed interface WorkflowEvent {
     val occurredAtEpochMillis: Long
 }
 
-@Serializable data class WorkflowCreated(override val workflowRunId: WorkflowRunId, override val occurredAtEpochMillis: Long) : WorkflowEvent
+@Serializable data class WorkflowCreated(override val workflowRunId: WorkflowRunId, val projectId: ProjectId? = null, val workflowDefinitionId: WorkflowDefinitionId? = null, val objective: String? = null, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class TaskBecameReady(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class ExecutorAssigned(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val executor: TaskExecutor, val responsibilityRoleId: RoleDefinitionId? = null, override val occurredAtEpochMillis: Long) : WorkflowEvent
 @Serializable data class AgentAssigned(override val workflowRunId: WorkflowRunId, val taskDefinitionId: TaskDefinitionId, val roleId: RoleDefinitionId, override val occurredAtEpochMillis: Long) : WorkflowEvent

@@ -87,7 +87,10 @@ class InMemoryWorkflowPersistence : WorkflowPersistence {
         }
         override suspend fun get(id: ApprovalGateId): ApprovalGate? = mutex.withLock { gateItems[id] }
         override suspend fun unresolved(workflowRunId: WorkflowRunId): List<ApprovalGate> = mutex.withLock {
-            gateItems.values.filter { it.workflowRunId == workflowRunId && it.status == ApprovalGateStatus.Pending }
+            gateItems.values.filter {
+                it.workflowRunId == workflowRunId &&
+                    (it.status == ApprovalGateStatus.Pending || it.status == ApprovalGateStatus.Applying)
+            }
         }
     }
 }

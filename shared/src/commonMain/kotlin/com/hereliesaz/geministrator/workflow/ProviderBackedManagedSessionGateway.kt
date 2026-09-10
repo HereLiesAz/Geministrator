@@ -116,7 +116,7 @@ class ProviderBackedManagedSessionGateway(
                     if (!handle.isTerminal()) delay(OBSERVER_RETRY_MILLIS)
                 } catch (failure: CancellationException) {
                     throw failure
-                } catch (_: Throwable) {
+                } catch (_: Exception) {
                     consecutiveFailures++
                     if (consecutiveFailures >= MAX_OBSERVER_FAILURES) {
                         mutex.withLock {
@@ -198,7 +198,7 @@ class ProviderBackedManagedSessionGateway(
                 )
                 is AgentEvent.Message -> current
                 is AgentEvent.ArtifactProduced -> current.copy(
-                    artifacts = (current.artifacts + event.artifact).distinct(),
+                    artifacts = current.artifacts.upsertArtifact(event.artifact),
                 )
                 is AgentEvent.Completed -> current.copy(
                     status = ManagedSessionStatus.Completed,
@@ -212,6 +212,23 @@ class ProviderBackedManagedSessionGateway(
             snapshots[handle] = next
         }
     }
+
+    private fun List<ProviderArtifact>.upsertArtifact(artifact: ProviderArtifact): List<ProviderArtifact> {
+        val identity = artifact.identityKey()
+        val index = indexOfFirst { it.identityKey() == identity }
+        if (index < 0) return this + artifact
+        if (this[index] == artifact) return this
+        return toMutableList().also { it[index] = artifact }
+    }
+
+    private fun ProviderArtifact.identityKey(): String = listOf(
+        kind.name,
+        uri.orEmpty(),
+        metadata["source"].orEmpty(),
+        metadata["baseCommitId"].orEmpty(),
+        metadata["command"].orEmpty(),
+        label,
+    ).joinToString("\u001f")
 
     private companion object {
         const val OBSERVER_RETRY_MILLIS = 1_000L
