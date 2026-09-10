@@ -16,6 +16,7 @@ import com.hereliesaz.geministrator.events.WorkflowEvent
 import com.hereliesaz.geministrator.workflow.ApprovalGate
 import com.hereliesaz.geministrator.workflow.ApprovalGateRepository
 import com.hereliesaz.geministrator.workflow.ApprovalGateStatus
+import com.hereliesaz.geministrator.workflow.FailureEscalationDecisionCommit
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -107,6 +108,38 @@ class SettingsWorkflowPersistence(
                 it.workflowRunId == workflowRunId &&
                     (it.status == ApprovalGateStatus.Pending || it.status == ApprovalGateStatus.Applying)
             }.sortedBy { it.createdAtEpochMillis }
+    }
+
+    override suspend fun commitFailureEscalationDecision(
+        commit: FailureEscalationDecisionCommit,
+    ): Boolean = mutex.withLock {
+        val snapshot = readUnlocked()
+        val current = snapshot.approvalGates.firstOrNull { it.id == commit.expectedGateId }
+            ?: return@withLock false
+        if (current.status != ApprovalGateStatus.Pending) return@withLock false
+        require(commit.decidedGate.id == current.id) {
+            "Escalation decision gate ${commit.decidedGate.id.value} does not match ${current.id.value}"
+        }
+        require(commit.nextRun.id == current.workflowRunId) {
+            "Escalation decision run ${commit.nextRun.id.value} does not match ${current.workflowRunId.value}"
+        }
+        require(commit.decisionEvent.gateId == current.id) {
+            "Escalation decision event does not match gate ${current.id.value}"
+        }
+
+        val next = snapshot.copy(
+            version = CURRENT_SCHEMA_VERSION,
+            approvalGates = snapshot.approvalGates.upsert(commit.decidedGate) {
+                it.id == commit.decidedGate.id
+            },
+            runs = snapshot.runs.upsert(commit.nextRun) { it.id == commit.nextRun.id },
+            events = snapshot.events + commit.decisionEvent,
+        )
+        settings.putString(
+            storageKey,
+            json.encodeToString(PersistenceSnapshot.serializer(), next),
+        )
+        true
     }
 
     suspend fun clearWorkflowData() {
