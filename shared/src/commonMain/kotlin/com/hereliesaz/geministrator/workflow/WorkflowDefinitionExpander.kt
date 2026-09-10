@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.ArtifactKind
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.TaskDefinition
@@ -50,7 +51,7 @@ object WorkflowDefinitionExpander {
                                 ArtifactKind.ContractTest,
                                 ArtifactKind.FailureScenario,
                             ),
-                            approvalPolicy = task.approvalPolicy,
+                            approvalPolicy = ApprovalPolicy.None,
                             retryPolicy = task.retryPolicy,
                             escalationPolicy = task.escalationPolicy,
                             providerConstraints = task.providerConstraints,
@@ -84,7 +85,7 @@ object WorkflowDefinitionExpander {
                                 ArtifactKind.TestCode,
                                 ArtifactKind.RegressionTest,
                             ),
-                            approvalPolicy = task.approvalPolicy,
+                            approvalPolicy = ApprovalPolicy.None,
                             retryPolicy = task.retryPolicy,
                             escalationPolicy = task.escalationPolicy,
                             providerConstraints = task.providerConstraints,
