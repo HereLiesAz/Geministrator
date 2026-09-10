@@ -15,7 +15,6 @@ import com.hereliesaz.geministrator.providers.PromptCacheCapabilities
 import com.hereliesaz.geministrator.providers.PromptCacheMode
 import com.hereliesaz.geministrator.providers.ProviderActionResult
 import com.hereliesaz.geministrator.providers.ProviderArtifact
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -272,12 +271,8 @@ class JulesProvider(
         }
     }
 
-    private suspend fun action(block: suspend () -> Unit): ProviderActionResult = try {
+    private suspend fun action(block: suspend () -> Unit): ProviderActionResult {
         block()
-        ProviderActionResult.Accepted
-    } catch (error: CancellationException) {
-        throw error
-    } catch (error: Exception) {
-        ProviderActionResult.Rejected(error.message ?: error::class.simpleName ?: "Jules request failed")
+        return ProviderActionResult.Accepted
     }
 }
