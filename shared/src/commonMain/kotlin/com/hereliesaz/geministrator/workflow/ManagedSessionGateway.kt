@@ -64,5 +64,8 @@ interface ManagedSessionGateway {
 
     suspend fun approvePlan(handle: ManagedSessionHandle): ProviderActionResult
 
+    suspend fun cancel(handle: ManagedSessionHandle): ProviderActionResult =
+        ProviderActionResult.Rejected("Provider session cancellation is not supported")
+
     suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact>
 }
