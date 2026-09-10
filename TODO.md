@@ -26,6 +26,23 @@ Tracking issue: #35
 - [x] Show real task artifacts, attempts, blocking reasons, provider/executor IDs, and progress in the inspector.
 - [x] Add explicit empty, loading, disconnected, failed-to-resume, and no-project states.
 
+## P0 — Runtime integrity audit
+
+- [x] Enforce terminal workflow/task guards and legal task transitions across provider and system executors.
+- [x] Make runtime cycles single-writer and cover concurrent dispatch against duplicate external work.
+- [x] Resume durable provider/system sessions instead of redispatching existing external work.
+- [x] Correlate GitHub workflow dispatches to the exact returned workflow-run ID.
+- [x] Keep provider completion behind explicit approval and route application approval through durable gates.
+- [x] Make plan approval rejection, transport failure, recovery, and audit events consistent.
+- [x] Make failure-escalation gates actionable from the application boundary.
+- [x] Commit failure-escalation gate decision, workflow transition, and audit event atomically.
+- [x] Preserve retry-attempt artifact identity and deduplicate replayed provider artifacts.
+- [x] Replace whole-snapshot event rewrites with append-only Settings event journaling.
+- [x] Preserve reconstructable workflow-created events and strict approval-gate identity with legacy compatibility.
+- [x] Build and stage both JS and Wasm outputs for GitHub Pages.
+- [x] Add regression coverage for concurrency, approvals, escalation atomicity, persistence, transitions, artifacts, and GitHub dispatch correlation.
+- [ ] Complete explicit on-device/on-runtime verification of launch → provider approval → execution → failure escalation → restart/resume → terminal outcome using real integrations.
+
 ## P0 — Make one complete workflow actually work end-to-end
 
 - [ ] Create/import a project.
