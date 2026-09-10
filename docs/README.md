@@ -10,6 +10,13 @@ The live H2G2 mindmap is a projection of runtime truth. It is not a second state
 
 ## Documents
 
+### Agent working rules
+
+The workflow engine prepends shared working rules to every role-agent task request,
+including custom roles. These are provider instructions, not mechanical enforcement.
+Code Reviewer and Antagonist retain separate instructions. The starter workflow still
+uses Code Reviewer; Antagonist is available in the roster for explicit assignment.
+
 ### Architecture
 
 [`architecture/ARCHITECTURE.md`](architecture/ARCHITECTURE.md) defines the product boundaries, runtime model, executor model, workflow UI, provider boundary, and delivery architecture.
