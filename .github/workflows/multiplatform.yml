@@ -159,10 +159,10 @@ jobs:
           test -f "$target_group/conveyance-h2g2-wasm-js/$pinned_version/conveyance-h2g2-wasm-js-$pinned_version.pom"
 
       - name: Build Web JS
-        run: ./gradlew -Phaive.useLocalH2g2=true :webApp:jsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:jsBrowserProductionWebpack
 
       - name: Build Web Wasm
-        run: ./gradlew -Phaive.useLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
+        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
       - name: Stage GitHub Pages
         run: |
