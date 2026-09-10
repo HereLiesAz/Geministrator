@@ -13,6 +13,9 @@ import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.russhwolf.settings.MapSettings
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,6 +27,95 @@ class SettingsEscalationAtomicityTest {
     fun gateRunAndDecisionEventSurviveRecreationAsOneCommittedState() = runBlocking {
         val settings = MapSettings()
         val persistence = SettingsWorkflowPersistence(settings)
+        val fixture = escalationFixture()
+        persistence.runs.put(fixture.run)
+        persistence.approvalGates.put(fixture.gate)
+
+        val nextRun = fixture.approvedRun()
+        val event = fixture.event(approved = true, at = 20L)
+
+        assertTrue(
+            persistence.commitFailureEscalationDecision(
+                FailureEscalationDecisionCommit(
+                    expectedGateId = fixture.gate.id,
+                    decidedGate = fixture.gate.approve(null, "Retry", 20L),
+                    nextRun = nextRun,
+                    decisionEvent = event,
+                ),
+            ),
+        )
+
+        val restored = SettingsWorkflowPersistence(settings)
+        assertEquals(ApprovalGateStatus.Approved, restored.approvalGates.get(fixture.gate.id)?.status)
+        assertEquals(nextRun, restored.runs.get(fixture.run.id))
+        assertEquals(listOf(event), restored.events.forRun(fixture.run.id).filterIsInstance<ApprovalDecisionReceived>())
+
+        assertFalse(
+            restored.commitFailureEscalationDecision(
+                FailureEscalationDecisionCommit(
+                    expectedGateId = fixture.gate.id,
+                    decidedGate = fixture.gate.reject(null, "Stop", 21L),
+                    nextRun = fixture.rejectedRun(21L),
+                    decisionEvent = fixture.event(approved = false, at = 21L),
+                ),
+            ),
+        )
+        assertEquals(1, restored.events.forRun(fixture.run.id).filterIsInstance<ApprovalDecisionReceived>().size)
+    }
+
+    @Test
+    fun sharedSettingsInstancesHaveSingleEscalationDecisionWinner() = runBlocking {
+        val settings = MapSettings()
+        val first = SettingsWorkflowPersistence(settings)
+        val second = SettingsWorkflowPersistence(settings)
+        val fixture = escalationFixture()
+        first.runs.put(fixture.run)
+        first.approvalGates.put(fixture.gate)
+
+        val outcomes = coroutineScope {
+            listOf(
+                async {
+                    first.commitFailureEscalationDecision(
+                        FailureEscalationDecisionCommit(
+                            expectedGateId = fixture.gate.id,
+                            decidedGate = fixture.gate.approve(null, "Retry", 20L),
+                            nextRun = fixture.approvedRun(),
+                            decisionEvent = fixture.event(approved = true, at = 20L),
+                        ),
+                    )
+                },
+                async {
+                    second.commitFailureEscalationDecision(
+                        FailureEscalationDecisionCommit(
+                            expectedGateId = fixture.gate.id,
+                            decidedGate = fixture.gate.reject(null, "Stop", 21L),
+                            nextRun = fixture.rejectedRun(21L),
+                            decisionEvent = fixture.event(approved = false, at = 21L),
+                        ),
+                    )
+                },
+            ).awaitAll()
+        }
+
+        assertEquals(1, outcomes.count { it })
+        assertEquals(1, outcomes.count { !it })
+
+        val restored = SettingsWorkflowPersistence(settings)
+        val gate = restored.approvalGates.get(fixture.gate.id)
+        val run = restored.runs.get(fixture.run.id)
+        val decisions = restored.events.forRun(fixture.run.id).filterIsInstance<ApprovalDecisionReceived>()
+        assertEquals(1, decisions.size)
+        if (gate?.status == ApprovalGateStatus.Approved) {
+            assertEquals(WorkflowRunStatus.Running, run?.status)
+            assertTrue(decisions.single().approved)
+        } else {
+            assertEquals(ApprovalGateStatus.Rejected, gate?.status)
+            assertEquals(WorkflowRunStatus.Failed, run?.status)
+            assertFalse(decisions.single().approved)
+        }
+    }
+
+    private fun escalationFixture(): EscalationFixture {
         val taskId = TaskDefinitionId("task")
         val run = WorkflowRun(
             id = WorkflowRunId("run"),
@@ -50,10 +142,15 @@ class SettingsEscalationAtomicityTest {
             reason = "Executor failed",
             createdAtEpochMillis = 10L,
         )
-        persistence.runs.put(run)
-        persistence.approvalGates.put(gate)
+        return EscalationFixture(taskId, run, gate)
+    }
 
-        val nextRun = run.copy(
+    private data class EscalationFixture(
+        val taskId: TaskDefinitionId,
+        val run: WorkflowRun,
+        val gate: ApprovalGate,
+    ) {
+        fun approvedRun() = run.copy(
             status = WorkflowRunStatus.Running,
             taskRuns = run.taskRuns + (
                 taskId to run.taskRuns.getValue(taskId).copy(
@@ -63,42 +160,22 @@ class SettingsEscalationAtomicityTest {
             ),
             updatedAtEpochMillis = 20L,
         )
-        val decidedGate = gate.approve(null, "Retry", 20L)
-        val event = ApprovalDecisionReceived(
+
+        fun rejectedRun(at: Long) = run.copy(
+            status = WorkflowRunStatus.Failed,
+            taskRuns = run.taskRuns + (
+                taskId to run.taskRuns.getValue(taskId).copy(status = TaskRunStatus.Cancelled)
+            ),
+            updatedAtEpochMillis = at,
+        )
+
+        fun event(approved: Boolean, at: Long) = ApprovalDecisionReceived(
             workflowRunId = run.id,
             taskDefinitionId = taskId,
             gateId = gate.id,
-            approved = true,
+            approved = approved,
             decidedByRoleId = null,
-            occurredAtEpochMillis = 20L,
+            occurredAtEpochMillis = at,
         )
-
-        assertTrue(
-            persistence.commitFailureEscalationDecision(
-                FailureEscalationDecisionCommit(
-                    expectedGateId = gate.id,
-                    decidedGate = decidedGate,
-                    nextRun = nextRun,
-                    decisionEvent = event,
-                ),
-            ),
-        )
-
-        val restored = SettingsWorkflowPersistence(settings)
-        assertEquals(ApprovalGateStatus.Approved, restored.approvalGates.get(gate.id)?.status)
-        assertEquals(nextRun, restored.runs.get(run.id))
-        assertEquals(listOf(event), restored.events.forRun(run.id).filterIsInstance<ApprovalDecisionReceived>())
-
-        assertFalse(
-            restored.commitFailureEscalationDecision(
-                FailureEscalationDecisionCommit(
-                    expectedGateId = gate.id,
-                    decidedGate = gate.reject(null, "Stop", 21L),
-                    nextRun = run.copy(status = WorkflowRunStatus.Failed, updatedAtEpochMillis = 21L),
-                    decisionEvent = event.copy(approved = false, occurredAtEpochMillis = 21L),
-                ),
-            ),
-        )
-        assertEquals(1, restored.events.forRun(run.id).filterIsInstance<ApprovalDecisionReceived>().size)
     }
 }
