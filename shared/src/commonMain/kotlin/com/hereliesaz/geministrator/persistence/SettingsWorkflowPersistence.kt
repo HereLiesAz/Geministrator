@@ -23,12 +23,13 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+private val settingsWorkflowPersistenceMutex = Mutex()
+
 class SettingsWorkflowPersistence(
     private val settings: Settings,
     private val storageKey: String = DEFAULT_STORAGE_KEY,
     private val json: Json = defaultJson,
 ) : WorkflowPersistence {
-    private val mutex = Mutex()
 
     override val projects: ProjectRepository = object : ProjectRepository {
         override suspend fun put(project: Project) = update { snapshot ->
@@ -63,14 +64,15 @@ class SettingsWorkflowPersistence(
 
     override val events: WorkflowEventRepository = object : WorkflowEventRepository {
         override suspend fun append(event: WorkflowEvent) {
-            mutex.withLock { appendEventUnlocked(event) }
+            settingsWorkflowPersistenceMutex.withLock { appendEventUnlocked(event) }
         }
 
-        override suspend fun forRun(workflowRunId: WorkflowRunId): List<WorkflowEvent> = mutex.withLock {
-            val legacyEmbedded = readUnlocked().events.filter { it.workflowRunId == workflowRunId }
-            val journaled = readJournalEventsUnlocked(workflowRunId)
-            (legacyEmbedded + journaled).sortedBy { it.occurredAtEpochMillis }
-        }
+        override suspend fun forRun(workflowRunId: WorkflowRunId): List<WorkflowEvent> =
+            settingsWorkflowPersistenceMutex.withLock {
+                val legacyEmbedded = readUnlocked().events.filter { it.workflowRunId == workflowRunId }
+                val journaled = readJournalEventsUnlocked(workflowRunId)
+                (legacyEmbedded + journaled).sortedBy { it.occurredAtEpochMillis }
+            }
     }
 
     override val roles: RoleRepository = object : RoleRepository {
@@ -112,7 +114,7 @@ class SettingsWorkflowPersistence(
 
     override suspend fun commitFailureEscalationDecision(
         commit: FailureEscalationDecisionCommit,
-    ): Boolean = mutex.withLock {
+    ): Boolean = settingsWorkflowPersistenceMutex.withLock {
         val snapshot = readUnlocked()
         val current = snapshot.approvalGates.firstOrNull { it.id == commit.expectedGateId }
             ?: return@withLock false
@@ -143,7 +145,7 @@ class SettingsWorkflowPersistence(
     }
 
     suspend fun clearWorkflowData() {
-        mutex.withLock {
+        settingsWorkflowPersistenceMutex.withLock {
             settings.remove(storageKey)
             settings.remove(LEGACY_STORAGE_KEY_V1)
             settings.keys
@@ -154,10 +156,10 @@ class SettingsWorkflowPersistence(
 
     suspend fun snapshotVersion(): Int = read().version
 
-    private suspend fun read(): PersistenceSnapshot = mutex.withLock { readUnlocked() }
+    private suspend fun read(): PersistenceSnapshot = settingsWorkflowPersistenceMutex.withLock { readUnlocked() }
 
     private suspend fun update(transform: (PersistenceSnapshot) -> PersistenceSnapshot) {
-        mutex.withLock {
+        settingsWorkflowPersistenceMutex.withLock {
             val next = transform(readUnlocked()).copy(version = CURRENT_SCHEMA_VERSION)
             settings.putString(storageKey, json.encodeToString(PersistenceSnapshot.serializer(), next))
         }
@@ -251,11 +253,56 @@ class SettingsWorkflowPersistence(
                 },
             )
         }
+        if (migrated.version < 3) {
+            val attemptsByTaskRunId = migrated.runs
+                .flatMap { it.taskRuns.values }
+                .associate { it.id to it.attempt }
+            migrated = migrated.copy(
+                version = 3,
+                runs = migrated.runs.map { run ->
+                    run.copy(
+                        taskRuns = run.taskRuns.mapValues { (_, taskRun) ->
+                            taskRun.copy(
+                                artifacts = taskRun.artifacts
+                                    .map { it.withAttemptScopedId(taskRun.attempt) }
+                                    .distinctBy { it.id },
+                            )
+                        },
+                    )
+                },
+                artifacts = migrated.artifacts
+                    .map { artifact ->
+                        artifact.withAttemptScopedId(attemptsByTaskRunId[artifact.taskRunId] ?: 1)
+                    }
+                    .distinctBy { it.id },
+            )
+        }
         return migrated
     }
 
+    private fun ArtifactRef.withAttemptScopedId(attempt: Int): ArtifactRef {
+        val rawId = id.value
+        val genericPrefix = "${taskRunId.value}:${kind}:"
+        if (rawId.startsWith(genericPrefix)) {
+            val suffix = rawId.removePrefix(genericPrefix)
+            if (':' !in suffix) {
+                return copy(id = ArtifactId("$genericPrefix$attempt:$suffix"))
+            }
+            return this
+        }
+
+        val githubPrefix = "${taskRunId.value}:github-action:"
+        if (rawId.startsWith(githubPrefix)) {
+            val suffix = rawId.removePrefix(githubPrefix)
+            if (!suffix.startsWith("$attempt:")) {
+                return copy(id = ArtifactId("$githubPrefix$attempt:$suffix"))
+            }
+        }
+        return this
+    }
+
     companion object {
-        const val CURRENT_SCHEMA_VERSION: Int = 2
+        const val CURRENT_SCHEMA_VERSION: Int = 3
         const val DEFAULT_STORAGE_KEY: String = "geministrator.workflow.persistence.v2"
         private const val LEGACY_STORAGE_KEY_V1: String = "geministrator.workflow.persistence.v1"
 
