@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -160,6 +161,20 @@ class JulesProviderTest {
     }
 
     @Test
+    fun approvePlanTransportFailurePropagatesInsteadOfBecomingSemanticRejection() = runBlocking {
+        val api = FakeJulesApi().apply {
+            approveFailure = IllegalStateException("temporary Jules API failure")
+        }
+        val provider = JulesProvider(api)
+
+        val failure = assertFailsWith<IllegalStateException> {
+            provider.approvePlan(ProviderRunId("sessions/session-1"))
+        }
+
+        assertEquals("temporary Jules API failure", failure.message)
+    }
+
+    @Test
     fun cancelPreservesEvidenceByDefault() {
         runBlocking {
             val api = FakeJulesApi()
@@ -175,6 +190,7 @@ private class FakeJulesApi : JulesApi {
     var createdRequest: JulesCreateSessionRequest? = null
     var activities: List<JulesActivity> = emptyList()
     var deleted: Boolean = false
+    var approveFailure: Throwable? = null
     var session: JulesSession = JulesSession(
         name = "sessions/session-1",
         id = "session-1",
@@ -204,7 +220,9 @@ private class FakeJulesApi : JulesApi {
 
     override suspend fun sendMessage(sessionName: String, message: String) = Unit
 
-    override suspend fun approvePlan(sessionName: String) = Unit
+    override suspend fun approvePlan(sessionName: String) {
+        approveFailure?.let { throw it }
+    }
 
     override suspend fun deleteSession(sessionName: String) {
         deleted = true
