@@ -15,6 +15,7 @@ import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
+import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
 import com.hereliesaz.geministrator.providers.ProviderArtifact
@@ -308,28 +309,50 @@ class WorkflowRuntimeCoordinator(
             .filter { it.kind == ApprovalGateKind.FailureEscalation }
         if (unresolved.isEmpty()) return run
 
-        var taskRuns = run.taskRuns
+        var nextRun = run
         for (gate in unresolved) {
-            gateCoordinator.decide(
-                id = gate.id,
-                approved = false,
-                decidedByRoleId = null,
-                note = "Workflow became ${run.status} before escalation decision",
-                nowEpochMillis = now,
-            )
-            val taskId = gate.taskDefinitionId ?: continue
-            val taskRun = taskRuns[taskId] ?: continue
-            if (taskRun.status != TaskRunStatus.Escalated) continue
-            TaskRunTransitions.requireAllowed(TaskRunStatus.Escalated, TaskRunStatus.Cancelled)
-            taskRuns = taskRuns + (
-                taskId to taskRun.copy(
-                    status = TaskRunStatus.Cancelled,
-                    blockingReason = null,
-                    progressMessage = "Escalation cancelled because workflow is ${run.status}",
+            val taskId = gate.taskDefinitionId
+            val taskRun = taskId?.let(nextRun.taskRuns::get)
+            val candidateRun = if (taskId != null && taskRun?.status == TaskRunStatus.Escalated) {
+                TaskRunTransitions.requireAllowed(TaskRunStatus.Escalated, TaskRunStatus.Cancelled)
+                nextRun.copy(
+                    taskRuns = nextRun.taskRuns + (
+                        taskId to taskRun.copy(
+                            status = TaskRunStatus.Cancelled,
+                            blockingReason = null,
+                            progressMessage = "Escalation cancelled because workflow is ${nextRun.status}",
+                        )
+                    ),
+                    updatedAtEpochMillis = now,
                 )
+            } else {
+                nextRun.copy(updatedAtEpochMillis = now)
+            }
+            val committed = persistence.commitFailureEscalationDecision(
+                FailureEscalationDecisionCommit(
+                    expectedGateId = gate.id,
+                    decidedGate = gate.reject(
+                        decidedByRoleId = null,
+                        note = "Workflow became ${run.status} before escalation decision",
+                        nowEpochMillis = now,
+                    ),
+                    nextRun = candidateRun,
+                    decisionEvent = ApprovalDecisionReceived(
+                        workflowRunId = run.id,
+                        taskDefinitionId = taskId,
+                        gateId = gate.id,
+                        approved = false,
+                        decidedByRoleId = null,
+                        occurredAtEpochMillis = now,
+                    ),
+                ),
             )
+            if (!committed) {
+                return persistence.runs.get(run.id) ?: nextRun
+            }
+            nextRun = candidateRun
         }
-        return run.copy(taskRuns = taskRuns, updatedAtEpochMillis = now)
+        return nextRun
     }
 
     private suspend fun ensurePlanApprovalGates(
