@@ -45,7 +45,7 @@ class WorkflowApprovalService(
     suspend fun approvePlan(
         gateId: ApprovalGateId,
         handle: ManagedSessionHandle,
-        decidedByRoleId: RoleDefinitionId,
+        decidedByRoleId: RoleDefinitionId?,
         note: String?,
         nowEpochMillis: Long,
     ): ApprovalGate = planApprovalMutex.withLock {
@@ -56,7 +56,7 @@ class WorkflowApprovalService(
             "Approval gate ${gateId.value} is not a plan gate"
         }
         require(gate.requiredRoleId == null || gate.requiredRoleId == decidedByRoleId) {
-            "Role ${decidedByRoleId.value} is not authorized for gate ${gateId.value}"
+            "Role ${decidedByRoleId?.value ?: "<human>"} is not authorized for gate ${gateId.value}"
         }
 
         if (gate.status == ApprovalGateStatus.Applying) {
