@@ -7,18 +7,34 @@ import com.hereliesaz.geministrator.events.ApprovalRequired
 import com.hereliesaz.geministrator.events.WorkflowEvent
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 class WorkflowEventCompatibilityTest {
+    @Test
+    fun currentApprovalRequiredAlwaysHasGateId() {
+        val current = ApprovalRequired(
+            workflowRunId = WorkflowRunId("run"),
+            taskDefinitionId = TaskDefinitionId("task"),
+            gateId = ApprovalGateId("gate"),
+            reason = "Review",
+            occurredAtEpochMillis = 10L,
+        )
+
+        assertTrue(current.hasGateId)
+        assertEquals(ApprovalGateId("gate"), current.gateId)
+    }
+
     @Test
     fun legacyApprovalRequiredWithoutGateIdStillDeserializesButCannotMasqueradeAsIdentified() {
         val json = SettingsWorkflowPersistence.defaultJson
         val current = ApprovalRequired(
             workflowRunId = WorkflowRunId("run"),
             taskDefinitionId = TaskDefinitionId("task"),
-            serializedGateId = ApprovalGateId("gate"),
+            gateId = ApprovalGateId("gate"),
             reason = "Review",
             occurredAtEpochMillis = 10L,
         )

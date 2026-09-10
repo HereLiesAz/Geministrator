@@ -81,13 +81,29 @@ class ProviderBackedManagedSessionGateway(
             if (result is ProviderActionResult.Accepted) {
                 mutex.withLock {
                     val current = snapshots[handle] ?: return@withLock
-                    if (current.status != ManagedSessionStatus.Completed && current.status != ManagedSessionStatus.Failed) {
+                    if (!current.status.isTerminal()) {
                         snapshots[handle] = current.copy(status = ManagedSessionStatus.Running)
                     }
                 }
             }
             result
         }
+
+    override suspend fun cancel(handle: ManagedSessionHandle): ProviderActionResult {
+        val alreadyTerminal = mutex.withLock { snapshots[handle]?.status?.isTerminal() == true }
+        if (alreadyTerminal) return ProviderActionResult.Accepted
+
+        return providerOperation("Unable to cancel provider session ${handle.providerRunId.value}") {
+            val result = providerFor(handle).cancel(handle.providerRunId)
+            if (result is ProviderActionResult.Accepted) {
+                mutex.withLock {
+                    val current = snapshots[handle] ?: SessionSnapshot(ManagedSessionStatus.Unknown)
+                    snapshots[handle] = current.copy(status = ManagedSessionStatus.Failed)
+                }
+            }
+            result
+        }
+    }
 
     override suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact> =
         mutex.withLock { snapshots[handle]?.artifacts.orEmpty() }
@@ -136,9 +152,11 @@ class ProviderBackedManagedSessionGateway(
     }
 
     private suspend fun ManagedSessionHandle.isTerminal(): Boolean = mutex.withLock {
-        snapshots[this]?.status == ManagedSessionStatus.Completed ||
-            snapshots[this]?.status == ManagedSessionStatus.Failed
+        snapshots[this]?.status?.isTerminal() == true
     }
+
+    private fun ManagedSessionStatus.isTerminal(): Boolean =
+        this == ManagedSessionStatus.Completed || this == ManagedSessionStatus.Failed
 
     private suspend fun selectProvider(
         selection: ProviderSelectionRequest,
@@ -186,6 +204,7 @@ class ProviderBackedManagedSessionGateway(
     ) {
         mutex.withLock {
             val current = snapshots[handle] ?: SessionSnapshot(ManagedSessionStatus.Unknown)
+            if (current.status.isTerminal()) return@withLock
             val next = when (event) {
                 is AgentEvent.PlanGenerated -> current.copy(status = ManagedSessionStatus.AwaitingApproval)
                 is AgentEvent.PlanApproved -> current.copy(status = ManagedSessionStatus.Running)

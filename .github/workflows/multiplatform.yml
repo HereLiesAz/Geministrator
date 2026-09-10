@@ -117,13 +117,30 @@ jobs:
         run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true :webApp:wasmJsBrowserProductionWebpack
 
       - name: Stage GitHub Pages
+        shell: bash
         run: |
+          set -euo pipefail
           rm -rf webApp/build/pages
+
+          JS_BUNDLE="$(find webApp/build -type f -path '*/dist/js/productionExecutable/haive.js' -print -quit)"
+          WASM_BUNDLE="$(find webApp/build -type f -path '*/dist/wasmJs/productionExecutable/haive.js' -print -quit)"
+          test -n "$JS_BUNDLE"
+          test -n "$WASM_BUNDLE"
+
+          JS_DIR="$(dirname "$JS_BUNDLE")"
+          WASM_DIR="$(dirname "$WASM_BUNDLE")"
+          echo "Staging JS bundle from $JS_DIR"
+          echo "Staging Wasm bundle from $WASM_DIR"
+
           mkdir -p webApp/build/pages/wasm
-          cp -R webApp/build/dist/js/productionExecutable/. webApp/build/pages/
-          cp -R webApp/build/dist/wasmJs/productionExecutable/. webApp/build/pages/wasm/
+          cp -R "$JS_DIR"/. webApp/build/pages/
+          cp -R "$WASM_DIR"/. webApp/build/pages/wasm/
+          cp -R webApp/src/webMain/resources/. webApp/build/pages/
+          cp -R webApp/src/webMain/resources/. webApp/build/pages/wasm/
           test -f webApp/build/pages/index.html
+          test -f webApp/build/pages/haive.js
           test -f webApp/build/pages/wasm/index.html
+          test -f webApp/build/pages/wasm/haive.js
 
       - name: Upload Android build
         if: github.event_name != 'pull_request'

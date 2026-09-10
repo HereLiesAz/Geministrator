@@ -85,13 +85,16 @@ class WorkflowApprovalService(
                 nowEpochMillis = nowEpochMillis,
             )
 
-            is ProviderActionResult.Rejected -> gateCoordinator.decide(
-                id = gateId,
-                approved = false,
-                decidedByRoleId = decidedByRoleId,
-                note = providerResult.reason,
-                nowEpochMillis = nowEpochMillis,
-            )
+            is ProviderActionResult.Rejected -> {
+                cancelRejectedPlanSession(handle, providerResult.reason)
+                gateCoordinator.decide(
+                    id = gateId,
+                    approved = false,
+                    decidedByRoleId = decidedByRoleId,
+                    note = providerResult.reason,
+                    nowEpochMillis = nowEpochMillis,
+                )
+            }
         }
     }
 
@@ -120,10 +123,36 @@ class WorkflowApprovalService(
 
         ManagedSessionStatus.Planning,
         ManagedSessionStatus.AwaitingApproval,
-        ManagedSessionStatus.Unknown,
-        -> error(
+        -> {
+            cancelRejectedPlanSession(
+                handle = handle,
+                reason = "Plan approval remained unconfirmed during recovery",
+            )
+            gateCoordinator.decide(
+                id = gate.id,
+                approved = false,
+                decidedByRoleId = gate.decidedByRoleId,
+                note = "Plan approval was not applied; provider session cancelled during recovery",
+                nowEpochMillis = nowEpochMillis,
+            )
+        }
+
+        ManagedSessionStatus.Unknown -> error(
             "Approval gate ${gate.id.value} has an in-flight provider decision that cannot yet be reconciled",
         )
+    }
+
+    private suspend fun cancelRejectedPlanSession(
+        handle: ManagedSessionHandle,
+        reason: String,
+    ) {
+        when (val cancellation = sessionGateway.cancel(handle)) {
+            ProviderActionResult.Accepted -> Unit
+            is ProviderActionResult.Rejected -> error(
+                "Provider session ${handle.providerRunId.value} could not be cancelled after plan rejection: " +
+                    "${cancellation.reason.ifBlank { reason }}",
+            )
+        }
     }
 
     suspend fun decideFailureEscalation(
