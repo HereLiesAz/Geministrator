@@ -56,28 +56,24 @@ class WorkflowApprovalService(
             "Role ${decidedByRoleId.value} is not authorized for gate ${gateId.value}"
         }
 
-        // Persist the local approval decision before invoking the irreversible provider side effect.
-        // If the provider call fails or rejects, compensate the local decision to Rejected below.
-        val approvedGate = gateCoordinator.decide(
-            id = gateId,
-            approved = true,
-            decidedByRoleId = decidedByRoleId,
-            note = note,
-            nowEpochMillis = nowEpochMillis,
-        )
-
+        // The provider side effect is the authority on whether the plan was actually accepted.
+        // Keep the local gate Pending until that call returns, then persist exactly one matching
+        // decision/event. If the call throws, no contradictory local approval is recorded.
         return when (val providerResult = sessionGateway.approvePlan(handle)) {
-            ProviderActionResult.Accepted -> approvedGate
-            is ProviderActionResult.Rejected -> {
-                val rejected = approvedGate.copy(
-                    status = ApprovalGateStatus.Rejected,
-                    decidedByRoleId = decidedByRoleId,
-                    decisionNote = providerResult.reason,
-                    decidedAtEpochMillis = nowEpochMillis,
-                )
-                gateRepository.put(rejected)
-                rejected
-            }
+            ProviderActionResult.Accepted -> gateCoordinator.decide(
+                id = gateId,
+                approved = true,
+                decidedByRoleId = decidedByRoleId,
+                note = note,
+                nowEpochMillis = nowEpochMillis,
+            )
+            is ProviderActionResult.Rejected -> gateCoordinator.decide(
+                id = gateId,
+                approved = false,
+                decidedByRoleId = decidedByRoleId,
+                note = providerResult.reason,
+                nowEpochMillis = nowEpochMillis,
+            )
         }
     }
 
