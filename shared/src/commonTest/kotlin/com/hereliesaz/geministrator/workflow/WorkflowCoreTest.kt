@@ -127,7 +127,9 @@ class WorkflowRunFactoryTest {
             taskRunIdFactory = { TaskRunId("run-${it.value}") },
         )
         val completedFirst = initial.copy(
-            taskRuns = initial.taskRuns + (first to initial.taskRuns.getValue(first).copy(status = TaskRunStatus.Completed)),
+            taskRuns = initial.taskRuns + (
+                first to initial.taskRuns.getValue(first).copy(status = TaskRunStatus.Completed)
+            ),
         )
 
         val refreshed = WorkflowRunFactory.refreshReadiness(definition, completedFirst, 200L)
@@ -135,7 +137,10 @@ class WorkflowRunFactoryTest {
         assertEquals(TaskRunStatus.Ready, refreshed.taskRuns.getValue(second).status)
     }
 
-    private fun task(id: TaskDefinitionId, dependsOn: Set<TaskDefinitionId> = emptySet()) = TaskDefinition(
+    private fun task(
+        id: TaskDefinitionId,
+        dependsOn: Set<TaskDefinitionId> = emptySet(),
+    ) = TaskDefinition(
         id = id,
         name = id.value,
         objective = "Do ${id.value}",
@@ -169,5 +174,36 @@ class TaskRunTransitionsTest {
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Completed))
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Ready, TaskRunStatus.Failed))
         assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Retrying, TaskRunStatus.Completed))
+    }
+
+    @Test
+    fun systemExecutorAvailabilityCanBlockAndRecover() {
+        listOf(
+            TaskRunStatus.Ready,
+            TaskRunStatus.Retrying,
+            TaskRunStatus.Running,
+            TaskRunStatus.Verifying,
+        ).forEach { status ->
+            assertTrue(TaskRunTransitions.canTransition(status, TaskRunStatus.Blocked))
+        }
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Blocked, TaskRunStatus.Ready))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Blocked, TaskRunStatus.Running))
+        assertTrue(TaskRunTransitions.canTransition(TaskRunStatus.Blocked, TaskRunStatus.Verifying))
+    }
+
+    @Test
+    fun everyNonterminalNonfailedTaskCanBeCancelled() {
+        TaskRunStatus.entries
+            .filterNot {
+                it == TaskRunStatus.Completed ||
+                    it == TaskRunStatus.Failed ||
+                    it == TaskRunStatus.Cancelled
+            }
+            .forEach { status ->
+                assertTrue(
+                    TaskRunTransitions.canTransition(status, TaskRunStatus.Cancelled),
+                    "$status should support cancellation",
+                )
+            }
     }
 }
