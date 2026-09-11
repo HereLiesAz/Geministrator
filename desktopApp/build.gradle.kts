@@ -21,7 +21,24 @@ compose.desktop {
 
         nativeDistributions {
             packageName = "TheHaive"
-            packageVersion = "0.1.0"
+            // Strip pre-release suffix — packageVersion must be x.y.z.
+            packageVersion = providers.gradleProperty("app.versionName").get().substringBefore("-")
+            description = "The Haive — agentic workflow orchestration"
+            copyright = "© 2026 HereLiesAz"
+
+            linux {
+                iconFile.set(rootProject.file("branding/haive-icon-color.png"))
+            }
+            macOS {
+                val icns = rootProject.file("branding/haive-icon.icns")
+                if (icns.exists()) iconFile.set(icns)
+            }
+            windows {
+                val ico = rootProject.file("branding/haive-icon.ico")
+                if (ico.exists()) iconFile.set(ico)
+                menuGroup = "The Haive"
+                upgradeUuid = "e1d4b3c2-5f6a-4b8e-9d7c-0a1b2c3d4e5f"
+            }
         }
     }
 }
