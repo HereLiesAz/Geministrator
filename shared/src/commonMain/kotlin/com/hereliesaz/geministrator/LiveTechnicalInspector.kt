@@ -63,7 +63,15 @@ internal fun TechnicalInspector(
             LiveInspectorLine("PROGRESS", "${(progress * 100f).toInt()}%")
         }
         taskRun.progressMessage?.takeIf(String::isNotBlank)?.let {
-            LiveInspectorLine("NOW", it)
+            val label = if (
+                taskRun.status == TaskRunStatus.AwaitingApproval &&
+                taskRun.assignedProviderId != null
+            ) {
+                "PLAN"
+            } else {
+                "NOW"
+            }
+            LiveInspectorLine(label, it)
         }
         taskRun.blockingReason?.let {
             LiveInspectorLine("BLOCKED", "${it.code} · ${it.message}")

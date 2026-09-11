@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.ApprovalPolicy
 import com.hereliesaz.geministrator.domain.BuiltInRoles
 import com.hereliesaz.geministrator.domain.EnvironmentPlanningPolicy
 import com.hereliesaz.geministrator.domain.TaskDefinition
@@ -30,6 +31,7 @@ object StarterWorkflowFactory {
                     objective = objective,
                     roleId = BuiltInRoles.ImplementationEngineer.id,
                     executor = TaskExecutor.RoleAgent(BuiltInRoles.ImplementationEngineer.id),
+                    approvalPolicy = ApprovalPolicy.HumanApproval,
                     environmentPlanningPolicy = EnvironmentPlanningPolicy.NotRequired,
                 ),
                 TaskDefinition(

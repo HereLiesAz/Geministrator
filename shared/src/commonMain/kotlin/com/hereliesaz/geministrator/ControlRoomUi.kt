@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.geministrator.domain.RepositoryRef
 
 internal object ControlRoomBreakpoints {
     val Wide: Dp = 820.dp
@@ -83,7 +84,7 @@ fun ControlRoom(
     onDestinationSelected: (ControlRoomDestination) -> Unit,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
-    onLaunchWorkflow: (String, String) -> Unit,
+    onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
     onApproveTask: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
     compact: Boolean,
@@ -253,7 +254,7 @@ private fun MainDestination(
     destination: ControlRoomDestination,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
-    onLaunchWorkflow: (String, String) -> Unit,
+    onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     runtimeState: ApplicationRuntimeState,

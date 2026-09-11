@@ -77,13 +77,14 @@ fun App(
                     onTaskSelected = { taskId ->
                         selectedTaskId = if (selectedTaskId == taskId) null else taskId
                     },
-                    onLaunchWorkflow = { projectName, objective ->
+                    onLaunchWorkflow = { projectName, objective, repository ->
                         val existingProject = (runtimeState as? ApplicationRuntimeState.NoRun)?.project
                         scope.launch {
                             try {
                                 runtime?.launchStarterWorkflow(
                                     projectName = projectName,
                                     objective = objective,
+                                    repository = repository,
                                     existingProject = existingProject,
                                 )
                             } catch (failure: CancellationException) {

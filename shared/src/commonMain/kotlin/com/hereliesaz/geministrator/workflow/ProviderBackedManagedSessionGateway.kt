@@ -206,7 +206,13 @@ class ProviderBackedManagedSessionGateway(
             val current = snapshots[handle] ?: SessionSnapshot(ManagedSessionStatus.Unknown)
             if (current.status.isTerminal()) return@withLock
             val next = when (event) {
-                is AgentEvent.PlanGenerated -> current.copy(status = ManagedSessionStatus.AwaitingApproval)
+                is AgentEvent.PlanGenerated -> current.copy(
+                    status = ManagedSessionStatus.AwaitingApproval,
+                    progress = ManagedSessionProgress(
+                        fraction = null,
+                        message = event.summary.takeIf(String::isNotBlank),
+                    ),
+                )
                 is AgentEvent.PlanApproved -> current.copy(status = ManagedSessionStatus.Running)
                 is AgentEvent.Progress -> current.copy(
                     status = ManagedSessionStatus.Running,

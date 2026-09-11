@@ -46,9 +46,17 @@ class StarterWorkflowEndToEndTest {
                 objective = "Ship the requested change",
             )
 
+            var implementationApproved = false
             withTimeout(12_000L) {
                 while (true) {
                     val live = runtime.state.value as? ApplicationRuntimeState.Live
+                    val implementation = live?.presentation?.run?.taskRuns?.get(TaskDefinitionId("implementation"))
+                    if (!implementationApproved && implementation?.status == TaskRunStatus.AwaitingApproval) {
+                        assertTrue(implementation.progressMessage?.contains("Inspect the requested change") == true)
+                        runtime.approveTask(TaskDefinitionId("implementation"))
+                        implementationApproved = true
+                    }
+
                     val release = live?.presentation?.run?.taskRuns?.get(TaskDefinitionId("release-approval"))
                     if (live?.presentation?.run?.status == WorkflowRunStatus.AwaitingHuman &&
                         release?.status == TaskRunStatus.AwaitingApproval
@@ -57,6 +65,7 @@ class StarterWorkflowEndToEndTest {
                 }
             }
 
+            assertTrue(implementationApproved)
             val awaiting = assertIs<ApplicationRuntimeState.Live>(runtime.state.value)
             val taskRuns = awaiting.presentation.run.taskRuns
             assertEquals(TaskRunStatus.Completed, taskRuns.getValue(TaskDefinitionId("implementation--pre-code-tests")).status)
@@ -92,6 +101,8 @@ class StarterWorkflowEndToEndTest {
 private class CompletingGovernedProvider : AgentProvider {
     override val id = AgentProviderId("governed-provider")
     val startedTaskIds = mutableSetOf<String>()
+    private val planApprovalRequired = mutableSetOf<ProviderRunId>()
+    private val approvedPlans = mutableSetOf<ProviderRunId>()
     private var runCount = 0
 
     override suspend fun capabilities() = AgentCapabilities(
@@ -115,14 +126,30 @@ private class CompletingGovernedProvider : AgentProvider {
         }
         startedTaskIds += request.taskRunId.value.substringAfter("run-").substringAfter("-")
         runCount += 1
-        return AgentRunHandle(ProviderRunId("governed-run-$runCount"))
+        val runId = ProviderRunId("governed-run-$runCount")
+        if (request.requirePlanApproval) planApprovalRequired += runId
+        return AgentRunHandle(runId)
     }
 
-    override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flowOf(AgentEvent.Completed(runId))
+    override fun observe(runId: ProviderRunId): Flow<AgentEvent> = if (
+        runId in planApprovalRequired && runId !in approvedPlans
+    ) {
+        flowOf(
+            AgentEvent.PlanGenerated(
+                runId,
+                "1. Inspect the requested change\n2. Implement only the approved scope",
+            ),
+        )
+    } else {
+        flowOf(AgentEvent.Completed(runId))
+    }
 
     override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted
 
-    override suspend fun approvePlan(runId: ProviderRunId) = ProviderActionResult.Accepted
+    override suspend fun approvePlan(runId: ProviderRunId): ProviderActionResult {
+        approvedPlans += runId
+        return ProviderActionResult.Accepted
+    }
 
     override suspend fun cancel(runId: ProviderRunId) = ProviderActionResult.Accepted
 }

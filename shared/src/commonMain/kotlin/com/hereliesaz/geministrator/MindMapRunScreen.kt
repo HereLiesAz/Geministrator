@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 
@@ -28,15 +29,19 @@ internal fun MindMapRunScreen(
     modifier: Modifier,
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
-    onLaunchWorkflow: (String, String) -> Unit,
+    onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
     compact: Boolean,
     runtimeState: ApplicationRuntimeState,
 ) {
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     val activityEntrance = remember { AzphaltEntrance.childBand() }
+    val existingRepository = (runtimeState as? ApplicationRuntimeState.NoRun)?.project?.repository
     var projectName by remember(runtimeState) {
         mutableStateOf((runtimeState as? ApplicationRuntimeState.NoRun)?.project?.name.orEmpty())
     }
+    var repositoryOwner by remember(runtimeState) { mutableStateOf(existingRepository?.owner.orEmpty()) }
+    var repositoryName by remember(runtimeState) { mutableStateOf(existingRepository?.name.orEmpty()) }
+    var defaultBranch by remember(runtimeState) { mutableStateOf(existingRepository?.defaultBranch.orEmpty()) }
     var objective by remember(runtimeState) { mutableStateOf("") }
 
     Column(
@@ -57,15 +62,50 @@ internal fun MindMapRunScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
+                    value = repositoryOwner,
+                    onValueChange = { repositoryOwner = it },
+                    label = { Text("Repository owner") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = repositoryName,
+                    onValueChange = { repositoryName = it },
+                    label = { Text("Repository name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = defaultBranch,
+                    onValueChange = { defaultBranch = it },
+                    label = { Text("Default branch (optional)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
                     value = objective,
                     onValueChange = { objective = it },
                     label = { Text("Objective") },
                     minLines = 3,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                val owner = repositoryOwner.trim()
+                val name = repositoryName.trim()
+                val repositoryComplete = (owner.isEmpty() && name.isEmpty()) || (owner.isNotEmpty() && name.isNotEmpty())
                 Button(
-                    onClick = { onLaunchWorkflow(projectName.trim(), objective.trim()) },
-                    enabled = projectName.isNotBlank() && objective.isNotBlank(),
+                    onClick = {
+                        val repository = if (owner.isNotEmpty() && name.isNotEmpty()) {
+                            RepositoryRef(
+                                owner = owner,
+                                name = name,
+                                defaultBranch = defaultBranch.trim().takeIf(String::isNotEmpty),
+                            )
+                        } else {
+                            null
+                        }
+                        onLaunchWorkflow(projectName.trim(), objective.trim(), repository)
+                    },
+                    enabled = projectName.isNotBlank() && objective.isNotBlank() && repositoryComplete,
                 ) {
                     Text(if (runtimeState is ApplicationRuntimeState.NoRun) "START RUN" else "CREATE PROJECT + START RUN")
                 }
