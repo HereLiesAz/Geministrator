@@ -331,30 +331,36 @@ internal fun ArtifactFileManagerScreen(runtimeState: ApplicationRuntimeState = A
 }
 
 @Composable
-internal fun SettingsScreen(modifier: Modifier = Modifier) {
+internal fun SettingsScreen(
+    connectedProviderIds: Set<String> = emptySet(),
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("SETTINGS", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
-        ProviderRecord("Jules", "Connected", "1 / 3 active", "Secure device storage / gateway")
-        ProviderRecord("Codex", "Not configured", "0 active", "No credential")
-        ProviderRecord("Claude", "Not configured", "0 active", "No credential")
+        SectionLabel("Providers")
+        if (connectedProviderIds.isNotEmpty()) {
+            connectedProviderIds.forEach { providerId ->
+                ProviderRecord(providerId, "Connected", "Credential present")
+            }
+        } else {
+            ProviderRecord("Jules", "Not configured", "No credential")
+            ProviderRecord("Codex", "Not configured", "No credential")
+            ProviderRecord("Claude", "Not configured", "No credential")
+        }
     }
 }
 
 @Composable
-private fun ProviderRecord(name: String, state: String, activity: String, auth: String) {
+private fun ProviderRecord(name: String, state: String, auth: String) {
     AzphaltRecord(
         seed = "provider-$name",
         eyebrow = "Provider",
         title = name,
-        body = "$activity · $auth",
+        body = auth,
         endCap = state,
-        well = {
-            Text("PROMPT REUSE", style = AzphaltType.eyebrow, color = Azphalt.Yellow)
-            Text(if (name == "Jules") "Session scoped" else "Provider default", style = AzphaltType.body, color = Azphalt.White)
-        },
     )
 }
 

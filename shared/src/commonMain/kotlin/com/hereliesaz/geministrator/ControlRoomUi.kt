@@ -91,6 +91,7 @@ fun ControlRoom(
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
+    connectedProviderIds: Set<String> = emptySet(),
 ) {
     val ground = Azphalt.currentGround
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
@@ -115,6 +116,7 @@ fun ControlRoom(
                     onApproveTask = onApproveTask,
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
+                    connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
                     runtimeState = runtimeState,
@@ -152,6 +154,7 @@ fun ControlRoom(
                     onApproveTask = onApproveTask,
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
+                    connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
                 )
@@ -267,6 +270,7 @@ private fun MainDestination(
     onApproveTask: (String) -> Unit,
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
+    connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     runtimeState: ApplicationRuntimeState,
@@ -287,7 +291,7 @@ private fun MainDestination(
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, Modifier.fillMaxSize())
         }
     }
 }

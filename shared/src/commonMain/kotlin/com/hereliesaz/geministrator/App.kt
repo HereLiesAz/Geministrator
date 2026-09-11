@@ -138,6 +138,7 @@ fun App(
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,
+                    connectedProviderIds = providers.map { it.id.value }.toSet(),
                 )
             }
         }
