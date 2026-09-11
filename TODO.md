@@ -104,7 +104,7 @@ Tracking issue: #35
 - [x] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
 - [x] Define equivalent motion/behavior rules for system executors.
 - [x] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
-- [ ] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
+- [x] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
 - [ ] Improve tiny-screen/mobile behavior without turning the product into a conventional dashboard.
 - [x] Accessibility pass: reduced motion, contrast, semantics, keyboard/focus, screen-reader labels.
 

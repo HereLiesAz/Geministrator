@@ -120,6 +120,105 @@ class WorkflowMindMapProjectionTest {
         assertEquals(H2g2WorkflowState.Active, implementation.state)
     }
 
+    @Test
+    fun focusOnRetainsAncestorsAndDescendantsOnly() {
+        val run = WorkflowRun(
+            id = WorkflowRunId("run"),
+            projectId = ProjectId("project"),
+            workflowDefinitionId = definition.id,
+            objective = "Ship feature",
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                productId to taskRun(productId, TaskRunStatus.Completed, BuiltInRoles.ProductManager.id.value),
+                implementationId to taskRun(implementationId, TaskRunStatus.Running, BuiltInRoles.ImplementationEngineer.id.value),
+                qaId to taskRun(qaId, TaskRunStatus.Blocked, BuiltInRoles.QaEngineer.id.value),
+            ),
+            createdAtEpochMillis = 1,
+            updatedAtEpochMillis = 2,
+        )
+
+        val full = projectWorkflowMindMap(definition, run, BuiltInRoles.all)
+
+        // Focus on implementation: should keep product (ancestor) + implementation + qa (descendant)
+        val focused = full.focusOn(implementationId, definition)
+        val ids = focused.bands.flatMap { it.nodes }.map { it.id }.toSet()
+        assertEquals(setOf("product", "implementation", "qa"), ids)
+        assertEquals(2, focused.edges.size)
+    }
+
+    @Test
+    fun focusOnLeafRetainsOnlyAncestors() {
+        val run = WorkflowRun(
+            id = WorkflowRunId("run"),
+            projectId = ProjectId("project"),
+            workflowDefinitionId = definition.id,
+            objective = "Ship feature",
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                productId to taskRun(productId, TaskRunStatus.Completed, BuiltInRoles.ProductManager.id.value),
+                implementationId to taskRun(implementationId, TaskRunStatus.Completed, BuiltInRoles.ImplementationEngineer.id.value),
+                qaId to taskRun(qaId, TaskRunStatus.Running, BuiltInRoles.QaEngineer.id.value),
+            ),
+            createdAtEpochMillis = 1,
+            updatedAtEpochMillis = 2,
+        )
+
+        val full = projectWorkflowMindMap(definition, run, BuiltInRoles.all)
+
+        // Focus on qa (leaf): ancestors = product, implementation, qa
+        val focused = full.focusOn(qaId, definition)
+        val ids = focused.bands.flatMap { it.nodes }.map { it.id }.toSet()
+        assertEquals(setOf("product", "implementation", "qa"), ids)
+    }
+
+    @Test
+    fun focusOnRootRetainsOnlyDescendants() {
+        val run = WorkflowRun(
+            id = WorkflowRunId("run"),
+            projectId = ProjectId("project"),
+            workflowDefinitionId = definition.id,
+            objective = "Ship feature",
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                productId to taskRun(productId, TaskRunStatus.Running, BuiltInRoles.ProductManager.id.value),
+                implementationId to taskRun(implementationId, TaskRunStatus.Blocked, BuiltInRoles.ImplementationEngineer.id.value),
+                qaId to taskRun(qaId, TaskRunStatus.Blocked, BuiltInRoles.QaEngineer.id.value),
+            ),
+            createdAtEpochMillis = 1,
+            updatedAtEpochMillis = 2,
+        )
+
+        val full = projectWorkflowMindMap(definition, run, BuiltInRoles.all)
+
+        // Focus on product (root): descendants = product, implementation, qa
+        val focused = full.focusOn(productId, definition)
+        val ids = focused.bands.flatMap { it.nodes }.map { it.id }.toSet()
+        assertEquals(setOf("product", "implementation", "qa"), ids)
+    }
+
+    @Test
+    fun focusOnNullReturnsFullProjection() {
+        val run = WorkflowRun(
+            id = WorkflowRunId("run"),
+            projectId = ProjectId("project"),
+            workflowDefinitionId = definition.id,
+            objective = "Ship feature",
+            status = WorkflowRunStatus.Running,
+            taskRuns = mapOf(
+                productId to taskRun(productId, TaskRunStatus.Completed, BuiltInRoles.ProductManager.id.value),
+                implementationId to taskRun(implementationId, TaskRunStatus.Running, BuiltInRoles.ImplementationEngineer.id.value),
+                qaId to taskRun(qaId, TaskRunStatus.Blocked, BuiltInRoles.QaEngineer.id.value),
+            ),
+            createdAtEpochMillis = 1,
+            updatedAtEpochMillis = 2,
+        )
+
+        val full = projectWorkflowMindMap(definition, run, BuiltInRoles.all)
+        val notFocused = full.focusOn(null, definition)
+        assertEquals(full.bands.flatMap { it.nodes }.size, notFocused.bands.flatMap { it.nodes }.size)
+        assertEquals(full.edges.size, notFocused.edges.size)
+    }
+
     private fun taskRun(
         taskId: TaskDefinitionId,
         status: TaskRunStatus,
