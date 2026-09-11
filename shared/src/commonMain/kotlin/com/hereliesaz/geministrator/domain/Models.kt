@@ -33,7 +33,10 @@ sealed interface TaskExecutor {
     @Serializable data class RepositoryOperation(val operation: String) : TaskExecutor
     @Serializable data class HumanApproval(val label: String = "Human approval") : TaskExecutor
     @Serializable data class ExternalService(val service: String, val operation: String? = null) : TaskExecutor
-    @Serializable data class NestedWorkflow(val workflowDefinitionId: WorkflowDefinitionId) : TaskExecutor
+    @Serializable data class NestedWorkflow(
+        val workflowDefinitionId: WorkflowDefinitionId,
+        val projectId: ProjectId? = null,
+    ) : TaskExecutor
 }
 
 fun TaskDefinition.effectiveExecutor(): TaskExecutor = executor

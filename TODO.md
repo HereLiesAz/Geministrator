@@ -94,7 +94,7 @@ Tracking issue: #35
 - [x] Add corruption/recovery handling and a user-visible recovery path.
 - [x] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
 - [x] Add run export/import for debugging and portability.
-- [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
+- [x] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
 - [x] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
 
 ## P1 — H2G2 execution surface
@@ -151,10 +151,10 @@ Tracking issue: #35
 ## P2 — Workflow composition
 
 - [x] Nested Haive workflows as executors.
-- [ ] Reusable workflow fragments/subgraphs.
+- [x] Reusable workflow fragments/subgraphs.
 - [x] Conditional branches grounded in explicit outputs/evidence.
 - [x] Fan-out/fan-in helpers without hiding the underlying DAG.
-- [ ] Cross-project workflows where permissions allow them.
+- [x] Cross-project workflows where permissions allow them.
 
 ## P2 — Brand and release polish
 

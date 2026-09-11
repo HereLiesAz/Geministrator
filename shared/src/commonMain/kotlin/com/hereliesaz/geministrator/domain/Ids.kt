@@ -13,3 +13,4 @@ import kotlinx.serialization.Serializable
 @Serializable data class ArtifactId(val value: String)
 @Serializable data class WorkflowTemplateId(val value: String)
 @Serializable data class ApprovalGateId(val value: String)
+@Serializable data class WorkflowFragmentId(val value: String)
