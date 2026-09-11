@@ -136,7 +136,7 @@ Tracking issue: #35
 - [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
 - [x] Add clear data deletion controls for local workflow state.
 - [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
-- [ ] Add dependency/security scanning without blocking development on noisy non-actionable findings.
+- [x] Add dependency/security scanning without blocking development on noisy non-actionable findings.
 - [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
 
 ## P2 — Cost and observability
@@ -162,7 +162,7 @@ Tracking issue: #35
 - [ ] Validate monochrome/themed Android icon on supported launchers.
 - [ ] Final Play Store icon/screenshots/feature graphic.
 - [ ] Splash/loading treatment using the approved Haive mark.
-- [ ] Make the privacy-policy URL stable for Play Store listing.
+- [x] Make the privacy-policy URL stable for Play Store listing.
 - [x] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
 
 ## Definition of a useful alpha
