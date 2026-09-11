@@ -223,13 +223,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Android release bundle
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: haive-android-release
           path: android-release
 
       - name: Download release notes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: haive-release-notes
           path: fastlane/metadata/android/en-US/changelogs
