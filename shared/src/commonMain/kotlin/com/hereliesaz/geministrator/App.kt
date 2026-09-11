@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 fun App(
     providers: Collection<AgentProvider>,
     executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
+    onReconfigureProvider: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
@@ -224,6 +225,7 @@ fun App(
                             }
                         }
                     },
+                    onReconfigureProvider = onReconfigureProvider,
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,

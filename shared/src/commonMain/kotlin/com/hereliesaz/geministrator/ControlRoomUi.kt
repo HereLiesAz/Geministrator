@@ -103,6 +103,7 @@ fun ControlRoom(
     onExportDiagnosticBundle: suspend () -> String? = { null },
     onValidateWorkflow: () -> List<String> = { emptyList() },
     onSaveRole: (RoleDefinition) -> Unit = {},
+    onReconfigureProvider: (String) -> Unit = {},
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -142,6 +143,7 @@ fun ControlRoom(
                     onExportDiagnosticBundle = onExportDiagnosticBundle,
                     onValidateWorkflow = onValidateWorkflow,
                     onSaveRole = onSaveRole,
+                    onReconfigureProvider = onReconfigureProvider,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
@@ -191,6 +193,7 @@ fun ControlRoom(
                     onExportDiagnosticBundle = onExportDiagnosticBundle,
                     onValidateWorkflow = onValidateWorkflow,
                     onSaveRole = onSaveRole,
+                    onReconfigureProvider = onReconfigureProvider,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
@@ -318,6 +321,7 @@ private fun MainDestination(
     onExportDiagnosticBundle: suspend () -> String?,
     onValidateWorkflow: () -> List<String>,
     onSaveRole: (RoleDefinition) -> Unit,
+    onReconfigureProvider: (String) -> Unit = {},
     connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
@@ -346,7 +350,7 @@ private fun MainDestination(
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, onSaveRole, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, onReconfigureProvider, Modifier.fillMaxSize())
         }
     }
 }

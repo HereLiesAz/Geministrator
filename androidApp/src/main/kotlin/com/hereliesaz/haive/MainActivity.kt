@@ -23,9 +23,14 @@ class MainActivity : ComponentActivity() {
             var julesKey by remember { mutableStateOf(storedKey) }
             var continueWithoutJules by remember { mutableStateOf(false) }
 
+            val reconfigure: (String) -> Unit = {
+                credentialStore.clear()
+                julesKey = null
+                continueWithoutJules = false
+            }
             when {
-                julesKey != null -> App(providers = configuredAndroidProviders(julesKey))
-                continueWithoutJules -> App(providers = emptyList())
+                julesKey != null -> App(providers = configuredAndroidProviders(julesKey), onReconfigureProvider = reconfigure)
+                continueWithoutJules -> App(providers = emptyList(), onReconfigureProvider = reconfigure)
                 else -> JulesCredentialSetup(
                     onSave = { key ->
                         credentialStore.write(key)

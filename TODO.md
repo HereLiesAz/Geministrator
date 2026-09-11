@@ -81,7 +81,7 @@ Tracking issue: #35
 ## P1 — Provider system
 
 - [ ] Finish Jules as the reference provider implementation.
-- [ ] Define provider configuration UI and secure credential handling per platform.
+- [x] Define provider configuration UI and secure credential handling per platform.
 - [x] Add provider health/capability reporting.
 - [ ] Add provider-neutral token/cost/latency telemetry where providers expose it.
 - [ ] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.

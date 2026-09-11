@@ -724,6 +724,7 @@ internal fun SettingsScreen(
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
     onExportDiagnosticBundle: suspend () -> String? = { null },
+    onReconfigureProvider: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var exportedJson by remember { mutableStateOf<String?>(null) }
@@ -742,7 +743,12 @@ internal fun SettingsScreen(
         if (connectedProviderIds.isNotEmpty()) {
             connectedProviderIds.forEach { providerId ->
                 val health = healthResults?.get(providerId)
-                ProviderRecord(providerId, if (health != null) health.substringBefore(" ·") else "Connected", health ?: "Credential present")
+                ProviderRecord(
+                    name = providerId,
+                    state = if (health != null) health.substringBefore(" ·") else "Connected",
+                    auth = health ?: "Credential present",
+                    onReconfigure = { onReconfigureProvider(providerId) },
+                )
             }
             if (healthChecking) {
                 LaunchedEffect(Unit) {
@@ -842,13 +848,29 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun ProviderRecord(name: String, state: String, auth: String) {
+private fun ProviderRecord(name: String, state: String, auth: String, onReconfigure: (() -> Unit)? = null) {
+    var reconfigureConfirm by remember { mutableStateOf(false) }
     AzphaltRecord(
         seed = "provider-$name",
         eyebrow = "Provider",
         title = name,
         body = auth,
         endCap = state,
+        well = if (onReconfigure != null) {
+            {
+                if (!reconfigureConfirm) {
+                    AzphaltPill("Reconfigure credential", "reconfigure-$name", onClick = { reconfigureConfirm = true })
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("This will clear the stored credential and return to setup.", style = AzphaltType.body, color = Azphalt.White)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            AzphaltPill("Clear and reconfigure", "reconfigure-$name-confirm", onClick = { onReconfigure(); reconfigureConfirm = false })
+                            AzphaltPill("Cancel", "reconfigure-$name-cancel", onClick = { reconfigureConfirm = false })
+                        }
+                    }
+                }
+            }
+        } else null,
     )
 }
 
