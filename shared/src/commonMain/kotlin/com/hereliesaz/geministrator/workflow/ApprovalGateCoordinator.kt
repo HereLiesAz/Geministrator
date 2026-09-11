@@ -80,7 +80,7 @@ class ApprovalGateCoordinator(
         require(current.status == ApprovalGateStatus.Pending) {
             "Approval gate ${id.value} is already being applied or resolved"
         }
-        val applying = current.applying(decidedByRoleId, note)
+        val applying = current.applying(ApprovalDecisionIntent.Approve, decidedByRoleId, note)
         repository.put(applying)
         applying
     }
