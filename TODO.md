@@ -99,11 +99,11 @@ Tracking issue: #35
 
 ## P1 — H2G2 execution surface
 
-- [ ] Keep the mindmap as a projection of runtime truth; do not put execution state into renderer state.
-- [ ] Add distinct visual identities for non-agent executor nodes without losing the shared H2G2 language.
-- [ ] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
-- [ ] Define equivalent motion/behavior rules for system executors.
-- [ ] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
+- [x] Keep the mindmap as a projection of runtime truth; do not put execution state into renderer state.
+- [x] Add distinct visual identities for non-agent executor nodes without losing the shared H2G2 language.
+- [x] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
+- [x] Define equivalent motion/behavior rules for system executors.
+- [x] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
 - [ ] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
 - [ ] Improve tiny-screen/mobile behavior without turning the product into a conventional dashboard.
 - [ ] Accessibility pass: reduced motion, contrast, semantics, keyboard/focus, screen-reader labels.
