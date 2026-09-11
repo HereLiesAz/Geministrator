@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun JulesCredentialSetup(
     onSave: (String) -> Unit,
+    onContinueWithoutJules: () -> Unit,
 ) {
     var apiKey by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -67,6 +69,9 @@ internal fun JulesCredentialSetup(
                     enabled = apiKey.isNotBlank(),
                 ) {
                     Text("SAVE + CONTINUE")
+                }
+                OutlinedButton(onClick = onContinueWithoutJules) {
+                    Text("CONTINUE WITHOUT JULES")
                 }
             }
         }
