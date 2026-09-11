@@ -16,7 +16,7 @@ import kotlin.test.assertFailsWith
 
 class PlanRejectionServiceTest {
     @Test
-    fun rejectionCancelsProviderBeforeResolvingGate() = runBlocking {
+    fun rejectionClaimsGateCancelsProviderAndThenResolvesGate() = runBlocking {
         val repository = RecordingGateRepository(planGate())
         val gateway = RecordingGateway()
         val service = PlanRejectionService(
@@ -40,7 +40,7 @@ class PlanRejectionServiceTest {
     }
 
     @Test
-    fun cancellationFailureLeavesGatePending() = runBlocking {
+    fun cancellationFailureLeavesDurableApplyingClaimForSafeRecovery() = runBlocking {
         val repository = RecordingGateRepository(planGate())
         val gateway = RecordingGateway(cancelResult = ProviderActionResult.Rejected("still running"))
         val service = PlanRejectionService(
@@ -53,17 +53,19 @@ class PlanRejectionServiceTest {
             service.rejectPlan(
                 gateId = GATE_ID,
                 handle = HANDLE,
+                note = "Reject it",
                 nowEpochMillis = 10L,
             )
         }
 
         assertEquals(1, gateway.cancelCalls)
-        assertEquals(ApprovalGateStatus.Pending, repository.get(GATE_ID)?.status)
+        assertEquals(ApprovalGateStatus.Applying, repository.get(GATE_ID)?.status)
+        assertEquals("Reject it", repository.get(GATE_ID)?.decisionNote)
     }
 
     @Test
-    fun applyingGateCannotBeContradictedByManualRejection() = runBlocking {
-        val repository = RecordingGateRepository(planGate().applying(null, "approval in flight"))
+    fun applyingGateCannotBeContradictedBySecondManualRejection() = runBlocking {
+        val repository = RecordingGateRepository(planGate().applying(null, "decision in flight"))
         val gateway = RecordingGateway()
         val service = PlanRejectionService(
             gateRepository = repository,
