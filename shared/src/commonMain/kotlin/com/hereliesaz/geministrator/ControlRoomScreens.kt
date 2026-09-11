@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.geministrator.domain.RoleDefinition
+import com.hereliesaz.geministrator.domain.TaskRunStatus
 
 @Composable
 internal fun TechnicalInspector(selectedTaskId: String, modifier: Modifier = Modifier) {
@@ -57,48 +59,116 @@ private fun InspectorLine(label: String, value: String) {
 }
 
 @Composable
-internal fun CompanyScreen(modifier: Modifier = Modifier) {
+internal fun CompanyScreen(runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading, modifier: Modifier = Modifier) {
+    val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("COMPANY", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
-        listOf(
-            "Executive" to listOf("Orchestrator"),
-            "Product" to listOf("Product Manager", "Researcher", "UX Designer"),
-            "Engineering" to listOf("Architect", "EPA Representative", "Implementation Engineer"),
-            "Assurance" to listOf("Crash Test Dummy", "QA Engineer", "Adversarial Reviewer", "Code Reviewer", "Recovery Engineer"),
-            "Delivery" to listOf("Release Engineer"),
-        ).forEach { (department, roles) ->
-            SectionLabel(department)
-            roles.forEach { role ->
-                AzphaltRecord(
-                    seed = role,
-                    eyebrow = department,
-                    title = role,
-                    endCap = if (role == "Implementation Engineer") "Working" else "Available",
-                    body = when (role) {
-                        "Crash Test Dummy" -> "Author tests · cannot verify or approve"
-                        "EPA Representative" -> "Select environment · cannot implement or verify"
-                        "Implementation Engineer" -> "Implement · cannot certify own work"
-                        else -> "Company position"
-                    },
-                )
+        if (liveWorkflow != null) {
+            val activeRoleIds = liveWorkflow.run.taskRuns.values
+                .filter { it.status in setOf(TaskRunStatus.Running, TaskRunStatus.Planning, TaskRunStatus.AwaitingApproval, TaskRunStatus.Verifying) }
+                .mapNotNull { it.assignedRoleId }
+                .toSet()
+            val byDept = liveWorkflow.roles.groupBy { it.department() }
+            listOf("Executive", "Product", "Engineering", "Assurance", "Delivery", "Custom").forEach { dept ->
+                val roles = byDept[dept] ?: return@forEach
+                SectionLabel(dept)
+                roles.forEach { role ->
+                    AzphaltRecord(
+                        seed = role.id.value,
+                        eyebrow = dept,
+                        title = role.name,
+                        endCap = if (role.id in activeRoleIds) "Working" else "Available",
+                        body = role.description,
+                    )
+                }
+            }
+        } else {
+            listOf(
+                "Executive" to listOf("Orchestrator"),
+                "Product" to listOf("Product Manager", "Researcher", "UX Designer"),
+                "Engineering" to listOf("Architect", "EPA Representative", "Implementation Engineer"),
+                "Assurance" to listOf("Crash Test Dummy", "QA Engineer", "Adversarial Reviewer", "Code Reviewer", "Recovery Engineer"),
+                "Delivery" to listOf("Release Engineer"),
+            ).forEach { (department, roles) ->
+                SectionLabel(department)
+                roles.forEach { role ->
+                    AzphaltRecord(
+                        seed = role,
+                        eyebrow = department,
+                        title = role,
+                        endCap = if (role == "Implementation Engineer") "Working" else "Available",
+                        body = when (role) {
+                            "Crash Test Dummy" -> "Author tests · cannot verify or approve"
+                            "EPA Representative" -> "Select environment · cannot implement or verify"
+                            "Implementation Engineer" -> "Implement · cannot certify own work"
+                            else -> "Company position"
+                        },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun InboxScreen(modifier: Modifier = Modifier) {
+internal fun InboxScreen(
+    runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading,
+    onApproveTask: (String) -> Unit = {},
+    onRejectPlan: (String) -> Unit = {},
+    onResolveEscalation: (String, Boolean) -> Unit = { _, _ -> },
+    modifier: Modifier = Modifier,
+) {
+    val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("INBOX", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
-        DecisionRecord("infra-release", "Failure escalation", "Infra · Release", "Release failed after 3 attempts", true)
-        DecisionRecord("market-security", "Security risk", "Marketplace · Security", "Expanded OAuth scope challenged", true)
-        DecisionRecord("foo-integration", "Upcoming", "Foo · Authentication", "Integration approval after independent review", false)
+        if (liveWorkflow != null) {
+            val pending = liveWorkflow.run.taskRuns.values.filter {
+                it.status == TaskRunStatus.AwaitingApproval || it.status == TaskRunStatus.Escalated
+            }
+            if (pending.isEmpty()) {
+                Text("No pending decisions.", style = AzphaltType.body, color = Azphalt.currentGround.onPage)
+            } else {
+                pending.forEach { taskRun ->
+                    val task = liveWorkflow.definition.tasks.firstOrNull { it.id == taskRun.taskDefinitionId }
+                    val taskId = taskRun.taskDefinitionId.value
+                    val isPlanApproval = taskRun.status == TaskRunStatus.AwaitingApproval
+                    AzphaltRecord(
+                        seed = taskId,
+                        eyebrow = if (isPlanApproval) "Plan Approval" else "Failure Escalation",
+                        title = task?.name ?: taskId,
+                        body = if (isPlanApproval) {
+                            taskRun.progressMessage?.takeIf(String::isNotBlank) ?: (task?.objective ?: "")
+                        } else {
+                            taskRun.blockingReason?.let { "${it.code} · ${it.message}" } ?: "Task failed"
+                        },
+                        endCap = "Needs you",
+                        well = {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (isPlanApproval) {
+                                    AzphaltPill("Approve", "$taskId-approve", onClick = { onApproveTask(taskId) })
+                                    if (taskRun.assignedProviderId != null) {
+                                        AzphaltPill("Reject", "$taskId-reject", onClick = { onRejectPlan(taskId) })
+                                    }
+                                } else {
+                                    AzphaltPill("Retry", "$taskId-retry", onClick = { onResolveEscalation(taskId, true) })
+                                    AzphaltPill("Stop", "$taskId-stop", onClick = { onResolveEscalation(taskId, false) })
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+        } else {
+            DecisionRecord("infra-release", "Failure escalation", "Infra · Release", "Release failed after 3 attempts", true)
+            DecisionRecord("market-security", "Security risk", "Marketplace · Security", "Expanded OAuth scope challenged", true)
+            DecisionRecord("foo-integration", "Upcoming", "Foo · Authentication", "Integration approval after independent review", false)
+        }
     }
 }
 
@@ -167,8 +237,28 @@ private val ArtifactTree = listOf(
 )
 
 @Composable
-internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
-    var openId by remember { mutableStateOf<String?>("spec") }
+internal fun ArtifactFileManagerScreen(runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading, modifier: Modifier = Modifier) {
+    val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
+    val displayTree: List<ArtifactEntry> = if (liveWorkflow != null) {
+        liveWorkflow.definition.tasks.mapNotNull { task ->
+            val taskRun = liveWorkflow.run.taskRuns[task.id] ?: return@mapNotNull null
+            if (taskRun.artifacts.isEmpty()) return@mapNotNull null
+            ArtifactEntry(
+                id = task.id.value,
+                name = task.name,
+                detail = taskRun.status.name,
+                children = taskRun.artifacts.map { artifact ->
+                    ArtifactEntry(
+                        id = artifact.id.value,
+                        name = artifact.label,
+                        detail = artifact.kind.name,
+                    )
+                },
+            )
+        }.takeIf { it.isNotEmpty() } ?: ArtifactTree
+    } else ArtifactTree
+
+    var openId by remember(displayTree) { mutableStateOf(displayTree.firstOrNull()?.id) }
     var previewId by remember { mutableStateOf<String?>(null) }
     val rootEntrance = remember { AzphaltEntrance.roll() }
     Column(
@@ -181,7 +271,10 @@ internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
             AzphaltPill("Search", "artifact-search", onClick = {})
             AzphaltPill("Storage", "artifact-storage", onClick = {})
         }
-        ArtifactTree.forEachIndexed { rootIndex, entry ->
+        if (liveWorkflow != null && displayTree === ArtifactTree) {
+            Text("No artifacts produced yet.", style = AzphaltType.body, color = Azphalt.currentGround.onPage)
+        }
+        displayTree.forEachIndexed { rootIndex, entry ->
             val open = openId == entry.id
             val siblingFraction by animateFloatAsState(
                 targetValue = if (openId == null || open) 1f else 0.42f,
@@ -200,7 +293,7 @@ internal fun ArtifactFileManagerScreen(modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier
                     .fillMaxWidth(siblingFraction)
-                    .azphaltEntrance(rootEntrance, rootIndex, ArtifactTree.size),
+                    .azphaltEntrance(rootEntrance, rootIndex, displayTree.size),
                 well = if (open && entry.children.isNotEmpty()) {
                     {
                         val childEntrance = remember(entry.id) { AzphaltEntrance.childBand() }
@@ -268,4 +361,13 @@ private fun ProviderRecord(name: String, state: String, activity: String, auth: 
 @Composable
 private fun SectionLabel(label: String) {
     Text(label.uppercase(), style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+}
+
+private fun RoleDefinition.department(): String = when (id.value) {
+    "orchestrator" -> "Executive"
+    "product-manager", "researcher", "ux-designer" -> "Product"
+    "architect", "epa-representative", "implementation-engineer" -> "Engineering"
+    "crash-test-dummy", "qa-engineer", "adversarial-reviewer", "code-reviewer", "recovery-engineer" -> "Assurance"
+    "release-engineer" -> "Delivery"
+    else -> "Custom"
 }

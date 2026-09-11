@@ -112,6 +112,9 @@ fun ControlRoom(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
                     onLaunchWorkflow = onLaunchWorkflow,
+                    onApproveTask = onApproveTask,
+                    onRejectPlan = onRejectPlan,
+                    onResolveEscalation = onResolveEscalation,
                     modifier = Modifier.weight(1f),
                     compact = true,
                     runtimeState = runtimeState,
@@ -146,6 +149,9 @@ fun ControlRoom(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
                     onLaunchWorkflow = onLaunchWorkflow,
+                    onApproveTask = onApproveTask,
+                    onRejectPlan = onRejectPlan,
+                    onResolveEscalation = onResolveEscalation,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
                 )
@@ -258,6 +264,9 @@ private fun MainDestination(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
+    onApproveTask: (String) -> Unit,
+    onRejectPlan: (String) -> Unit,
+    onResolveEscalation: (String, Boolean) -> Unit,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     runtimeState: ApplicationRuntimeState,
@@ -275,9 +284,9 @@ private fun MainDestination(
                 runtimeState = runtimeState,
             )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Inbox -> InboxScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())
+            ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
+            ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
             ControlRoomDestination.Settings -> SettingsScreen(Modifier.fillMaxSize())
         }
     }
