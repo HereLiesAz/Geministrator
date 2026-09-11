@@ -193,6 +193,36 @@ class SettingsWorkflowPersistenceTest {
     }
 
     @Test
+    fun customStorageNamespaceDoesNotConsumeDefaultLegacyData() = runBlocking {
+        val settings = MapSettings()
+        val defaultPersistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("legacy-default-project"),
+            name = "Default Legacy Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        defaultPersistence.projects.put(project)
+        val encoded = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        settings.remove(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY)
+        settings.putString(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1, encoded)
+
+        val customKey = "test.workflow.persistence"
+        val custom = SettingsWorkflowPersistence(settings, storageKey = customKey)
+
+        assertTrue(custom.projects.all().isEmpty())
+        assertFalse(settings.hasKey(customKey))
+        assertEquals(encoded, settings.getStringOrNull(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+
+        custom.clearWorkflowData()
+        assertEquals(encoded, settings.getStringOrNull(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+
+        val restoredDefault = SettingsWorkflowPersistence(settings)
+        assertEquals(project, restoredDefault.projects.get(project.id))
+        assertFalse(settings.hasKey(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+    }
+
+    @Test
     fun futureSchemaIsRejectedWithoutOverwritingStoredData() = runBlocking {
         val settings = MapSettings()
         val persistence = SettingsWorkflowPersistence(settings)
