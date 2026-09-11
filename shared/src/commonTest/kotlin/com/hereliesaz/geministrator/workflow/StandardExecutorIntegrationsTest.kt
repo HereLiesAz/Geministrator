@@ -214,7 +214,7 @@ private class FakeNestedWorkflowClient : NestedWorkflowClient {
     var workflowDefinitionId: WorkflowDefinitionId? = null
     var runId: String? = null
 
-    override suspend fun start(project: Project, workflowDefinitionId: WorkflowDefinitionId): ExternalExecutionRun {
+    override suspend fun start(project: Project, workflowDefinitionId: WorkflowDefinitionId, targetProjectId: ProjectId?): ExternalExecutionRun {
         this.workflowDefinitionId = workflowDefinitionId
         return ExternalExecutionRun("nested-1", ExternalExecutionStatus.Running)
     }
