@@ -102,13 +102,19 @@ class WorkflowEngine(
                     val providerActive = activeByProvider[providerId] ?: 0
                     if (providerActive >= providerLimit) continue
 
+                    val redaction = definition.payloadRedactionPolicy
                     val dependencyArtifacts = task.dependsOn
                         .mapNotNull(nextRun.taskRuns::get)
                         .flatMap(TaskRun::artifacts)
+                        .filter { it.kind !in redaction.excludedArtifactKinds }
                     val request = AgentTaskRequest(
                         taskRunId = taskRun.id,
-                        objective = task.objective,
-                        roleInstructions = "$swarmInstructions\n\n${role.instructions}",
+                        objective = if (redaction.redactObjective) "[redacted]" else task.objective,
+                        roleInstructions = if (redaction.redactRoleInstructions) {
+                            swarmInstructions
+                        } else {
+                            "$swarmInstructions\n\n${role.instructions}"
+                        },
                         acceptanceCriteria = task.acceptanceCriteria,
                         contextArtifacts = dependencyArtifacts,
                         repository = project.repository,

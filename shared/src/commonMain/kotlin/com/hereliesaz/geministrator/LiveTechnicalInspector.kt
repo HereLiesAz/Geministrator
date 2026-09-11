@@ -129,19 +129,26 @@ internal fun TechnicalInspector(
             ?: task.roleId?.let { rid -> liveWorkflow.roles.firstOrNull { it.id == rid } }
         val isAgentTask = executor is TaskExecutor.RoleAgent || task.roleId != null
         if (isAgentTask && roleForPayload != null) {
-            val contextArtifacts = task.dependsOn
+            val redaction = liveWorkflow.definition.payloadRedactionPolicy
+            val allContextArtifacts = task.dependsOn
                 .flatMap { depId -> liveWorkflow.run.taskRuns[depId]?.artifacts.orEmpty() }
+            val sentArtifacts = allContextArtifacts.filter { it.kind !in redaction.excludedArtifactKinds }
             LiveInspectorLine("PAYLOAD CONTEXT", buildString {
                 append("Role: ${roleForPayload.name}")
-                append("\nObjective: ${task.objective.take(120)}${if (task.objective.length > 120) "…" else ""}")
+                append("\nObjective: ${if (redaction.redactObjective) "[redacted by policy]" else task.objective.take(120) + if (task.objective.length > 120) "…" else ""}")
                 if (task.acceptanceCriteria.isNotEmpty()) {
                     append("\nAcceptance criteria: ${task.acceptanceCriteria.size} item${if (task.acceptanceCriteria.size != 1) "s" else ""}")
                 }
-                if (roleForPayload.instructions.isNotBlank()) {
+                if (!redaction.redactRoleInstructions && roleForPayload.instructions.isNotBlank()) {
                     append("\nRole instructions: ${roleForPayload.instructions.take(80)}${if (roleForPayload.instructions.length > 80) "…" else ""}")
+                } else if (redaction.redactRoleInstructions) {
+                    append("\nRole instructions: [redacted by policy]")
                 }
-                if (contextArtifacts.isNotEmpty()) {
-                    append("\nContext artifacts from dependencies: ${contextArtifacts.size}")
+                if (allContextArtifacts.isNotEmpty()) {
+                    append("\nContext artifacts: ${sentArtifacts.size} sent")
+                    if (sentArtifacts.size < allContextArtifacts.size) {
+                        append(", ${allContextArtifacts.size - sentArtifacts.size} excluded by redaction policy")
+                    }
                 }
             })
             LiveInspectorLine("PROVIDER TARGET", taskRun.assignedProviderId?.value ?: task.executor?.let { ex ->

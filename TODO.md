@@ -133,7 +133,7 @@ Tracking issue: #35
 
 - [x] Implement platform-secure credential storage; credentials must never enter workflow persistence.
 - [x] Audit provider payloads so users can see what context leaves the device before execution.
-- [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
+- [x] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
 - [x] Add clear data deletion controls for local workflow state.
 - [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
 - [x] Add dependency/security scanning without blocking development on noisy non-actionable findings.

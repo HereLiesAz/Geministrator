@@ -79,6 +79,7 @@ data class WorkflowDefinition(
     val concurrencyPolicy: ConcurrencyPolicy = ConcurrencyPolicy(),
     val testDesignPolicy: TestDesignPolicy = TestDesignPolicy.BeforeAndAfterImplementation,
     val promptReusePolicy: PromptReusePolicy = PromptReusePolicy.PreferCache,
+    val payloadRedactionPolicy: PayloadRedactionPolicy = PayloadRedactionPolicy(),
 )
 
 @Serializable
