@@ -172,7 +172,7 @@ jobs:
 
       - name: Upload Android build
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: haive-android-release
           path: |
@@ -182,14 +182,14 @@ jobs:
 
       - name: Upload release notes
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: haive-release-notes
           path: fastlane/metadata/android/en-US/changelogs/
           if-no-files-found: error
 
       - name: Upload Desktop build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: haive-desktop-linux
           path: desktopApp/build/compose/binaries/main/app/**
