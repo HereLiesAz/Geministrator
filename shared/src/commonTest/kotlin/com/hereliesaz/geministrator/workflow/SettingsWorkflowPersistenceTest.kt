@@ -18,6 +18,8 @@ import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -89,7 +91,7 @@ class SettingsWorkflowPersistenceTest {
     }
 
     @Test
-    fun legacyV2ArtifactIdsMigrateToAttemptScopedIdentity() = runBlocking {
+    fun legacyV2ArtifactIdsMigrateToAttemptScopedIdentityAndWriteBackImmediately() = runBlocking {
         val settings = MapSettings()
         val persistence = SettingsWorkflowPersistence(settings)
         val taskId = TaskDefinitionId("task")
@@ -162,6 +164,90 @@ class SettingsWorkflowPersistenceTest {
         assertNull(restored.artifacts.get(legacyProviderArtifact.id))
         assertNull(restored.artifacts.get(legacyGitHubArtifact.id))
         assertEquals(3, restored.snapshotVersion())
+        assertTrue(
+            assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+                .contains("\"version\":3"),
+        )
+    }
+
+    @Test
+    fun legacyStorageKeyIsPromotedAndRetiredOnRead() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("legacy-project"),
+            name = "Legacy Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        persistence.projects.put(project)
+        val encoded = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        settings.remove(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY)
+        settings.putString(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1, encoded)
+
+        val restored = SettingsWorkflowPersistence(settings)
+
+        assertEquals(project, restored.projects.get(project.id))
+        assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        assertFalse(settings.hasKey(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+    }
+
+    @Test
+    fun customStorageNamespaceDoesNotConsumeDefaultLegacyData() = runBlocking {
+        val settings = MapSettings()
+        val defaultPersistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("legacy-default-project"),
+            name = "Default Legacy Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        defaultPersistence.projects.put(project)
+        val encoded = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        settings.remove(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY)
+        settings.putString(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1, encoded)
+
+        val customKey = "test.workflow.persistence"
+        val custom = SettingsWorkflowPersistence(settings, storageKey = customKey)
+
+        assertTrue(custom.projects.all().isEmpty())
+        assertFalse(settings.hasKey(customKey))
+        assertEquals(encoded, settings.getStringOrNull(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+
+        custom.clearWorkflowData()
+        assertEquals(encoded, settings.getStringOrNull(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+
+        val restoredDefault = SettingsWorkflowPersistence(settings)
+        assertEquals(project, restoredDefault.projects.get(project.id))
+        assertFalse(settings.hasKey(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+    }
+
+    @Test
+    fun futureSchemaIsRejectedWithoutOverwritingStoredData() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("future-project"),
+            name = "Future Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        persistence.projects.put(project)
+        val current = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        val futureVersion = SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION + 1
+        val future = current.replace(
+            "\"version\":${SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION}",
+            "\"version\":$futureVersion",
+        )
+        settings.putString(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY, future)
+
+        val restored = SettingsWorkflowPersistence(settings)
+        val failure = assertFailsWith<IllegalArgumentException> {
+            restored.snapshotVersion()
+        }
+
+        assertTrue(failure.message.orEmpty().contains("Unsupported workflow persistence schema $futureVersion"))
+        assertEquals(future, settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
     }
 
     @Test
