@@ -93,6 +93,70 @@ class GitHubActionsExecutorIntegrationTest {
         assertEquals("https://example.invalid/artifact", artifact.uri)
     }
 
+    @Test
+    fun jobStepProgressProjectsIntoTaskProgress() = runBlocking {
+        val base = context(TaskExecutor.GitHubAction("ci.yml"))
+        val client = FakeGitHubActionsClient(
+            reconciledRun = GitHubWorkflowRun(
+                id = "run-42",
+                status = GitHubWorkflowRunStatus.Running,
+                jobs = listOf(
+                    GitHubWorkflowJob(
+                        id = "job-1",
+                        name = "Build",
+                        status = GitHubWorkflowRunStatus.Running,
+                        currentStep = "Compile",
+                        completedSteps = 2,
+                        totalSteps = 5,
+                    ),
+                ),
+            ),
+        )
+        val integration = GitHubActionsExecutorIntegration(client)
+        val context = base.copy(taskRun = base.taskRun.copy(status = TaskRunStatus.Running, externalRunId = "run-42"))
+
+        val execution = integration.reconcile(context)
+
+        assertEquals(TaskRunStatus.Running, execution.status)
+        assertEquals(2f / 5f, execution.progress)
+        assertEquals("Build: Compile (3/5)", execution.progressMessage)
+    }
+
+    @Test
+    fun multipleJobStepsAggregateAcrossJobs() = runBlocking {
+        val base = context(TaskExecutor.GitHubAction("ci.yml"))
+        val client = FakeGitHubActionsClient(
+            reconciledRun = GitHubWorkflowRun(
+                id = "run-42",
+                status = GitHubWorkflowRunStatus.Running,
+                jobs = listOf(
+                    GitHubWorkflowJob(
+                        id = "job-1",
+                        name = "Build",
+                        status = GitHubWorkflowRunStatus.Completed,
+                        completedSteps = 4,
+                        totalSteps = 4,
+                    ),
+                    GitHubWorkflowJob(
+                        id = "job-2",
+                        name = "Test",
+                        status = GitHubWorkflowRunStatus.Running,
+                        currentStep = "Unit tests",
+                        completedSteps = 1,
+                        totalSteps = 3,
+                    ),
+                ),
+            ),
+        )
+        val integration = GitHubActionsExecutorIntegration(client)
+        val context = base.copy(taskRun = base.taskRun.copy(status = TaskRunStatus.Running, externalRunId = "run-42"))
+
+        val execution = integration.reconcile(context)
+
+        assertEquals(5f / 7f, execution.progress)
+        assertEquals("Test: Unit tests (2/3)", execution.progressMessage)
+    }
+
     private fun context(executor: TaskExecutor.GitHubAction): TaskExecutorContext {
         val taskId = TaskDefinitionId("ci")
         val repository = RepositoryRef("HereLiesAz", "haive", defaultBranch = "main")

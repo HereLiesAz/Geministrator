@@ -88,3 +88,17 @@ enum class IntegrationPolicy {
     PullRequest,
     AutoMergeAfterVerification,
 }
+
+/** Controls what context is included in provider payloads for agent tasks. */
+@Serializable
+data class PayloadRedactionPolicy(
+    /** Artifact kinds from dependency task runs that must not be sent to providers. */
+    val excludedArtifactKinds: Set<ArtifactKind> = emptySet(),
+    /** When true, the task objective is replaced with a placeholder in provider payloads. */
+    val redactObjective: Boolean = false,
+    /** When true, role standing instructions are replaced with a placeholder in provider payloads. */
+    val redactRoleInstructions: Boolean = false,
+) {
+    val isActive: Boolean get() =
+        excludedArtifactKinds.isNotEmpty() || redactObjective || redactRoleInstructions
+}

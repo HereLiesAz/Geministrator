@@ -23,6 +23,7 @@ class ProviderBackedManagedSessionGateway(
         val status: ManagedSessionStatus,
         val artifacts: List<ProviderArtifact> = emptyList(),
         val progress: ManagedSessionProgress? = null,
+        val pendingUsage: ManagedSessionUsage? = null,
     )
 
     private val mutex = Mutex()
@@ -107,6 +108,13 @@ class ProviderBackedManagedSessionGateway(
 
     override suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact> =
         mutex.withLock { snapshots[handle]?.artifacts.orEmpty() }
+
+    override suspend fun usageReport(handle: ManagedSessionHandle): ManagedSessionUsage? =
+        mutex.withLock {
+            val usage = snapshots[handle]?.pendingUsage ?: return@withLock null
+            snapshots[handle] = snapshots[handle]!!.copy(pendingUsage = null)
+            usage
+        }
 
     private suspend fun registerAndObserve(
         handle: ManagedSessionHandle,
@@ -233,6 +241,15 @@ class ProviderBackedManagedSessionGateway(
                     ),
                 )
                 is AgentEvent.Failed -> current.copy(status = ManagedSessionStatus.Failed)
+                is AgentEvent.UsageReported -> current.copy(
+                    pendingUsage = ManagedSessionUsage(
+                        inputTokens = event.inputTokens,
+                        outputTokens = event.outputTokens,
+                        costUsd = event.costUsd,
+                        cacheHitFraction = event.cacheHitFraction,
+                        latencyMillis = event.latencyMillis,
+                    ),
+                )
             }
             snapshots[handle] = next
         }

@@ -126,6 +126,25 @@ sealed interface AgentEvent {
         override val runId: ProviderRunId,
         val reason: String,
     ) : AgentEvent
+
+    /**
+     * Optional telemetry from providers that expose token/cost/cache data. Never affects workflow
+     * correctness — emit opportunistically, handle lossily.
+     */
+    data class UsageReported(
+        override val runId: ProviderRunId,
+        val inputTokens: Long? = null,
+        val outputTokens: Long? = null,
+        val costUsd: Double? = null,
+        val cacheHitFraction: Float? = null,
+        val latencyMillis: Long? = null,
+    ) : AgentEvent {
+        init {
+            require(cacheHitFraction == null || cacheHitFraction in 0f..1f) {
+                "Cache hit fraction must be normalized 0f..1f"
+            }
+        }
+    }
 }
 
 interface AgentProvider {

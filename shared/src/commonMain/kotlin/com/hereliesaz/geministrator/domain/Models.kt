@@ -33,7 +33,10 @@ sealed interface TaskExecutor {
     @Serializable data class RepositoryOperation(val operation: String) : TaskExecutor
     @Serializable data class HumanApproval(val label: String = "Human approval") : TaskExecutor
     @Serializable data class ExternalService(val service: String, val operation: String? = null) : TaskExecutor
-    @Serializable data class NestedWorkflow(val workflowDefinitionId: WorkflowDefinitionId) : TaskExecutor
+    @Serializable data class NestedWorkflow(
+        val workflowDefinitionId: WorkflowDefinitionId,
+        val projectId: ProjectId? = null,
+    ) : TaskExecutor
 }
 
 fun TaskDefinition.effectiveExecutor(): TaskExecutor = executor
@@ -51,6 +54,20 @@ fun TaskExecutor.displayName(): String = when (this) {
     is TaskExecutor.NestedWorkflow -> "Nested Workflow"
 }
 
+/**
+ * Condition under which a task is eligible to become Ready after its dependencies complete.
+ * [Always] is the default: run whenever all [TaskDefinition.dependsOn] tasks are Completed.
+ * [OnAnyOutcome] makes the task run regardless of whether a specific dependency succeeded or failed
+ * (useful for cleanup/notification branches). [OnFailure] is the mirror of the default — only
+ * eligible when the named dependency reached a Failed/Escalated terminal state.
+ */
+@Serializable
+sealed interface TaskCondition {
+    @Serializable data object Always : TaskCondition
+    @Serializable data class OnAnyOutcome(val ofTask: TaskDefinitionId) : TaskCondition
+    @Serializable data class OnFailure(val ofTask: TaskDefinitionId) : TaskCondition
+}
+
 @Serializable
 data class TaskDefinition(
     val id: TaskDefinitionId,
@@ -58,6 +75,7 @@ data class TaskDefinition(
     val objective: String,
     val roleId: RoleDefinitionId?,
     val dependsOn: Set<TaskDefinitionId> = emptySet(),
+    val condition: TaskCondition = TaskCondition.Always,
     val acceptanceCriteria: List<AcceptanceCriterion> = emptyList(),
     val requiredArtifacts: Set<ArtifactKind> = emptySet(),
     val approvalPolicy: ApprovalPolicy = ApprovalPolicy.None,
@@ -79,6 +97,7 @@ data class WorkflowDefinition(
     val concurrencyPolicy: ConcurrencyPolicy = ConcurrencyPolicy(),
     val testDesignPolicy: TestDesignPolicy = TestDesignPolicy.BeforeAndAfterImplementation,
     val promptReusePolicy: PromptReusePolicy = PromptReusePolicy.PreferCache,
+    val payloadRedactionPolicy: PayloadRedactionPolicy = PayloadRedactionPolicy(),
 )
 
 @Serializable
@@ -88,6 +107,11 @@ enum class WorkflowRunStatus { Created, Running, AwaitingHuman, Completed, Faile
 enum class TaskRunStatus {
     Created, Blocked, Ready, Planning, AwaitingApproval, Running, Verifying, Retrying, Completed, Failed, Escalated, Cancelled,
 }
+
+fun TaskRunStatus.isTerminal(): Boolean = this == TaskRunStatus.Completed ||
+    this == TaskRunStatus.Failed ||
+    this == TaskRunStatus.Escalated ||
+    this == TaskRunStatus.Cancelled
 
 @Serializable
 data class BlockingReason(

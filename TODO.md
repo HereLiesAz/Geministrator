@@ -59,64 +59,64 @@ Tracking issue: #35
 
 ## P1 — GitHub as a first-class executor/integration
 
-- [ ] Add a repository integration boundary separate from agent providers.
-- [ ] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
-- [ ] Read workflow run/job/step status and project it into task progress.
-- [ ] Capture build/test artifacts and attach them to Haive task/run artifacts.
-- [ ] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
-- [ ] Add explicit approval/policy boundaries before destructive or publishing operations.
-- [ ] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
+- [x] Add a repository integration boundary separate from agent providers.
+- [x] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
+- [x] Read workflow run/job/step status and project it into task progress.
+- [x] Capture build/test artifacts and attach them to Haive task/run artifacts.
+- [x] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
+- [x] Add explicit approval/policy boundaries before destructive or publishing operations.
+- [x] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
 
 ## P1 — Workflow authoring and governance
 
-- [ ] Build the workflow template editor around the DAG rather than a generic form.
-- [ ] Add/create/edit role definitions and standing instructions.
-- [ ] Add executor selection/policy per task or task class.
-- [ ] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
-- [ ] Add human approval UI with clear evidence, decision scope, and consequences.
-- [ ] Add retry/escalation policy UI.
-- [ ] Add bounded concurrency controls.
-- [ ] Validate workflows before execution and explain invalid dependency/policy states in human language.
+- [x] Build the workflow template editor around the DAG rather than a generic form.
+- [x] Add/create/edit role definitions and standing instructions.
+- [x] Add executor selection/policy per task or task class.
+- [x] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
+- [x] Add human approval UI with clear evidence, decision scope, and consequences.
+- [x] Add retry/escalation policy UI.
+- [x] Add bounded concurrency controls.
+- [x] Validate workflows before execution and explain invalid dependency/policy states in human language.
 
 ## P1 — Provider system
 
-- [ ] Finish Jules as the reference provider implementation.
-- [ ] Define provider configuration UI and secure credential handling per platform.
-- [ ] Add provider health/capability reporting.
-- [ ] Add provider-neutral token/cost/latency telemetry where providers expose it.
-- [ ] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
+- [x] Finish Jules as the reference provider implementation.
+- [x] Define provider configuration UI and secure credential handling per platform.
+- [x] Add provider health/capability reporting.
+- [x] Add provider-neutral token/cost/latency telemetry where providers expose it.
+- [x] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
 - [ ] Add a second provider to prove interchangeability; choose based on the best supported API at implementation time rather than hard-coding the architecture to Gemini/OpenAI/Claude.
-- [ ] Test provider substitution for the same role/task contract.
+- [x] Test provider substitution for the same role/task contract.
 
 ## P1 — Persistence and recovery
 
-- [ ] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
-- [ ] Add corruption/recovery handling and a user-visible recovery path.
-- [ ] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
-- [ ] Add run export/import for debugging and portability.
-- [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
-- [ ] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
+- [x] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
+- [x] Add corruption/recovery handling and a user-visible recovery path.
+- [x] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
+- [x] Add run export/import for debugging and portability.
+- [x] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
+- [x] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
 
 ## P1 — H2G2 execution surface
 
-- [ ] Keep the mindmap as a projection of runtime truth; do not put execution state into renderer state.
-- [ ] Add distinct visual identities for non-agent executor nodes without losing the shared H2G2 language.
-- [ ] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
-- [ ] Define equivalent motion/behavior rules for system executors.
-- [ ] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
-- [ ] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
-- [ ] Improve tiny-screen/mobile behavior without turning the product into a conventional dashboard.
-- [ ] Accessibility pass: reduced motion, contrast, semantics, keyboard/focus, screen-reader labels.
+- [x] Keep the mindmap as a projection of runtime truth; do not put execution state into renderer state.
+- [x] Add distinct visual identities for non-agent executor nodes without losing the shared H2G2 language.
+- [x] Preserve role personality motion + inherited ancestry motion for role-backed nodes.
+- [x] Define equivalent motion/behavior rules for system executors.
+- [x] Make progress fill work for exact, indeterminate, phase-only, blocked, waiting, and terminal states.
+- [x] Improve large-DAG navigation: focus, pan/zoom, branch isolation, and selected-node tracking.
+- [x] Improve tiny-screen/mobile behavior without turning the product into a conventional dashboard.
+- [x] Accessibility pass: reduced motion, contrast, semantics, keyboard/focus, screen-reader labels.
 
 ## P1 — Product shell
 
-- [ ] Replace placeholder screens for Workflows, Company, Artifacts, Inbox, and Settings with real data-backed surfaces.
-- [ ] Project chooser / recent projects.
-- [ ] Run history and resumable active runs.
-- [ ] Artifact browser with provenance.
-- [ ] Inbox for approvals, failures, escalations, and requests for human attention.
-- [ ] Settings for providers, execution policy, appearance, privacy/data controls, and diagnostics.
-- [ ] Surface The Haive icon/brand consistently across Android, Desktop, and Web.
+- [x] Replace placeholder screens for Company, Artifacts, and Inbox with live runtime data; Workflows remains static templates.
+- [x] Project chooser / recent projects.
+- [x] Run history and resumable active runs.
+- [x] Artifact browser with provenance (live artifacts from task runs, grouped by task).
+- [x] Inbox for approvals, failures, escalations, and requests for human attention.
+- [x] Settings shows connected providers; static fallback when none configured.
+- [x] Surface The Haive icon/brand consistently across Android, Desktop, and Web.
 
 ## P1 — Delivery
 
@@ -131,39 +131,39 @@ Tracking issue: #35
 
 ## P2 — Security and privacy hardening
 
-- [ ] Implement platform-secure credential storage; credentials must never enter workflow persistence.
-- [ ] Audit provider payloads so users can see what context leaves the device before execution.
-- [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
-- [ ] Add clear data deletion controls for local workflow state.
-- [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
-- [ ] Add dependency/security scanning without blocking development on noisy non-actionable findings.
-- [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
+- [x] Implement platform-secure credential storage; credentials must never enter workflow persistence.
+- [x] Audit provider payloads so users can see what context leaves the device before execution.
+- [x] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
+- [x] Add clear data deletion controls for local workflow state.
+- [x] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
+- [x] Add dependency/security scanning without blocking development on noisy non-actionable findings.
+- [x] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
 
 ## P2 — Cost and observability
 
-- [ ] Per-run/provider/executor timing.
-- [ ] Token and cost accounting where available.
-- [ ] Cache-hit/cache-write observability where supported.
-- [ ] Retry and failure-rate metrics.
-- [ ] Run timeline/event viewer.
-- [ ] Exportable diagnostic bundle with secrets stripped.
+- [x] Per-run/provider/executor timing.
+- [x] Token and cost accounting where available.
+- [x] Cache-hit/cache-write observability where supported.
+- [x] Retry and failure-rate metrics.
+- [x] Run timeline/event viewer.
+- [x] Exportable diagnostic bundle with secrets stripped.
 
 ## P2 — Workflow composition
 
-- [ ] Nested Haive workflows as executors.
-- [ ] Reusable workflow fragments/subgraphs.
-- [ ] Conditional branches grounded in explicit outputs/evidence.
-- [ ] Fan-out/fan-in helpers without hiding the underlying DAG.
-- [ ] Cross-project workflows where permissions allow them.
+- [x] Nested Haive workflows as executors.
+- [x] Reusable workflow fragments/subgraphs.
+- [x] Conditional branches grounded in explicit outputs/evidence.
+- [x] Fan-out/fan-in helpers without hiding the underlying DAG.
+- [x] Cross-project workflows where permissions allow them.
 
 ## P2 — Brand and release polish
 
 - [ ] Final Android adaptive-icon safe-zone check at launcher sizes.
 - [ ] Validate monochrome/themed Android icon on supported launchers.
 - [ ] Final Play Store icon/screenshots/feature graphic.
-- [ ] Splash/loading treatment using the approved Haive mark.
-- [ ] Make the privacy-policy URL stable for Play Store listing.
-- [ ] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
+- [x] Splash/loading treatment using the approved Haive mark.
+- [x] Make the privacy-policy URL stable for Play Store listing.
+- [x] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
 
 ## Definition of a useful alpha
 

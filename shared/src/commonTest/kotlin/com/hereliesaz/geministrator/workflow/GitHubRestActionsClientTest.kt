@@ -74,6 +74,11 @@ class GitHubRestActionsClientTest {
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json"),
                 )
+                request.url.encodedPath.endsWith("/jobs") -> respond(
+                    content = """{"jobs":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
                 else -> respond(
                     content = """{"id":42,"status":"completed","conclusion":"success"}""",
                     status = HttpStatusCode.OK,
@@ -101,21 +106,25 @@ class GitHubRestActionsClientTest {
             ),
             run.artifacts,
         )
-        assertEquals(2, requests.size)
+        assertEquals(3, requests.size)
         assertTrue(requests.all { it.method == HttpMethod.Get })
     }
 
     @Test
     fun getRunMapsCompletedNonSuccessToFailure() = runBlocking {
         val engine = MockEngine { request ->
-            if (request.url.encodedPath.endsWith("/artifacts")) {
-                respond(
+            when {
+                request.url.encodedPath.endsWith("/artifacts") -> respond(
                     content = """{"artifacts":[]}""",
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json"),
                 )
-            } else {
-                respond(
+                request.url.encodedPath.endsWith("/jobs") -> respond(
+                    content = """{"jobs":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                else -> respond(
                     content = """{"id":42,"status":"completed","conclusion":"failure"}""",
                     status = HttpStatusCode.OK,
                     headers = headersOf(HttpHeaders.ContentType, "application/json"),
@@ -131,5 +140,110 @@ class GitHubRestActionsClientTest {
         val run = client.getRun(RepositoryRef("HereLiesAz", "haive", "main"), "42")
 
         assertEquals(GitHubWorkflowRunStatus.Failed, run.status)
+    }
+
+    @Test
+    fun getRunReturnsJobStepProgress() = runBlocking {
+        val engine = MockEngine { request ->
+            when {
+                request.url.encodedPath.endsWith("/artifacts") -> respond(
+                    content = """{"artifacts":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                request.url.encodedPath.endsWith("/jobs") -> respond(
+                    content = """{"jobs":[{"id":1,"name":"Build","status":"in_progress","conclusion":null,"steps":[{"name":"Checkout","status":"completed","conclusion":"success"},{"name":"Compile","status":"in_progress","conclusion":null},{"name":"Package","status":"queued","conclusion":null}]}]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                else -> respond(
+                    content = """{"id":42,"status":"in_progress","conclusion":null}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+        }
+        val client = GitHubRestActionsClient(
+            httpClient = HttpClient(engine),
+            tokenProvider = GitHubTokenProvider { "token" },
+            baseUrl = "https://api.github.test",
+        )
+
+        val run = client.getRun(RepositoryRef("HereLiesAz", "haive", "main"), "42")
+
+        assertEquals(GitHubWorkflowRunStatus.Running, run.status)
+        assertEquals(1, run.jobs.size)
+        val job = run.jobs.single()
+        assertEquals("Build", job.name)
+        assertEquals(GitHubWorkflowRunStatus.Running, job.status)
+        assertEquals("Compile", job.currentStep)
+        assertEquals(1, job.completedSteps)
+        assertEquals(3, job.totalSteps)
+    }
+
+    @Test
+    fun getRunMapsCancelledConclusionToFailedWithMessage() = runBlocking {
+        val engine = MockEngine { request ->
+            when {
+                request.url.encodedPath.endsWith("/artifacts") -> respond(
+                    content = """{"artifacts":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                request.url.encodedPath.endsWith("/jobs") -> respond(
+                    content = """{"jobs":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                else -> respond(
+                    content = """{"id":42,"status":"completed","conclusion":"cancelled"}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+        }
+        val client = GitHubRestActionsClient(
+            httpClient = HttpClient(engine),
+            tokenProvider = GitHubTokenProvider { "token" },
+            baseUrl = "https://api.github.test",
+        )
+
+        val run = client.getRun(RepositoryRef("HereLiesAz", "haive", "main"), "42")
+
+        assertEquals(GitHubWorkflowRunStatus.Failed, run.status)
+        assertEquals("Run was cancelled", run.progressMessage)
+    }
+
+    @Test
+    fun getRunMapsTimedOutToFailedWithMessage() = runBlocking {
+        val engine = MockEngine { request ->
+            when {
+                request.url.encodedPath.endsWith("/artifacts") -> respond(
+                    content = """{"artifacts":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                request.url.encodedPath.endsWith("/jobs") -> respond(
+                    content = """{"jobs":[]}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+                else -> respond(
+                    content = """{"id":42,"status":"completed","conclusion":"timed_out"}""",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                )
+            }
+        }
+        val client = GitHubRestActionsClient(
+            httpClient = HttpClient(engine),
+            tokenProvider = GitHubTokenProvider { "token" },
+            baseUrl = "https://api.github.test",
+        )
+
+        val run = client.getRun(RepositoryRef("HereLiesAz", "haive", "main"), "42")
+
+        assertEquals(GitHubWorkflowRunStatus.Failed, run.status)
+        assertEquals("Run timed out", run.progressMessage)
     }
 }

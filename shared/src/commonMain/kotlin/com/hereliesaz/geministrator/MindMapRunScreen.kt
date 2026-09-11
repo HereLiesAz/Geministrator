@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.RepositoryRef
@@ -30,9 +31,12 @@ internal fun MindMapRunScreen(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
+    onRecoverFromCorruption: () -> Unit = {},
+    onValidateWorkflow: () -> List<String> = { emptyList() },
     compact: Boolean,
     runtimeState: ApplicationRuntimeState,
 ) {
+    var branchIsolation by remember { mutableStateOf(false) }
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     val activityEntrance = remember { AzphaltEntrance.childBand() }
     val existingRepository = (runtimeState as? ApplicationRuntimeState.NoRun)?.project?.repository
@@ -53,6 +57,15 @@ internal fun MindMapRunScreen(
     ) {
         if (liveWorkflow == null) {
             RuntimeStateRecord(runtimeState, compact)
+            val corrupted = (runtimeState as? ApplicationRuntimeState.ResumeFailed)?.isCorrupted == true
+            if (corrupted) {
+                AzphaltPill(
+                    "Recover — clear corrupted data",
+                    "recover-corruption",
+                    onClick = onRecoverFromCorruption,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             if (runtimeState == ApplicationRuntimeState.NoProject || runtimeState is ApplicationRuntimeState.NoRun) {
                 OutlinedTextField(
                     value = projectName,
@@ -86,7 +99,7 @@ internal fun MindMapRunScreen(
                     value = objective,
                     onValueChange = { objective = it },
                     label = { Text("Objective") },
-                    minLines = 3,
+                    minLines = if (compact) 2 else 3,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 val owner = repositoryOwner.trim()
@@ -150,13 +163,52 @@ internal fun MindMapRunScreen(
             endCap = if (awaitingHuman) "Required" else "Clear",
         )
 
-        Text("COMPANY EXECUTION", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+        val validationErrors = remember(liveWorkflow.definition) { onValidateWorkflow() }
+        if (validationErrors.isNotEmpty()) {
+            Text("WORKFLOW ERRORS", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+            validationErrors.forEachIndexed { index, error ->
+                AzphaltRecord(
+                    seed = "validation-error-$index",
+                    eyebrow = "Invalid",
+                    title = "Workflow definition error",
+                    body = error,
+                    endCap = "Blocked",
+                )
+            }
+        }
+        val activeTaskId = remember(run) {
+            run.taskRuns.values
+                .firstOrNull { it.status == TaskRunStatus.Running || it.status == TaskRunStatus.Planning }
+                ?.taskDefinitionId?.value
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("COMPANY EXECUTION", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage, modifier = Modifier.weight(1f))
+            if (activeTaskId != null) {
+                AzphaltPill(
+                    label = "Jump to active",
+                    seed = "jump-active",
+                    onClick = { onTaskSelected(activeTaskId) },
+                )
+            }
+            AzphaltPill(
+                label = "Branch",
+                seed = "branch-isolation",
+                selected = branchIsolation,
+                onClick = { branchIsolation = !branchIsolation },
+            )
+        }
         GeministratorWorkflowMindMap(
             definition = liveWorkflow.definition,
             run = run,
             roles = liveWorkflow.roles,
             selectedTaskId = selectedTaskId,
             onTaskSelected = onTaskSelected,
+            branchIsolation = branchIsolation,
             modifier = Modifier.fillMaxWidth(),
         )
 

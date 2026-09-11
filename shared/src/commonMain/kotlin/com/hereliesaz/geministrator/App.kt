@@ -13,7 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.domain.WorkflowRunId
+import com.hereliesaz.geministrator.events.WorkflowEvent
+import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.CancellationException
@@ -24,6 +30,7 @@ import kotlinx.coroutines.launch
 fun App(
     providers: Collection<AgentProvider>,
     executorIntegrations: TaskExecutorIntegrationRegistry = TaskExecutorIntegrationRegistry.Empty,
+    onReconfigureProvider: (String) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
@@ -135,9 +142,94 @@ fun App(
                             }
                         }
                     },
+                    onRecoverFromCorruption = {
+                        scope.launch {
+                            try {
+                                runtime?.recoverFromCorruption()
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Recovery failed")
+                            }
+                        }
+                    },
+                    onCheckProviderHealth = {
+                        runtime?.checkProviderHealth()?.mapValues { (_, result) ->
+                            result.fold(
+                                onSuccess = { caps ->
+                                    "Reachable · ${caps.supported.size} capabilities"
+                                },
+                                onFailure = { failure ->
+                                    "Unreachable · ${failure.message?.take(60) ?: "unknown error"}"
+                                },
+                            )
+                        } ?: emptyMap()
+                    },
+                    onClearWorkflowData = {
+                        scope.launch {
+                            try {
+                                (runtime?.persistence as? SettingsWorkflowPersistence)?.clearWorkflowData()
+                                runtime?.loadLatest()
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Clear failed")
+                            }
+                        }
+                    },
+                    onExportJson = suspend {
+                        runtime?.exportJson()
+                    },
+                    onImportJson = { encoded ->
+                        scope.launch {
+                            try {
+                                runtime?.importJson(encoded)
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Import failed")
+                            }
+                        }
+                    },
+                    onLoadRunHistory = {
+                        runtime?.loadRunHistory() ?: emptyList()
+                    },
+                    onSwitchRun = { runId ->
+                        scope.launch {
+                            try {
+                                runtime?.switchToRun(WorkflowRunId(runId))
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Switch run failed")
+                            }
+                        }
+                    },
+                    onLoadRunTimeline = {
+                        runtime?.loadRunTimeline() ?: emptyList()
+                    },
+                    onExportDiagnosticBundle = {
+                        runtime?.exportDiagnosticBundle()
+                    },
+                    onValidateWorkflow = {
+                        runtime?.validateCurrentWorkflow() ?: emptyList()
+                    },
+                    onSaveRole = { role ->
+                        scope.launch {
+                            try {
+                                runtime?.saveRole(role)
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Save role failed")
+                            }
+                        }
+                    },
+                    onReconfigureProvider = onReconfigureProvider,
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,
+                    connectedProviderIds = providers.map { it.id.value }.toSet(),
                 )
             }
         }

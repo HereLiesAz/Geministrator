@@ -20,6 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -158,6 +162,10 @@ internal fun AzphaltPill(
     val content = if (selected) Azphalt.Yellow else hue.contrastingText
     Row(
         modifier = modifier
+            .semantics {
+                role = Role.Button
+                contentDescription = if (endCap != null) "$label: $endCap" else label
+            }
             .azphaltSelectedTransform(selected)
             .clip(RoundedCornerShape(999.dp))
             .background(hue)
@@ -200,7 +208,22 @@ internal fun AzphaltRecord(
     val hue = if (selected) Azphalt.Ink else Azphalt.hue(seed)
     val content = if (selected) Azphalt.Yellow else hue.contrastingText
     val radius = animatedRecordRadius(selected)
-    val interactive = if (onClick == null) modifier else modifier.clickable(onClick = onClick)
+    val description = buildString {
+        append(title)
+        if (eyebrow.isNotBlank()) append(", $eyebrow")
+        endCap?.takeIf(String::isNotBlank)?.let { append(", $it") }
+    }
+    val semanticsMod = if (onClick != null) {
+        modifier.semantics(mergeDescendants = true) {
+            role = Role.Button
+            contentDescription = description
+        }
+    } else {
+        modifier.semantics(mergeDescendants = true) {
+            contentDescription = description
+        }
+    }
+    val interactive = if (onClick == null) semanticsMod else semanticsMod.clickable(onClick = onClick)
     Column(
         modifier = interactive
             .azphaltSelectedTransform(selected)

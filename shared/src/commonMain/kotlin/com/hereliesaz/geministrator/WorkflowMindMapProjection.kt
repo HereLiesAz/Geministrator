@@ -99,6 +99,69 @@ internal fun projectWorkflowMindMap(
     return WorkflowMindMapProjection(bands = bands, edges = edges)
 }
 
+/**
+ * Returns the subset of [taskIds] that are reachable ancestors of [root] (including [root]),
+ * walking [dependsOn] edges in the definition.
+ */
+internal fun ancestorsOf(
+    root: TaskDefinitionId,
+    tasksById: Map<TaskDefinitionId, TaskDefinition>,
+): Set<TaskDefinitionId> {
+    val visited = mutableSetOf<TaskDefinitionId>()
+    fun visit(id: TaskDefinitionId) {
+        if (!visited.add(id)) return
+        tasksById[id]?.dependsOn?.forEach(::visit)
+    }
+    visit(root)
+    return visited
+}
+
+/**
+ * Returns the subset of tasks that are reachable descendants of [root] (including [root]),
+ * walking reverse edges in the definition.
+ */
+internal fun descendantsOf(
+    root: TaskDefinitionId,
+    tasksById: Map<TaskDefinitionId, TaskDefinition>,
+): Set<TaskDefinitionId> {
+    val reverseEdges: Map<TaskDefinitionId, List<TaskDefinitionId>> = buildMap<TaskDefinitionId, MutableList<TaskDefinitionId>> {
+        tasksById.values.forEach { task ->
+            task.dependsOn.forEach { dep ->
+                getOrPut(dep) { mutableListOf() }.add(task.id)
+            }
+        }
+    }
+    val visited = mutableSetOf<TaskDefinitionId>()
+    fun visit(id: TaskDefinitionId) {
+        if (!visited.add(id)) return
+        reverseEdges[id]?.forEach(::visit)
+    }
+    visit(root)
+    return visited
+}
+
+/**
+ * Returns a filtered projection containing only the subgraph reachable from [focusId]
+ * (ancestors + descendants). Edges not connecting two retained nodes are dropped.
+ * If [focusId] is null or not found, the full projection is returned unchanged.
+ */
+internal fun WorkflowMindMapProjection.focusOn(
+    focusId: TaskDefinitionId?,
+    definition: WorkflowDefinition,
+): WorkflowMindMapProjection {
+    if (focusId == null) return this
+    val tasksById = definition.tasks.associateBy { it.id }
+    if (focusId !in tasksById) return this
+    val retained = ancestorsOf(focusId, tasksById) + descendantsOf(focusId, tasksById)
+    val filteredBands = bands
+        .map { band -> H2g2WorkflowBand(band.nodes.filter { TaskDefinitionId(it.id) in retained }) }
+        .filter { it.nodes.isNotEmpty() }
+    val filteredEdges = edges.filter {
+        TaskDefinitionId(it.from) in retained && TaskDefinitionId(it.to) in retained
+    }
+    return copy(bands = filteredBands, edges = filteredEdges)
+}
+
 private fun TaskRunStatus?.toH2g2State(): H2g2WorkflowState = when (this) {
     null, TaskRunStatus.Created -> H2g2WorkflowState.Pending
     TaskRunStatus.Blocked -> H2g2WorkflowState.Blocked

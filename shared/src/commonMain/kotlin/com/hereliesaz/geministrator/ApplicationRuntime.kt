@@ -14,12 +14,16 @@ import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
+import com.hereliesaz.geministrator.persistence.PersistenceCorruptionException
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
+import com.hereliesaz.geministrator.events.WorkflowEvent
+import com.hereliesaz.geministrator.providers.AgentCapabilities
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
@@ -33,6 +37,8 @@ import com.hereliesaz.geministrator.workflow.StarterWorkflowFactory
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import com.hereliesaz.geministrator.workflow.WorkflowApprovalService
 import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
+import com.hereliesaz.geministrator.workflow.WorkflowGraphValidator
+import com.hereliesaz.geministrator.workflow.humanReadable
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
 import com.hereliesaz.geministrator.workflow.WorkflowLaunchService
 import com.hereliesaz.geministrator.workflow.WorkflowRuntimeCoordinator
@@ -58,12 +64,13 @@ sealed interface ApplicationRuntimeState {
     data class NoRun(val project: Project) : ApplicationRuntimeState
     data class Live(val presentation: LiveWorkflowPresentation) : ApplicationRuntimeState
     data class Disconnected(val message: String) : ApplicationRuntimeState
-    data class ResumeFailed(val message: String) : ApplicationRuntimeState
+    data class ResumeFailed(val message: String, val isCorrupted: Boolean = false) : ApplicationRuntimeState
 }
 
 sealed class ApplicationRuntimeFailure(message: String, cause: Throwable? = null) : RuntimeException(message, cause) {
     class Disconnected(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
     class Resume(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
+    class Corrupted(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
 }
 
 class WorkflowRuntimePublisher {
@@ -144,6 +151,41 @@ class ApplicationRuntime private constructor(
     }
 
     suspend fun refresh() = loadLatest()
+
+    suspend fun loadRunHistory(): List<Pair<Project, List<WorkflowRun>>> {
+        val projects = persistence.projects.all()
+        return projects.map { project ->
+            project to persistence.runs.byProject(project.id)
+                .sortedByDescending(WorkflowRun::updatedAtEpochMillis)
+        }.sortedByDescending { (project, runs) ->
+            runs.firstOrNull()?.updatedAtEpochMillis ?: project.updatedAtEpochMillis
+        }
+    }
+
+    suspend fun switchToRun(runId: WorkflowRunId) {
+        runtimeMutex.withLock {
+            publisher.publish(ApplicationRuntimeState.Loading)
+            try {
+                val run = persistence.runs.get(runId)
+                    ?: error("Run ${runId.value} not found")
+                val project = persistence.projects.all().firstOrNull { it.id == run.projectId }
+                    ?: error("Project ${run.projectId.value} not found for run ${runId.value}")
+                val definition = persistence.definitions.get(run.workflowDefinitionId)
+                    ?: error("Workflow definition ${run.workflowDefinitionId.value} not found")
+                val runtimeState = try {
+                    coordinator.resume(runId)
+                } catch (failure: Throwable) {
+                    throw classifyResumeFailure(failure)
+                }
+                replaceCurrent(Current(project, definition, runtimeState))
+                publishCurrent()
+                startCycling()
+            } catch (failure: Throwable) {
+                replaceCurrent(null)
+                publishFailure(failure)
+            }
+        }
+    }
 
     suspend fun launchStarterWorkflow(
         projectName: String,
@@ -354,13 +396,101 @@ class ApplicationRuntime private constructor(
             ?.takeIf(String::isNotBlank)
             ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime failure" }
         publisher.publish(
-            if (failure is ApplicationRuntimeFailure.Disconnected) {
-                ApplicationRuntimeState.Disconnected(message)
-            } else {
-                ApplicationRuntimeState.ResumeFailed(message)
+            when (failure) {
+                is ApplicationRuntimeFailure.Disconnected -> ApplicationRuntimeState.Disconnected(message)
+                is ApplicationRuntimeFailure.Corrupted -> ApplicationRuntimeState.ResumeFailed(message, isCorrupted = true)
+                else -> ApplicationRuntimeState.ResumeFailed(message)
             },
         )
     }
+
+    suspend fun recoverFromCorruption() {
+        val settingsPersistence = persistence as? SettingsWorkflowPersistence ?: return
+        settingsPersistence.recoverFromCorruption()
+        loadLatest()
+    }
+
+    suspend fun checkProviderHealth(): Map<String, Result<AgentCapabilities>> {
+        val results = mutableMapOf<String, Result<AgentCapabilities>>()
+        for (providerId in providerRegistry.providerIds) {
+            val provider = providerRegistry.provider(providerId) ?: continue
+            results[providerId.value] = runCatching { provider.capabilities() }
+        }
+        return results
+    }
+
+    suspend fun exportJson(): String? =
+        (persistence as? SettingsWorkflowPersistence)?.exportJson()
+
+    suspend fun importJson(encoded: String) {
+        (persistence as? SettingsWorkflowPersistence)?.importJson(encoded)
+        loadLatest()
+    }
+
+    suspend fun loadRunTimeline(): List<WorkflowEvent> {
+        val runId = runtimeMutex.withLock { current?.state?.run?.id } ?: return emptyList()
+        return persistence.events.forRun(runId)
+    }
+
+    suspend fun saveRole(role: RoleDefinition) {
+        persistence.roles.put(role)
+    }
+
+    fun validateCurrentWorkflow(): List<String> {
+        val definition = current?.definition ?: return emptyList()
+        return WorkflowGraphValidator.validate(definition).map { it.humanReadable() }
+    }
+
+    suspend fun exportDiagnosticBundle(): String {
+        val snapshot = runtimeMutex.withLock { current }
+        val run = snapshot?.state?.run
+        val definition = snapshot?.definition
+        val events = if (run != null) persistence.events.forRun(run.id) else emptyList()
+
+        val retryCount = events.count { it is com.hereliesaz.geministrator.events.RetryScheduled }
+        val failureCount = events.count { it is com.hereliesaz.geministrator.events.TaskFailed }
+        val escalationCount = events.count { it is com.hereliesaz.geministrator.events.TaskEscalated }
+        val artifactCount = events.count { it is com.hereliesaz.geministrator.events.ArtifactCreated }
+        val durationMs = if (run != null) run.updatedAtEpochMillis - run.createdAtEpochMillis else 0L
+
+        val startsByTask = events
+            .filterIsInstance<com.hereliesaz.geministrator.events.TaskStarted>()
+            .groupBy { it.taskDefinitionId }
+            .mapValues { (_, starts) -> starts.minOf { it.occurredAtEpochMillis } }
+        val completionsByTask = events
+            .filterIsInstance<com.hereliesaz.geministrator.events.TaskCompleted>()
+            .associateBy { it.taskDefinitionId }
+
+        return buildString {
+            appendLine("{")
+            appendLine("  \"schema\": \"haive-diagnostic-v1\",")
+            appendLine("  \"runId\": ${jsonStr(run?.id?.value)},")
+            appendLine("  \"objective\": ${jsonStr(run?.objective)},")
+            appendLine("  \"status\": ${jsonStr(run?.status?.name)},")
+            appendLine("  \"durationMs\": $durationMs,")
+            appendLine("  \"taskCount\": ${definition?.tasks?.size ?: 0},")
+            appendLine("  \"taskRunCount\": ${run?.taskRuns?.size ?: 0},")
+            appendLine("  \"eventCount\": ${events.size},")
+            appendLine("  \"retryCount\": $retryCount,")
+            appendLine("  \"failureCount\": $failureCount,")
+            appendLine("  \"escalationCount\": $escalationCount,")
+            appendLine("  \"artifactCount\": $artifactCount,")
+            appendLine("  \"taskRuns\": [")
+            val taskRuns = run?.taskRuns?.values?.toList() ?: emptyList()
+            taskRuns.forEachIndexed { index, taskRun ->
+                val comma = if (index < taskRuns.size - 1) "," else ""
+                val taskStart = startsByTask[taskRun.taskDefinitionId]
+                val taskEnd = completionsByTask[taskRun.taskDefinitionId]?.occurredAtEpochMillis
+                val taskDurationMs = if (taskStart != null && taskEnd != null) taskEnd - taskStart else "null"
+                appendLine("    {\"id\": ${jsonStr(taskRun.taskDefinitionId.value)}, \"status\": ${jsonStr(taskRun.status.name)}, \"attempt\": ${taskRun.attempt}, \"durationMs\": $taskDurationMs, \"providerId\": ${jsonStr(taskRun.assignedProviderId?.value)}}$comma")
+            }
+            appendLine("  ]")
+            append("}")
+        }
+    }
+
+    private fun jsonStr(value: String?): String =
+        if (value == null) "null" else "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
 
     private fun WorkflowRunStatus.isTerminal() =
         this == WorkflowRunStatus.Completed ||
@@ -382,6 +512,10 @@ class ApplicationRuntime private constructor(
 
         internal fun classifyRuntimeFailure(failure: Throwable): ApplicationRuntimeFailure = when (failure) {
             is ApplicationRuntimeFailure -> failure
+            is PersistenceCorruptionException -> ApplicationRuntimeFailure.Corrupted(
+                failure.message ?: "Workflow persistence is corrupted",
+                failure,
+            )
             is ManagedSessionFailure.ProviderUnavailable -> ApplicationRuntimeFailure.Disconnected(
                 failure.message ?: "Provider runtime is unavailable",
                 failure,

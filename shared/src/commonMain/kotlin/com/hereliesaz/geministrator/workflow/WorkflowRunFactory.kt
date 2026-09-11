@@ -2,10 +2,12 @@ package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.BlockingReason
 import com.hereliesaz.geministrator.domain.ProjectId
+import com.hereliesaz.geministrator.domain.TaskCondition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRun
 import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
+import com.hereliesaz.geministrator.domain.isTerminal
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
@@ -26,7 +28,14 @@ object WorkflowRunFactory {
         WorkflowGraphValidator.requireValid(definition)
 
         val taskRuns = definition.tasks.associate { task ->
-            val status = if (task.dependsOn.isEmpty()) TaskRunStatus.Ready else TaskRunStatus.Blocked
+            val conditionTask = when (val c = task.condition) {
+                is TaskCondition.Always -> null
+                is TaskCondition.OnAnyOutcome -> c.ofTask
+                is TaskCondition.OnFailure -> c.ofTask
+            }
+            val blocked = task.dependsOn.isNotEmpty() ||
+                (conditionTask != null && conditionTask != task.id)
+            val status = if (blocked) TaskRunStatus.Blocked else TaskRunStatus.Ready
             task.id to TaskRun(
                 id = taskRunIdFactory(task.id),
                 taskDefinitionId = task.id,
@@ -36,7 +45,7 @@ object WorkflowRunFactory {
                 blockingReason = if (status == TaskRunStatus.Blocked) {
                     BlockingReason(
                         code = "WAITING_FOR_DEPENDENCIES",
-                        message = "Waiting for ${task.dependsOn.size} task dependency/dependencies.",
+                        message = "Waiting for task dependencies.",
                     )
                 } else {
                     null
@@ -75,13 +84,30 @@ object WorkflowRunFactory {
             }
             val allCompleted = dependencyRuns.size == task.dependsOn.size &&
                 dependencyRuns.all { it.status == TaskRunStatus.Completed }
+            val allTerminal = dependencyRuns.size == task.dependsOn.size &&
+                dependencyRuns.all { it.status.isTerminal() }
+
+            val conditionMet: Boolean = when (val c = task.condition) {
+                is TaskCondition.Always -> allCompleted
+                is TaskCondition.OnAnyOutcome -> {
+                    val targetRun = run.taskRuns[c.ofTask]
+                    allTerminal && targetRun != null && targetRun.status.isTerminal()
+                }
+                is TaskCondition.OnFailure -> {
+                    val targetRun = run.taskRuns[c.ofTask]
+                    allTerminal && targetRun != null &&
+                        (targetRun.status == TaskRunStatus.Failed ||
+                            targetRun.status == TaskRunStatus.Escalated ||
+                            targetRun.status == TaskRunStatus.Cancelled)
+                }
+            }
 
             when {
-                allCompleted -> taskRun.copy(
+                conditionMet -> taskRun.copy(
                     status = TaskRunStatus.Ready,
                     blockingReason = null,
                 )
-                hasFailedDependency -> taskRun.copy(
+                hasFailedDependency && task.condition is TaskCondition.Always -> taskRun.copy(
                     blockingReason = BlockingReason(
                         code = "DEPENDENCY_FAILED",
                         message = "A dependency did not complete successfully.",

@@ -35,10 +35,20 @@ data class GitHubWorkflowArtifact(
     val archiveDownloadUrl: String?,
 )
 
+data class GitHubWorkflowJob(
+    val id: String,
+    val name: String,
+    val status: GitHubWorkflowRunStatus,
+    val currentStep: String? = null,
+    val completedSteps: Int = 0,
+    val totalSteps: Int = 0,
+)
+
 data class GitHubWorkflowRun(
     val id: String,
     val status: GitHubWorkflowRunStatus,
     val artifacts: List<GitHubWorkflowArtifact> = emptyList(),
+    val jobs: List<GitHubWorkflowJob> = emptyList(),
     val progressMessage: String? = null,
 )
 
@@ -111,16 +121,50 @@ class GitHubRestActionsClient(
                     artifact.archiveDownloadUrl,
                 )
             }
-        return run.toWorkflowRun(artifacts)
+        val jobsBody = httpClient.get("$baseRepositoryUrl/actions/runs/${runId.encodeURLPathPart()}/jobs") {
+            githubHeaders(token)
+        }.requireSuccessBody("read jobs for GitHub Actions run $runId")
+        val jobs = json.decodeFromString<JobsResponse>(jobsBody).jobs.map { job ->
+            val steps = job.steps
+            val completedSteps = steps.count { it.status == "completed" }
+            val currentStep = steps.firstOrNull { it.status == "in_progress" }?.name
+            GitHubWorkflowJob(
+                id = job.id.toString(),
+                name = job.name,
+                status = when (job.status) {
+                    "completed" -> if (job.conclusion == "success") {
+                        GitHubWorkflowRunStatus.Completed
+                    } else {
+                        GitHubWorkflowRunStatus.Failed
+                    }
+                    "queued", "waiting" -> GitHubWorkflowRunStatus.Queued
+                    else -> GitHubWorkflowRunStatus.Running
+                },
+                currentStep = currentStep,
+                completedSteps = completedSteps,
+                totalSteps = steps.size,
+            )
+        }
+        return run.toWorkflowRun(artifacts, jobs)
     }
 
     private fun RunResponse.toWorkflowRun(
         artifacts: List<GitHubWorkflowArtifact> = emptyList(),
+        jobs: List<GitHubWorkflowJob> = emptyList(),
     ) = GitHubWorkflowRun(
         id = id.toString(),
         status = toStatus(),
         artifacts = artifacts,
-        progressMessage = conclusion ?: status,
+        jobs = jobs,
+        progressMessage = when {
+            conclusion == "cancelled" -> "Run was cancelled"
+            conclusion == "timed_out" -> "Run timed out"
+            conclusion == "stale" -> "Run became stale and was abandoned"
+            conclusion == "action_required" -> "Run requires manual action"
+            conclusion == "skipped" -> "Run was skipped"
+            conclusion != null -> conclusion
+            else -> status
+        },
     )
 
     private suspend fun requireToken(): String = tokenProvider.getToken().trim().also {
@@ -144,10 +188,12 @@ class GitHubRestActionsClient(
     }
 
     private fun RunResponse.toStatus(): GitHubWorkflowRunStatus = when (status) {
-        "completed" -> if (conclusion == "success") {
-            GitHubWorkflowRunStatus.Completed
-        } else {
-            GitHubWorkflowRunStatus.Failed
+        "completed" -> when (conclusion) {
+            "success" -> GitHubWorkflowRunStatus.Completed
+            "cancelled", "skipped", "stale", "timed_out", "action_required",
+            "neutral", "failure",
+            -> GitHubWorkflowRunStatus.Failed
+            else -> GitHubWorkflowRunStatus.Failed
         }
         "queued", "waiting", "pending", "requested" -> GitHubWorkflowRunStatus.Queued
         else -> GitHubWorkflowRunStatus.Running
@@ -184,6 +230,27 @@ class GitHubRestActionsClient(
         @SerialName("archive_download_url") val archiveDownloadUrl: String? = null,
     )
 
+    @Serializable
+    private data class JobsResponse(
+        val jobs: List<JobResponse> = emptyList(),
+    )
+
+    @Serializable
+    private data class JobResponse(
+        val id: Long,
+        val name: String,
+        val status: String,
+        val conclusion: String? = null,
+        val steps: List<StepResponse> = emptyList(),
+    )
+
+    @Serializable
+    private data class StepResponse(
+        val name: String,
+        val status: String,
+        val conclusion: String? = null,
+    )
+
     private companion object {
         const val API_VERSION = "2026-03-10"
     }
@@ -218,28 +285,42 @@ class GitHubActionsExecutorIntegration(
         return client.getRun(repository, runId).toExecution(context)
     }
 
-    private fun GitHubWorkflowRun.toExecution(context: TaskExecutorContext) = TaskExecutorExecution(
-        status = when (status) {
+    private fun GitHubWorkflowRun.toExecution(context: TaskExecutorContext): TaskExecutorExecution {
+        val taskStatus = when (status) {
             GitHubWorkflowRunStatus.Queued,
             GitHubWorkflowRunStatus.Running,
             -> TaskRunStatus.Running
             GitHubWorkflowRunStatus.Completed -> TaskRunStatus.Completed
             GitHubWorkflowRunStatus.Failed -> TaskRunStatus.Failed
-        },
-        externalRunId = id,
-        artifacts = artifacts.map { artifact ->
-            ArtifactRef(
-                ArtifactId(
-                    "${context.taskRun.id.value}:github-action:${context.taskRun.attempt}:${artifact.id}",
-                ),
-                ArtifactKind.CommandOutput,
-                context.taskRun.id,
-                artifact.name,
-                uri = artifact.archiveDownloadUrl,
-                createdAtEpochMillis = context.nowEpochMillis,
-            )
-        },
-        progress = if (status == GitHubWorkflowRunStatus.Completed) 1f else null,
-        progressMessage = progressMessage,
-    )
+        }
+        val totalSteps = jobs.sumOf { it.totalSteps }
+        val completedSteps = jobs.sumOf { it.completedSteps }
+        val stepProgress = if (totalSteps > 0) completedSteps.toFloat() / totalSteps else null
+        val activeJob = jobs.firstOrNull { it.status == GitHubWorkflowRunStatus.Running }
+        val stepMessage = activeJob?.currentStep?.let { step ->
+            if (activeJob.totalSteps > 0) {
+                "${activeJob.name}: $step (${activeJob.completedSteps + 1}/${activeJob.totalSteps})"
+            } else {
+                "${activeJob.name}: $step"
+            }
+        } ?: progressMessage
+        return TaskExecutorExecution(
+            status = taskStatus,
+            externalRunId = id,
+            artifacts = artifacts.map { artifact ->
+                ArtifactRef(
+                    ArtifactId(
+                        "${context.taskRun.id.value}:github-action:${context.taskRun.attempt}:${artifact.id}",
+                    ),
+                    ArtifactKind.CommandOutput,
+                    context.taskRun.id,
+                    artifact.name,
+                    uri = artifact.archiveDownloadUrl,
+                    createdAtEpochMillis = context.nowEpochMillis,
+                )
+            },
+            progress = if (taskStatus == TaskRunStatus.Completed) 1f else stepProgress,
+            progressMessage = stepMessage,
+        )
+    }
 }

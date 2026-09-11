@@ -21,6 +21,7 @@ import com.hereliesaz.geministrator.events.ArtifactCreated
 import com.hereliesaz.geministrator.events.ExecutorAssigned
 import com.hereliesaz.geministrator.events.HumanDecisionRequired
 import com.hereliesaz.geministrator.events.NoOpWorkflowEventSink
+import com.hereliesaz.geministrator.events.ProviderUsageRecorded
 import com.hereliesaz.geministrator.events.RetryScheduled
 import com.hereliesaz.geministrator.events.TaskCompleted
 import com.hereliesaz.geministrator.events.TaskEscalated
@@ -101,13 +102,19 @@ class WorkflowEngine(
                     val providerActive = activeByProvider[providerId] ?: 0
                     if (providerActive >= providerLimit) continue
 
+                    val redaction = definition.payloadRedactionPolicy
                     val dependencyArtifacts = task.dependsOn
                         .mapNotNull(nextRun.taskRuns::get)
                         .flatMap(TaskRun::artifacts)
+                        .filter { it.kind !in redaction.excludedArtifactKinds }
                     val request = AgentTaskRequest(
                         taskRunId = taskRun.id,
-                        objective = task.objective,
-                        roleInstructions = "$swarmInstructions\n\n${role.instructions}",
+                        objective = if (redaction.redactObjective) "[redacted]" else task.objective,
+                        roleInstructions = if (redaction.redactRoleInstructions) {
+                            swarmInstructions
+                        } else {
+                            "$swarmInstructions\n\n${role.instructions}"
+                        },
                         acceptanceCriteria = task.acceptanceCriteria,
                         contextArtifacts = dependencyArtifacts,
                         repository = project.repository,
@@ -309,6 +316,22 @@ class WorkflowEngine(
             val previousStatus = taskRun.status
             val status = sessionGateway.status(handle)
             val providerProgress = sessionGateway.progress(handle)
+            sessionGateway.usageReport(handle)?.let { usage ->
+                eventSink.append(
+                    ProviderUsageRecorded(
+                        workflowRunId = nextRun.id,
+                        taskDefinitionId = taskId,
+                        providerId = handle.providerId,
+                        providerRunId = handle.providerRunId,
+                        inputTokens = usage.inputTokens,
+                        outputTokens = usage.outputTokens,
+                        costUsd = usage.costUsd,
+                        cacheHitFraction = usage.cacheHitFraction,
+                        latencyMillis = usage.latencyMillis,
+                        occurredAtEpochMillis = nowEpochMillis,
+                    ),
+                )
+            }
             val durableArtifacts = sessionGateway.artifacts(handle).mapIndexed { index, artifact ->
                 ArtifactRef(
                     id = artifactIdFactory(taskRun, artifact, index),

@@ -29,7 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RepositoryRef
+import com.hereliesaz.geministrator.domain.RoleDefinition
+import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.events.WorkflowEvent
 
 internal object ControlRoomBreakpoints {
     val Wide: Dp = 820.dp
@@ -88,9 +92,22 @@ fun ControlRoom(
     onApproveTask: (String) -> Unit,
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
+    onRecoverFromCorruption: () -> Unit,
+    onCheckProviderHealth: suspend () -> Map<String, String> = { emptyMap() },
+    onClearWorkflowData: () -> Unit = {},
+    onExportJson: suspend () -> String? = { null },
+    onImportJson: (String) -> Unit = {},
+    onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
+    onSwitchRun: (String) -> Unit = {},
+    onLoadRunTimeline: suspend () -> List<WorkflowEvent> = { emptyList() },
+    onExportDiagnosticBundle: suspend () -> String? = { null },
+    onValidateWorkflow: () -> List<String> = { emptyList() },
+    onSaveRole: (RoleDefinition) -> Unit = {},
+    onReconfigureProvider: (String) -> Unit = {},
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
+    connectedProviderIds: Set<String> = emptySet(),
 ) {
     val ground = Azphalt.currentGround
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
@@ -112,6 +129,22 @@ fun ControlRoom(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
                     onLaunchWorkflow = onLaunchWorkflow,
+                    onApproveTask = onApproveTask,
+                    onRejectPlan = onRejectPlan,
+                    onResolveEscalation = onResolveEscalation,
+                    onRecoverFromCorruption = onRecoverFromCorruption,
+                    onCheckProviderHealth = onCheckProviderHealth,
+                    onClearWorkflowData = onClearWorkflowData,
+                    onExportJson = onExportJson,
+                    onImportJson = onImportJson,
+                    onLoadRunHistory = onLoadRunHistory,
+                    onSwitchRun = onSwitchRun,
+                    onLoadRunTimeline = onLoadRunTimeline,
+                    onExportDiagnosticBundle = onExportDiagnosticBundle,
+                    onValidateWorkflow = onValidateWorkflow,
+                    onSaveRole = onSaveRole,
+                    onReconfigureProvider = onReconfigureProvider,
+                    connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
                     runtimeState = runtimeState,
@@ -128,7 +161,7 @@ fun ControlRoom(
                             onApproveTask = onApproveTask,
                             onRejectPlan = onRejectPlan,
                             onResolveEscalation = onResolveEscalation,
-                            modifier = Modifier.fillMaxWidth().height(280.dp),
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f),
                         )
                     }
                 }
@@ -146,6 +179,22 @@ fun ControlRoom(
                     selectedTaskId = selectedTaskId,
                     onTaskSelected = onTaskSelected,
                     onLaunchWorkflow = onLaunchWorkflow,
+                    onApproveTask = onApproveTask,
+                    onRejectPlan = onRejectPlan,
+                    onResolveEscalation = onResolveEscalation,
+                    onRecoverFromCorruption = onRecoverFromCorruption,
+                    onCheckProviderHealth = onCheckProviderHealth,
+                    onClearWorkflowData = onClearWorkflowData,
+                    onExportJson = onExportJson,
+                    onImportJson = onImportJson,
+                    onLoadRunHistory = onLoadRunHistory,
+                    onSwitchRun = onSwitchRun,
+                    onLoadRunTimeline = onLoadRunTimeline,
+                    onExportDiagnosticBundle = onExportDiagnosticBundle,
+                    onValidateWorkflow = onValidateWorkflow,
+                    onSaveRole = onSaveRole,
+                    onReconfigureProvider = onReconfigureProvider,
+                    connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
                 )
@@ -258,27 +307,50 @@ private fun MainDestination(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
+    onApproveTask: (String) -> Unit,
+    onRejectPlan: (String) -> Unit,
+    onResolveEscalation: (String, Boolean) -> Unit,
+    onRecoverFromCorruption: () -> Unit,
+    onCheckProviderHealth: suspend () -> Map<String, String>,
+    onClearWorkflowData: () -> Unit,
+    onExportJson: suspend () -> String?,
+    onImportJson: (String) -> Unit,
+    onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>>,
+    onSwitchRun: (String) -> Unit,
+    onLoadRunTimeline: suspend () -> List<WorkflowEvent>,
+    onExportDiagnosticBundle: suspend () -> String?,
+    onValidateWorkflow: () -> List<String>,
+    onSaveRole: (RoleDefinition) -> Unit,
+    onReconfigureProvider: (String) -> Unit = {},
+    connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
     runtimeState: ApplicationRuntimeState,
 ) {
     AzphaltPlaceTransition(target = destination, modifier = modifier.fillMaxSize()) { place ->
         when (place) {
-            ControlRoomDestination.Overview,
-            ControlRoomDestination.Runs,
-            -> MindMapRunScreen(
+            ControlRoomDestination.Overview -> MindMapRunScreen(
                 modifier = Modifier.fillMaxSize(),
                 selectedTaskId = selectedTaskId,
                 onTaskSelected = onTaskSelected,
                 onLaunchWorkflow = onLaunchWorkflow,
+                onRecoverFromCorruption = onRecoverFromCorruption,
+                onValidateWorkflow = onValidateWorkflow,
                 compact = compact,
                 runtimeState = runtimeState,
             )
-            ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Company -> CompanyScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Inbox -> InboxScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Runs -> RunsScreen(
+                runtimeState = runtimeState,
+                onLoadRunHistory = onLoadRunHistory,
+                onSwitchRun = onSwitchRun,
+                onLoadRunTimeline = onLoadRunTimeline,
+                modifier = Modifier.fillMaxSize(),
+            )
+            ControlRoomDestination.Workflows -> WorkflowTemplateScreen(runtimeState, Modifier.fillMaxSize())
+            ControlRoomDestination.Company -> CompanyScreen(runtimeState, onSaveRole, Modifier.fillMaxSize())
+            ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
+            ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, onReconfigureProvider, Modifier.fillMaxSize())
         }
     }
 }
