@@ -59,13 +59,13 @@ Tracking issue: #35
 
 ## P1 — GitHub as a first-class executor/integration
 
-- [ ] Add a repository integration boundary separate from agent providers.
-- [ ] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
-- [ ] Read workflow run/job/step status and project it into task progress.
-- [ ] Capture build/test artifacts and attach them to Haive task/run artifacts.
+- [x] Add a repository integration boundary separate from agent providers.
+- [x] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
+- [x] Read workflow run/job/step status and project it into task progress.
+- [x] Capture build/test artifacts and attach them to Haive task/run artifacts.
 - [ ] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
-- [ ] Add explicit approval/policy boundaries before destructive or publishing operations.
-- [ ] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
+- [x] Add explicit approval/policy boundaries before destructive or publishing operations.
+- [x] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
 
 ## P1 — Workflow authoring and governance
 
@@ -137,7 +137,7 @@ Tracking issue: #35
 - [x] Add clear data deletion controls for local workflow state.
 - [x] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
 - [x] Add dependency/security scanning without blocking development on noisy non-actionable findings.
-- [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
+- [x] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
 
 ## P2 — Cost and observability
 

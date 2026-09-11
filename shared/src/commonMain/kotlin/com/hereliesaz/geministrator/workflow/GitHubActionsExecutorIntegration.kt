@@ -156,7 +156,15 @@ class GitHubRestActionsClient(
         status = toStatus(),
         artifacts = artifacts,
         jobs = jobs,
-        progressMessage = conclusion ?: status,
+        progressMessage = when {
+            conclusion == "cancelled" -> "Run was cancelled"
+            conclusion == "timed_out" -> "Run timed out"
+            conclusion == "stale" -> "Run became stale and was abandoned"
+            conclusion == "action_required" -> "Run requires manual action"
+            conclusion == "skipped" -> "Run was skipped"
+            conclusion != null -> conclusion
+            else -> status
+        },
     )
 
     private suspend fun requireToken(): String = tokenProvider.getToken().trim().also {
@@ -180,10 +188,12 @@ class GitHubRestActionsClient(
     }
 
     private fun RunResponse.toStatus(): GitHubWorkflowRunStatus = when (status) {
-        "completed" -> if (conclusion == "success") {
-            GitHubWorkflowRunStatus.Completed
-        } else {
-            GitHubWorkflowRunStatus.Failed
+        "completed" -> when (conclusion) {
+            "success" -> GitHubWorkflowRunStatus.Completed
+            "cancelled", "skipped", "stale", "timed_out", "action_required",
+            "neutral", "failure",
+            -> GitHubWorkflowRunStatus.Failed
+            else -> GitHubWorkflowRunStatus.Failed
         }
         "queued", "waiting", "pending", "requested" -> GitHubWorkflowRunStatus.Queued
         else -> GitHubWorkflowRunStatus.Running

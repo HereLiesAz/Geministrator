@@ -51,6 +51,7 @@ import com.hereliesaz.geministrator.events.ApprovalRequired
 import com.hereliesaz.geministrator.events.ArtifactCreated
 import com.hereliesaz.geministrator.events.ExecutorAssigned
 import com.hereliesaz.geministrator.events.HumanDecisionRequired
+import com.hereliesaz.geministrator.events.ProviderUsageRecorded
 import com.hereliesaz.geministrator.events.RetryScheduled
 import com.hereliesaz.geministrator.events.TaskBecameReady
 import com.hereliesaz.geministrator.events.TaskCancelled
@@ -460,6 +461,7 @@ private fun workflowEventTaskId(event: WorkflowEvent): TaskDefinitionId? = when 
     is HumanDecisionRequired -> event.taskDefinitionId
     is TaskCancelled -> event.taskDefinitionId
     is WorkflowCreated, is WorkflowCompleted, is WorkflowFailed, is WorkflowCancelled -> null
+    is ProviderUsageRecorded -> null
 }
 
 private fun workflowEventLabel(event: WorkflowEvent): String = when (event) {
@@ -481,6 +483,7 @@ private fun workflowEventLabel(event: WorkflowEvent): String = when (event) {
     is WorkflowFailed -> "Workflow failed"
     is WorkflowCancelled -> "Workflow cancelled"
     is TaskCancelled -> "Task cancelled"
+    is ProviderUsageRecorded -> "Usage recorded"
 }
 
 private fun workflowEventDetail(event: WorkflowEvent): String = when (event) {
