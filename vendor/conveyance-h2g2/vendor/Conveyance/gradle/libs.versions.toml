@@ -8,7 +8,7 @@
 # carries the fix yet. Checked 9.5.0-alpha03 too: it resolves the same BC 1.80.2 as this RC, so
 # there's nothing to gain from the extra alpha-grade instability -- reconsider only if a later
 # stable AGP (9.4.0 final or newer) ships, at which point drop back to a stable pin.
-agp = "9.5.0-alpha04"
+agp = "9.4.0-rc02"
 gradle = "9.7.1"
 kotlin = "2.4.10"
 # Compose Multiplatform: latest stable plugin.

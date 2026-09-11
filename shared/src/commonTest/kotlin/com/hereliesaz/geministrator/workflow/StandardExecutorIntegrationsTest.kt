@@ -84,14 +84,16 @@ class StandardExecutorIntegrationsTest {
     }
 
     @Test
-    fun nestedWorkflowDispatchAndReconcileUseDefinitionAndRunId() = runBlocking {
+    fun nestedWorkflowDispatchAndReconcileUseDefinitionTargetProjectAndRunId() = runBlocking {
         val client = FakeNestedWorkflowClient()
         val integration = NestedWorkflowExecutorIntegration(client)
         val childDefinitionId = WorkflowDefinitionId("child-workflow")
-        val context = context(TaskExecutor.NestedWorkflow(childDefinitionId))
+        val targetProjectId = ProjectId("child-project")
+        val context = context(TaskExecutor.NestedWorkflow(childDefinitionId, targetProjectId))
 
         val started = integration.dispatch(context)
         assertEquals(childDefinitionId, client.workflowDefinitionId)
+        assertEquals(targetProjectId, client.targetProjectId)
         assertEquals("nested-1", started.externalRunId)
 
         val completed = integration.reconcile(context.withExternalRun("nested-1"))
@@ -212,10 +214,16 @@ private class FakeExternalServiceClient : ExternalServiceClient {
 
 private class FakeNestedWorkflowClient : NestedWorkflowClient {
     var workflowDefinitionId: WorkflowDefinitionId? = null
+    var targetProjectId: ProjectId? = null
     var runId: String? = null
 
-    override suspend fun start(project: Project, workflowDefinitionId: WorkflowDefinitionId, targetProjectId: ProjectId?): ExternalExecutionRun {
+    override suspend fun start(
+        project: Project,
+        workflowDefinitionId: WorkflowDefinitionId,
+        targetProjectId: ProjectId?,
+    ): ExternalExecutionRun {
         this.workflowDefinitionId = workflowDefinitionId
+        this.targetProjectId = targetProjectId
         return ExternalExecutionRun("nested-1", ExternalExecutionStatus.Running)
     }
 

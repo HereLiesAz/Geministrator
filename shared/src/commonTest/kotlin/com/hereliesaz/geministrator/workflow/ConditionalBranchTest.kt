@@ -84,6 +84,7 @@ class ConditionalBranchTest {
 
         assertEquals(TaskRunStatus.Ready, refreshed.taskRuns.getValue(happyPathId).status)
         assertEquals(TaskRunStatus.Cancelled, refreshed.taskRuns.getValue(failureHandlerId).status)
+        assertEquals("CONDITION_NOT_MET", refreshed.taskRuns.getValue(failureHandlerId).blockingReason?.code)
         assertEquals(TaskRunStatus.Ready, refreshed.taskRuns.getValue(alwaysRunId).status)
     }
 
