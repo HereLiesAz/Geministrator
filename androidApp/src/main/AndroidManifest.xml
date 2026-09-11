@@ -8,14 +8,15 @@
         android:label="The Haive"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.NoActionBar">
+        android:theme="@style/Theme.Haive">
 
         <meta-data
             android:name="android.content.APP_PRIVACY_POLICY"
             android:value="https://hereliesaz.github.io/haive/privacy" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.Haive.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base app theme -->
+    <style name="Theme.Haive" parent="@android:style/Theme.Material.NoActionBar" />
+
+    <!-- Splash theme for API 26–30: uses window background drawable -->
+    <style name="Theme.Haive.Splash" parent="Theme.Haive">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>
