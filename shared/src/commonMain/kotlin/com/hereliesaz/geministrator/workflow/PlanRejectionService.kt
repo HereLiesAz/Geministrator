@@ -3,10 +3,6 @@ package com.hereliesaz.geministrator.workflow
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.providers.ProviderActionResult
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-
-private val planRejectionMutex = Mutex()
 
 class PlanRejectionService(
     private val gateRepository: ApprovalGateRepository,
@@ -19,7 +15,7 @@ class PlanRejectionService(
         decidedByRoleId: RoleDefinitionId? = null,
         note: String? = null,
         nowEpochMillis: Long,
-    ): ApprovalGate = planRejectionMutex.withLock {
+    ): ApprovalGate {
         val gate = requireNotNull(gateRepository.get(gateId)) {
             "Approval gate ${gateId.value} does not exist"
         }
@@ -33,6 +29,13 @@ class PlanRejectionService(
             "Approval gate ${gateId.value} cannot be rejected while ${gate.status}"
         }
 
+        val rejectionNote = note ?: "Plan rejected in application"
+        gateCoordinator.claimPlanApproval(
+            id = gateId,
+            decidedByRoleId = decidedByRoleId,
+            note = rejectionNote,
+        )
+
         when (val cancellation = sessionGateway.cancel(handle)) {
             ProviderActionResult.Accepted -> Unit
             is ProviderActionResult.Rejected -> error(
@@ -41,11 +44,11 @@ class PlanRejectionService(
             )
         }
 
-        gateCoordinator.decide(
+        return gateCoordinator.decide(
             id = gateId,
             approved = false,
             decidedByRoleId = decidedByRoleId,
-            note = note ?: "Plan rejected in application",
+            note = rejectionNote,
             nowEpochMillis = nowEpochMillis,
         )
     }
