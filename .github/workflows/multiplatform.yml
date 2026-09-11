@@ -103,10 +103,10 @@ jobs:
 
       - name: Generate Desktop icons (macOS icns, Windows ico)
         run: |
-          sudo apt-get install -y --no-install-recommends icnsutils > /dev/null
+          sudo apt-get install -y --no-install-recommends icnsutils ffmpeg > /dev/null
           pip install --quiet pillow
           # Re-encode via ffmpeg to a clean PNG Pillow can always read.
-          ffmpeg -y -i branding/haive-icon-color.png /tmp/haive-icon-source.png 2>/dev/null
+          ffmpeg -y -i branding/haive-icon-color.png /tmp/haive-icon-source.png
           python3 - <<'EOF'
           from PIL import Image
           src = Image.open("/tmp/haive-icon-source.png").convert("RGBA")
