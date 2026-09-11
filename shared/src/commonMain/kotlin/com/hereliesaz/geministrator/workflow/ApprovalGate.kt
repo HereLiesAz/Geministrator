@@ -26,6 +26,12 @@ enum class ApprovalGateStatus {
 }
 
 @Serializable
+enum class ApprovalDecisionIntent {
+    Approve,
+    Reject,
+}
+
+@Serializable
 data class ApprovalGate(
     val id: ApprovalGateId,
     val workflowRunId: WorkflowRunId,
@@ -36,13 +42,19 @@ data class ApprovalGate(
     val requiredRoleId: RoleDefinitionId? = null,
     val requiresHuman: Boolean = false,
     val status: ApprovalGateStatus = ApprovalGateStatus.Pending,
+    val applyingIntent: ApprovalDecisionIntent? = null,
     val decidedByRoleId: RoleDefinitionId? = null,
     val decisionNote: String? = null,
     val createdAtEpochMillis: Long,
     val decidedAtEpochMillis: Long? = null,
 ) {
-    fun applying(decidedByRoleId: RoleDefinitionId?, note: String?): ApprovalGate = copy(
+    fun applying(
+        intent: ApprovalDecisionIntent,
+        decidedByRoleId: RoleDefinitionId?,
+        note: String?,
+    ): ApprovalGate = copy(
         status = ApprovalGateStatus.Applying,
+        applyingIntent = intent,
         decidedByRoleId = decidedByRoleId,
         decisionNote = note,
         decidedAtEpochMillis = null,
@@ -50,6 +62,7 @@ data class ApprovalGate(
 
     fun approve(decidedByRoleId: RoleDefinitionId?, note: String?, nowEpochMillis: Long): ApprovalGate = copy(
         status = ApprovalGateStatus.Approved,
+        applyingIntent = null,
         decidedByRoleId = decidedByRoleId,
         decisionNote = note,
         decidedAtEpochMillis = nowEpochMillis,
@@ -57,6 +70,7 @@ data class ApprovalGate(
 
     fun reject(decidedByRoleId: RoleDefinitionId?, note: String?, nowEpochMillis: Long): ApprovalGate = copy(
         status = ApprovalGateStatus.Rejected,
+        applyingIntent = null,
         decidedByRoleId = decidedByRoleId,
         decisionNote = note,
         decidedAtEpochMillis = nowEpochMillis,
