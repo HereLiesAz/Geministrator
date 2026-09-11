@@ -105,6 +105,17 @@ fun App(
                             }
                         }
                     },
+                    onRejectPlan = { taskId ->
+                        scope.launch {
+                            try {
+                                runtime?.rejectPlan(TaskDefinitionId(taskId))
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Plan rejection failed")
+                            }
+                        }
+                    },
                     onResolveEscalation = { taskId, approved ->
                         scope.launch {
                             try {
