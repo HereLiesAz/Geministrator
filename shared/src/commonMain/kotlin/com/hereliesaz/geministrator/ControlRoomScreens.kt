@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RoleDefinition
+import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
@@ -84,13 +85,88 @@ private fun InspectorLine(label: String, value: String) {
 }
 
 @Composable
-internal fun CompanyScreen(runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading, modifier: Modifier = Modifier) {
+internal fun CompanyScreen(
+    runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading,
+    onSaveRole: (RoleDefinition) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
+    var showRoleForm by remember { mutableStateOf(false) }
+    var roleIdDraft by remember { mutableStateOf("") }
+    var roleNameDraft by remember { mutableStateOf("") }
+    var roleDescDraft by remember { mutableStateOf("") }
+    var roleInstructionsDraft by remember { mutableStateOf("") }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("COMPANY", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
+        AzphaltPill(
+            label = if (showRoleForm) "Cancel" else "Add role",
+            seed = "add-role-toggle",
+            onClick = {
+                showRoleForm = !showRoleForm
+                if (!showRoleForm) {
+                    roleIdDraft = ""
+                    roleNameDraft = ""
+                    roleDescDraft = ""
+                    roleInstructionsDraft = ""
+                }
+            },
+        )
+        if (showRoleForm) {
+            OutlinedTextField(
+                value = roleNameDraft,
+                onValueChange = { roleNameDraft = it },
+                label = { Text("Role name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = roleIdDraft,
+                onValueChange = { roleIdDraft = it },
+                label = { Text("Role ID (slug)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = roleDescDraft,
+                onValueChange = { roleDescDraft = it },
+                label = { Text("Description") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = roleInstructionsDraft,
+                onValueChange = { roleInstructionsDraft = it },
+                label = { Text("Standing instructions") },
+                minLines = 3,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            AzphaltPill(
+                label = "Save role",
+                seed = "save-role",
+                onClick = {
+                    val id = roleIdDraft.trim().ifBlank { roleNameDraft.trim().lowercase().replace(" ", "-") }
+                    if (id.isNotEmpty() && roleNameDraft.isNotBlank()) {
+                        onSaveRole(
+                            RoleDefinition(
+                                id = RoleDefinitionId(id),
+                                name = roleNameDraft.trim(),
+                                description = roleDescDraft.trim(),
+                                instructions = roleInstructionsDraft.trim(),
+                            )
+                        )
+                        showRoleForm = false
+                        roleIdDraft = ""
+                        roleNameDraft = ""
+                        roleDescDraft = ""
+                        roleInstructionsDraft = ""
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         if (liveWorkflow != null) {
             val activeRoleIds = liveWorkflow.run.taskRuns.values
                 .filter { it.status in setOf(TaskRunStatus.Running, TaskRunStatus.Planning, TaskRunStatus.AwaitingApproval, TaskRunStatus.Verifying) }

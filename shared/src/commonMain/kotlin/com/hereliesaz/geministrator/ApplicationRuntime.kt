@@ -432,6 +432,10 @@ class ApplicationRuntime private constructor(
         return persistence.events.forRun(runId)
     }
 
+    suspend fun saveRole(role: RoleDefinition) {
+        persistence.roles.put(role)
+    }
+
     fun validateCurrentWorkflow(): List<String> {
         val definition = current?.definition ?: return emptyList()
         return WorkflowGraphValidator.validate(definition).map { it.humanReadable() }

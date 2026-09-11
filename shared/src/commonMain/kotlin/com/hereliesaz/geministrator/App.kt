@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
@@ -211,6 +212,17 @@ fun App(
                     },
                     onValidateWorkflow = {
                         runtime?.validateCurrentWorkflow() ?: emptyList()
+                    },
+                    onSaveRole = { role ->
+                        scope.launch {
+                            try {
+                                runtime?.saveRole(role)
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Save role failed")
+                            }
+                        }
                     },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RepositoryRef
+import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.events.WorkflowEvent
 
@@ -101,6 +102,7 @@ fun ControlRoom(
     onLoadRunTimeline: suspend () -> List<WorkflowEvent> = { emptyList() },
     onExportDiagnosticBundle: suspend () -> String? = { null },
     onValidateWorkflow: () -> List<String> = { emptyList() },
+    onSaveRole: (RoleDefinition) -> Unit = {},
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -139,6 +141,7 @@ fun ControlRoom(
                     onLoadRunTimeline = onLoadRunTimeline,
                     onExportDiagnosticBundle = onExportDiagnosticBundle,
                     onValidateWorkflow = onValidateWorkflow,
+                    onSaveRole = onSaveRole,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
@@ -187,6 +190,7 @@ fun ControlRoom(
                     onLoadRunTimeline = onLoadRunTimeline,
                     onExportDiagnosticBundle = onExportDiagnosticBundle,
                     onValidateWorkflow = onValidateWorkflow,
+                    onSaveRole = onSaveRole,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
@@ -313,6 +317,7 @@ private fun MainDestination(
     onLoadRunTimeline: suspend () -> List<WorkflowEvent>,
     onExportDiagnosticBundle: suspend () -> String?,
     onValidateWorkflow: () -> List<String>,
+    onSaveRole: (RoleDefinition) -> Unit,
     connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
@@ -338,7 +343,7 @@ private fun MainDestination(
                 modifier = Modifier.fillMaxSize(),
             )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
-            ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())
+            ControlRoomDestination.Company -> CompanyScreen(runtimeState, onSaveRole, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
             ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, Modifier.fillMaxSize())
