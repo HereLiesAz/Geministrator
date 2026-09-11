@@ -50,15 +50,17 @@ class ServiceExecutorIntegrationsTest {
     }
 
     @Test
-    fun nestedWorkflowCarriesDefinitionId() = runBlocking {
+    fun nestedWorkflowCarriesDefinitionAndTargetProject() = runBlocking {
         val client = RecordingNestedWorkflowClient()
         val integration = NestedWorkflowExecutorIntegration(client)
         val nestedId = WorkflowDefinitionId("child-workflow")
-        val context = context(TaskExecutor.NestedWorkflow(nestedId))
+        val targetProjectId = ProjectId("child-project")
+        val context = context(TaskExecutor.NestedWorkflow(nestedId, targetProjectId))
 
         val started = integration.dispatch(context)
 
         assertEquals(nestedId, client.workflowDefinitionId)
+        assertEquals(targetProjectId, client.targetProjectId)
         assertEquals("nested-1", started.externalRunId)
     }
 
@@ -120,8 +122,14 @@ private class RecordingExternalServiceClient : ExternalServiceClient {
 
 private class RecordingNestedWorkflowClient : NestedWorkflowClient {
     var workflowDefinitionId: WorkflowDefinitionId? = null
-    override suspend fun start(project: Project, workflowDefinitionId: WorkflowDefinitionId, targetProjectId: ProjectId?): ExternalExecutionRun {
+    var targetProjectId: ProjectId? = null
+    override suspend fun start(
+        project: Project,
+        workflowDefinitionId: WorkflowDefinitionId,
+        targetProjectId: ProjectId?,
+    ): ExternalExecutionRun {
         this.workflowDefinitionId = workflowDefinitionId
+        this.targetProjectId = targetProjectId
         return ExternalExecutionRun("nested-1", ExternalExecutionStatus.Running)
     }
     override suspend fun getRun(project: Project, runId: String): ExternalExecutionRun =

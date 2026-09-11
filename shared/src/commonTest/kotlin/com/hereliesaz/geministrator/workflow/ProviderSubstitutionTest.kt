@@ -170,9 +170,10 @@ private class StubTwoProviderGateway(
     override suspend fun approvePlan(handle: ManagedSessionHandle) = ProviderActionResult.Accepted
 
     override suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact> = listOf(
-        ProviderArtifact(textContent="dummy content",
+        ProviderArtifact(
             kind = ArtifactKind.CodeChange,
             label = "Change from ${handle.providerId.value}",
+            textContent = "Synthetic code change from ${handle.providerId.value}",
         ),
     )
 }
