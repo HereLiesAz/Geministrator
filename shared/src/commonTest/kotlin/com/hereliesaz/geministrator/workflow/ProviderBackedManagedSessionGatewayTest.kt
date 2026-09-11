@@ -20,6 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
@@ -191,13 +192,16 @@ private class PlanPreviewProvider : AgentProvider {
 
 private class RetryingObserverProvider : AgentProvider {
     override val id = AgentProviderId("retry-observer")
-    var observeCount = 0
+    private val observeCounter = MutableStateFlow(0)
+    val observeCount: Int
+        get() = observeCounter.value
     val firstObservationFailed = CompletableDeferred<Unit>()
     override suspend fun capabilities() = AgentCapabilities(supported = setOf(AgentCapability.RepositoryRead))
     override suspend fun start(request: AgentTaskRequest) = AgentRunHandle(ProviderRunId("provider-run"))
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flow {
-        observeCount += 1
-        if (observeCount == 1) {
+        val attempt = observeCounter.value + 1
+        observeCounter.value = attempt
+        if (attempt == 1) {
             firstObservationFailed.complete(Unit)
             throw IllegalStateException("temporary transport failure")
         }
@@ -210,7 +214,9 @@ private class RetryingObserverProvider : AgentProvider {
 
 private class ReplayingArtifactProvider : AgentProvider {
     override val id = AgentProviderId("replaying-artifact")
-    var observeCount = 0
+    private val observeCounter = MutableStateFlow(0)
+    val observeCount: Int
+        get() = observeCounter.value
     private val artifact = ProviderArtifact(
         kind = ArtifactKind.CommandOutput,
         label = "result",
@@ -220,9 +226,10 @@ private class ReplayingArtifactProvider : AgentProvider {
     override suspend fun capabilities() = AgentCapabilities(supported = setOf(AgentCapability.RepositoryRead))
     override suspend fun start(request: AgentTaskRequest) = AgentRunHandle(ProviderRunId("artifact-run"))
     override fun observe(runId: ProviderRunId): Flow<AgentEvent> = flow {
-        observeCount += 1
+        val attempt = observeCounter.value + 1
+        observeCounter.value = attempt
         emit(AgentEvent.ArtifactProduced(runId, artifact))
-        if (observeCount == 1) throw IllegalStateException("reconnect")
+        if (attempt == 1) throw IllegalStateException("reconnect")
         emit(AgentEvent.Completed(runId))
     }
     override suspend fun sendMessage(runId: ProviderRunId, message: String) = ProviderActionResult.Accepted

@@ -34,8 +34,9 @@ interface JulesApi {
 class JulesRestApi(
     private val apiKeyProvider: JulesApiKeyProvider,
     private val baseUrl: String = "https://jules.googleapis.com/v1alpha",
-    private val client: HttpClient = HttpClient {
+    client: HttpClient = HttpClient {
         expectSuccess = true
+        followRedirects = false
         install(HttpTimeout) {
             requestTimeoutMillis = 30_000L
             connectTimeoutMillis = 10_000L
@@ -50,6 +51,9 @@ class JulesRestApi(
         }
     },
 ) : JulesApi {
+    private val client = client.config {
+        followRedirects = false
+    }
 
     override suspend fun listSources(): List<JulesSource> {
         val result = mutableListOf<JulesSource>()
