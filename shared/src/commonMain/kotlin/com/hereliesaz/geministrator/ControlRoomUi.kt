@@ -86,6 +86,7 @@ fun ControlRoom(
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
     onApproveTask: (String) -> Unit,
+    onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
     compact: Boolean,
     contentPadding: PaddingValues,
@@ -125,6 +126,7 @@ fun ControlRoom(
                             selectedTaskId = taskId,
                             liveWorkflow = liveWorkflow,
                             onApproveTask = onApproveTask,
+                            onRejectPlan = onRejectPlan,
                             onResolveEscalation = onResolveEscalation,
                             modifier = Modifier.fillMaxWidth().height(280.dp),
                         )
@@ -163,6 +165,7 @@ fun ControlRoom(
                             selectedTaskId = taskId,
                             liveWorkflow = liveWorkflow,
                             onApproveTask = onApproveTask,
+                            onRejectPlan = onRejectPlan,
                             onResolveEscalation = onResolveEscalation,
                             modifier = Modifier.width(310.dp).fillMaxHeight(),
                         )
