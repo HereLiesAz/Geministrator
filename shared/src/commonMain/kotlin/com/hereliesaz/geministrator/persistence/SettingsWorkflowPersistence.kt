@@ -216,12 +216,27 @@ class SettingsWorkflowPersistence(
     }
 
     private fun readUnlocked(): PersistenceSnapshot {
-        val encoded = settings.getStringOrNull(storageKey)
-            ?: settings.getStringOrNull(LEGACY_STORAGE_KEY_V1)
-            ?: return PersistenceSnapshot()
+        val currentEncoded = settings.getStringOrNull(storageKey)
+        val legacyEncoded = if (currentEncoded == null) {
+            settings.getStringOrNull(LEGACY_STORAGE_KEY_V1)
+        } else {
+            null
+        }
+        val encoded = currentEncoded ?: legacyEncoded ?: return PersistenceSnapshot()
         val snapshot = json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
         if (snapshot.version > CURRENT_SCHEMA_VERSION) return PersistenceSnapshot()
-        return migrate(snapshot)
+
+        val migrated = migrate(snapshot)
+        if (currentEncoded == null || migrated != snapshot) {
+            settings.putString(
+                storageKey,
+                json.encodeToString(PersistenceSnapshot.serializer(), migrated),
+            )
+            if (legacyEncoded != null) {
+                settings.remove(LEGACY_STORAGE_KEY_V1)
+            }
+        }
+        return migrated
     }
 
     private fun migrate(snapshot: PersistenceSnapshot): PersistenceSnapshot {
@@ -304,7 +319,7 @@ class SettingsWorkflowPersistence(
     companion object {
         const val CURRENT_SCHEMA_VERSION: Int = 3
         const val DEFAULT_STORAGE_KEY: String = "geministrator.workflow.persistence.v2"
-        private const val LEGACY_STORAGE_KEY_V1: String = "geministrator.workflow.persistence.v1"
+        internal const val LEGACY_STORAGE_KEY_V1: String = "geministrator.workflow.persistence.v1"
 
         val defaultJson: Json = Json {
             encodeDefaults = true
