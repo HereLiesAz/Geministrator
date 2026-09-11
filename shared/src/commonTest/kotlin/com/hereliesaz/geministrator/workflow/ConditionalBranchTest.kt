@@ -83,7 +83,7 @@ class ConditionalBranchTest {
         val refreshed = WorkflowRunFactory.refreshReadiness(definition, withMainCompleted, 2L)
 
         assertEquals(TaskRunStatus.Ready, refreshed.taskRuns.getValue(happyPathId).status)
-        assertEquals(TaskRunStatus.Blocked, refreshed.taskRuns.getValue(failureHandlerId).status)
+        assertEquals(TaskRunStatus.Cancelled, refreshed.taskRuns.getValue(failureHandlerId).status)
         assertEquals(TaskRunStatus.Ready, refreshed.taskRuns.getValue(alwaysRunId).status)
     }
 

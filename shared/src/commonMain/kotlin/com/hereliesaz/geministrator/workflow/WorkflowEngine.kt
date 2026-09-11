@@ -558,7 +558,7 @@ class WorkflowEngine(
         if (run.status.isTerminal()) return run.status
         val statuses = run.taskRuns.values.map { it.status }
         return when {
-            statuses.isNotEmpty() && statuses.all { it == TaskRunStatus.Completed } -> WorkflowRunStatus.Completed
+            statuses.isNotEmpty() && statuses.all { it == TaskRunStatus.Completed || it == TaskRunStatus.Cancelled } -> WorkflowRunStatus.Completed
             statuses.any { it == TaskRunStatus.AwaitingApproval || it == TaskRunStatus.Escalated } -> WorkflowRunStatus.AwaitingHuman
             statuses.any { it == TaskRunStatus.Failed } -> WorkflowRunStatus.Failed
             else -> WorkflowRunStatus.Running
