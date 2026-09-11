@@ -29,7 +29,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RepositoryRef
+import com.hereliesaz.geministrator.domain.WorkflowRun
 
 internal object ControlRoomBreakpoints {
     val Wide: Dp = 820.dp
@@ -88,6 +90,8 @@ fun ControlRoom(
     onApproveTask: (String) -> Unit,
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
+    onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
+    onSwitchRun: (String) -> Unit = {},
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -116,6 +120,8 @@ fun ControlRoom(
                     onApproveTask = onApproveTask,
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
+                    onLoadRunHistory = onLoadRunHistory,
+                    onSwitchRun = onSwitchRun,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
@@ -154,6 +160,8 @@ fun ControlRoom(
                     onApproveTask = onApproveTask,
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
+                    onLoadRunHistory = onLoadRunHistory,
+                    onSwitchRun = onSwitchRun,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
@@ -270,6 +278,8 @@ private fun MainDestination(
     onApproveTask: (String) -> Unit,
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
+    onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>>,
+    onSwitchRun: (String) -> Unit,
     connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
@@ -277,15 +287,19 @@ private fun MainDestination(
 ) {
     AzphaltPlaceTransition(target = destination, modifier = modifier.fillMaxSize()) { place ->
         when (place) {
-            ControlRoomDestination.Overview,
-            ControlRoomDestination.Runs,
-            -> MindMapRunScreen(
+            ControlRoomDestination.Overview -> MindMapRunScreen(
                 modifier = Modifier.fillMaxSize(),
                 selectedTaskId = selectedTaskId,
                 onTaskSelected = onTaskSelected,
                 onLaunchWorkflow = onLaunchWorkflow,
                 compact = compact,
                 runtimeState = runtimeState,
+            )
+            ControlRoomDestination.Runs -> RunsScreen(
+                runtimeState = runtimeState,
+                onLoadRunHistory = onLoadRunHistory,
+                onSwitchRun = onSwitchRun,
+                modifier = Modifier.fillMaxSize(),
             )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())

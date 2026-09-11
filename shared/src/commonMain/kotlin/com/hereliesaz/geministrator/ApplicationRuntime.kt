@@ -14,6 +14,7 @@ import com.hereliesaz.geministrator.domain.TaskRunId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
@@ -144,6 +145,41 @@ class ApplicationRuntime private constructor(
     }
 
     suspend fun refresh() = loadLatest()
+
+    suspend fun loadRunHistory(): List<Pair<Project, List<WorkflowRun>>> {
+        val projects = persistence.projects.all()
+        return projects.map { project ->
+            project to persistence.runs.byProject(project.id)
+                .sortedByDescending(WorkflowRun::updatedAtEpochMillis)
+        }.sortedByDescending { (project, runs) ->
+            runs.firstOrNull()?.updatedAtEpochMillis ?: project.updatedAtEpochMillis
+        }
+    }
+
+    suspend fun switchToRun(runId: WorkflowRunId) {
+        runtimeMutex.withLock {
+            publisher.publish(ApplicationRuntimeState.Loading)
+            try {
+                val run = persistence.runs.get(runId)
+                    ?: error("Run ${runId.value} not found")
+                val project = persistence.projects.all().firstOrNull { it.id == run.projectId }
+                    ?: error("Project ${run.projectId.value} not found for run ${runId.value}")
+                val definition = persistence.definitions.get(run.workflowDefinitionId)
+                    ?: error("Workflow definition ${run.workflowDefinitionId.value} not found")
+                val runtimeState = try {
+                    coordinator.resume(runId)
+                } catch (failure: Throwable) {
+                    throw classifyResumeFailure(failure)
+                }
+                replaceCurrent(Current(project, definition, runtimeState))
+                publishCurrent()
+                startCycling()
+            } catch (failure: Throwable) {
+                replaceCurrent(null)
+                publishFailure(failure)
+            }
+        }
+    }
 
     suspend fun launchStarterWorkflow(
         projectName: String,

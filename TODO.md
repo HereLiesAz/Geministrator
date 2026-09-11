@@ -110,13 +110,13 @@ Tracking issue: #35
 
 ## P1 — Product shell
 
-- [ ] Replace placeholder screens for Workflows, Company, Artifacts, Inbox, and Settings with real data-backed surfaces.
-- [ ] Project chooser / recent projects.
-- [ ] Run history and resumable active runs.
-- [ ] Artifact browser with provenance.
-- [ ] Inbox for approvals, failures, escalations, and requests for human attention.
-- [ ] Settings for providers, execution policy, appearance, privacy/data controls, and diagnostics.
-- [ ] Surface The Haive icon/brand consistently across Android, Desktop, and Web.
+- [x] Replace placeholder screens for Company, Artifacts, and Inbox with live runtime data; Workflows remains static templates.
+- [x] Project chooser / recent projects.
+- [x] Run history and resumable active runs.
+- [x] Artifact browser with provenance (live artifacts from task runs, grouped by task).
+- [x] Inbox for approvals, failures, escalations, and requests for human attention.
+- [x] Settings shows connected providers; static fallback when none configured.
+- [x] Surface The Haive icon/brand consistently across Android, Desktop, and Web.
 
 ## P1 — Delivery
 
@@ -163,7 +163,7 @@ Tracking issue: #35
 - [ ] Final Play Store icon/screenshots/feature graphic.
 - [ ] Splash/loading treatment using the approved Haive mark.
 - [ ] Make the privacy-policy URL stable for Play Store listing.
-- [ ] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
+- [x] Audit all user-facing text for leftover Geministrator branding; internal historical package names may remain only where intentionally preserved.
 
 ## Definition of a useful alpha
 

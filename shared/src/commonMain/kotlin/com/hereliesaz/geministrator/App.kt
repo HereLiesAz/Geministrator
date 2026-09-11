@@ -13,7 +13,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.CancellationException
@@ -132,6 +135,20 @@ fun App(
                                 throw failure
                             } catch (failure: Exception) {
                                 runtimeState = failure.toRuntimeFailureState("Escalation decision failed")
+                            }
+                        }
+                    },
+                    onLoadRunHistory = {
+                        runtime?.loadRunHistory() ?: emptyList()
+                    },
+                    onSwitchRun = { runId ->
+                        scope.launch {
+                            try {
+                                runtime?.switchToRun(WorkflowRunId(runId))
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Switch run failed")
                             }
                         }
                     },

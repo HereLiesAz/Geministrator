@@ -27,8 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
+import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.TaskRunStatus
+import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 
 @Composable
 internal fun TechnicalInspector(selectedTaskId: String, modifier: Modifier = Modifier) {
@@ -182,6 +186,61 @@ private fun DecisionRecord(seed: String, kind: String, title: String, body: Stri
             }
         }
     } else null)
+}
+
+@Composable
+internal fun RunsScreen(
+    runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading,
+    onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
+    onSwitchRun: (String) -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    var history by remember { mutableStateOf<List<Pair<Project, List<WorkflowRun>>>?>(null) }
+    LaunchedEffect(runtimeState) {
+        history = onLoadRunHistory()
+    }
+    val liveRunId = (runtimeState as? ApplicationRuntimeState.Live)?.presentation?.run?.id?.value
+    Column(
+        modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text("RUNS", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
+        val entries = history
+        if (entries == null) {
+            Text("Loading…", style = AzphaltType.body, color = Azphalt.currentGround.onPage)
+        } else if (entries.isEmpty()) {
+            Text("No projects yet.", style = AzphaltType.body, color = Azphalt.currentGround.onPage)
+        } else {
+            entries.forEach { (project, runs) ->
+                SectionLabel(project.name)
+                if (runs.isEmpty()) {
+                    Text("No runs.", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+                } else {
+                    runs.forEach { run ->
+                        val isActive = run.id.value == liveRunId
+                        AzphaltRecord(
+                            seed = run.id.value,
+                            eyebrow = run.status.name,
+                            title = run.objective.take(60).let { if (run.objective.length > 60) "$it…" else it },
+                            body = "Run · ${run.id.value.takeLast(8)}",
+                            endCap = if (isActive) "Active" else runStatusEndCap(run.status),
+                            selected = isActive,
+                            onClick = { if (!isActive) onSwitchRun(run.id.value) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun runStatusEndCap(status: WorkflowRunStatus): String = when (status) {
+    WorkflowRunStatus.Completed -> "Done"
+    WorkflowRunStatus.Failed -> "Failed"
+    WorkflowRunStatus.Cancelled -> "Cancelled"
+    WorkflowRunStatus.Running -> "Running"
+    WorkflowRunStatus.AwaitingHuman -> "Waiting"
+    WorkflowRunStatus.Created -> "Created"
 }
 
 @Composable
