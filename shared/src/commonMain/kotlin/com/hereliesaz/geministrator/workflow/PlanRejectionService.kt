@@ -1,6 +1,5 @@
 package com.hereliesaz.geministrator.workflow
 
-import com.hereliesaz.geministrator.domain.ApprovalDecisionIntent
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.providers.ProviderActionResult

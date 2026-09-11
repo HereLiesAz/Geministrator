@@ -765,9 +765,9 @@ internal fun SettingsScreen(
     onClearWorkflowData: () -> Unit = {},
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
-    onShareText: ((String) -> Unit)? = null,
     onExportDiagnosticBundle: suspend () -> String? = { null },
     onReconfigureProvider: (String) -> Unit = {},
+    onShareText: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     var exportedJson by remember { mutableStateOf<String?>(null) }
