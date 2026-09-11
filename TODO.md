@@ -80,11 +80,11 @@ Tracking issue: #35
 
 ## P1 — Provider system
 
-- [ ] Finish Jules as the reference provider implementation.
+- [x] Finish Jules as the reference provider implementation.
 - [x] Define provider configuration UI and secure credential handling per platform.
 - [x] Add provider health/capability reporting.
-- [ ] Add provider-neutral token/cost/latency telemetry where providers expose it.
-- [ ] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
+- [x] Add provider-neutral token/cost/latency telemetry where providers expose it.
+- [x] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
 - [ ] Add a second provider to prove interchangeability; choose based on the best supported API at implementation time rather than hard-coding the architecture to Gemini/OpenAI/Claude.
 - [ ] Test provider substitution for the same role/task contract.
 
@@ -142,8 +142,8 @@ Tracking issue: #35
 ## P2 — Cost and observability
 
 - [x] Per-run/provider/executor timing.
-- [ ] Token and cost accounting where available.
-- [ ] Cache-hit/cache-write observability where supported.
+- [x] Token and cost accounting where available.
+- [x] Cache-hit/cache-write observability where supported.
 - [x] Retry and failure-rate metrics.
 - [x] Run timeline/event viewer.
 - [x] Exportable diagnostic bundle with secrets stripped.

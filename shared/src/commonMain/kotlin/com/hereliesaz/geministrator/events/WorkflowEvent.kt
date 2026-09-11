@@ -1,8 +1,10 @@
 package com.hereliesaz.geministrator.events
 
+import com.hereliesaz.geministrator.domain.AgentProviderId
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.ArtifactRef
 import com.hereliesaz.geministrator.domain.ProjectId
+import com.hereliesaz.geministrator.domain.ProviderRunId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskExecutor
@@ -180,5 +182,20 @@ data class WorkflowCancelled(
 data class TaskCancelled(
     override val workflowRunId: WorkflowRunId,
     val taskDefinitionId: TaskDefinitionId,
+    override val occurredAtEpochMillis: Long,
+) : WorkflowEvent
+
+/** Opportunistic telemetry from providers that expose usage data. Never affects run state. */
+@Serializable
+data class ProviderUsageRecorded(
+    override val workflowRunId: WorkflowRunId,
+    val taskDefinitionId: TaskDefinitionId,
+    val providerId: AgentProviderId,
+    val providerRunId: ProviderRunId,
+    val inputTokens: Long? = null,
+    val outputTokens: Long? = null,
+    val costUsd: Double? = null,
+    val cacheHitFraction: Float? = null,
+    val latencyMillis: Long? = null,
     override val occurredAtEpochMillis: Long,
 ) : WorkflowEvent

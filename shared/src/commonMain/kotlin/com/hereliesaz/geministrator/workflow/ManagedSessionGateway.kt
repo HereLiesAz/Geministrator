@@ -68,4 +68,15 @@ interface ManagedSessionGateway {
         ProviderActionResult.Rejected("Provider session cancellation is not supported")
 
     suspend fun artifacts(handle: ManagedSessionHandle): List<ProviderArtifact>
+
+    /** Pending usage metrics from the last provider report, or null if not available. */
+    suspend fun usageReport(handle: ManagedSessionHandle): ManagedSessionUsage? = null
 }
+
+data class ManagedSessionUsage(
+    val inputTokens: Long? = null,
+    val outputTokens: Long? = null,
+    val costUsd: Double? = null,
+    val cacheHitFraction: Float? = null,
+    val latencyMillis: Long? = null,
+)
