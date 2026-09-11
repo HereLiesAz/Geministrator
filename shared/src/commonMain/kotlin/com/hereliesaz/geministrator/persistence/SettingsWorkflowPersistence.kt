@@ -147,7 +147,9 @@ class SettingsWorkflowPersistence(
     suspend fun clearWorkflowData() {
         settingsWorkflowPersistenceMutex.withLock {
             settings.remove(storageKey)
-            settings.remove(LEGACY_STORAGE_KEY_V1)
+            if (storageKey == DEFAULT_STORAGE_KEY) {
+                settings.remove(LEGACY_STORAGE_KEY_V1)
+            }
             settings.keys
                 .filter { it.startsWith(eventJournalRoot()) }
                 .forEach(settings::remove)
@@ -217,7 +219,7 @@ class SettingsWorkflowPersistence(
 
     private fun readUnlocked(): PersistenceSnapshot {
         val currentEncoded = settings.getStringOrNull(storageKey)
-        val legacyEncoded = if (currentEncoded == null) {
+        val legacyEncoded = if (currentEncoded == null && storageKey == DEFAULT_STORAGE_KEY) {
             settings.getStringOrNull(LEGACY_STORAGE_KEY_V1)
         } else {
             null
