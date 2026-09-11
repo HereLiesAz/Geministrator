@@ -393,6 +393,7 @@ internal fun ArtifactFileManagerScreen(runtimeState: ApplicationRuntimeState = A
 @Composable
 internal fun SettingsScreen(
     connectedProviderIds: Set<String> = emptySet(),
+    onClearWorkflowData: () -> Unit = {},
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -400,6 +401,7 @@ internal fun SettingsScreen(
     var exportedJson by remember { mutableStateOf<String?>(null) }
     var importDraft by remember { mutableStateOf("") }
     var importMode by remember { mutableStateOf(false) }
+    var clearConfirm by remember { mutableStateOf(false) }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -456,6 +458,25 @@ internal fun SettingsScreen(
                     importDraft = ""
                     importMode = false
                 })
+            }
+        }
+        SectionLabel("Privacy")
+        if (!clearConfirm) {
+            AzphaltPill("Delete all workflow data", "clear-data-enter", onClick = { clearConfirm = true }, modifier = Modifier.fillMaxWidth())
+        } else {
+            AzphaltRecord(
+                seed = "clear-confirm",
+                eyebrow = "Destructive",
+                title = "Delete all workflow data?",
+                body = "Permanently removes all projects, runs, events, and artifacts from this device. Export first if you want a backup.",
+                endCap = "Irreversible",
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AzphaltPill("Delete everything", "clear-data-confirm", onClick = {
+                    onClearWorkflowData()
+                    clearConfirm = false
+                })
+                AzphaltPill("Cancel", "clear-data-cancel", onClick = { clearConfirm = false })
             }
         }
     }

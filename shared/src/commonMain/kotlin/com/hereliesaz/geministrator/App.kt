@@ -17,6 +17,7 @@ import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
+import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import kotlinx.coroutines.CancellationException
@@ -146,6 +147,18 @@ fun App(
                                 throw failure
                             } catch (failure: Exception) {
                                 runtimeState = failure.toRuntimeFailureState("Recovery failed")
+                            }
+                        }
+                    },
+                    onClearWorkflowData = {
+                        scope.launch {
+                            try {
+                                (runtime?.persistence as? SettingsWorkflowPersistence)?.clearWorkflowData()
+                                runtime?.loadLatest()
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Clear failed")
                             }
                         }
                     },

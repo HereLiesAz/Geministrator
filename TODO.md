@@ -95,7 +95,7 @@ Tracking issue: #35
 - [ ] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
 - [x] Add run export/import for debugging and portability.
 - [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
-- [ ] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
+- [x] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
 
 ## P1 — H2G2 execution surface
 
