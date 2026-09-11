@@ -47,7 +47,7 @@ jobs:
           java-version: "21"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Reconstruct and verify Android signing keystore
         id: signing
@@ -215,7 +215,7 @@ jobs:
     steps:
       - name: Deploy GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   publish-play:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
