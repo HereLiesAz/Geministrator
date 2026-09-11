@@ -146,7 +146,7 @@ Tracking issue: #35
 - [ ] Cache-hit/cache-write observability where supported.
 - [ ] Retry and failure-rate metrics.
 - [x] Run timeline/event viewer.
-- [ ] Exportable diagnostic bundle with secrets stripped.
+- [x] Exportable diagnostic bundle with secrets stripped.
 
 ## P2 — Workflow composition
 

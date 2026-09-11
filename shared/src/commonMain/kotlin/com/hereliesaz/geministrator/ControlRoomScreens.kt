@@ -488,9 +488,11 @@ internal fun SettingsScreen(
     onClearWorkflowData: () -> Unit = {},
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
+    onExportDiagnosticBundle: suspend () -> String? = { null },
     modifier: Modifier = Modifier,
 ) {
     var exportedJson by remember { mutableStateOf<String?>(null) }
+    var diagnosticBundle by remember { mutableStateOf<String?>(null) }
     var importDraft by remember { mutableStateOf("") }
     var importMode by remember { mutableStateOf(false) }
     var clearConfirm by remember { mutableStateOf(false) }
@@ -561,6 +563,26 @@ internal fun SettingsScreen(
                     importMode = false
                 })
             }
+        }
+        SectionLabel("Diagnostics")
+        var diagnosticTriggered by remember { mutableStateOf(false) }
+        if (diagnosticTriggered) {
+            LaunchedEffect(Unit) {
+                diagnosticBundle = onExportDiagnosticBundle()
+                diagnosticTriggered = false
+            }
+        }
+        if (diagnosticBundle == null) {
+            AzphaltPill("Export diagnostic bundle", "diagnostic-trigger", onClick = { diagnosticTriggered = true }, modifier = Modifier.fillMaxWidth())
+        } else {
+            AzphaltRecord(
+                seed = "diagnostic-result",
+                eyebrow = "Diagnostic",
+                title = "Run diagnostic bundle",
+                body = diagnosticBundle!!.take(300).let { if (diagnosticBundle!!.length > 300) "$it…" else it },
+                endCap = "${diagnosticBundle!!.length} chars",
+                onClick = { diagnosticBundle = null },
+            )
         }
         SectionLabel("Privacy")
         if (!clearConfirm) {

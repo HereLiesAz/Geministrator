@@ -206,6 +206,9 @@ fun App(
                     onLoadRunTimeline = {
                         runtime?.loadRunTimeline() ?: emptyList()
                     },
+                    onExportDiagnosticBundle = {
+                        runtime?.exportDiagnosticBundle()
+                    },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,

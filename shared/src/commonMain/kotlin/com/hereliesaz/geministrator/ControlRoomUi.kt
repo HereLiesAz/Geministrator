@@ -99,6 +99,7 @@ fun ControlRoom(
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
     onSwitchRun: (String) -> Unit = {},
     onLoadRunTimeline: suspend () -> List<WorkflowEvent> = { emptyList() },
+    onExportDiagnosticBundle: suspend () -> String? = { null },
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -135,6 +136,7 @@ fun ControlRoom(
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
                     onLoadRunTimeline = onLoadRunTimeline,
+                    onExportDiagnosticBundle = onExportDiagnosticBundle,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
@@ -181,6 +183,7 @@ fun ControlRoom(
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
                     onLoadRunTimeline = onLoadRunTimeline,
+                    onExportDiagnosticBundle = onExportDiagnosticBundle,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
@@ -305,6 +308,7 @@ private fun MainDestination(
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>>,
     onSwitchRun: (String) -> Unit,
     onLoadRunTimeline: suspend () -> List<WorkflowEvent>,
+    onExportDiagnosticBundle: suspend () -> String?,
     connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
@@ -332,7 +336,7 @@ private fun MainDestination(
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, Modifier.fillMaxSize())
         }
     }
 }

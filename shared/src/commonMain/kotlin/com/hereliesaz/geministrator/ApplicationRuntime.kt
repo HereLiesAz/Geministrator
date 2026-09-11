@@ -430,6 +430,46 @@ class ApplicationRuntime private constructor(
         return persistence.events.forRun(runId)
     }
 
+    suspend fun exportDiagnosticBundle(): String {
+        val snapshot = runtimeMutex.withLock { current }
+        val run = snapshot?.state?.run
+        val definition = snapshot?.definition
+        val events = if (run != null) persistence.events.forRun(run.id) else emptyList()
+
+        val retryCount = events.count { it is com.hereliesaz.geministrator.events.RetryScheduled }
+        val failureCount = events.count { it is com.hereliesaz.geministrator.events.TaskFailed }
+        val escalationCount = events.count { it is com.hereliesaz.geministrator.events.TaskEscalated }
+        val artifactCount = events.count { it is com.hereliesaz.geministrator.events.ArtifactCreated }
+        val durationMs = if (run != null) run.updatedAtEpochMillis - run.createdAtEpochMillis else 0L
+
+        return buildString {
+            appendLine("{")
+            appendLine("  \"schema\": \"haive-diagnostic-v1\",")
+            appendLine("  \"runId\": ${jsonStr(run?.id?.value)},")
+            appendLine("  \"objective\": ${jsonStr(run?.objective)},")
+            appendLine("  \"status\": ${jsonStr(run?.status?.name)},")
+            appendLine("  \"durationMs\": $durationMs,")
+            appendLine("  \"taskCount\": ${definition?.tasks?.size ?: 0},")
+            appendLine("  \"taskRunCount\": ${run?.taskRuns?.size ?: 0},")
+            appendLine("  \"eventCount\": ${events.size},")
+            appendLine("  \"retryCount\": $retryCount,")
+            appendLine("  \"failureCount\": $failureCount,")
+            appendLine("  \"escalationCount\": $escalationCount,")
+            appendLine("  \"artifactCount\": $artifactCount,")
+            appendLine("  \"taskRuns\": [")
+            val taskRuns = run?.taskRuns?.values?.toList() ?: emptyList()
+            taskRuns.forEachIndexed { index, taskRun ->
+                val comma = if (index < taskRuns.size - 1) "," else ""
+                appendLine("    {\"id\": ${jsonStr(taskRun.taskDefinitionId.value)}, \"status\": ${jsonStr(taskRun.status.name)}, \"attempt\": ${taskRun.attempt}}$comma")
+            }
+            appendLine("  ]")
+            append("}")
+        }
+    }
+
+    private fun jsonStr(value: String?): String =
+        if (value == null) "null" else "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+
     private fun WorkflowRunStatus.isTerminal() =
         this == WorkflowRunStatus.Completed ||
             this == WorkflowRunStatus.Failed ||
