@@ -69,10 +69,10 @@ Tracking issue: #35
 
 ## P1 — Workflow authoring and governance
 
-- [ ] Build the workflow template editor around the DAG rather than a generic form.
-- [ ] Add/create/edit role definitions and standing instructions.
+- [x] Build the workflow template editor around the DAG rather than a generic form.
+- [x] Add/create/edit role definitions and standing instructions.
 - [ ] Add executor selection/policy per task or task class.
-- [ ] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
+- [x] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
 - [ ] Add human approval UI with clear evidence, decision scope, and consequences.
 - [ ] Add retry/escalation policy UI.
 - [ ] Add bounded concurrency controls.

@@ -29,13 +29,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
+import com.hereliesaz.geministrator.domain.ApprovalPolicy
+import com.hereliesaz.geministrator.domain.EscalationPolicy
+import com.hereliesaz.geministrator.domain.IntegrationPolicy
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.PromptReusePolicy
+import com.hereliesaz.geministrator.domain.TestDesignPolicy
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.domain.displayName
 import com.hereliesaz.geministrator.events.AgentAssigned
 import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
 import com.hereliesaz.geministrator.events.ApprovalRequired
@@ -168,6 +174,54 @@ internal fun CompanyScreen(
             )
         }
         if (liveWorkflow != null) {
+            val definition = liveWorkflow.definition
+            SectionLabel("Workflow Policies")
+            AzphaltRecord(
+                seed = "policy-integration",
+                eyebrow = "Integration",
+                title = "Integration policy",
+                body = when (definition.integrationPolicy) {
+                    IntegrationPolicy.Manual -> "Changes integrated manually"
+                    IntegrationPolicy.PullRequest -> "Changes delivered via pull request"
+                    IntegrationPolicy.AutoMergeAfterVerification -> "Auto-merge after verification passes"
+                },
+                endCap = definition.integrationPolicy.name,
+            )
+            AzphaltRecord(
+                seed = "policy-concurrency",
+                eyebrow = "Concurrency",
+                title = "Concurrency policy",
+                body = buildString {
+                    append("${definition.concurrencyPolicy.maxConcurrentTasks} tasks max")
+                    if (definition.concurrencyPolicy.perProviderLimits.isNotEmpty()) {
+                        append(" · Per-provider limits: ${definition.concurrencyPolicy.perProviderLimits.entries.joinToString { "${it.key.value}=${it.value}" }}")
+                    }
+                },
+                endCap = "${definition.concurrencyPolicy.maxConcurrentTasks} max",
+            )
+            AzphaltRecord(
+                seed = "policy-tests",
+                eyebrow = "Test design",
+                title = "Test design policy",
+                body = when (definition.testDesignPolicy) {
+                    TestDesignPolicy.None -> "No test design injection"
+                    TestDesignPolicy.BeforeImplementation -> "Pre-code verification injected before implementation"
+                    TestDesignPolicy.AfterImplementation -> "Post-code regression tests injected after implementation"
+                    TestDesignPolicy.BeforeAndAfterImplementation -> "Pre-code verification and post-code regression tests injected"
+                },
+                endCap = definition.testDesignPolicy.name,
+            )
+            AzphaltRecord(
+                seed = "policy-cache",
+                eyebrow = "Prompt reuse",
+                title = "Prompt reuse policy",
+                body = when (definition.promptReusePolicy) {
+                    PromptReusePolicy.ProviderDefault -> "Provider decides cache behavior"
+                    PromptReusePolicy.PreferCache -> "Cache reads preferred where supported"
+                    PromptReusePolicy.DisableCache -> "Prompt caching disabled"
+                },
+                endCap = definition.promptReusePolicy.name,
+            )
             val activeRoleIds = liveWorkflow.run.taskRuns.values
                 .filter { it.status in setOf(TaskRunStatus.Running, TaskRunStatus.Planning, TaskRunStatus.AwaitingApproval, TaskRunStatus.Verifying) }
                 .mapNotNull { it.assignedRoleId }
@@ -412,26 +466,91 @@ private fun runStatusEndCap(status: WorkflowRunStatus): String = when (status) {
 }
 
 @Composable
-internal fun WorkflowTemplateScreen(modifier: Modifier = Modifier) {
+internal fun WorkflowTemplateScreen(
+    runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading,
+    modifier: Modifier = Modifier,
+) {
+    val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     val entrance = remember { AzphaltEntrance.roll() }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("WORKFLOWS", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
-        listOf(
-            Triple("Standard Feature", "Product → Architecture → Tests → Implementation → QA → Review → Release", "Default"),
-            Triple("Bug Fix", "Diagnosis → Contract → Fix → Regression → QA → Review", "Template"),
-            Triple("Research Spike", "Product → Research → Architecture → Decision", "Template"),
-        ).forEachIndexed { index, item ->
+        if (liveWorkflow != null) {
+            val definition = liveWorkflow.definition
+            SectionLabel("Active — ${definition.name}")
             AzphaltRecord(
-                "workflow-$index",
-                "Workflow",
-                item.first,
-                item.second,
-                item.third,
-                modifier = Modifier.azphaltEntrance(entrance, index, 3),
+                seed = "workflow-policies",
+                eyebrow = "Policies",
+                title = "Workflow configuration",
+                body = buildString {
+                    append("Integration: ${definition.integrationPolicy.name}")
+                    append(" · Concurrency: ${definition.concurrencyPolicy.maxConcurrentTasks} max")
+                    append(" · Tests: ${definition.testDesignPolicy.name}")
+                    append(" · Cache: ${definition.promptReusePolicy.name}")
+                },
+                endCap = "${definition.tasks.size} tasks",
             )
+            SectionLabel("Task graph")
+            definition.tasks.forEachIndexed { index, task ->
+                val taskRun = liveWorkflow.run.taskRuns[task.id]
+                val executor = task.executor
+                val executorLabel = when {
+                    executor != null -> executor.displayName()
+                    task.roleId != null -> task.roleId.value
+                    else -> "Unassigned"
+                }
+                val policyDetail = buildString {
+                    when (val ap = task.approvalPolicy) {
+                        is ApprovalPolicy.None -> Unit
+                        is ApprovalPolicy.RoleApproval -> append("Approval: ${ap.authority.name}")
+                        is ApprovalPolicy.HumanApproval -> append("Approval: Human")
+                    }
+                    if (task.retryPolicy.maxAttempts > 1) {
+                        if (isNotEmpty()) append(" · ")
+                        append("Retry: ${task.retryPolicy.maxAttempts}x")
+                    }
+                    when (val ep = task.escalationPolicy) {
+                        is EscalationPolicy.FailWorkflow -> Unit
+                        is EscalationPolicy.RequireHumanDecision -> {
+                            if (isNotEmpty()) append(" · ")
+                            append("Escalation: Human")
+                        }
+                        is EscalationPolicy.Reassign -> {
+                            if (isNotEmpty()) append(" · ")
+                            append("Escalation: Reassign → ${ep.roleId.value}")
+                        }
+                    }
+                    if (task.dependsOn.isNotEmpty()) {
+                        if (isNotEmpty()) append(" · ")
+                        append("After: ${task.dependsOn.joinToString(", ") { it.value }}")
+                    }
+                }.ifBlank { task.objective.take(60) }
+                AzphaltRecord(
+                    seed = "task-dag-${task.id.value}",
+                    eyebrow = executorLabel,
+                    title = task.name,
+                    body = policyDetail,
+                    endCap = taskRun?.status?.name ?: "Pending",
+                    modifier = Modifier.azphaltEntrance(entrance, index, definition.tasks.size),
+                )
+            }
+        } else {
+            listOf(
+                Triple("Standard Feature", "Product → Architecture → Tests → Implementation → QA → Review → Release", "Default"),
+                Triple("Bug Fix", "Diagnosis → Contract → Fix → Regression → QA → Review", "Template"),
+                Triple("Research Spike", "Product → Research → Architecture → Decision", "Template"),
+            ).forEachIndexed { index, item ->
+                AzphaltRecord(
+                    "workflow-$index",
+                    "Workflow",
+                    item.first,
+                    item.second,
+                    item.third,
+                    modifier = Modifier.azphaltEntrance(entrance, index, 3),
+                )
+            }
         }
     }
 }

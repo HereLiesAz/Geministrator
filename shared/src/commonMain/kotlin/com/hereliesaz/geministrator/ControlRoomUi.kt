@@ -342,7 +342,7 @@ private fun MainDestination(
                 onLoadRunTimeline = onLoadRunTimeline,
                 modifier = Modifier.fillMaxSize(),
             )
-            ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())
+            ControlRoomDestination.Workflows -> WorkflowTemplateScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, onSaveRole, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
