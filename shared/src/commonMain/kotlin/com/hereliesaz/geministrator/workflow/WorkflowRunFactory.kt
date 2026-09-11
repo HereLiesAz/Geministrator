@@ -102,6 +102,7 @@ object WorkflowRunFactory {
                 }
             }
 
+            val conditionUnreachable = allTerminal && !conditionMet
             when {
                 conditionMet -> taskRun.copy(
                     status = TaskRunStatus.Ready,
@@ -111,6 +112,13 @@ object WorkflowRunFactory {
                     blockingReason = BlockingReason(
                         code = "DEPENDENCY_FAILED",
                         message = "A dependency did not complete successfully.",
+                    ),
+                )
+                conditionUnreachable -> taskRun.copy(
+                    status = TaskRunStatus.Cancelled,
+                    blockingReason = BlockingReason(
+                        code = "CONDITION_NOT_MET",
+                        message = "Task condition was not satisfied; task will not run.",
                     ),
                 )
                 else -> taskRun

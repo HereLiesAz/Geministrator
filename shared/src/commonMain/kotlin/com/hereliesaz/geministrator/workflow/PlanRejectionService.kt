@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.ApprovalDecisionIntent
 import com.hereliesaz.geministrator.domain.ApprovalGateId
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.providers.ProviderActionResult
@@ -32,6 +33,7 @@ class PlanRejectionService(
         val rejectionNote = note ?: "Plan rejected in application"
         gateCoordinator.claimPlanApproval(
             id = gateId,
+            intent = ApprovalDecisionIntent.Reject,
             decidedByRoleId = decidedByRoleId,
             note = rejectionNote,
         )

@@ -765,6 +765,7 @@ internal fun SettingsScreen(
     onClearWorkflowData: () -> Unit = {},
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
+    onShareText: ((String) -> Unit)? = null,
     onExportDiagnosticBundle: suspend () -> String? = { null },
     onReconfigureProvider: (String) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -815,14 +816,20 @@ internal fun SettingsScreen(
         if (exportedJson == null) {
             AzphaltPill("Export workflow data to JSON", "export-trigger", onClick = { exportTriggered = true }, modifier = Modifier.fillMaxWidth())
         } else {
-            AzphaltRecord(
-                seed = "export-result",
-                eyebrow = "Export",
-                title = "Workflow data JSON",
-                body = exportedJson!!.take(200).let { if (exportedJson!!.length > 200) "$it…" else it },
-                endCap = "${exportedJson!!.length} chars",
-                onClick = { exportedJson = null },
+            OutlinedTextField(
+                value = exportedJson!!,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Exported JSON (${exportedJson!!.length} chars)") },
+                modifier = Modifier.fillMaxWidth().height(160.dp),
             )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (onShareText != null) {
+                    val json = exportedJson!!
+                    AzphaltPill("Share", "export-share", onClick = { onShareText(json) })
+                }
+                AzphaltPill("Dismiss", "export-dismiss", onClick = { exportedJson = null })
+            }
         }
         if (!importMode) {
             AzphaltPill("Import data from JSON", "import-mode-enter", onClick = { importMode = true }, modifier = Modifier.fillMaxWidth())

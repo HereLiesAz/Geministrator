@@ -68,6 +68,7 @@ class ApprovalGateCoordinator(
 
     suspend fun claimPlanApproval(
         id: ApprovalGateId,
+        intent: ApprovalDecisionIntent,
         decidedByRoleId: RoleDefinitionId?,
         note: String?,
     ): ApprovalGate = mutex.withLock {
@@ -80,7 +81,7 @@ class ApprovalGateCoordinator(
         require(current.status == ApprovalGateStatus.Pending) {
             "Approval gate ${id.value} is already being applied or resolved"
         }
-        val applying = current.applying(ApprovalDecisionIntent.Approve, decidedByRoleId, note)
+        val applying = current.applying(intent, decidedByRoleId, note)
         repository.put(applying)
         applying
     }

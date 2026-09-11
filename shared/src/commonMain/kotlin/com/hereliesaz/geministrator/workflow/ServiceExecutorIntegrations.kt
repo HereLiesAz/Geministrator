@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.Project
+import com.hereliesaz.geministrator.domain.ProjectId
 import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.WorkflowDefinitionId
 
@@ -51,7 +52,11 @@ class ExternalServiceExecutorIntegration(
 }
 
 interface NestedWorkflowClient {
-    suspend fun start(project: Project, workflowDefinitionId: WorkflowDefinitionId): ExternalExecutionRun
+    suspend fun start(
+        project: Project,
+        workflowDefinitionId: WorkflowDefinitionId,
+        targetProjectId: ProjectId? = null,
+    ): ExternalExecutionRun
     suspend fun getRun(project: Project, runId: String): ExternalExecutionRun
 }
 
@@ -62,7 +67,7 @@ class NestedWorkflowExecutorIntegration(
 
     override suspend fun dispatch(context: TaskExecutorContext): TaskExecutorExecution {
         val executor = context.executor as TaskExecutor.NestedWorkflow
-        return client.start(context.project, executor.workflowDefinitionId).toTaskExecution()
+        return client.start(context.project, executor.workflowDefinitionId, executor.projectId).toTaskExecution()
     }
 
     override suspend fun reconcile(context: TaskExecutorContext): TaskExecutorExecution {
