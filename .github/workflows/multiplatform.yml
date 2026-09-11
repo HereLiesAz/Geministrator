@@ -101,26 +101,11 @@ jobs:
             ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease
           fi
 
-      - name: Generate Desktop icons (macOS icns, Windows ico)
+      - name: Verify Desktop icons exist
         run: |
-          sudo apt-get install -y --no-install-recommends icnsutils ffmpeg > /dev/null
-          pip install --quiet pillow
-          # Re-encode via ffmpeg to a clean PNG Pillow can always read.
-          ffmpeg -y -i branding/haive-icon-color.png /tmp/haive-icon-source.png
-          python3 - <<'EOF'
-          from PIL import Image
-          src = Image.open("/tmp/haive-icon-source.png").convert("RGBA")
-          # ICO: Pillow writes multi-resolution Windows ico natively.
-          src.save("branding/haive-icon.ico", format="ICO",
-                   sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
-          # Individual PNGs for icns (written with standard filtering).
-          for size in [16, 32, 128, 256, 512]:
-              src.resize((size, size), Image.LANCZOS).save(f"/tmp/haive_{size}.png")
-          EOF
-          # macOS icns via png2icns
-          png2icns branding/haive-icon.icns \
-            /tmp/haive_16.png /tmp/haive_32.png /tmp/haive_128.png \
-            /tmp/haive_256.png /tmp/haive_512.png || true
+          test -f branding/haive-icon.ico  || { echo "Missing haive-icon.ico"; exit 1; }
+          test -f branding/haive-icon.icns || { echo "Missing haive-icon.icns"; exit 1; }
+          echo "Desktop icons present."
 
       - name: Build Desktop distributable
         run: ./gradlew :desktopApp:createDistributable
