@@ -9,6 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
+
+        <meta-data
+            android:name="android.content.APP_PRIVACY_POLICY"
+            android:value="https://hereliesaz.github.io/haive/privacy" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

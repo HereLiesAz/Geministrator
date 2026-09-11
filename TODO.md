@@ -121,13 +121,13 @@ Tracking issue: #35
 ## P1 — Delivery
 
 - [ ] Keep `main` CI green across shared tests, Jules provider, Android, Desktop, JS, and Wasm.
-- [ ] Confirm Android release signing from reconstructed keystore material on CI.
-- [ ] Add Google Play publishing using `PLAY_SERVICE_ACCOUNT_JSON` as a separate publishing job.
-- [ ] Automatically publish the desired Google Play internal-testing track after a successful release build.
-- [ ] Ensure versionCode/versionName have one clear source of truth and cannot regress.
-- [ ] Verify GitHub Pages deployment after the rename to `haive` and `haive.js`.
-- [ ] Package Desktop icon/metadata correctly for each supported OS.
-- [ ] Add release notes/changelog generation from actual shipped changes.
+- [x] Confirm Android release signing from reconstructed keystore material on CI.
+- [x] Add Google Play publishing using `PLAY_SERVICE_ACCOUNT_JSON` as a separate publishing job.
+- [x] Automatically publish the desired Google Play internal-testing track after a successful release build.
+- [x] Ensure versionCode/versionName have one clear source of truth and cannot regress.
+- [x] Verify GitHub Pages deployment after the rename to `haive` and `haive.js`.
+- [x] Package Desktop icon/metadata correctly for each supported OS.
+- [x] Add release notes/changelog generation from actual shipped changes.
 
 ## P2 — Security and privacy hardening
 
