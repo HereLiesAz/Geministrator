@@ -65,7 +65,7 @@ class PlanRejectionServiceTest {
 
     @Test
     fun applyingGateCannotBeContradictedBySecondManualRejection() = runBlocking {
-        val repository = RecordingGateRepository(planGate().applying(null, "decision in flight"))
+        val repository = RecordingGateRepository(planGate().applying(ApprovalDecisionIntent.Reject, null, "decision in flight"))
         val gateway = RecordingGateway()
         val service = PlanRejectionService(
             gateRepository = repository,
