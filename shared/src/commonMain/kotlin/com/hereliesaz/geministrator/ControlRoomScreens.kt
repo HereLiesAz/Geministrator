@@ -34,10 +34,13 @@ import com.hereliesaz.geministrator.domain.EscalationPolicy
 import com.hereliesaz.geministrator.domain.IntegrationPolicy
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.PromptReusePolicy
+import com.hereliesaz.geministrator.domain.ProviderConstraints
+import com.hereliesaz.geministrator.domain.TaskExecutor
 import com.hereliesaz.geministrator.domain.TestDesignPolicy
 import com.hereliesaz.geministrator.domain.RoleDefinition
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
+import com.hereliesaz.geministrator.domain.effectiveExecutor
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
@@ -512,6 +515,7 @@ internal fun WorkflowTemplateScreen(
 ) {
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
     val entrance = remember { AzphaltEntrance.roll() }
+    var selectedTaskId by remember { mutableStateOf<String?>(null) }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -519,6 +523,7 @@ internal fun WorkflowTemplateScreen(
         Text("WORKFLOWS", style = AzphaltType.hero, color = Azphalt.currentGround.onPage)
         if (liveWorkflow != null) {
             val definition = liveWorkflow.definition
+            val concurrency = definition.concurrencyPolicy
             SectionLabel("Active — ${definition.name}")
             AzphaltRecord(
                 seed = "workflow-policies",
@@ -526,7 +531,12 @@ internal fun WorkflowTemplateScreen(
                 title = "Workflow configuration",
                 body = buildString {
                     append("Integration: ${definition.integrationPolicy.name}")
-                    append(" · Concurrency: ${definition.concurrencyPolicy.maxConcurrentTasks} max")
+                    append(" · Concurrency: ${concurrency.maxConcurrentTasks} max")
+                    if (concurrency.perProviderLimits.isNotEmpty()) {
+                        append(" (")
+                        append(concurrency.perProviderLimits.entries.joinToString(", ") { (pid, n) -> "${pid.value}: $n" })
+                        append(")")
+                    }
                     append(" · Tests: ${definition.testDesignPolicy.name}")
                     append(" · Cache: ${definition.promptReusePolicy.name}")
                 },
@@ -567,13 +577,42 @@ internal fun WorkflowTemplateScreen(
                         append("After: ${task.dependsOn.joinToString(", ") { it.value }}")
                     }
                 }.ifBlank { task.objective.take(60) }
+                val isSelected = selectedTaskId == task.id.value
                 AzphaltRecord(
                     seed = "task-dag-${task.id.value}",
                     eyebrow = executorLabel,
                     title = task.name,
                     body = policyDetail,
                     endCap = taskRun?.status?.name ?: "Pending",
+                    selected = isSelected,
+                    onClick = { selectedTaskId = if (isSelected) null else task.id.value },
                     modifier = Modifier.azphaltEntrance(entrance, index, definition.tasks.size),
+                    well = if (isSelected) {
+                        {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val executorDetail = when (val ex = task.effectiveExecutor()) {
+                                    is TaskExecutor.RoleAgent -> "Role: ${ex.roleId.value}"
+                                    is TaskExecutor.GitHubAction -> "Workflow: ${ex.workflow}${ex.ref?.let { " @ $it" } ?: ""}"
+                                    is TaskExecutor.TestRunner -> "Command: ${ex.command ?: "default"}"
+                                    is TaskExecutor.Deployment -> "Environment: ${ex.environment}"
+                                    is TaskExecutor.RepositoryOperation -> "Operation: ${ex.operation}"
+                                    is TaskExecutor.HumanApproval -> "Label: ${ex.label}"
+                                    is TaskExecutor.ExternalService -> "${ex.service}${ex.operation?.let { " · $it" } ?: ""}"
+                                    is TaskExecutor.NestedWorkflow -> "Workflow: ${ex.workflowDefinitionId.value}"
+                                }
+                                AzphaltNote("executor-type-${task.id.value}", "Executor type", executor?.displayName() ?: "Role agent")
+                                AzphaltNote("executor-detail-${task.id.value}", "Executor detail", executorDetail)
+                                when (val pc = task.providerConstraints) {
+                                    is ProviderConstraints.None -> Unit
+                                    is ProviderConstraints.RequireCapabilities -> AzphaltNote("constraints-${task.id.value}", "Provider constraints", pc.capabilities.joinToString(", ") { it.name })
+                                    is ProviderConstraints.RequireProvider -> AzphaltNote("constraints-${task.id.value}", "Pinned provider", pc.providerId.value)
+                                }
+                                if (task.acceptanceCriteria.isNotEmpty()) {
+                                    AzphaltNote("criteria-${task.id.value}", "Acceptance criteria", task.acceptanceCriteria.joinToString("\n") { "· ${it.description}" })
+                                }
+                            }
+                        }
+                    } else null,
                 )
             }
         } else {

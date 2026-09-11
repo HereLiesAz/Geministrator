@@ -71,11 +71,11 @@ Tracking issue: #35
 
 - [x] Build the workflow template editor around the DAG rather than a generic form.
 - [x] Add/create/edit role definitions and standing instructions.
-- [ ] Add executor selection/policy per task or task class.
+- [x] Add executor selection/policy per task or task class.
 - [x] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
 - [x] Add human approval UI with clear evidence, decision scope, and consequences.
 - [x] Add retry/escalation policy UI.
-- [ ] Add bounded concurrency controls.
+- [x] Add bounded concurrency controls.
 - [x] Validate workflows before execution and explain invalid dependency/policy states in human language.
 
 ## P1 — Provider system
