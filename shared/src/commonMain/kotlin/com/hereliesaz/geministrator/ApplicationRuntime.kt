@@ -22,6 +22,7 @@ import com.hereliesaz.geministrator.persistence.PersistenceCorruptionException
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
+import com.hereliesaz.geministrator.providers.AgentCapabilities
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.ProviderArtifact
 import com.hereliesaz.geministrator.workflow.AgentProviderRegistry
@@ -404,6 +405,15 @@ class ApplicationRuntime private constructor(
         val settingsPersistence = persistence as? SettingsWorkflowPersistence ?: return
         settingsPersistence.recoverFromCorruption()
         loadLatest()
+    }
+
+    suspend fun checkProviderHealth(): Map<String, Result<AgentCapabilities>> {
+        val results = mutableMapOf<String, Result<AgentCapabilities>>()
+        for (providerId in providerRegistry.providerIds) {
+            val provider = providerRegistry.provider(providerId) ?: continue
+            results[providerId.value] = runCatching { provider.capabilities() }
+        }
+        return results
     }
 
     suspend fun exportJson(): String? =

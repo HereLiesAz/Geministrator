@@ -82,7 +82,7 @@ Tracking issue: #35
 
 - [ ] Finish Jules as the reference provider implementation.
 - [ ] Define provider configuration UI and secure credential handling per platform.
-- [ ] Add provider health/capability reporting.
+- [x] Add provider health/capability reporting.
 - [ ] Add provider-neutral token/cost/latency telemetry where providers expose it.
 - [ ] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
 - [ ] Add a second provider to prove interchangeability; choose based on the best supported API at implementation time rather than hard-coding the architecture to Gemini/OpenAI/Claude.
@@ -92,7 +92,7 @@ Tracking issue: #35
 
 - [x] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
 - [x] Add corruption/recovery handling and a user-visible recovery path.
-- [ ] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
+- [x] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
 - [x] Add run export/import for debugging and portability.
 - [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
 - [x] Add retention/deletion controls consistent with `docs/PRIVACY.md`.
@@ -134,7 +134,7 @@ Tracking issue: #35
 - [ ] Implement platform-secure credential storage; credentials must never enter workflow persistence.
 - [ ] Audit provider payloads so users can see what context leaves the device before execution.
 - [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
-- [ ] Add clear data deletion controls for local workflow state.
+- [x] Add clear data deletion controls for local workflow state.
 - [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
 - [ ] Add dependency/security scanning without blocking development on noisy non-actionable findings.
 - [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.

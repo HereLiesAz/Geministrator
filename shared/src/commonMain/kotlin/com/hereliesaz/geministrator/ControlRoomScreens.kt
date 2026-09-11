@@ -393,6 +393,7 @@ internal fun ArtifactFileManagerScreen(runtimeState: ApplicationRuntimeState = A
 @Composable
 internal fun SettingsScreen(
     connectedProviderIds: Set<String> = emptySet(),
+    onCheckProviderHealth: suspend () -> Map<String, String> = { emptyMap() },
     onClearWorkflowData: () -> Unit = {},
     onExportJson: suspend () -> String? = { null },
     onImportJson: (String) -> Unit = {},
@@ -402,6 +403,8 @@ internal fun SettingsScreen(
     var importDraft by remember { mutableStateOf("") }
     var importMode by remember { mutableStateOf(false) }
     var clearConfirm by remember { mutableStateOf(false) }
+    var healthResults by remember { mutableStateOf<Map<String, String>?>(null) }
+    var healthChecking by remember { mutableStateOf(false) }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -410,8 +413,16 @@ internal fun SettingsScreen(
         SectionLabel("Providers")
         if (connectedProviderIds.isNotEmpty()) {
             connectedProviderIds.forEach { providerId ->
-                ProviderRecord(providerId, "Connected", "Credential present")
+                val health = healthResults?.get(providerId)
+                ProviderRecord(providerId, if (health != null) health.substringBefore(" ·") else "Connected", health ?: "Credential present")
             }
+            if (healthChecking) {
+                LaunchedEffect(Unit) {
+                    healthResults = onCheckProviderHealth()
+                    healthChecking = false
+                }
+            }
+            AzphaltPill(if (healthResults == null) "Check provider health" else "Refresh health", "health-check", onClick = { healthChecking = true; healthResults = null }, modifier = Modifier.fillMaxWidth())
         } else {
             ProviderRecord("Jules", "Not configured", "No credential")
             ProviderRecord("Codex", "Not configured", "No credential")

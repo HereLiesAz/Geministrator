@@ -150,6 +150,18 @@ fun App(
                             }
                         }
                     },
+                    onCheckProviderHealth = {
+                        runtime?.checkProviderHealth()?.mapValues { (_, result) ->
+                            result.fold(
+                                onSuccess = { caps ->
+                                    "Reachable · ${caps.supported.size} capabilities"
+                                },
+                                onFailure = { failure ->
+                                    "Unreachable · ${failure.message?.take(60) ?: "unknown error"}"
+                                },
+                            )
+                        } ?: emptyMap()
+                    },
                     onClearWorkflowData = {
                         scope.launch {
                             try {

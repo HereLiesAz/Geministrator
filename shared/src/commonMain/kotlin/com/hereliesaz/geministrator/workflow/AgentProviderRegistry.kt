@@ -20,6 +20,8 @@ class AgentProviderRegistry(
         require(providersById.size == providers.size) { "Provider IDs must be unique" }
     }
 
+    val providerIds: Set<AgentProviderId> get() = providersById.keys
+
     fun provider(id: AgentProviderId): AgentProvider? = providersById[id]
 
     suspend fun select(request: ProviderSelectionRequest): AgentProvider {
