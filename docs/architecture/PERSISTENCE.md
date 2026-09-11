@@ -8,7 +8,7 @@ The engine therefore treats durable workflow state as a first-class product requ
 
 ## Current backend
 
-`SettingsWorkflowPersistence` is the current cross-platform persistence implementation. It stores a versioned serialized workflow snapshot through Multiplatform Settings.
+`SettingsWorkflowPersistence` is the current cross-platform persistence implementation. It stores a versioned serialized workflow snapshot through Multiplatform Settings. Workflow events appended during normal operation use a per-run settings journal so event growth does not force the entire snapshot to be deserialized and rewritten for every event.
 
 Current platform backing stores are:
 
@@ -28,7 +28,7 @@ The persisted model includes:
 - artifacts
 - approval gates
 
-Writes are guarded so the engine has a coherent restart-safe baseline.
+Writes are guarded so the engine has a coherent restart-safe baseline. Failure-escalation decisions that must update the gate, run, and audit event together remain embedded in one snapshot write so those three pieces cannot recover in a split state.
 
 ## What is deliberately not persisted here
 
@@ -61,21 +61,23 @@ This separation lets an external build, deployment, repository operation, approv
 
 ## Schema versioning
 
-The current persistence schema is **2**.
+The current persistence schema is **3**.
 
-Schema `2` introduces executor-neutral task/run state. The migration from schema `1` is explicit:
+Schema `2` introduced executor-neutral task/run state. The migration from schema `1` is explicit:
 
 - a stored `TaskDefinition` with a role but no executor becomes `TaskExecutor.RoleAgent(roleId)`
 - a stored `TaskRun` with an assigned role but no executor becomes `TaskExecutor.RoleAgent(assignedRoleId)`
 - existing workflow IDs, task-run IDs, statuses, attempts, provider IDs, provider run IDs, artifacts, blocking reasons, and progress are preserved
 
-Readers reject snapshots created by a newer unsupported schema. Any future incompatible schema change likewise requires an explicit migration path rather than silent reinterpretation.
+Schema `3` makes retained artifact identity retry-safe. Legacy provider and GitHub artifact IDs are rewritten to include the task attempt so evidence from an earlier failed attempt cannot collide with the current attempt.
 
-The storage key remains `geministrator.workflow.persistence.v1` intentionally. Renaming that key would strand existing data before the schema migrator can read it. Product branding and storage compatibility are separate concerns.
+A successful migration is written back immediately at the current schema version instead of existing only in memory until some unrelated later write. Readers reject snapshots created by a newer unsupported schema and leave the stored bytes untouched. Any future incompatible schema change likewise requires an explicit migration path rather than silent reinterpretation or replacement with an empty snapshot.
+
+The current storage key is `geministrator.workflow.persistence.v2`. The previous `geministrator.workflow.persistence.v1` key remains a read fallback: when legacy data is found there, it is migrated, written to the current key, and the legacy key is retired.
 
 ## Scale boundary
 
-The Settings-backed snapshot is a restart-safe baseline, not the final high-volume event database.
+The Settings-backed snapshot plus per-run event journal is a restart-safe baseline, not the final high-volume event database.
 
 The repository contracts are intentionally replaceable. Likely future storage includes transactional SQL on Android/Desktop and IndexedDB on Web when event volume or indexed queries justify it.
 
