@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -392,8 +393,13 @@ internal fun ArtifactFileManagerScreen(runtimeState: ApplicationRuntimeState = A
 @Composable
 internal fun SettingsScreen(
     connectedProviderIds: Set<String> = emptySet(),
+    onExportJson: suspend () -> String? = { null },
+    onImportJson: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    var exportedJson by remember { mutableStateOf<String?>(null) }
+    var importDraft by remember { mutableStateOf("") }
+    var importMode by remember { mutableStateOf(false) }
     Column(
         modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState()).padding(26.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -408,6 +414,49 @@ internal fun SettingsScreen(
             ProviderRecord("Jules", "Not configured", "No credential")
             ProviderRecord("Codex", "Not configured", "No credential")
             ProviderRecord("Claude", "Not configured", "No credential")
+        }
+        SectionLabel("Data")
+        var exportTriggered by remember { mutableStateOf(false) }
+        if (exportTriggered) {
+            LaunchedEffect(Unit) {
+                exportedJson = onExportJson()
+                exportTriggered = false
+            }
+        }
+        if (exportedJson == null) {
+            AzphaltPill("Export workflow data to JSON", "export-trigger", onClick = { exportTriggered = true }, modifier = Modifier.fillMaxWidth())
+        } else {
+            AzphaltRecord(
+                seed = "export-result",
+                eyebrow = "Export",
+                title = "Workflow data JSON",
+                body = exportedJson!!.take(200).let { if (exportedJson!!.length > 200) "$it…" else it },
+                endCap = "${exportedJson!!.length} chars",
+                onClick = { exportedJson = null },
+            )
+        }
+        if (!importMode) {
+            AzphaltPill("Import data from JSON", "import-mode-enter", onClick = { importMode = true }, modifier = Modifier.fillMaxWidth())
+        } else {
+            OutlinedTextField(
+                value = importDraft,
+                onValueChange = { importDraft = it },
+                label = { Text("Paste exported JSON") },
+                modifier = Modifier.fillMaxWidth().height(120.dp),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AzphaltPill("Import", "import-confirm", onClick = {
+                    if (importDraft.isNotBlank()) {
+                        onImportJson(importDraft)
+                        importDraft = ""
+                        importMode = false
+                    }
+                })
+                AzphaltPill("Cancel", "import-cancel", onClick = {
+                    importDraft = ""
+                    importMode = false
+                })
+            }
         }
     }
 }

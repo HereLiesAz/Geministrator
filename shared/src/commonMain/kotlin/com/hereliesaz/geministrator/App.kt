@@ -149,6 +149,20 @@ fun App(
                             }
                         }
                     },
+                    onExportJson = suspend {
+                        runtime?.exportJson()
+                    },
+                    onImportJson = { encoded ->
+                        scope.launch {
+                            try {
+                                runtime?.importJson(encoded)
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Import failed")
+                            }
+                        }
+                    },
                     onLoadRunHistory = {
                         runtime?.loadRunHistory() ?: emptyList()
                     },

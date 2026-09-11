@@ -146,6 +146,25 @@ class SettingsWorkflowPersistence(
         true
     }
 
+    suspend fun exportJson(): String = settingsWorkflowPersistenceMutex.withLock {
+        json.encodeToString(PersistenceSnapshot.serializer(), readUnlocked())
+    }
+
+    suspend fun importJson(encoded: String) {
+        val snapshot = try {
+            json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
+        } catch (failure: Exception) {
+            throw PersistenceCorruptionException("Import data could not be parsed: ${failure.message}", failure)
+        }
+        require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
+            "Import schema version ${snapshot.version} is not supported (max $CURRENT_SCHEMA_VERSION)"
+        }
+        val migrated = migrate(snapshot).copy(version = CURRENT_SCHEMA_VERSION)
+        settingsWorkflowPersistenceMutex.withLock {
+            settings.putString(storageKey, json.encodeToString(PersistenceSnapshot.serializer(), migrated))
+        }
+    }
+
     suspend fun clearWorkflowData() {
         settingsWorkflowPersistenceMutex.withLock {
             settings.remove(storageKey)

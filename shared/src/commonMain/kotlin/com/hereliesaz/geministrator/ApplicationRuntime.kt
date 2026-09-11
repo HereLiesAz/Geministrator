@@ -406,6 +406,14 @@ class ApplicationRuntime private constructor(
         loadLatest()
     }
 
+    suspend fun exportJson(): String? =
+        (persistence as? SettingsWorkflowPersistence)?.exportJson()
+
+    suspend fun importJson(encoded: String) {
+        (persistence as? SettingsWorkflowPersistence)?.importJson(encoded)
+        loadLatest()
+    }
+
     private fun WorkflowRunStatus.isTerminal() =
         this == WorkflowRunStatus.Completed ||
             this == WorkflowRunStatus.Failed ||

@@ -91,6 +91,8 @@ fun ControlRoom(
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
     onRecoverFromCorruption: () -> Unit,
+    onExportJson: suspend () -> String? = { null },
+    onImportJson: (String) -> Unit = {},
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
     onSwitchRun: (String) -> Unit = {},
     compact: Boolean,
@@ -122,6 +124,8 @@ fun ControlRoom(
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
                     onRecoverFromCorruption = onRecoverFromCorruption,
+                    onExportJson = onExportJson,
+                    onImportJson = onImportJson,
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
                     connectedProviderIds = connectedProviderIds,
@@ -163,6 +167,8 @@ fun ControlRoom(
                     onRejectPlan = onRejectPlan,
                     onResolveEscalation = onResolveEscalation,
                     onRecoverFromCorruption = onRecoverFromCorruption,
+                    onExportJson = onExportJson,
+                    onImportJson = onImportJson,
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
                     connectedProviderIds = connectedProviderIds,
@@ -282,6 +288,8 @@ private fun MainDestination(
     onRejectPlan: (String) -> Unit,
     onResolveEscalation: (String, Boolean) -> Unit,
     onRecoverFromCorruption: () -> Unit,
+    onExportJson: suspend () -> String?,
+    onImportJson: (String) -> Unit,
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>>,
     onSwitchRun: (String) -> Unit,
     connectedProviderIds: Set<String>,
@@ -310,7 +318,7 @@ private fun MainDestination(
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onExportJson, onImportJson, Modifier.fillMaxSize())
         }
     }
 }
