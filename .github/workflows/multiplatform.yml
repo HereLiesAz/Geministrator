@@ -24,17 +24,17 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Check out pinned h2g2
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: HereLiesAz/conveyance-h2g2
           ref: faa80ed5aa063f6bdab42163d7b021123b248254
           path: vendor/conveyance-h2g2
 
       - name: Check out pinned Conveyance
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: HereLiesAz/Conveyance
           ref: 468371de06a903b1a6bdcf812197eef4a81afd3e
