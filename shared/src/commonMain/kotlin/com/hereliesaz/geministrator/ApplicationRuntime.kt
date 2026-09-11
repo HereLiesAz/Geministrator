@@ -18,6 +18,7 @@ import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunId
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
 import com.hereliesaz.geministrator.domain.effectiveExecutor
+import com.hereliesaz.geministrator.persistence.PersistenceCorruptionException
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
@@ -59,12 +60,13 @@ sealed interface ApplicationRuntimeState {
     data class NoRun(val project: Project) : ApplicationRuntimeState
     data class Live(val presentation: LiveWorkflowPresentation) : ApplicationRuntimeState
     data class Disconnected(val message: String) : ApplicationRuntimeState
-    data class ResumeFailed(val message: String) : ApplicationRuntimeState
+    data class ResumeFailed(val message: String, val isCorrupted: Boolean = false) : ApplicationRuntimeState
 }
 
 sealed class ApplicationRuntimeFailure(message: String, cause: Throwable? = null) : RuntimeException(message, cause) {
     class Disconnected(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
     class Resume(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
+    class Corrupted(message: String, cause: Throwable? = null) : ApplicationRuntimeFailure(message, cause)
 }
 
 class WorkflowRuntimePublisher {
@@ -390,12 +392,18 @@ class ApplicationRuntime private constructor(
             ?.takeIf(String::isNotBlank)
             ?: failure::class.simpleName.orEmpty().ifBlank { "Runtime failure" }
         publisher.publish(
-            if (failure is ApplicationRuntimeFailure.Disconnected) {
-                ApplicationRuntimeState.Disconnected(message)
-            } else {
-                ApplicationRuntimeState.ResumeFailed(message)
+            when (failure) {
+                is ApplicationRuntimeFailure.Disconnected -> ApplicationRuntimeState.Disconnected(message)
+                is ApplicationRuntimeFailure.Corrupted -> ApplicationRuntimeState.ResumeFailed(message, isCorrupted = true)
+                else -> ApplicationRuntimeState.ResumeFailed(message)
             },
         )
+    }
+
+    suspend fun recoverFromCorruption() {
+        val settingsPersistence = persistence as? SettingsWorkflowPersistence ?: return
+        settingsPersistence.recoverFromCorruption()
+        loadLatest()
     }
 
     private fun WorkflowRunStatus.isTerminal() =
@@ -418,6 +426,10 @@ class ApplicationRuntime private constructor(
 
         internal fun classifyRuntimeFailure(failure: Throwable): ApplicationRuntimeFailure = when (failure) {
             is ApplicationRuntimeFailure -> failure
+            is PersistenceCorruptionException -> ApplicationRuntimeFailure.Corrupted(
+                failure.message ?: "Workflow persistence is corrupted",
+                failure,
+            )
             is ManagedSessionFailure.ProviderUnavailable -> ApplicationRuntimeFailure.Disconnected(
                 failure.message ?: "Provider runtime is unavailable",
                 failure,

@@ -23,6 +23,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
+class PersistenceCorruptionException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+
 private val settingsWorkflowPersistenceMutex = Mutex()
 
 class SettingsWorkflowPersistence(
@@ -217,6 +219,21 @@ class SettingsWorkflowPersistence(
         }
     }
 
+    var lastCorruptionError: Throwable? = null
+        private set
+
+    suspend fun recoverFromCorruption(): Boolean {
+        val hadData = settingsWorkflowPersistenceMutex.withLock {
+            val had = settings.getStringOrNull(storageKey) != null ||
+                settings.getStringOrNull(LEGACY_STORAGE_KEY_V1) != null
+            settings.remove(storageKey)
+            settings.remove(LEGACY_STORAGE_KEY_V1)
+            had
+        }
+        lastCorruptionError = null
+        return hadData
+    }
+
     private fun readUnlocked(): PersistenceSnapshot {
         val currentEncoded = settings.getStringOrNull(storageKey)
         val legacyEncoded = if (currentEncoded == null && storageKey == DEFAULT_STORAGE_KEY) {
@@ -225,7 +242,18 @@ class SettingsWorkflowPersistence(
             null
         }
         val encoded = currentEncoded ?: legacyEncoded ?: return PersistenceSnapshot()
-        val snapshot = json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
+
+        val snapshot = try {
+            json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
+        } catch (failure: Exception) {
+            lastCorruptionError = failure
+            throw PersistenceCorruptionException(
+                "Workflow persistence data is unreadable and must be recovered. " +
+                    "Call recoverFromCorruption() to clear corrupted state.",
+                failure,
+            )
+        }
+
         require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
             "Unsupported workflow persistence schema ${snapshot.version}; maximum supported is $CURRENT_SCHEMA_VERSION"
         }

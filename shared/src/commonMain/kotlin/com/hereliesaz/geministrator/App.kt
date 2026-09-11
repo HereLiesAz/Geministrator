@@ -138,6 +138,17 @@ fun App(
                             }
                         }
                     },
+                    onRecoverFromCorruption = {
+                        scope.launch {
+                            try {
+                                runtime?.recoverFromCorruption()
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Recovery failed")
+                            }
+                        }
+                    },
                     onLoadRunHistory = {
                         runtime?.loadRunHistory() ?: emptyList()
                     },

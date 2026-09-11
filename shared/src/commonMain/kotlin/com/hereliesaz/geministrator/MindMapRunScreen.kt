@@ -30,6 +30,7 @@ internal fun MindMapRunScreen(
     selectedTaskId: String?,
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
+    onRecoverFromCorruption: () -> Unit = {},
     compact: Boolean,
     runtimeState: ApplicationRuntimeState,
 ) {
@@ -53,6 +54,15 @@ internal fun MindMapRunScreen(
     ) {
         if (liveWorkflow == null) {
             RuntimeStateRecord(runtimeState, compact)
+            val corrupted = (runtimeState as? ApplicationRuntimeState.ResumeFailed)?.isCorrupted == true
+            if (corrupted) {
+                AzphaltPill(
+                    "Recover — clear corrupted data",
+                    "recover-corruption",
+                    onClick = onRecoverFromCorruption,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             if (runtimeState == ApplicationRuntimeState.NoProject || runtimeState is ApplicationRuntimeState.NoRun) {
                 OutlinedTextField(
                     value = projectName,

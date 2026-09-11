@@ -90,8 +90,8 @@ Tracking issue: #35
 
 ## P1 — Persistence and recovery
 
-- [ ] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
-- [ ] Add corruption/recovery handling and a user-visible recovery path.
+- [x] Add schema migrations; never silently reinterpret incompatible persisted workflow state.
+- [x] Add corruption/recovery handling and a user-visible recovery path.
 - [ ] Ensure active provider/executor sessions reconnect rather than duplicate after restart.
 - [ ] Add run export/import for debugging and portability.
 - [ ] Decide when Settings-backed storage has reached its scale limit and implement SQL/IndexedDB backends behind the existing repository contracts.
