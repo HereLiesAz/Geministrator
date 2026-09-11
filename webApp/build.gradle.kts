@@ -30,6 +30,8 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.shared)
             implementation(projects.providers.jules)
+            implementation(compose.foundation)
+            implementation(compose.material3)
             implementation(compose.ui)
         }
 

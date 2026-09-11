@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Splash theme for API 31+: uses system SplashScreen API -->
+    <!-- Splash theme for API 31+: uses the platform SplashScreen attributes. -->
     <style name="Theme.Haive.Splash" parent="Theme.Haive">
         <item name="android:windowSplashScreenBackground">@color/haive_icon_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
