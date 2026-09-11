@@ -18,6 +18,7 @@ import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -89,7 +90,7 @@ class SettingsWorkflowPersistenceTest {
     }
 
     @Test
-    fun legacyV2ArtifactIdsMigrateToAttemptScopedIdentity() = runBlocking {
+    fun legacyV2ArtifactIdsMigrateToAttemptScopedIdentityAndWriteBackImmediately() = runBlocking {
         val settings = MapSettings()
         val persistence = SettingsWorkflowPersistence(settings)
         val taskId = TaskDefinitionId("task")
@@ -162,6 +163,32 @@ class SettingsWorkflowPersistenceTest {
         assertNull(restored.artifacts.get(legacyProviderArtifact.id))
         assertNull(restored.artifacts.get(legacyGitHubArtifact.id))
         assertEquals(3, restored.snapshotVersion())
+        assertTrue(
+            assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+                .contains("\"version\":3"),
+        )
+    }
+
+    @Test
+    fun legacyStorageKeyIsPromotedAndRetiredOnRead() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("legacy-project"),
+            name = "Legacy Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        persistence.projects.put(project)
+        val encoded = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        settings.remove(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY)
+        settings.putString(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1, encoded)
+
+        val restored = SettingsWorkflowPersistence(settings)
+
+        assertEquals(project, restored.projects.get(project.id))
+        assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        assertFalse(settings.hasKey(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
     }
 
     @Test
