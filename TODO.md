@@ -141,10 +141,10 @@ Tracking issue: #35
 
 ## P2 — Cost and observability
 
-- [ ] Per-run/provider/executor timing.
+- [x] Per-run/provider/executor timing.
 - [ ] Token and cost accounting where available.
 - [ ] Cache-hit/cache-write observability where supported.
-- [ ] Retry and failure-rate metrics.
+- [x] Retry and failure-rate metrics.
 - [x] Run timeline/event viewer.
 - [x] Exportable diagnostic bundle with secrets stripped.
 

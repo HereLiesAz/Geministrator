@@ -442,6 +442,14 @@ class ApplicationRuntime private constructor(
         val artifactCount = events.count { it is com.hereliesaz.geministrator.events.ArtifactCreated }
         val durationMs = if (run != null) run.updatedAtEpochMillis - run.createdAtEpochMillis else 0L
 
+        val startsByTask = events
+            .filterIsInstance<com.hereliesaz.geministrator.events.TaskStarted>()
+            .groupBy { it.taskDefinitionId }
+            .mapValues { (_, starts) -> starts.minOf { it.occurredAtEpochMillis } }
+        val completionsByTask = events
+            .filterIsInstance<com.hereliesaz.geministrator.events.TaskCompleted>()
+            .associateBy { it.taskDefinitionId }
+
         return buildString {
             appendLine("{")
             appendLine("  \"schema\": \"haive-diagnostic-v1\",")
@@ -460,7 +468,10 @@ class ApplicationRuntime private constructor(
             val taskRuns = run?.taskRuns?.values?.toList() ?: emptyList()
             taskRuns.forEachIndexed { index, taskRun ->
                 val comma = if (index < taskRuns.size - 1) "," else ""
-                appendLine("    {\"id\": ${jsonStr(taskRun.taskDefinitionId.value)}, \"status\": ${jsonStr(taskRun.status.name)}, \"attempt\": ${taskRun.attempt}}$comma")
+                val taskStart = startsByTask[taskRun.taskDefinitionId]
+                val taskEnd = completionsByTask[taskRun.taskDefinitionId]?.occurredAtEpochMillis
+                val taskDurationMs = if (taskStart != null && taskEnd != null) taskEnd - taskStart else "null"
+                appendLine("    {\"id\": ${jsonStr(taskRun.taskDefinitionId.value)}, \"status\": ${jsonStr(taskRun.status.name)}, \"attempt\": ${taskRun.attempt}, \"durationMs\": $taskDurationMs, \"providerId\": ${jsonStr(taskRun.assignedProviderId?.value)}}$comma")
             }
             appendLine("  ]")
             append("}")
