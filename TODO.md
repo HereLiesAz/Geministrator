@@ -73,8 +73,8 @@ Tracking issue: #35
 - [x] Add/create/edit role definitions and standing instructions.
 - [ ] Add executor selection/policy per task or task class.
 - [x] Make injected policy work visible: environment planning, pre-code verification, post-code testing, independent review, release gates.
-- [ ] Add human approval UI with clear evidence, decision scope, and consequences.
-- [ ] Add retry/escalation policy UI.
+- [x] Add human approval UI with clear evidence, decision scope, and consequences.
+- [x] Add retry/escalation policy UI.
 - [ ] Add bounded concurrency controls.
 - [x] Validate workflows before execution and explain invalid dependency/policy states in human language.
 

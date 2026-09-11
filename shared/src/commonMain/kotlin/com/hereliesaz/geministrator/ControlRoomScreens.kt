@@ -293,26 +293,66 @@ internal fun InboxScreen(
                     val task = liveWorkflow.definition.tasks.firstOrNull { it.id == taskRun.taskDefinitionId }
                     val taskId = taskRun.taskDefinitionId.value
                     val isPlanApproval = taskRun.status == TaskRunStatus.AwaitingApproval
+                    val scope = buildString {
+                        if (isPlanApproval) {
+                            append("Approve to begin execution")
+                            task?.approvalPolicy?.let {
+                                if (it is ApprovalPolicy.RoleApproval) append(" · authority: ${it.authority.name}")
+                            }
+                        } else {
+                            val maxAttempts = task?.retryPolicy?.maxAttempts ?: 2
+                            append("Attempt ${taskRun.attempt} of $maxAttempts")
+                            task?.escalationPolicy?.let { ep ->
+                                when (ep) {
+                                    is EscalationPolicy.FailWorkflow -> append(" · Reject stops the workflow")
+                                    is EscalationPolicy.RequireHumanDecision -> append(" · Human decision required")
+                                    is EscalationPolicy.Reassign -> append(" · Reject reassigns to ${ep.roleId.value}")
+                                }
+                            }
+                        }
+                    }
                     AzphaltRecord(
                         seed = taskId,
                         eyebrow = if (isPlanApproval) "Plan Approval" else "Failure Escalation",
                         title = task?.name ?: taskId,
-                        body = if (isPlanApproval) {
-                            taskRun.progressMessage?.takeIf(String::isNotBlank) ?: (task?.objective ?: "")
-                        } else {
-                            taskRun.blockingReason?.let { "${it.code} · ${it.message}" } ?: "Task failed"
+                        body = buildString {
+                            val primary = if (isPlanApproval) {
+                                taskRun.progressMessage?.takeIf(String::isNotBlank) ?: task?.objective ?: ""
+                            } else {
+                                taskRun.blockingReason?.let { "${it.code} · ${it.message}" } ?: "Task failed"
+                            }
+                            append(primary)
+                            if (scope.isNotBlank()) {
+                                append("\n")
+                                append(scope)
+                            }
                         },
                         endCap = "Needs you",
                         well = {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                if (isPlanApproval) {
-                                    AzphaltPill("Approve", "$taskId-approve", onClick = { onApproveTask(taskId) })
-                                    if (taskRun.assignedProviderId != null) {
-                                        AzphaltPill("Reject", "$taskId-reject", onClick = { onRejectPlan(taskId) })
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (taskRun.artifacts.isNotEmpty()) {
+                                    Text("EVIDENCE", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+                                    taskRun.artifacts.forEach { artifact ->
+                                        val ref = artifact.uri
+                                            ?: artifact.textContent?.take(80)?.let { if (artifact.textContent.length > 80) "$it…" else it }
+                                            ?: "stored"
+                                        AzphaltNote(
+                                            seed = "inbox-artifact-${artifact.id.value}",
+                                            label = "${artifact.kind.name} · ${artifact.label}",
+                                            value = ref,
+                                        )
                                     }
-                                } else {
-                                    AzphaltPill("Retry", "$taskId-retry", onClick = { onResolveEscalation(taskId, true) })
-                                    AzphaltPill("Stop", "$taskId-stop", onClick = { onResolveEscalation(taskId, false) })
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    if (isPlanApproval) {
+                                        AzphaltPill("Approve", "$taskId-approve", onClick = { onApproveTask(taskId) })
+                                        if (taskRun.assignedProviderId != null) {
+                                            AzphaltPill("Reject", "$taskId-reject", onClick = { onRejectPlan(taskId) })
+                                        }
+                                    } else {
+                                        AzphaltPill("Retry", "$taskId-retry", onClick = { onResolveEscalation(taskId, true) })
+                                        AzphaltPill("Stop", "$taskId-stop", onClick = { onResolveEscalation(taskId, false) })
+                                    }
                                 }
                             }
                         },
