@@ -103,34 +103,20 @@ jobs:
 
       - name: Generate Desktop icons (macOS icns, Windows ico)
         run: |
-          sudo apt-get install -y --no-install-recommends imagemagick > /dev/null
+          sudo apt-get install -y --no-install-recommends imagemagick icnsutils > /dev/null
           ICON=branding/haive-icon-color.png
-          # Windows ico (multi-resolution)
-          convert "$ICON" -resize 256x256 \
-            \( +clone -resize 128x128 \) \
-            \( +clone -resize 64x64 \) \
-            \( +clone -resize 48x48 \) \
-            \( +clone -resize 32x32 \) \
-            \( +clone -resize 16x16 \) \
-            branding/haive-icon.ico
-          # macOS iconset -> icns
-          mkdir -p branding/haive.iconset
-          for SIZE in 16 32 64 128 256 512; do
-            convert "$ICON" -resize ${SIZE}x${SIZE} branding/haive.iconset/icon_${SIZE}x${SIZE}.png
-            convert "$ICON" -resize $((SIZE*2))x$((SIZE*2)) branding/haive.iconset/icon_${SIZE}x${SIZE}@2x.png
+          # Resize each size separately to avoid IM6 parenthesis syntax issues.
+          for SIZE in 16 32 48 64 128 256 512; do
+            convert "$ICON" -strip -resize ${SIZE}x${SIZE} "/tmp/haive_${SIZE}.png"
           done
-          if command -v iconutil &>/dev/null; then
-            iconutil -c icns branding/haive.iconset -o branding/haive-icon.icns
-          else
-            # Fallback: png2icns (available on ubuntu)
-            sudo apt-get install -y --no-install-recommends icnsutils > /dev/null
-            png2icns branding/haive-icon.icns \
-              branding/haive.iconset/icon_16x16.png \
-              branding/haive.iconset/icon_32x32.png \
-              branding/haive.iconset/icon_128x128.png \
-              branding/haive.iconset/icon_256x256.png \
-              branding/haive.iconset/icon_512x512.png || true
-          fi
+          # Windows ico (multi-resolution)
+          convert /tmp/haive_16.png /tmp/haive_32.png /tmp/haive_48.png \
+            /tmp/haive_64.png /tmp/haive_128.png /tmp/haive_256.png \
+            branding/haive-icon.ico
+          # macOS icns via png2icns
+          png2icns branding/haive-icon.icns \
+            /tmp/haive_16.png /tmp/haive_32.png /tmp/haive_128.png \
+            /tmp/haive_256.png /tmp/haive_512.png || true
 
       - name: Build Desktop distributable
         run: ./gradlew :desktopApp:createDistributable
