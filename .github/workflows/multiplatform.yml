@@ -86,6 +86,9 @@ jobs:
       - name: Compile Jules provider Wasm
         run: ./gradlew :providers:jules:compileKotlinWasmJs
 
+      - name: Test Android provider bootstrap
+        run: ./gradlew :androidApp:testDebugUnitTest
+
       - name: Build Android (debug on PRs, release on push)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
