@@ -1,5 +1,6 @@
 package com.hereliesaz.geministrator.workflow
 
+import com.hereliesaz.geministrator.domain.TaskCondition
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowDefinition
 
@@ -8,6 +9,10 @@ sealed interface WorkflowValidationError {
     data class MissingDependency(
         val taskId: TaskDefinitionId,
         val missingDependencyId: TaskDefinitionId,
+    ) : WorkflowValidationError
+    data class MissingConditionTarget(
+        val taskId: TaskDefinitionId,
+        val missingTargetId: TaskDefinitionId,
     ) : WorkflowValidationError
     data class MissingExecutor(val taskId: TaskDefinitionId) : WorkflowValidationError
     data class SelfDependency(val taskId: TaskDefinitionId) : WorkflowValidationError
@@ -19,6 +24,8 @@ fun WorkflowValidationError.humanReadable(): String = when (this) {
         "Task '${taskId.value}' appears more than once. Each task must have a unique ID."
     is WorkflowValidationError.MissingDependency ->
         "Task '${taskId.value}' depends on '${missingDependencyId.value}', which doesn't exist in this workflow."
+    is WorkflowValidationError.MissingConditionTarget ->
+        "Task '${taskId.value}' has a condition referencing '${missingTargetId.value}', which doesn't exist in this workflow."
     is WorkflowValidationError.MissingExecutor ->
         "Task '${taskId.value}' has no executor or role assigned. Every task must specify who does the work."
     is WorkflowValidationError.SelfDependency ->
@@ -45,6 +52,14 @@ object WorkflowGraphValidator {
                     dependency == task.id -> errors += WorkflowValidationError.SelfDependency(task.id)
                     dependency !in knownIds -> errors += WorkflowValidationError.MissingDependency(task.id, dependency)
                 }
+            }
+            val conditionTarget = when (val c = task.condition) {
+                is TaskCondition.Always -> null
+                is TaskCondition.OnAnyOutcome -> c.ofTask
+                is TaskCondition.OnFailure -> c.ofTask
+            }
+            if (conditionTarget != null && conditionTarget !in knownIds) {
+                errors += WorkflowValidationError.MissingConditionTarget(task.id, conditionTarget)
             }
         }
 

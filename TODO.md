@@ -63,7 +63,7 @@ Tracking issue: #35
 - [x] Represent GitHub Actions jobs/steps as real workflow execution rather than agent roles.
 - [x] Read workflow run/job/step status and project it into task progress.
 - [x] Capture build/test artifacts and attach them to Haive task/run artifacts.
-- [ ] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
+- [x] Support repository operations needed by workflows: branch, commit, PR, merge-state checks, and release metadata.
 - [x] Add explicit approval/policy boundaries before destructive or publishing operations.
 - [x] Handle GitHub failures, cancellation, reruns, and stale runs cleanly.
 
@@ -150,10 +150,10 @@ Tracking issue: #35
 
 ## P2 — Workflow composition
 
-- [ ] Nested Haive workflows as executors.
+- [x] Nested Haive workflows as executors.
 - [ ] Reusable workflow fragments/subgraphs.
-- [ ] Conditional branches grounded in explicit outputs/evidence.
-- [ ] Fan-out/fan-in helpers without hiding the underlying DAG.
+- [x] Conditional branches grounded in explicit outputs/evidence.
+- [x] Fan-out/fan-in helpers without hiding the underlying DAG.
 - [ ] Cross-project workflows where permissions allow them.
 
 ## P2 — Brand and release polish
