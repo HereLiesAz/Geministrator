@@ -22,6 +22,7 @@ internal fun TechnicalInspector(
     selectedTaskId: String,
     liveWorkflow: LiveWorkflowPresentation?,
     onApproveTask: (String) -> Unit = {},
+    onRejectPlan: (String) -> Unit = {},
     onResolveEscalation: (String, Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
@@ -87,14 +88,23 @@ internal fun TechnicalInspector(
             )
         }
         if (taskRun.status == TaskRunStatus.AwaitingApproval) {
-            val label = if (taskRun.assignedProviderId != null) "Approve plan" else "Approve task"
+            val providerPlan = taskRun.assignedProviderId != null
             AzphaltPill(
-                label = label,
+                label = if (providerPlan) "Approve plan" else "Approve task",
                 seed = "approve-$selectedTaskId",
                 endCap = "Proceed",
                 onClick = { onApproveTask(selectedTaskId) },
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (providerPlan) {
+                AzphaltPill(
+                    label = "Reject plan",
+                    seed = "reject-plan-$selectedTaskId",
+                    endCap = "Reject",
+                    onClick = { onRejectPlan(selectedTaskId) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
         if (taskRun.status == TaskRunStatus.Escalated) {
             AzphaltPill(
