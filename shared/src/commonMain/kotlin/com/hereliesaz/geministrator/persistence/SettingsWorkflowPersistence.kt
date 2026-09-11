@@ -147,7 +147,12 @@ class SettingsWorkflowPersistence(
     }
 
     suspend fun exportJson(): String = settingsWorkflowPersistenceMutex.withLock {
-        json.encodeToString(PersistenceSnapshot.serializer(), readUnlocked())
+        val snapshot = readUnlocked()
+        val journaledEvents = snapshot.runs.flatMap { run ->
+            readJournalEventsUnlocked(run.id)
+        }
+        val full = snapshot.copy(events = (snapshot.events + journaledEvents).sortedBy { it.occurredAtEpochMillis })
+        json.encodeToString(PersistenceSnapshot.serializer(), full)
     }
 
     suspend fun importJson(encoded: String) {
@@ -161,6 +166,10 @@ class SettingsWorkflowPersistence(
         }
         val migrated = migrate(snapshot).copy(version = CURRENT_SCHEMA_VERSION)
         settingsWorkflowPersistenceMutex.withLock {
+            // Clear existing per-run journal entries before restoring to prevent event mixing.
+            settings.keys
+                .filter { it.startsWith(eventJournalRoot()) }
+                .forEach(settings::remove)
             settings.putString(storageKey, json.encodeToString(PersistenceSnapshot.serializer(), migrated))
         }
     }

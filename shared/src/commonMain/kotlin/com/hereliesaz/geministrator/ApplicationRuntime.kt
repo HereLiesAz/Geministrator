@@ -102,6 +102,8 @@ class ApplicationRuntime private constructor(
     private var currentGeneration: Long = 0L
     private var cycleJob: Job? = null
     private val runtimeMutex = Mutex()
+    /** Non-null while the UI is viewing a historical run; cycling continues on [current]. */
+    private var viewingRun: Pair<WorkflowDefinition, WorkflowRun>? = null
     val state: StateFlow<ApplicationRuntimeState> = publisher.state
 
     suspend fun loadLatest() {
@@ -164,26 +166,24 @@ class ApplicationRuntime private constructor(
 
     suspend fun switchToRun(runId: WorkflowRunId) {
         runtimeMutex.withLock {
-            publisher.publish(ApplicationRuntimeState.Loading)
             try {
                 val run = persistence.runs.get(runId)
                     ?: error("Run ${runId.value} not found")
-                val project = persistence.projects.all().firstOrNull { it.id == run.projectId }
-                    ?: error("Project ${run.projectId.value} not found for run ${runId.value}")
                 val definition = persistence.definitions.get(run.workflowDefinitionId)
                     ?: error("Workflow definition ${run.workflowDefinitionId.value} not found")
-                val runtimeState = try {
-                    coordinator.resume(runId)
-                } catch (failure: Throwable) {
-                    throw classifyResumeFailure(failure)
-                }
-                replaceCurrent(Current(project, definition, runtimeState))
+                viewingRun = definition to run
                 publishCurrent()
-                startCycling()
             } catch (failure: Throwable) {
-                replaceCurrent(null)
                 publishFailure(failure)
             }
+        }
+    }
+
+    /** Clear any historical-run view and return to displaying the active run. */
+    suspend fun clearRunView() {
+        runtimeMutex.withLock {
+            viewingRun = null
+            publishCurrent()
         }
     }
 
@@ -342,6 +342,7 @@ class ApplicationRuntime private constructor(
     private fun replaceCurrent(next: Current?) {
         currentGeneration += 1L
         current = next
+        viewingRun = null
     }
 
     private fun startCycling() {
@@ -379,6 +380,20 @@ class ApplicationRuntime private constructor(
     }
 
     private fun publishCurrent() {
+        val viewing = viewingRun
+        if (viewing != null) {
+            val (definition, run) = viewing
+            publisher.publish(
+                ApplicationRuntimeState.Live(
+                    LiveWorkflowPresentation(
+                        definition = definition,
+                        run = run,
+                        roles = roles,
+                    ),
+                ),
+            )
+            return
+        }
         val snapshot = current ?: return
         publisher.publish(
             ApplicationRuntimeState.Live(
@@ -434,6 +449,7 @@ class ApplicationRuntime private constructor(
 
     suspend fun saveRole(role: RoleDefinition) {
         persistence.roles.put(role)
+        loadLatest()
     }
 
     fun validateCurrentWorkflow(): List<String> {
@@ -489,8 +505,24 @@ class ApplicationRuntime private constructor(
         }
     }
 
-    private fun jsonStr(value: String?): String =
-        if (value == null) "null" else "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+    private fun jsonStr(value: String?): String {
+        if (value == null) return "null"
+        val escaped = buildString {
+            for (ch in value) {
+                when (ch) {
+                    '\\' -> append("\\\\")
+                    '"' -> append("\\\"")
+                    '\n' -> append("\\n")
+                    '\r' -> append("\\r")
+                    '\t' -> append("\\t")
+                    '\b' -> append("\\b")
+                    '' -> append("\\f")
+                    else -> if (ch.code < 0x20) append("\\u${ch.code.toString(16).padStart(4, '0')}") else append(ch)
+                }
+            }
+        }
+        return "\"$escaped\""
+    }
 
     private fun WorkflowRunStatus.isTerminal() =
         this == WorkflowRunStatus.Completed ||

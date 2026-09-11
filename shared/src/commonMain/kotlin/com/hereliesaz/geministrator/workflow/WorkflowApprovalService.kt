@@ -72,6 +72,7 @@ class WorkflowApprovalService(
 
         gateCoordinator.claimPlanApproval(
             id = gateId,
+            intent = ApprovalDecisionIntent.Approve,
             decidedByRoleId = decidedByRoleId,
             note = note,
         )

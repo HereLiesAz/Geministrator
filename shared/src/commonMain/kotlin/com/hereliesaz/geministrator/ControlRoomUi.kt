@@ -350,7 +350,7 @@ private fun MainDestination(
             ControlRoomDestination.Company -> CompanyScreen(runtimeState, onSaveRole, Modifier.fillMaxSize())
             ControlRoomDestination.Artifacts -> ArtifactFileManagerScreen(runtimeState, Modifier.fillMaxSize())
             ControlRoomDestination.Inbox -> InboxScreen(runtimeState, onApproveTask, onRejectPlan, onResolveEscalation, Modifier.fillMaxSize())
-            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, onReconfigureProvider, Modifier.fillMaxSize())
+            ControlRoomDestination.Settings -> SettingsScreen(connectedProviderIds, onCheckProviderHealth, onClearWorkflowData, onExportJson, onImportJson, onExportDiagnosticBundle, onReconfigureProvider, modifier = Modifier.fillMaxSize())
         }
     }
 }

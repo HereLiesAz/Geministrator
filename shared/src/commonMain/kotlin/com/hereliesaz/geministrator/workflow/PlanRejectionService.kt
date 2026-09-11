@@ -32,6 +32,7 @@ class PlanRejectionService(
         val rejectionNote = note ?: "Plan rejected in application"
         gateCoordinator.claimPlanApproval(
             id = gateId,
+            intent = ApprovalDecisionIntent.Reject,
             decidedByRoleId = decidedByRoleId,
             note = rejectionNote,
         )

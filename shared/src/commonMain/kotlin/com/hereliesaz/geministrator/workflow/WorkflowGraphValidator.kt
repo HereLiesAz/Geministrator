@@ -83,7 +83,14 @@ object WorkflowGraphValidator {
     }
 
     private fun detectCycleNodes(definition: WorkflowDefinition): Set<TaskDefinitionId> {
-        val dependencies = definition.tasks.associate { it.id to it.dependsOn }
+        val dependencies = definition.tasks.associate { task ->
+            val conditionTarget = when (val c = task.condition) {
+                is TaskCondition.Always -> null
+                is TaskCondition.OnAnyOutcome -> c.ofTask
+                is TaskCondition.OnFailure -> c.ofTask
+            }
+            task.id to (task.dependsOn + listOfNotNull(conditionTarget)).distinct()
+        }
         val visiting = mutableSetOf<TaskDefinitionId>()
         val visited = mutableSetOf<TaskDefinitionId>()
         val cycleNodes = linkedSetOf<TaskDefinitionId>()
