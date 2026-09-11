@@ -15,9 +15,9 @@ data class WorkflowFragment(
     val id: WorkflowFragmentId,
     val name: String,
     val tasks: List<TaskDefinition>,
-    val entryPoints: Set<TaskDefinitionId> = tasks.map { it.id }.toSet() - tasks.flatMap { it.dependsOn }.toSet(),
-    val exitPoints: Set<TaskDefinitionId> = tasks.map { it.id }.toSet() -
+    val entryPoints: Set<TaskDefinitionId> = tasks.map { it.id }.toSet() -
         tasks.flatMap { t -> tasks.filter { dep -> t.id in dep.dependsOn }.map { it.id } }.toSet(),
+    val exitPoints: Set<TaskDefinitionId> = tasks.map { it.id }.toSet() - tasks.flatMap { it.dependsOn }.toSet(),
 )
 
 /**
