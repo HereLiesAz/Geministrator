@@ -103,16 +103,18 @@ jobs:
 
       - name: Generate Desktop icons (macOS icns, Windows ico)
         run: |
-          sudo apt-get install -y --no-install-recommends imagemagick icnsutils > /dev/null
-          ICON=branding/haive-icon-color.png
-          # Resize each size separately to avoid IM6 parenthesis syntax issues.
-          for SIZE in 16 32 48 64 128 256 512; do
-            convert "$ICON" -strip -resize ${SIZE}x${SIZE} "/tmp/haive_${SIZE}.png"
-          done
-          # Windows ico (multi-resolution)
-          convert /tmp/haive_16.png /tmp/haive_32.png /tmp/haive_48.png \
-            /tmp/haive_64.png /tmp/haive_128.png /tmp/haive_256.png \
-            branding/haive-icon.ico
+          sudo apt-get install -y --no-install-recommends icnsutils > /dev/null
+          pip install --quiet pillow
+          python3 - <<'EOF'
+          from PIL import Image
+          src = Image.open("branding/haive-icon-color.png").convert("RGBA")
+          # ICO: Pillow writes multi-resolution Windows ico natively.
+          src.save("branding/haive-icon.ico", format="ICO",
+                   sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
+          # Individual PNGs for icns (written with standard filtering).
+          for size in [16, 32, 128, 256, 512]:
+              src.resize((size, size), Image.LANCZOS).save(f"/tmp/haive_{size}.png")
+          EOF
           # macOS icns via png2icns
           png2icns branding/haive-icon.icns \
             /tmp/haive_16.png /tmp/haive_32.png /tmp/haive_128.png \
