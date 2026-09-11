@@ -161,7 +161,7 @@ fun ControlRoom(
                             onApproveTask = onApproveTask,
                             onRejectPlan = onRejectPlan,
                             onResolveEscalation = onResolveEscalation,
-                            modifier = Modifier.fillMaxWidth().height(280.dp),
+                            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.35f),
                         )
                     }
                 }

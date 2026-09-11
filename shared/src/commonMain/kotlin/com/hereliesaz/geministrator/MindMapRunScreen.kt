@@ -99,7 +99,7 @@ internal fun MindMapRunScreen(
                     value = objective,
                     onValueChange = { objective = it },
                     label = { Text("Objective") },
-                    minLines = 3,
+                    minLines = if (compact) 2 else 3,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 val owner = repositoryOwner.trim()
