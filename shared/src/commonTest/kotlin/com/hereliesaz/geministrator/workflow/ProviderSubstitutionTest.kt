@@ -147,8 +147,6 @@ private class StubTwoProviderGateway(
     private val preferred: AgentProviderId? = null,
 ) : ManagedSessionGateway {
 
-    private val completed = mutableSetOf<ManagedSessionHandle>()
-
     override suspend fun resolveProvider(selection: ProviderSelectionRequest): AgentProviderId {
         val constraint = selection.constraints
         if (constraint is ProviderConstraints.RequireProvider) return constraint.providerId
@@ -164,11 +162,8 @@ private class StubTwoProviderGateway(
         )
     }
 
-    override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus {
-        if (handle in completed) return ManagedSessionStatus.Completed
-        completed += handle
-        return ManagedSessionStatus.Running
-    }
+    override suspend fun status(handle: ManagedSessionHandle): ManagedSessionStatus =
+        ManagedSessionStatus.Completed
 
     override suspend fun message(handle: ManagedSessionHandle, message: String) = ProviderActionResult.Accepted
 
