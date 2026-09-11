@@ -1,6 +1,7 @@
 package com.hereliesaz.geministrator.workflow
 
 import com.hereliesaz.geministrator.domain.ApprovalGateId
+import com.hereliesaz.geministrator.domain.RoleAuthority
 import com.hereliesaz.geministrator.domain.RoleDefinitionId
 import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.WorkflowRunId
@@ -23,6 +24,7 @@ class ApprovalGateCoordinator(
         taskDefinitionId: TaskDefinitionId?,
         kind: ApprovalGateKind,
         reason: String,
+        requiredAuthority: RoleAuthority? = null,
         requiredRoleId: RoleDefinitionId? = null,
         requiresHuman: Boolean = false,
         nowEpochMillis: Long,
@@ -36,6 +38,7 @@ class ApprovalGateCoordinator(
             taskDefinitionId = taskDefinitionId,
             kind = kind,
             reason = reason,
+            requiredAuthority = requiredAuthority,
             requiredRoleId = requiredRoleId,
             requiresHuman = requiresHuman,
             createdAtEpochMillis = nowEpochMillis,
