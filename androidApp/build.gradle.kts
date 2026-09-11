@@ -50,5 +50,5 @@ dependencies {
     implementation(projects.providers.jules)
     implementation(libs.androidx.activity.compose)
     implementation(compose.material3)
-    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
