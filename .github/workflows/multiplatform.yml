@@ -105,9 +105,11 @@ jobs:
         run: |
           sudo apt-get install -y --no-install-recommends icnsutils > /dev/null
           pip install --quiet pillow
+          # Re-encode via ffmpeg to a clean PNG Pillow can always read.
+          ffmpeg -y -i branding/haive-icon-color.png /tmp/haive-icon-source.png 2>/dev/null
           python3 - <<'EOF'
           from PIL import Image
-          src = Image.open("branding/haive-icon-color.png").convert("RGBA")
+          src = Image.open("/tmp/haive-icon-source.png").convert("RGBA")
           # ICO: Pillow writes multi-resolution Windows ico natively.
           src.save("branding/haive-icon.ico", format="ICO",
                    sizes=[(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)])
