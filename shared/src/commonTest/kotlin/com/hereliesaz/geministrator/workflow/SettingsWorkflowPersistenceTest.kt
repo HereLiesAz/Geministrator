@@ -18,6 +18,7 @@ import com.russhwolf.settings.MapSettings
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -189,6 +190,34 @@ class SettingsWorkflowPersistenceTest {
         assertEquals(project, restored.projects.get(project.id))
         assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
         assertFalse(settings.hasKey(SettingsWorkflowPersistence.LEGACY_STORAGE_KEY_V1))
+    }
+
+    @Test
+    fun futureSchemaIsRejectedWithoutOverwritingStoredData() = runBlocking {
+        val settings = MapSettings()
+        val persistence = SettingsWorkflowPersistence(settings)
+        val project = Project(
+            id = ProjectId("future-project"),
+            name = "Future Project",
+            createdAtEpochMillis = 1L,
+            updatedAtEpochMillis = 1L,
+        )
+        persistence.projects.put(project)
+        val current = assertNotNull(settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
+        val futureVersion = SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION + 1
+        val future = current.replace(
+            "\"version\":${SettingsWorkflowPersistence.CURRENT_SCHEMA_VERSION}",
+            "\"version\":$futureVersion",
+        )
+        settings.putString(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY, future)
+
+        val restored = SettingsWorkflowPersistence(settings)
+        val failure = assertFailsWith<IllegalArgumentException> {
+            restored.snapshotVersion()
+        }
+
+        assertTrue(failure.message.orEmpty().contains("Unsupported workflow persistence schema $futureVersion"))
+        assertEquals(future, settings.getStringOrNull(SettingsWorkflowPersistence.DEFAULT_STORAGE_KEY))
     }
 
     @Test
