@@ -125,6 +125,29 @@ internal fun TechnicalInspector(
         if (taskRun.assignedProviderId != null) {
             AzphaltPill("Message agent", "message-$selectedTaskId", onClick = {}, modifier = Modifier.fillMaxWidth())
         }
+        val roleForPayload = role
+            ?: task.roleId?.let { rid -> liveWorkflow.roles.firstOrNull { it.id == rid } }
+        val isAgentTask = executor is TaskExecutor.RoleAgent || task.roleId != null
+        if (isAgentTask && roleForPayload != null) {
+            val contextArtifacts = task.dependsOn
+                .flatMap { depId -> liveWorkflow.run.taskRuns[depId]?.artifacts.orEmpty() }
+            LiveInspectorLine("PAYLOAD CONTEXT", buildString {
+                append("Role: ${roleForPayload.name}")
+                append("\nObjective: ${task.objective.take(120)}${if (task.objective.length > 120) "…" else ""}")
+                if (task.acceptanceCriteria.isNotEmpty()) {
+                    append("\nAcceptance criteria: ${task.acceptanceCriteria.size} item${if (task.acceptanceCriteria.size != 1) "s" else ""}")
+                }
+                if (roleForPayload.instructions.isNotBlank()) {
+                    append("\nRole instructions: ${roleForPayload.instructions.take(80)}${if (roleForPayload.instructions.length > 80) "…" else ""}")
+                }
+                if (contextArtifacts.isNotEmpty()) {
+                    append("\nContext artifacts from dependencies: ${contextArtifacts.size}")
+                }
+            })
+            LiveInspectorLine("PROVIDER TARGET", taskRun.assignedProviderId?.value ?: task.executor?.let { ex ->
+                if (ex is TaskExecutor.RoleAgent) "any capable provider" else "—"
+            } ?: "any capable provider")
+        }
     }
 }
 

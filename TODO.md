@@ -132,7 +132,7 @@ Tracking issue: #35
 ## P2 — Security and privacy hardening
 
 - [x] Implement platform-secure credential storage; credentials must never enter workflow persistence.
-- [ ] Audit provider payloads so users can see what context leaves the device before execution.
+- [x] Audit provider payloads so users can see what context leaves the device before execution.
 - [ ] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
 - [x] Add clear data deletion controls for local workflow state.
 - [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
