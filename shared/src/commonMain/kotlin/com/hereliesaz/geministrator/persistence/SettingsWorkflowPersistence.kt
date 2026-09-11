@@ -224,7 +224,9 @@ class SettingsWorkflowPersistence(
         }
         val encoded = currentEncoded ?: legacyEncoded ?: return PersistenceSnapshot()
         val snapshot = json.decodeFromString(PersistenceSnapshot.serializer(), encoded)
-        if (snapshot.version > CURRENT_SCHEMA_VERSION) return PersistenceSnapshot()
+        require(snapshot.version <= CURRENT_SCHEMA_VERSION) {
+            "Unsupported workflow persistence schema ${snapshot.version}; maximum supported is $CURRENT_SCHEMA_VERSION"
+        }
 
         val migrated = migrate(snapshot)
         if (currentEncoded == null || migrated != snapshot) {
