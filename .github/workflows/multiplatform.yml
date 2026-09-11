@@ -24,17 +24,17 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Check out pinned h2g2
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: HereLiesAz/conveyance-h2g2
           ref: faa80ed5aa063f6bdab42163d7b021123b248254
           path: vendor/conveyance-h2g2
 
       - name: Check out pinned Conveyance
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           repository: HereLiesAz/Conveyance
           ref: 468371de06a903b1a6bdcf812197eef4a81afd3e
@@ -47,7 +47,7 @@ jobs:
           java-version: "21"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Reconstruct and verify Android signing keystore
         id: signing
@@ -215,7 +215,7 @@ jobs:
     steps:
       - name: Deploy GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   publish-play:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -223,13 +223,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Android release bundle
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: haive-android-release
           path: android-release
 
       - name: Download release notes
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: haive-release-notes
           path: fastlane/metadata/android/en-US/changelogs
