@@ -37,6 +37,8 @@ import com.hereliesaz.geministrator.workflow.StarterWorkflowFactory
 import com.hereliesaz.geministrator.workflow.TaskExecutorIntegrationRegistry
 import com.hereliesaz.geministrator.workflow.WorkflowApprovalService
 import com.hereliesaz.geministrator.workflow.WorkflowDefinitionPreparer
+import com.hereliesaz.geministrator.workflow.WorkflowGraphValidator
+import com.hereliesaz.geministrator.workflow.humanReadable
 import com.hereliesaz.geministrator.workflow.WorkflowEngine
 import com.hereliesaz.geministrator.workflow.WorkflowLaunchService
 import com.hereliesaz.geministrator.workflow.WorkflowRuntimeCoordinator
@@ -428,6 +430,11 @@ class ApplicationRuntime private constructor(
     suspend fun loadRunTimeline(): List<WorkflowEvent> {
         val runId = runtimeMutex.withLock { current?.state?.run?.id } ?: return emptyList()
         return persistence.events.forRun(runId)
+    }
+
+    fun validateCurrentWorkflow(): List<String> {
+        val definition = current?.definition ?: return emptyList()
+        return WorkflowGraphValidator.validate(definition).map { it.humanReadable() }
     }
 
     suspend fun exportDiagnosticBundle(): String {

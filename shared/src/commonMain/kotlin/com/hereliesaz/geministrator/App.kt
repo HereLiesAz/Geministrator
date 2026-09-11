@@ -209,6 +209,9 @@ fun App(
                     onExportDiagnosticBundle = {
                         runtime?.exportDiagnosticBundle()
                     },
+                    onValidateWorkflow = {
+                        runtime?.validateCurrentWorkflow() ?: emptyList()
+                    },
                     compact = maxWidth < ControlRoomBreakpoints.Wide,
                     contentPadding = paddingValues,
                     runtimeState = runtimeState,

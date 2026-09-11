@@ -31,6 +31,7 @@ internal fun MindMapRunScreen(
     onTaskSelected: (String) -> Unit,
     onLaunchWorkflow: (String, String, RepositoryRef?) -> Unit,
     onRecoverFromCorruption: () -> Unit = {},
+    onValidateWorkflow: () -> List<String> = { emptyList() },
     compact: Boolean,
     runtimeState: ApplicationRuntimeState,
 ) {
@@ -160,6 +161,19 @@ internal fun MindMapRunScreen(
             endCap = if (awaitingHuman) "Required" else "Clear",
         )
 
+        val validationErrors = remember(liveWorkflow.definition) { onValidateWorkflow() }
+        if (validationErrors.isNotEmpty()) {
+            Text("WORKFLOW ERRORS", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+            validationErrors.forEachIndexed { index, error ->
+                AzphaltRecord(
+                    seed = "validation-error-$index",
+                    eyebrow = "Invalid",
+                    title = "Workflow definition error",
+                    body = error,
+                    endCap = "Blocked",
+                )
+            }
+        }
         Text("COMPANY EXECUTION", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
         GeministratorWorkflowMindMap(
             definition = liveWorkflow.definition,

@@ -76,7 +76,7 @@ Tracking issue: #35
 - [ ] Add human approval UI with clear evidence, decision scope, and consequences.
 - [ ] Add retry/escalation policy UI.
 - [ ] Add bounded concurrency controls.
-- [ ] Validate workflows before execution and explain invalid dependency/policy states in human language.
+- [x] Validate workflows before execution and explain invalid dependency/policy states in human language.
 
 ## P1 — Provider system
 

@@ -14,6 +14,19 @@ sealed interface WorkflowValidationError {
     data class Cycle(val taskIds: Set<TaskDefinitionId>) : WorkflowValidationError
 }
 
+fun WorkflowValidationError.humanReadable(): String = when (this) {
+    is WorkflowValidationError.DuplicateTaskId ->
+        "Task '${taskId.value}' appears more than once. Each task must have a unique ID."
+    is WorkflowValidationError.MissingDependency ->
+        "Task '${taskId.value}' depends on '${missingDependencyId.value}', which doesn't exist in this workflow."
+    is WorkflowValidationError.MissingExecutor ->
+        "Task '${taskId.value}' has no executor or role assigned. Every task must specify who does the work."
+    is WorkflowValidationError.SelfDependency ->
+        "Task '${taskId.value}' lists itself as a dependency. A task cannot depend on itself."
+    is WorkflowValidationError.Cycle ->
+        "Circular dependency detected among tasks: ${taskIds.joinToString(" → ") { it.value }}. These tasks can never all complete."
+}
+
 object WorkflowGraphValidator {
     fun validate(definition: WorkflowDefinition): List<WorkflowValidationError> {
         val errors = mutableListOf<WorkflowValidationError>()
@@ -50,7 +63,7 @@ object WorkflowGraphValidator {
     fun requireValid(definition: WorkflowDefinition) {
         val errors = validate(definition)
         require(errors.isEmpty()) {
-            "Invalid workflow graph: ${errors.joinToString()}"
+            errors.joinToString(separator = "\n") { it.humanReadable() }
         }
     }
 
