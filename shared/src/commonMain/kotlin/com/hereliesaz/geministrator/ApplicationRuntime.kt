@@ -22,6 +22,7 @@ import com.hereliesaz.geministrator.persistence.PersistenceCorruptionException
 import com.hereliesaz.geministrator.persistence.RepositoryWorkflowEventSink
 import com.hereliesaz.geministrator.persistence.SettingsWorkflowPersistence
 import com.hereliesaz.geministrator.persistence.WorkflowPersistence
+import com.hereliesaz.geministrator.events.WorkflowEvent
 import com.hereliesaz.geministrator.providers.AgentCapabilities
 import com.hereliesaz.geministrator.providers.AgentProvider
 import com.hereliesaz.geministrator.providers.ProviderArtifact
@@ -422,6 +423,11 @@ class ApplicationRuntime private constructor(
     suspend fun importJson(encoded: String) {
         (persistence as? SettingsWorkflowPersistence)?.importJson(encoded)
         loadLatest()
+    }
+
+    suspend fun loadRunTimeline(): List<WorkflowEvent> {
+        val runId = runtimeMutex.withLock { current?.state?.run?.id } ?: return emptyList()
+        return persistence.events.forRun(runId)
     }
 
     private fun WorkflowRunStatus.isTerminal() =

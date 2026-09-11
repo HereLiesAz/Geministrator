@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RepositoryRef
 import com.hereliesaz.geministrator.domain.WorkflowRun
+import com.hereliesaz.geministrator.events.WorkflowEvent
 
 internal object ControlRoomBreakpoints {
     val Wide: Dp = 820.dp
@@ -97,6 +98,7 @@ fun ControlRoom(
     onImportJson: (String) -> Unit = {},
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
     onSwitchRun: (String) -> Unit = {},
+    onLoadRunTimeline: suspend () -> List<WorkflowEvent> = { emptyList() },
     compact: Boolean,
     contentPadding: PaddingValues,
     runtimeState: ApplicationRuntimeState,
@@ -132,6 +134,7 @@ fun ControlRoom(
                     onImportJson = onImportJson,
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
+                    onLoadRunTimeline = onLoadRunTimeline,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     compact = true,
@@ -177,6 +180,7 @@ fun ControlRoom(
                     onImportJson = onImportJson,
                     onLoadRunHistory = onLoadRunHistory,
                     onSwitchRun = onSwitchRun,
+                    onLoadRunTimeline = onLoadRunTimeline,
                     connectedProviderIds = connectedProviderIds,
                     modifier = Modifier.weight(1f),
                     runtimeState = runtimeState,
@@ -300,6 +304,7 @@ private fun MainDestination(
     onImportJson: (String) -> Unit,
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>>,
     onSwitchRun: (String) -> Unit,
+    onLoadRunTimeline: suspend () -> List<WorkflowEvent>,
     connectedProviderIds: Set<String>,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
@@ -320,6 +325,7 @@ private fun MainDestination(
                 runtimeState = runtimeState,
                 onLoadRunHistory = onLoadRunHistory,
                 onSwitchRun = onSwitchRun,
+                onLoadRunTimeline = onLoadRunTimeline,
                 modifier = Modifier.fillMaxSize(),
             )
             ControlRoomDestination.Workflows -> WorkflowTemplateScreen(Modifier.fillMaxSize())

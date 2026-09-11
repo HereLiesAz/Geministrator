@@ -31,9 +31,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import com.hereliesaz.geministrator.domain.Project
 import com.hereliesaz.geministrator.domain.RoleDefinition
+import com.hereliesaz.geministrator.domain.TaskDefinitionId
 import com.hereliesaz.geministrator.domain.TaskRunStatus
 import com.hereliesaz.geministrator.domain.WorkflowRun
 import com.hereliesaz.geministrator.domain.WorkflowRunStatus
+import com.hereliesaz.geministrator.events.AgentAssigned
+import com.hereliesaz.geministrator.events.ApprovalDecisionReceived
+import com.hereliesaz.geministrator.events.ApprovalRequired
+import com.hereliesaz.geministrator.events.ArtifactCreated
+import com.hereliesaz.geministrator.events.ExecutorAssigned
+import com.hereliesaz.geministrator.events.HumanDecisionRequired
+import com.hereliesaz.geministrator.events.RetryScheduled
+import com.hereliesaz.geministrator.events.TaskBecameReady
+import com.hereliesaz.geministrator.events.TaskCancelled
+import com.hereliesaz.geministrator.events.TaskCompleted
+import com.hereliesaz.geministrator.events.TaskEscalated
+import com.hereliesaz.geministrator.events.TaskFailed
+import com.hereliesaz.geministrator.events.TaskStarted
+import com.hereliesaz.geministrator.events.VerificationFailed
+import com.hereliesaz.geministrator.events.WorkflowCancelled
+import com.hereliesaz.geministrator.events.WorkflowCompleted
+import com.hereliesaz.geministrator.events.WorkflowCreated
+import com.hereliesaz.geministrator.events.WorkflowEvent
+import com.hereliesaz.geministrator.events.WorkflowFailed
 
 @Composable
 internal fun TechnicalInspector(selectedTaskId: String, modifier: Modifier = Modifier) {
@@ -194,11 +214,14 @@ internal fun RunsScreen(
     runtimeState: ApplicationRuntimeState = ApplicationRuntimeState.Loading,
     onLoadRunHistory: suspend () -> List<Pair<Project, List<WorkflowRun>>> = { emptyList() },
     onSwitchRun: (String) -> Unit = {},
+    onLoadRunTimeline: suspend () -> List<WorkflowEvent> = { emptyList() },
     modifier: Modifier = Modifier,
 ) {
     var history by remember { mutableStateOf<List<Pair<Project, List<WorkflowRun>>>?>(null) }
+    var timeline by remember { mutableStateOf<List<WorkflowEvent>?>(null) }
     LaunchedEffect(runtimeState) {
         history = onLoadRunHistory()
+        timeline = onLoadRunTimeline()
     }
     val liveRunId = (runtimeState as? ApplicationRuntimeState.Live)?.presentation?.run?.id?.value
     Column(
@@ -232,7 +255,75 @@ internal fun RunsScreen(
                 }
             }
         }
+        val events = timeline
+        if (events != null && events.isNotEmpty()) {
+            SectionLabel("Timeline")
+            events.sortedByDescending { it.occurredAtEpochMillis }.forEach { event ->
+                AzphaltRecord(
+                    seed = "event-${event.occurredAtEpochMillis}-${event::class.simpleName}",
+                    eyebrow = workflowEventTaskId(event)?.value?.takeLast(12) ?: "workflow",
+                    title = workflowEventLabel(event),
+                    body = workflowEventDetail(event),
+                    endCap = null,
+                )
+            }
+        }
     }
+}
+
+private fun workflowEventTaskId(event: WorkflowEvent): TaskDefinitionId? = when (event) {
+    is TaskBecameReady -> event.taskDefinitionId
+    is ExecutorAssigned -> event.taskDefinitionId
+    is AgentAssigned -> event.taskDefinitionId
+    is TaskStarted -> event.taskDefinitionId
+    is ApprovalRequired -> event.taskDefinitionId
+    is ApprovalDecisionReceived -> event.taskDefinitionId
+    is ArtifactCreated -> event.taskDefinitionId
+    is VerificationFailed -> event.taskDefinitionId
+    is RetryScheduled -> event.taskDefinitionId
+    is TaskEscalated -> event.taskDefinitionId
+    is TaskCompleted -> event.taskDefinitionId
+    is TaskFailed -> event.taskDefinitionId
+    is HumanDecisionRequired -> event.taskDefinitionId
+    is TaskCancelled -> event.taskDefinitionId
+    is WorkflowCreated, is WorkflowCompleted, is WorkflowFailed, is WorkflowCancelled -> null
+}
+
+private fun workflowEventLabel(event: WorkflowEvent): String = when (event) {
+    is WorkflowCreated -> "Workflow created"
+    is TaskBecameReady -> "Task ready"
+    is ExecutorAssigned -> "Executor assigned"
+    is AgentAssigned -> "Agent assigned"
+    is TaskStarted -> "Task started · attempt ${event.attempt}"
+    is ApprovalRequired -> "Approval required"
+    is ApprovalDecisionReceived -> if (event.approved) "Approved" else "Rejected"
+    is ArtifactCreated -> "Artifact created · ${event.artifact.kind.name}"
+    is VerificationFailed -> "Verification failed"
+    is RetryScheduled -> "Retry scheduled · attempt ${event.nextAttempt}"
+    is TaskEscalated -> "Task escalated"
+    is TaskCompleted -> "Task completed"
+    is TaskFailed -> "Task failed"
+    is HumanDecisionRequired -> "Human decision required"
+    is WorkflowCompleted -> "Workflow completed"
+    is WorkflowFailed -> "Workflow failed"
+    is WorkflowCancelled -> "Workflow cancelled"
+    is TaskCancelled -> "Task cancelled"
+}
+
+private fun workflowEventDetail(event: WorkflowEvent): String = when (event) {
+    is WorkflowCreated -> event.objective?.take(80) ?: event.workflowRunId.value.takeLast(8)
+    is ApprovalRequired -> event.reason.take(80)
+    is ApprovalDecisionReceived -> event.decidedByRoleId?.value ?: "system"
+    is ArtifactCreated -> event.artifact.id.value.takeLast(16)
+    is VerificationFailed -> event.reason.take(80)
+    is RetryScheduled -> event.reason.take(80)
+    is TaskEscalated -> event.reason.take(80)
+    is TaskFailed -> event.reason.take(80)
+    is WorkflowFailed -> event.reason.take(80)
+    is HumanDecisionRequired -> event.reason.take(80)
+    is ExecutorAssigned -> event.executor::class.simpleName ?: "executor"
+    is AgentAssigned -> event.roleId.value
+    else -> event.workflowRunId.value.takeLast(8)
 }
 
 private fun runStatusEndCap(status: WorkflowRunStatus): String = when (status) {

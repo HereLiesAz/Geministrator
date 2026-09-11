@@ -145,7 +145,7 @@ Tracking issue: #35
 - [ ] Token and cost accounting where available.
 - [ ] Cache-hit/cache-write observability where supported.
 - [ ] Retry and failure-rate metrics.
-- [ ] Run timeline/event viewer.
+- [x] Run timeline/event viewer.
 - [ ] Exportable diagnostic bundle with secrets stripped.
 
 ## P2 — Workflow composition
