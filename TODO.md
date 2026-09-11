@@ -86,7 +86,7 @@ Tracking issue: #35
 - [x] Add provider-neutral token/cost/latency telemetry where providers expose it.
 - [x] Implement prompt-reuse telemetry without making cache behavior part of workflow correctness.
 - [ ] Add a second provider to prove interchangeability; choose based on the best supported API at implementation time rather than hard-coding the architecture to Gemini/OpenAI/Claude.
-- [ ] Test provider substitution for the same role/task contract.
+- [x] Test provider substitution for the same role/task contract.
 
 ## P1 — Persistence and recovery
 
@@ -135,7 +135,7 @@ Tracking issue: #35
 - [x] Audit provider payloads so users can see what context leaves the device before execution.
 - [x] Add optional redaction/exclusion rules for files/artifacts/context sent to providers.
 - [x] Add clear data deletion controls for local workflow state.
-- [ ] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
+- [x] Keep analytics/telemetry opt-in if product analytics are ever introduced; update the privacy policy before shipping any such collection.
 - [x] Add dependency/security scanning without blocking development on noisy non-actionable findings.
 - [ ] Threat-model repository write access, workflow injection, malicious artifacts, prompt injection, and compromised provider responses.
 
