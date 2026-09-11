@@ -125,10 +125,13 @@ jobs:
           set -euo pipefail
           rm -rf webApp/build/pages
 
-          JS_BUNDLE="$(find webApp/build -type f -path '*/dist/js/productionExecutable/haive.js' -print -quit)"
-          WASM_BUNDLE="$(find webApp/build -type f -path '*/dist/wasmJs/productionExecutable/haive.js' -print -quit)"
-          test -n "$JS_BUNDLE"
-          test -n "$WASM_BUNDLE"
+          JS_BUNDLE="$(find webApp/build -type f -path '*/js/productionExecutable/haive.js' -print -quit)"
+          WASM_BUNDLE="$(find webApp/build -type f -path '*/wasmJs/productionExecutable/haive.js' -print -quit)"
+          if [ -z "$JS_BUNDLE" ] || [ -z "$WASM_BUNDLE" ]; then
+            echo "Production bundles found under webApp/build:"
+            find webApp/build -type f -name 'haive.js' -print
+            exit 1
+          fi
 
           JS_DIR="$(dirname "$JS_BUNDLE")"
           WASM_DIR="$(dirname "$WASM_BUNDLE")"
