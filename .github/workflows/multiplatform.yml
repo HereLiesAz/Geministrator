@@ -281,7 +281,22 @@ jobs:
 
       - name: Package native installer
         shell: bash
-        run: ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true ":desktopApp:${{ matrix.task }}"
+        run: |
+          set +e
+          ./gradlew -Phaive.useLocalH2g2=false -Phaive.useMavenLocalH2g2=true ":desktopApp:${{ matrix.task }}"
+          EXIT_CODE=$?
+          if [ "$EXIT_CODE" -ne 0 ]; then
+            echo "=== Native packaging diagnostics ==="
+            if [ -d desktopApp/build/compose/logs ]; then
+              find desktopApp/build/compose/logs -type f -print | while IFS= read -r log_file; do
+                echo "--- $log_file ---"
+                cat "$log_file"
+              done
+            else
+              echo "No Compose packaging logs directory found."
+            fi
+          fi
+          exit "$EXIT_CODE"
 
       - name: Upload native installer
         uses: actions/upload-artifact@v7
