@@ -34,6 +34,11 @@ fun main() {
         var credentials by remember { mutableStateOf(readWebProviderCredentials()) }
         var setupComplete by remember { mutableStateOf(credentials.isNotEmpty()) }
         var configuringProviderId by remember { mutableStateOf<String?>(null) }
+        val providers = remember(credentials) { configuredWebProviders(credentials) }
+        val githubToken = window.localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY)
+        val executorIntegrations = remember(githubToken) {
+            configuredWebExecutorIntegrations(githubToken)
+        }
 
         val providerId = configuringProviderId
         when {
@@ -55,10 +60,8 @@ fun main() {
             )
 
             else -> App(
-                providers = configuredWebProviders(credentials),
-                executorIntegrations = configuredWebExecutorIntegrations(
-                    githubToken = window.localStorage.getItem(GITHUB_TOKEN_STORAGE_KEY),
-                ),
+                providers = providers,
+                executorIntegrations = executorIntegrations,
                 onReconfigureProvider = { configuringProviderId = it },
             )
         }
