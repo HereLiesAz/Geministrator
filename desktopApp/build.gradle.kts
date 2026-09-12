@@ -18,7 +18,11 @@ kotlin {
     jvmToolchain(17)
 }
 
-val appPackageVersion = providers.gradleProperty("app.versionName").get().substringBefore("-")
+val appVersionName = providers.gradleProperty("app.versionName").get()
+val numericBase = appVersionName.substringBefore("-")
+val prerelease = appVersionName.substringAfter("-", "")
+val prereleaseNumber = prerelease.filter(Char::isDigit).trimStart('0').ifEmpty { "0" }
+val appPackageVersion = if (prerelease.isEmpty() || prereleaseNumber == "0") numericBase else "$numericBase.$prereleaseNumber"
 val nativePackageVersion = if (System.getProperty("os.name").startsWith("Mac", ignoreCase = true)) {
     // macOS jpackage requires the first app-version component to be greater than zero.
     // Offset only the native macOS package major so Haive's public SemVer can remain pre-1.0.

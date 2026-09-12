@@ -39,6 +39,9 @@ internal fun CompanyProviderScreen(
     modifier: Modifier = Modifier,
 ) {
     val liveWorkflow = (runtimeState as? ApplicationRuntimeState.Live)?.presentation
+    val roles: Collection<RoleDefinition> = liveWorkflow?.roles
+        ?: (runtimeState as? ApplicationRuntimeState.NoRun)?.roles
+        ?: emptyList()
     var showRoleForm by remember { mutableStateOf(false) }
     var roleIdDraft by remember { mutableStateOf("") }
     var roleNameDraft by remember { mutableStateOf("") }
@@ -133,6 +136,58 @@ internal fun CompanyProviderScreen(
             )
         }
 
+        val byDepartment = roles.groupBy { it.providerDepartment() }
+        listOf("Executive", "Product", "Engineering", "Assurance", "Delivery", "Custom").forEach { department ->
+            val deptRoles = byDepartment[department] ?: return@forEach
+            ProviderSectionLabel(department)
+            val activeRoleIds = liveWorkflow?.run?.taskRuns?.values
+                ?.filter {
+                    it.status in setOf(
+                        TaskRunStatus.Running,
+                        TaskRunStatus.Planning,
+                        TaskRunStatus.AwaitingApproval,
+                        TaskRunStatus.Verifying,
+                    )
+                }
+                ?.mapNotNull { it.assignedRoleId }
+                ?.toSet()
+                .orEmpty()
+            deptRoles.forEach { role ->
+                val assigned = role.preferredProviderId?.value
+                val providerLabel = assigned?.let { ProviderCatalog.entry(it)?.displayName ?: it } ?: "Auto"
+                AzphaltRecord(
+                    seed = "provider-role-${role.id.value}",
+                    eyebrow = department,
+                    title = role.name,
+                    body = "${role.description}\nProvider: $providerLabel",
+                    endCap = if (role.id in activeRoleIds) "Working" else "Available",
+                    well = {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("PROVIDER ROUTING", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
+                            ProviderChoiceRow(
+                                selectedProviderId = assigned,
+                                connectedProviderIds = connectedProviderIds,
+                                onSelected = { selected ->
+                                    onSaveRole(
+                                        role.copy(
+                                            preferredProviderId = selected?.let(::AgentProviderId),
+                                        ),
+                                    )
+                                },
+                            )
+                            if (connectedProviderIds.isEmpty()) {
+                                Text(
+                                    "Connect provider API keys in Settings before assigning roles.",
+                                    style = AzphaltType.body,
+                                    color = Azphalt.currentGround.onPage,
+                                )
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
         if (liveWorkflow != null) {
             val definition = liveWorkflow.definition
             ProviderSectionLabel("Workflow Policies")
@@ -184,63 +239,6 @@ internal fun CompanyProviderScreen(
                 endCap = definition.promptReusePolicy.name,
             )
 
-            val activeRoleIds = liveWorkflow.run.taskRuns.values
-                .filter {
-                    it.status in setOf(
-                        TaskRunStatus.Running,
-                        TaskRunStatus.Planning,
-                        TaskRunStatus.AwaitingApproval,
-                        TaskRunStatus.Verifying,
-                    )
-                }
-                .mapNotNull { it.assignedRoleId }
-                .toSet()
-            val byDepartment = liveWorkflow.roles.groupBy { it.providerDepartment() }
-            listOf("Executive", "Product", "Engineering", "Assurance", "Delivery", "Custom").forEach { department ->
-                val roles = byDepartment[department] ?: return@forEach
-                ProviderSectionLabel(department)
-                roles.forEach { role ->
-                    val assigned = role.preferredProviderId?.value
-                    val providerLabel = assigned?.let { ProviderCatalog.entry(it)?.displayName ?: it } ?: "Auto"
-                    AzphaltRecord(
-                        seed = "provider-role-${role.id.value}",
-                        eyebrow = department,
-                        title = role.name,
-                        body = "${role.description}\nProvider: $providerLabel",
-                        endCap = if (role.id in activeRoleIds) "Working" else "Available",
-                        well = {
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("PROVIDER ROUTING", style = AzphaltType.eyebrow, color = Azphalt.currentGround.onPage)
-                                ProviderChoiceRow(
-                                    selectedProviderId = assigned,
-                                    connectedProviderIds = connectedProviderIds,
-                                    onSelected = { selected ->
-                                        onSaveRole(
-                                            role.copy(
-                                                preferredProviderId = selected?.let(::AgentProviderId),
-                                            ),
-                                        )
-                                    },
-                                )
-                                if (connectedProviderIds.isEmpty()) {
-                                    Text(
-                                        "Connect provider API keys in Settings before assigning roles.",
-                                        style = AzphaltType.body,
-                                        color = Azphalt.currentGround.onPage,
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
-            }
-        } else {
-            ProviderSectionLabel("Provider routing")
-            Text(
-                "Role routing becomes editable when the runtime is available. Configure provider credentials in Settings first.",
-                style = AzphaltType.body,
-                color = Azphalt.currentGround.onPage,
-            )
         }
     }
 }
@@ -280,6 +278,7 @@ internal fun ProviderSettingsScreen(
     onImportJson: (String) -> Unit = {},
     onExportDiagnosticBundle: suspend () -> String? = { null },
     onConfigureProvider: (String) -> Unit = {},
+    onDisconnectProvider: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -329,6 +328,13 @@ internal fun ProviderSettingsScreen(
                             "configure-provider-${entry.id}",
                             onClick = { onConfigureProvider(entry.id) },
                         )
+                        if (connected) {
+                            AzphaltPill(
+                                "Disconnect",
+                                "disconnect-provider-${entry.id}",
+                                onClick = { onDisconnectProvider(entry.id) },
+                            )
+                        }
                         AzphaltPill(
                             "Get API key",
                             "get-key-${entry.id}",
