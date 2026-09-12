@@ -1,1 +1,8 @@
-Nothing worth reporting.
+[BROKEN] PR body — The claim that "No code changes were made" is contradicted by the 36,524 lines of code in the orphan commit this PR submits.
+  Failure: Merging this PR to apply a label will instead replace the entire repository's git history with a disconnected root commit, permanently breaking the merge base for all open branches and destroying commit provenance.
+  Evidence: The PR description explicitly states "No code changes were made", yet commit `e0d04310a7` has no parent (`git show -s --format="%P"`) and introduces 302 files from scratch.
+  Confidence: CONFIRMED
+
+Checked that the files included in the orphan commit match the current state of the main branch.
+
+This PR is a catastrophic repository rewrite disguised as a label update.
