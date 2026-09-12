@@ -35,8 +35,9 @@ fun App(
     val scope = rememberCoroutineScope()
     var runtimeState by remember { mutableStateOf<ApplicationRuntimeState>(ApplicationRuntimeState.Loading) }
     var runtime by remember { mutableStateOf<ApplicationRuntime?>(null) }
+    var runtimeGeneration by remember { mutableStateOf(0) }
 
-    LaunchedEffect(providers, executorIntegrations) {
+    LaunchedEffect(providers, executorIntegrations, runtimeGeneration) {
         runtime?.close()
         runtime = null
         runtimeState = ApplicationRuntimeState.Loading
@@ -229,6 +230,7 @@ fun App(
                         scope.launch {
                             try {
                                 runtime?.saveRole(role)
+                                runtimeGeneration += 1
                             } catch (failure: CancellationException) {
                                 throw failure
                             } catch (failure: Exception) {
