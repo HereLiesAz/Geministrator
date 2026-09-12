@@ -176,16 +176,26 @@ open class TextLlmProvider(
             append(block.content.trim())
             append("\n\n")
         }
-        if (request.repository != null) {
+        val repository = request.repository
+        if (repository != null) {
             append("REPOSITORY CONTEXT\n")
-            append(request.repository.owner)
+            append(repository.owner)
             append('/')
-            append(request.repository.name)
-            request.repository.defaultBranch?.let { branch ->
+            append(repository.name)
+            repository.defaultBranch?.let { branch ->
                 append(" @ ")
                 append(branch)
             }
             append("\n\n")
+        }
+        val textArtifacts = request.contextArtifacts.filter { !it.textContent.isNullOrBlank() }
+        if (textArtifacts.isNotEmpty()) {
+            textArtifacts.forEach { artifact ->
+                append(artifact.label.uppercase())
+                append("\n")
+                append(artifact.textContent!!.trim())
+                append("\n\n")
+            }
         }
         append("Return only the concrete work product for this assigned role. Do not claim repository access, shell execution, tests, or changes you did not actually perform.")
     }.trim()

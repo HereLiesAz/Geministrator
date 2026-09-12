@@ -107,6 +107,7 @@ class AnthropicMessagesApi(
             val key = apiKeyProvider.requireKey("Anthropic")
             header("x-api-key", key)
             header("anthropic-version", "2023-06-01")
+            header("anthropic-dangerous-direct-browser-access", "true")
             contentType(ContentType.Application.Json)
             setBody(
                 AnthropicMessageRequest(
@@ -118,6 +119,9 @@ class AnthropicMessagesApi(
         }
         response.requireSuccess("generate Claude response")
         val payload = response.body<AnthropicMessageResponse>()
+        if (payload.stopReason == "max_tokens") {
+            error("Claude response was truncated at the token limit; output is incomplete")
+        }
         val text = payload.content
             .firstOrNull { it.type == "text" && !it.text.isNullOrBlank() }
             ?.text
@@ -231,6 +235,7 @@ private data class AnthropicInputMessage(
 private data class AnthropicMessageResponse(
     val content: List<AnthropicContentBlock> = emptyList(),
     val usage: AnthropicUsage? = null,
+    @SerialName("stop_reason") val stopReason: String? = null,
 )
 
 @Serializable
