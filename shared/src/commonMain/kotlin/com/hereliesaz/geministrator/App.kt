@@ -153,6 +153,17 @@ fun App(
                             }
                         }
                     },
+                    onRetryRuntime = {
+                        scope.launch {
+                            try {
+                                runtime?.refresh()
+                            } catch (failure: CancellationException) {
+                                throw failure
+                            } catch (failure: Exception) {
+                                runtimeState = failure.toRuntimeFailureState("Retry failed")
+                            }
+                        }
+                    },
                     onCheckProviderHealth = {
                         runtime?.checkProviderHealth()?.mapValues { (_, result) ->
                             result.fold(
