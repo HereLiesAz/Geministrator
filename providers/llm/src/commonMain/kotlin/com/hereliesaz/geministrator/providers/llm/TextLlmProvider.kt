@@ -40,10 +40,11 @@ open class TextLlmProvider(
     private val mutex = Mutex()
     private var nextSequence = 1L
 
-    companion object {
+    private companion object {
         // Keyed by provider id prefix so sessions survive provider instance recreation.
-        private val sessionsByProvider = mutableMapOf<String, MutableMap<ProviderRunId, Session>>()
-        private val sessionsMutex = Mutex()
+        val sessionsByProvider = mutableMapOf<String, MutableMap<ProviderRunId, Session>>()
+        val sessionsMutex = Mutex()
+        const val MAX_PLAN_PREVIEW_CHARS = 8_000
     }
 
     private suspend fun providerSessions(): MutableMap<ProviderRunId, Session> =
@@ -255,10 +256,8 @@ open class TextLlmProvider(
         }
     }
 
-    private companion object {
-        const val MAX_PLAN_PREVIEW_CHARS = 8_000
-    }
 }
+
 
 class OpenAiProvider(
     apiKeyProvider: LlmApiKeyProvider,
