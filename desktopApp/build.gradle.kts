@@ -1,3 +1,5 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
@@ -20,6 +22,7 @@ compose.desktop {
         mainClass = "com.hereliesaz.geministrator.MainKt"
 
         nativeDistributions {
+            targetFormats(TargetFormat.Deb, TargetFormat.Dmg, TargetFormat.Msi)
             packageName = "TheHaive"
             // Strip pre-release suffix — packageVersion must be x.y.z.
             packageVersion = providers.gradleProperty("app.versionName").get().substringBefore("-")
