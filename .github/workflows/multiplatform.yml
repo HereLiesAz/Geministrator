@@ -424,20 +424,24 @@ jobs:
             git push origin ":refs/tags/$LEGACY_TAG"
           fi
 
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            gh release delete "$TAG_NAME" --yes
-          fi
-
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -fa "$TAG_NAME" -m "Latest Haive alpha ${VERSION_NAME}"
           git push origin "$TAG_NAME" --force
 
-          gh release create "$TAG_NAME" release-files/* \
-            --prerelease \
-            --verify-tag \
-            --title "The Haive ${VERSION_NAME} — Latest Alpha" \
-            --notes-file release-notes.md
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" \
+              --title "The Haive ${VERSION_NAME} — Latest Alpha" \
+              --notes-file release-notes.md \
+              --prerelease
+            gh release upload "$TAG_NAME" release-files/* --clobber
+          else
+            gh release create "$TAG_NAME" release-files/* \
+              --prerelease \
+              --verify-tag \
+              --title "The Haive ${VERSION_NAME} — Latest Alpha" \
+              --notes-file release-notes.md
+          fi
 
   deploy-pages:
     if: github.event_name != 'pull_request'

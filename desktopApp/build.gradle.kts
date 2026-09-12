@@ -18,7 +18,9 @@ kotlin {
     jvmToolchain(17)
 }
 
-val appPackageVersion = providers.gradleProperty("app.versionName").get().substringBefore("-")
+val appVersionName = providers.gradleProperty("app.versionName").get()
+// DMG and MSI only accept MAJOR.MINOR.PATCH; strip any prerelease suffix.
+val appPackageVersion = appVersionName.substringBefore("-")
 val nativePackageVersion = if (System.getProperty("os.name").startsWith("Mac", ignoreCase = true)) {
     // macOS jpackage requires the first app-version component to be greater than zero.
     // Offset only the native macOS package major so Haive's public SemVer can remain pre-1.0.

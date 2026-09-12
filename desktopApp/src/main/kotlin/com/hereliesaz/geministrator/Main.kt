@@ -80,6 +80,10 @@ fun main() {
                         providers = providers,
                         executorIntegrations = executorIntegrations,
                         onReconfigureProvider = { configuringProviderId = it },
+                        onDisconnectProvider = { providerId ->
+                            credentialStore.clear(providerId)
+                            credentials = readDesktopProviderCredentials(credentialStore)
+                        },
                     )
                 }
             }
