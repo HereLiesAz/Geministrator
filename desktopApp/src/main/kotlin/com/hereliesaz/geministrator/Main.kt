@@ -55,6 +55,7 @@ fun main() {
                 var credentials by remember { mutableStateOf(initialCredentials) }
                 var setupComplete by remember { mutableStateOf(initialCredentials.isNotEmpty()) }
                 var configuringProviderId by remember { mutableStateOf<String?>(null) }
+                val providers = remember(credentials) { configuredDesktopProviders(credentials) }
 
                 val providerId = configuringProviderId
                 when {
@@ -76,7 +77,7 @@ fun main() {
                     )
 
                     else -> App(
-                        providers = configuredDesktopProviders(credentials),
+                        providers = providers,
                         executorIntegrations = executorIntegrations,
                         onReconfigureProvider = { configuringProviderId = it },
                     )
