@@ -9,6 +9,7 @@ plugins {
 dependencies {
     implementation(projects.shared)
     implementation(projects.providers.jules)
+    implementation(projects.providers.llm)
     implementation(compose.desktop.currentOs)
     implementation(libs.ktor.client.cio)
 }
