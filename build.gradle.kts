@@ -14,11 +14,11 @@ if (providers.gradleProperty("haive.useMavenLocalH2g2").orNull == "true") {
     allprojects {
         configurations.configureEach {
             resolutionStrategy.dependencySubstitution {
-                substitute(module("com.github.HereLiesAz:conveyance-h2g2:faa80ed5aa063f6bdab42163d7b021123b248254"))
+                substitute(module("com.github.HereLiesAz:conveyance-h2g2:13e3d2296f66afe5dc3549d656cb3b7fed1668f0"))
                     .using(module("com.hereliesaz.conveyance:conveyance-h2g2:0.1.0"))
-                substitute(module("com.github.HereLiesAz.Conveyance:conveyance-core:468371de06a903b1a6bdcf812197eef4a81afd3e"))
+                substitute(module("com.github.HereLiesAz.Conveyance:conveyance-core:b3e13674df9dfbcc0b35f800b57d78a305d07b03"))
                     .using(module("com.hereliesaz.conveyance:conveyance-core:0.1.0"))
-                substitute(module("com.github.HereLiesAz.Conveyance:conveyance-compose:468371de06a903b1a6bdcf812197eef4a81afd3e"))
+                substitute(module("com.github.HereLiesAz.Conveyance:conveyance-compose:b3e13674df9dfbcc0b35f800b57d78a305d07b03"))
                     .using(module("com.hereliesaz.conveyance:conveyance-compose:0.1.0"))
             }
         }
