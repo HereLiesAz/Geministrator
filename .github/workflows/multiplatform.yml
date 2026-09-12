@@ -8,6 +8,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      publish_play:
+        description: "Publish the Android bundle to the Google Play internal track"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -71,6 +76,20 @@ jobs:
           echo "HAIVE_KEYSTORE_PATH=${{ steps.signing.outputs.keystore-path }}" >> "$GITHUB_ENV"
           echo "HAIVE_KEYSTORE_TYPE=${{ steps.signing.outputs.store-type }}" >> "$GITHUB_ENV"
 
+      - name: Select Android release versionCode
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          NOW_EPOCH=$(date -u +%s)
+          VERSION_CODE=$((NOW_EPOCH - 1500000000))
+          if [ "$VERSION_CODE" -le 0 ] || [ "$VERSION_CODE" -gt 2100000000 ]; then
+            echo "::error::Generated Android versionCode $VERSION_CODE is outside the Play-supported range"
+            exit 1
+          fi
+          echo "HAIVE_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "Android release versionCode: $VERSION_CODE"
+
       - name: Test shared domain
         run: ./gradlew :shared:desktopTest
 
@@ -98,7 +117,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             ./gradlew :androidApp:assembleDebug
           else
-            ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease
+            ./gradlew -Papp.versionCode="$HAIVE_VERSION_CODE" :androidApp:assembleRelease :androidApp:bundleRelease
           fi
 
       - name: Verify Desktop icons exist
@@ -218,7 +237,7 @@ jobs:
         uses: actions/deploy-pages@v5
 
   publish-play:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.publish_play) }}
     needs: build
     runs-on: ubuntu-latest
     steps:
