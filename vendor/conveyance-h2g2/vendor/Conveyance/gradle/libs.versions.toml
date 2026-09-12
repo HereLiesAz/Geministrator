@@ -1,16 +1,9 @@
 [versions]
-# Toolchain baseline. AGP 9.3+ is a project requirement, and it sets the Gradle floor.
-#
-# Pinned to the 9.4 release candidate, not the 9.3.2 stable release, specifically for its bumped
-# BouncyCastle (1.79 -> 1.80.2): AGP bundles its own bcprov-jdk18on/bcpkix-jdk18on for APK signing,
-# and 1.79 carries CVE-2025-14813 (GOST 28147 CTR mode keystream reuse after 255 blocks, Critical) --
-# fixed upstream at 1.84, with 1.80.2/1.81.1 as backported-fix point releases. No stable AGP release
-# carries the fix yet. Checked 9.5.0-alpha03 too: it resolves the same BC 1.80.2 as this RC, so
-# there's nothing to gain from the extra alpha-grade instability -- reconsider only if a later
-# stable AGP (9.4.0 final or newer) ships, at which point drop back to a stable pin.
-agp = "9.4.0-rc02"
+# Toolchain baseline. AGP 9.4.0 is the current stable release and supports API 37.
+# Kotlin 2.4.20 includes the fix for CVE-2026-53914 (unsafe build-cache deserialization).
+agp = "9.4.0"
 gradle = "9.7.1"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 # Compose Multiplatform: latest stable plugin.
 compose = "1.12.0"
 # material3 is taken at alpha deliberately: the Expressive shape-morph machinery
