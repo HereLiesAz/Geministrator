@@ -32,11 +32,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Pin the exact Conveyance revision this binding was built against. Floating
+            // Pin the exact patched Conveyance revision this binding was built against. Floating
             // main-SNAPSHOT dependencies make KMP metadata non-reproducible and can resolve stale
             // target publications through JitPack.
-            api("com.github.HereLiesAz.Conveyance:conveyance-core:468371de06a903b1a6bdcf812197eef4a81afd3e")
-            api("com.github.HereLiesAz.Conveyance:conveyance-compose:468371de06a903b1a6bdcf812197eef4a81afd3e")
+            api("com.github.HereLiesAz.Conveyance:conveyance-core:b3e13674df9dfbcc0b35f800b57d78a305d07b03")
+            api("com.github.HereLiesAz.Conveyance:conveyance-compose:b3e13674df9dfbcc0b35f800b57d78a305d07b03")
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.animation)
