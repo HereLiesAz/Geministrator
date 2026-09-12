@@ -36,7 +36,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: false
-          dependency-graph: generate-submit-and-upload
+          dependency-graph: disabled
 
       - name: Run unit tests
         run: |
