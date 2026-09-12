@@ -155,13 +155,17 @@ fun App(
                         }
                     },
                     onRetryRuntime = {
-                        scope.launch {
-                            try {
-                                runtime?.refresh()
-                            } catch (failure: CancellationException) {
-                                throw failure
-                            } catch (failure: Exception) {
-                                runtimeState = failure.toRuntimeFailureState("Retry failed")
+                        if (runtime == null) {
+                            runtimeGeneration += 1
+                        } else {
+                            scope.launch {
+                                try {
+                                    runtime?.refresh()
+                                } catch (failure: CancellationException) {
+                                    throw failure
+                                } catch (failure: Exception) {
+                                    runtimeState = failure.toRuntimeFailureState("Retry failed")
+                                }
                             }
                         }
                     },

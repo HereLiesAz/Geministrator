@@ -187,6 +187,15 @@ open class TextLlmProvider(
             }
             append("\n\n")
         }
+        val textArtifacts = request.contextArtifacts.filter { !it.textContent.isNullOrBlank() }
+        if (textArtifacts.isNotEmpty()) {
+            textArtifacts.forEach { artifact ->
+                append(artifact.label.uppercase())
+                append("\n")
+                append(artifact.textContent!!.trim())
+                append("\n\n")
+            }
+        }
         append("Return only the concrete work product for this assigned role. Do not claim repository access, shell execution, tests, or changes you did not actually perform.")
     }.trim()
 
