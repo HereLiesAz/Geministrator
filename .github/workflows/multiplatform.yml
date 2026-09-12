@@ -35,14 +35,14 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: HereLiesAz/conveyance-h2g2
-          ref: faa80ed5aa063f6bdab42163d7b021123b248254
+          ref: 13e3d2296f66afe5dc3549d656cb3b7fed1668f0
           path: vendor/conveyance-h2g2
 
       - name: Check out pinned Conveyance
         uses: actions/checkout@v7
         with:
           repository: HereLiesAz/Conveyance
-          ref: 468371de06a903b1a6bdcf812197eef4a81afd3e
+          ref: b3e13674df9dfbcc0b35f800b57d78a305d07b03
           path: vendor/conveyance-h2g2/vendor/Conveyance
 
       - name: Set up JDK 21
@@ -177,7 +177,6 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           mkdir -p fastlane/metadata/android/en-US/changelogs
-          # Use commits since last tag, or last 20 commits if no tags exist.
           LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -n "$LAST_TAG" ]; then
             git log "${LAST_TAG}..HEAD" --pretty=format:"- %s" --no-merges | head -50 \
