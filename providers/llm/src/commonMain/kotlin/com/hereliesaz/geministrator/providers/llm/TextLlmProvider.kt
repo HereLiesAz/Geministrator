@@ -176,12 +176,13 @@ open class TextLlmProvider(
             append(block.content.trim())
             append("\n\n")
         }
-        if (request.repository != null) {
+        val repository = request.repository
+        if (repository != null) {
             append("REPOSITORY CONTEXT\n")
-            append(request.repository.owner)
+            append(repository.owner)
             append('/')
-            append(request.repository.name)
-            request.repository.defaultBranch?.let { branch ->
+            append(repository.name)
+            repository.defaultBranch?.let { branch ->
                 append(" @ ")
                 append(branch)
             }
